@@ -1,4 +1,4 @@
-from model.learner import Learner
+from model.learner import QLearner
 from model.teacher import Teacher
 
 from task import exercise
@@ -8,7 +8,7 @@ def run():
 
     t_max = exercise.t_max
 
-    learner = Learner()
+    learner = QLearner()
     teacher = Teacher()
 
     for t in range(t_max):
