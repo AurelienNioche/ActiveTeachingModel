@@ -1,4 +1,5 @@
 import numpy as np
+import cmath
 
 from utils.functions import temporal_difference, softmax
 from task import exercise
@@ -7,10 +8,23 @@ from task import exercise
 debug = False
 
 
-class QLearner:
+class Learner:
+
+    def __init__(self):
+        pass
+
+    def decide(self, question):
+        return 0
+
+    def learn(self, question, reply, correct_answer):
+        pass
+
+
+class QLearner(Learner):
 
     def __init__(self, alpha=0.1, tau=0.05):
 
+        super().__init__()
         self.q = np.zeros((exercise.n, exercise.n))
         self.alpha = alpha
         self.tau = tau
@@ -43,138 +57,86 @@ class QLearner:
             print(f'Old q value is {old_q_value}; New q value is {new_q_value}')
 
 
-class ActRLearner:
+class ActRLearner(Learner):
 
-    def __init__(self, d=0.5, p=0.01, theta=0.5, sigma=0.01):
+    """
+    A chunk is composed of:
+    * a type (here: means)
+    * several slots (here: slot 1: kanji, slot2: meaning)
+    """
+
+    def __init__(self, d=0.5, theta=0.5, s=0.4):
+
+        super().__init__()
 
         # Noted 'l' in the paper (to confirm)
         self.n_chunk = exercise.n
 
-        # Noted 'n' in the paper (number of source of activation)
-        self.n_content = exercise.n
-
-        # Strength (ji-indexed): Sji is the existing strength of association from element j to chunk i
-        self.s = np.zeros((self.n_content, self.n_chunk))
-
-        # Activation of chunks (i-indexed)
-        self.a = np.zeros(self.n_chunk)
-
-        # Base level activations (i-indexed)
-        self.b = np.zeros(self.n_chunk)
-
-        # Wj source activation of element j currently attended to
-        self.w = np.zeros(self.n_content)
-
-        #
-        self.t = np.zeros(self.n_content)
-
-        # The goodness of the match Mi of a chunk i
-        self.m = np.zeros(self.n_chunk)
-
-        # The probability of a chunk being above some retrieval threshold τ is
-        self.prob = np.zeros(self.n_chunk)
-
-        # The probability of retrieving a chunk is
-        self.probability_retrieving_chunk = np.zeros(self.n_chunk)
+        # Time recording of presentations of chunks
+        self.time_presentation = [[] for _ in range(self.n_chunk)]
 
         # Decay parameter
         self._d = d
 
-        # Mismatch parameter
-        self._p = p
-
+        # Retrieval threshold
         self._theta = theta
 
-        self._sigma = sigma
+        # Noise in the activation levels
+        self._s = s
 
-        # Scale constant
-        self._s = 0
+        # Time counter
+        self.t = 0
 
-        self._t = 0
+    def activation_function(self, i):
 
-    def set_w(self):
+        """The activation of a chunk is the sum of its base-level activation and some noise
+        IN FUTURE: ...and the activations it receives from elements attended to. """
 
-        """
-        If there are n sources of activation, the Wj are set to l/n.
-        :return:
-        """
+        # noise = np.random.normal()
+        return self.base_level_learning_activation(i) # + noise
 
-        self.w[:] = self.n_chunk / self.n_content
-
-    def set_s(self):
-
-        """S is a scale constant, which by default is set to the log of the total number of chunks"""
-        self._s = np.log(self.n_chunk)
-
-    def set_t(self):
-
-        self._t = (6**(1/2) * self._sigma) / np.pi
-
-    def third(self, i):
-
-        """The activation of a chunk is the sum of its base-level activation
-        and the activations it receives from elements attended to. """
-
-        self.a[i] = self.b[i] + np.sum([self.w[j] * self.s[j, i] for j in range(self.n_content)])
-
-    def fourth(self, i):
+    def base_level_learning_activation(self, i):
 
         """The base-level activation measures how much time has elapsed since the jth use:"""
 
-        self.b[i] = np.log(np.sum([self.t[j]**(-self._d) for j in range(self.n_content)]))
+        sum_a = np.sum([
+            (self.t - t_presentation)**(-self._d)
+            for t_presentation in self.time_presentation[i]
+        ])
 
-    def fifth(self, j, i):
+        if sum_a > 0:
+            return np.log(sum_a)
+        else:
+            return 0
 
-        self.s[j, i] = self._s - np.log(self.p(i, j))
-
-    def sixth(self, i):
-
-        self.m[i] = self.a[i] - self._p
-
-    def seventh(self, i):
+    def probability_of_retrieval_equation(self, a):
 
         """The probability of a chunk being above some retrieval threshold τ is"""
 
-        self.prob[i] = 1 / (1 + np.exp((self.m[i] - self._theta)/2))
+        return \
+            1 / (1 + np.exp(
+                        - (a - self._theta) / (cmath.sqrt(2) * self._s)
+                    )
+                 )
 
-    def eighth(self, i):
+    def update_time_presentation(self, question):
 
-        """The probability of retrieving a chunk is"""
-        self.probability_retrieving_chunk[i] = np.exp(self.m[i] / self._t)
-
-    @classmethod
-    def p(cls, i, j):
-
-        """P(i | j) is the probability that chunk i will be needed when j appears in the context."""
-
-        return 0.5
+        self.time_presentation[question].append(self.t)
 
     def decide(self, question):
 
-        pass
-        # p = softmax(x=self.q[question, :], temp=self.tau)
-        # reply = np.random.choice(np.arange(exercise.n), p=p)
-        #
-        # if debug:
-        #     print(f'Question is: {question}')
-        #     print(f'P values are: {[f"{p_i:.02f}" for p_i in p]}')
-        #     print(f'Reply is {reply}')
-        #
+        self.t += 1
+
+        a = self.activation_function(question)
+        p = self.probability_of_retrieval_equation(a)
+        r = np.random.random()
+        if p > r:
+            return question
+        else:
+            return np.random.randint(exercise.n)
         # return reply
 
     def learn(self, question, reply, correct_answer):
 
+        self.update_time_presentation(question)  # We suppose the response to be always correct if recalled
         pass
-
-        # success = reply == correct_answer
-        #
-        # old_q_value = self.q[question, reply]
-        # new_q_value = temporal_difference(v=old_q_value, obs=success, alpha=self.alpha)
-        #
-        # self.q[question, reply] = new_q_value
-        #
-        # if not success:
-        #     self.q[question, correct_answer] = temporal_difference(v=self.q[question, correct_answer], obs=1, alpha=self.alpha)
-        #
-        # if debug:
-        #     print(f'Old q value is {old_q_value}; New q value is {new_q_value}')
