@@ -42,8 +42,11 @@ def run_act_r():
 
 def main():
 
-    success = run_act_r()
-    plot.success(success)
+    success_act_r = run_act_r()
+    plot.success(success_act_r, fig_name='act_r.pdf')
+
+    success_rl = run_rl()
+    plot.success(success_rl, fig_name='rl.pdf')
 
 
 if __name__ == "__main__":
