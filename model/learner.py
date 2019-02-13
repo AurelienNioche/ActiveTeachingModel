@@ -65,7 +65,7 @@ class ActRLearner(Learner):
     * several slots (here: slot 1: kanji, slot2: meaning)
     """
 
-    def __init__(self, d=0.5, theta=0.5, s=0.4):
+    def __init__(self, d=0.5, theta=0.1, s=0.4):
 
         super().__init__()
 
