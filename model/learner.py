@@ -65,7 +65,7 @@ class ActRLearner(Learner):
     * several slots (here: slot 1: kanji, slot2: meaning)
     """
 
-    def __init__(self, d=0.5, theta=0.01, s=0.25):
+    def __init__(self, d=0.5, theta=0.01, s=0.4):
 
         super().__init__()
 
@@ -107,7 +107,7 @@ class ActRLearner(Learner):
         if sum_a > 0:
             return np.log(sum_a)
         else:
-            return 0
+            return -np.inf
 
     def probability_of_retrieval_equation(self, a):
 

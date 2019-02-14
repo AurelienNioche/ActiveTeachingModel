@@ -43,10 +43,12 @@ def run_act_r():
 def main():
 
     success_act_r = run_act_r()
-    plot.success(success_act_r, fig_name='act_r.pdf')
+    plot.success_scatter_plot(success_act_r, fig_name='act_r_scatter.pdf')
+    plot.success_curve(success_act_r, fig_name='act_r_curve.pdf')
 
     success_rl = run_rl()
-    plot.success(success_rl, fig_name='rl.pdf')
+    plot.success_scatter_plot(success_rl, fig_name='rl_scatter.pdf')
+    plot.success_curve(success_rl, fig_name='rl_curve.pdf')
 
 
 if __name__ == "__main__":

@@ -1,5 +1,5 @@
 import numpy as np
 
-t_max = 200
-n = 10
+t_max = 1000
+n = 100
 items = np.arange(n)
