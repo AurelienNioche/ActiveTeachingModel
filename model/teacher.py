@@ -22,6 +22,11 @@ class Teacher:
 
     def choose_question(self, t):
 
+        # if t < exercise.t_max:
+        #     self.question = np.random.randint(int(exercise.n/2))
+        #
+        # else:
+        #     self.question = np.random.randint(int(exercise.n/2), exercise.n)
         self.question = np.random.randint(exercise.n)
 
         self.memory.questions[t] = self.question

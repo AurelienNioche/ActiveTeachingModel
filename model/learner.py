@@ -22,7 +22,7 @@ class Learner:
 
 class QLearner(Learner):
 
-    def __init__(self, alpha=0.1, tau=0.05):
+    def __init__(self, alpha=0.01, tau=0.05):
 
         super().__init__()
         self.q = np.zeros((exercise.n, exercise.n))
