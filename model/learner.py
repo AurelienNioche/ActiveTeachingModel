@@ -65,7 +65,7 @@ class ActRLearner(Learner):
     * several slots (here: slot 1: kanji, slot2: meaning)
     """
 
-    def __init__(self, d=0.5, theta=0.01, s=0.4):
+    def __init__(self, d=0.5, theta=0.0001, s=0.01):
 
         super().__init__()
 
@@ -118,6 +118,8 @@ class ActRLearner(Learner):
                         - (a - self._theta) / (cmath.sqrt(2) * self._s)
                     )
                  )
+
+        # return 1 if a > 0 else 0
 
     def update_time_presentation(self, question):
 
