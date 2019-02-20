@@ -1,14 +1,16 @@
+import numpy as np
+
 from graph import plot
 
 from model.learner import QLearner, ActRLearner
 from model.teacher import Teacher
 
-from task import exercise
+from task import task
 
 
 def run_rl():
 
-    t_max = exercise.t_max
+    t_max = task.t_max
 
     learner = QLearner()
     teacher = Teacher()
@@ -25,7 +27,7 @@ def run_rl():
 
 def run_act_r():
 
-    t_max = exercise.t_max
+    t_max = task.t_max
 
     learner = ActRLearner()
     teacher = Teacher()
@@ -41,6 +43,8 @@ def run_act_r():
 
 
 def main():
+
+    np.random.seed(123)
 
     success_act_r = run_act_r()
     plot.success_scatter_plot(success_act_r, fig_name='act_r_scatter.pdf')

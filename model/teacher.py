@@ -1,15 +1,15 @@
 import numpy as np
 
-from task import exercise
+from task import task
 
 
 class TeacherMemory:
 
     def __init__(self):
 
-        self.questions = np.zeros(exercise.t_max, dtype=int)
-        self.replies = np.zeros(exercise.t_max, dtype=int)
-        self.successes = np.zeros(exercise.t_max, dtype=bool)
+        self.questions = np.zeros(task.t_max, dtype=int)
+        self.replies = np.zeros(task.t_max, dtype=int)
+        self.successes = np.zeros(task.t_max, dtype=bool)
 
 
 class Teacher:
@@ -27,7 +27,7 @@ class Teacher:
         #
         # else:
         #     self.question = np.random.randint(int(exercise.n/2), exercise.n)
-        self.question = np.random.randint(exercise.n)
+        self.question = np.random.randint(task.n)
 
         self.memory.questions[t] = self.question
 
@@ -35,7 +35,7 @@ class Teacher:
 
     def evaluate(self, t, reply):
 
-        correct_answer = exercise.items[self.question]
+        correct_answer = task.items[self.question]
         success = correct_answer == reply
 
         self.memory.replies[t] = reply

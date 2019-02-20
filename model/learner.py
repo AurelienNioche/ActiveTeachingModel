@@ -2,7 +2,7 @@ import numpy as np
 import cmath
 
 from utils.functions import temporal_difference, softmax
-from task import exercise
+from task import task
 
 
 debug = False
@@ -25,14 +25,14 @@ class QLearner(Learner):
     def __init__(self, alpha=0.01, tau=0.05):
 
         super().__init__()
-        self.q = np.zeros((exercise.n, exercise.n))
+        self.q = np.zeros((task.n, task.n))
         self.alpha = alpha
         self.tau = tau
 
     def decide(self, question):
 
         p = softmax(x=self.q[question, :], temp=self.tau)
-        reply = np.random.choice(np.arange(exercise.n), p=p)
+        reply = np.random.choice(np.arange(task.n), p=p)
 
         if debug:
             print(f'Question is: {question}')
@@ -70,7 +70,7 @@ class ActRLearner(Learner):
         super().__init__()
 
         # Noted 'l' in the paper (to confirm)
-        self.n_chunk = exercise.n
+        self.n_chunk = task.n
 
         # Time recording of presentations of chunks
         self.time_presentation = [[] for _ in range(self.n_chunk)]
@@ -93,7 +93,7 @@ class ActRLearner(Learner):
         IN FUTURE: ...and the activations it receives from elements attended to. """
 
         # noise = np.random.normal()
-        return self.base_level_learning_activation(i) # + noise
+        return self.base_level_learning_activation(i)  # + noise
 
     def base_level_learning_activation(self, i):
 
@@ -135,10 +135,20 @@ class ActRLearner(Learner):
         if p > r:
             return question
         else:
-            return np.random.randint(exercise.n)
+            return np.random.randint(task.n)
         # return reply
 
     def learn(self, question, reply, correct_answer):
 
         self.update_time_presentation(question)  # We suppose the response to be always correct if recalled
-        pass
+
+
+class ActRCogLearner(ActRLearner):
+
+    def __init__(self, d=0.5, theta=0.0001, s=0.01):
+
+        super().__init__(d, theta, theta, s)
+
+    def activation_function(self, i):
+
+        return self.base_level_learning_activation(i)  # +

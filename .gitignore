@@ -118,3 +118,6 @@ dmypy.json
 
 # Figure folder
 fig
+
+# Parameters file
+task/parameters/parameters.json
