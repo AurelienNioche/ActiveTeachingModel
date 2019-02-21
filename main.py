@@ -4,18 +4,12 @@ from graph import plot
 
 from model.learner import QLearner, ActRLearner
 from model.teacher import Teacher
+from model.task import Task
 
-from task import task
 
+def run_exercise(task, teacher, learner):
 
-def run_rl():
-
-    t_max = task.t_max
-
-    learner = QLearner()
-    teacher = Teacher()
-
-    for t in range(t_max):
+    for t in range(task.t_max):
 
         question = teacher.choose_question(t=t)
         reply = learner.decide(question=question)
@@ -25,34 +19,26 @@ def run_rl():
     return teacher.summarize()
 
 
-def run_act_r():
+def plot_results(success, condition='test'):
 
-    t_max = task.t_max
-
-    learner = ActRLearner()
-    teacher = Teacher()
-
-    for t in range(t_max):
-
-        question = teacher.choose_question(t=t)
-        reply = learner.decide(question=question)
-        correct_answer, success = teacher.evaluate(t=t, reply=reply)
-        learner.learn(question=question, reply=reply, correct_answer=correct_answer)
-
-    return teacher.summarize()
+    plot.success_scatter_plot(success, fig_name=f'{condition}_scatter.pdf')
+    plot.success_curve(success, fig_name=f'{condition}_curve.pdf')
 
 
 def main():
 
     np.random.seed(123)
 
-    success_act_r = run_act_r()
-    plot.success_scatter_plot(success_act_r, fig_name='act_r_scatter.pdf')
-    plot.success_curve(success_act_r, fig_name='act_r_curve.pdf')
+    task = Task()
+    teacher = Teacher(task=task)
 
-    success_rl = run_rl()
-    plot.success_scatter_plot(success_rl, fig_name='rl_scatter.pdf')
-    plot.success_curve(success_rl, fig_name='rl_curve.pdf')
+    for learner in (
+        QLearner(task=task),
+        ActRLearner(task=task)
+    ):
+
+        success = run_exercise(task, teacher, learner)
+        plot_results(success, condition=learner.name)
 
 
 if __name__ == "__main__":

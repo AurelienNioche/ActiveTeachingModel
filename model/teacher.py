@@ -1,24 +1,42 @@
 import numpy as np
 
-from task import task
-
 
 class TeacherMemory:
 
-    def __init__(self):
+    def __init__(self, task):
 
-        self.questions = np.zeros(task.t_max, dtype=int)
-        self.replies = np.zeros(task.t_max, dtype=int)
-        self.successes = np.zeros(task.t_max, dtype=bool)
+        self.questions = np.zeros(task.t_max, dtype=int) * -1
+        self.replies = np.zeros(task.t_max, dtype=int) * -1
+        self.successes = np.zeros(task.t_max, dtype=bool) * -1
 
 
 class Teacher:
 
-    def __init__(self):
+    def __init__(self, task, plan_questions_in_advance=False):
 
-        self.question = None
+        self.task = task
+        self.memory = TeacherMemory(task)
 
-        self.memory = TeacherMemory()
+        if plan_questions_in_advance:
+            self.plan_questions_in_advance()
+
+        self.questions_already_planned = plan_questions_in_advance
+
+    def plan_questions_in_advance(self):
+
+        self.memory.questions[:] = np.random.choice(self.task.questions, size=self.task.t_max)
+
+    def ask_question(self, t):
+
+        if not self.questions_already_planned:
+
+            question = self.choose_question(t)
+            self.memory.questions[t] = question
+
+        else:
+            question = self.memory.questions[t]
+
+        return question
 
     def choose_question(self, t):
 
@@ -27,15 +45,12 @@ class Teacher:
         #
         # else:
         #     self.question = np.random.randint(int(exercise.n/2), exercise.n)
-        self.question = np.random.randint(task.n)
 
-        self.memory.questions[t] = self.question
-
-        return self.question
+        return np.random.choice(self.task.questions)
 
     def evaluate(self, t, reply):
 
-        correct_answer = task.items[self.question]
+        correct_answer = self.task.get_reply(self.memory.questions[t])
         success = correct_answer == reply
 
         self.memory.replies[t] = reply

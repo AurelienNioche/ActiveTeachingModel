@@ -1,8 +1,9 @@
+from typing import List, Any
+
 import numpy as np
 import cmath
 
 from utils.functions import temporal_difference, softmax
-from task import task
 
 
 debug = False
@@ -10,8 +11,8 @@ debug = False
 
 class Learner:
 
-    def __init__(self):
-        pass
+    def __init__(self, task):
+        self.task = task
 
     def decide(self, question):
         return 0
@@ -19,20 +20,24 @@ class Learner:
     def learn(self, question, reply, correct_answer):
         pass
 
+    @property
+    def name(self):
+        return type(self).__name__
+
 
 class QLearner(Learner):
 
-    def __init__(self, alpha=0.01, tau=0.05):
+    def __init__(self, task, alpha=0.01, tau=0.05):
 
-        super().__init__()
-        self.q = np.zeros((task.n, task.n))
+        super().__init__(task=task)
+        self.q = np.zeros((self.task.n, self.task.n))
         self.alpha = alpha
         self.tau = tau
 
     def decide(self, question):
 
         p = softmax(x=self.q[question, :], temp=self.tau)
-        reply = np.random.choice(np.arange(task.n), p=p)
+        reply = np.random.choice(np.arange(self.task.n), p=p)
 
         if debug:
             print(f'Question is: {question}')
@@ -65,9 +70,9 @@ class ActRLearner(Learner):
     * several slots (here: slot 1: kanji, slot2: meaning)
     """
 
-    def __init__(self, d=0.5, theta=0.0001, s=0.01):
+    def __init__(self, task, d=0.5, theta=0.0001, s=0.01):
 
-        super().__init__()
+        super().__init__(task=task)
 
         # Noted 'l' in the paper (to confirm)
         self.n_chunk = task.n
@@ -99,6 +104,7 @@ class ActRLearner(Learner):
 
         """The base-level activation measures how much time has elapsed since the jth use:"""
 
+        # noinspection PyTypeChecker
         sum_a = np.sum([
             (self.t - t_presentation)**(-self._d)
             for t_presentation in self.time_presentation[i]
@@ -135,7 +141,7 @@ class ActRLearner(Learner):
         if p > r:
             return question
         else:
-            return np.random.randint(task.n)
+            return np.random.randint(self.task.n)
         # return reply
 
     def learn(self, question, reply, correct_answer):
@@ -145,9 +151,9 @@ class ActRLearner(Learner):
 
 class ActRCogLearner(ActRLearner):
 
-    def __init__(self, d=0.5, theta=0.0001, s=0.01):
+    def __init__(self, task, d=0.5, theta=0.0001, s=0.01):
 
-        super().__init__(d, theta, theta, s)
+        super().__init__(task, d, theta, s)
 
     def activation_function(self, i):
 
