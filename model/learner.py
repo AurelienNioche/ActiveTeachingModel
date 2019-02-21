@@ -92,6 +92,8 @@ class ActRLearner(Learner):
         # Time counter
         self.t = 0
 
+        self.square_root_2 = 2**(1/2)
+
     def activation_function(self, i):
 
         """The activation of a chunk is the sum of its base-level activation and some noise
@@ -119,12 +121,15 @@ class ActRLearner(Learner):
 
         """The probability of a chunk being above some retrieval threshold τ is"""
 
-        return \
-            1 / (1 + np.exp(
-                        - (a - self._theta) / (cmath.sqrt(2) * self._s)
+        p =  \
+            1 / \
+                (1 + np.exp
+                    (
+                        - (a - self._theta) / (self.square_root_2 * self._s)
                     )
                  )
-
+        print(p)
+        return p
         # return 1 if a > 0 else 0
 
     def update_time_presentation(self, question):
@@ -151,10 +156,37 @@ class ActRLearner(Learner):
 
 class ActRCogLearner(ActRLearner):
 
-    def __init__(self, task, d=0.5, theta=0.0001, s=0.01):
+    def __init__(self, task, d=0.5, theta=0.0001, s=0.01, g=0.5, m=0.5):
 
         super().__init__(task, d, theta, s)
 
+        self.g = g
+        self.m = m
+
     def activation_function(self, i):
 
-        return self.base_level_learning_activation(i)  # +
+        return self.base_level_learning_activation(i) + self.sum_source_activation(i)
+
+    def sum_source_activation(self, i):
+
+        sum_source = 0
+
+        list_j = list(range(self.task.n))
+        list_j.remove(i)
+
+        for j in list_j:
+
+            s_j = self.probability_of_retrieval_equation(self.base_level_learning_activation(j))
+
+            try:
+                assert 0 <= s_j <= 1
+            except AssertionError as e:
+                print(self.base_level_learning_activation(j))
+                print(s_j)
+                raise e
+
+            sum_source += \
+                self.g * self.task.c_graphic[i, j] * s_j + \
+                self.m * self.task.c_semantic[i, j] * s_j
+
+        return sum_source / self.task.n

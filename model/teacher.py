@@ -18,27 +18,15 @@ class Teacher:
         self.memory = TeacherMemory(task)
 
         if plan_questions_in_advance:
-            self.plan_questions_in_advance()
+            self._plan_questions_in_advance()
 
         self.questions_already_planned = plan_questions_in_advance
 
-    def plan_questions_in_advance(self):
+    def _plan_questions_in_advance(self):
 
         self.memory.questions[:] = np.random.choice(self.task.questions, size=self.task.t_max)
 
-    def ask_question(self, t):
-
-        if not self.questions_already_planned:
-
-            question = self.choose_question(t)
-            self.memory.questions[t] = question
-
-        else:
-            question = self.memory.questions[t]
-
-        return question
-
-    def choose_question(self, t):
+    def _choose_question(self, t):
 
         # if t < exercise.t_max:
         #     self.question = np.random.randint(int(exercise.n/2))
@@ -47,6 +35,18 @@ class Teacher:
         #     self.question = np.random.randint(int(exercise.n/2), exercise.n)
 
         return np.random.choice(self.task.questions)
+
+    def ask_question(self, t):
+
+        if not self.questions_already_planned:
+
+            question = self._choose_question(t)
+            self.memory.questions[t] = question
+
+        else:
+            question = self.memory.questions[t]
+
+        return question
 
     def evaluate(self, t, reply):
 

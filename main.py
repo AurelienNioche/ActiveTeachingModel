@@ -2,16 +2,16 @@ import numpy as np
 
 from graph import plot
 
-from model.learner import QLearner, ActRLearner
+from model.learner import QLearner, ActRLearner, ActRCogLearner
 from model.teacher import Teacher
-from model.task import Task
+from model.task import TaskConnect
 
 
 def run_exercise(task, teacher, learner):
 
     for t in range(task.t_max):
 
-        question = teacher.choose_question(t=t)
+        question = teacher.ask_question(t=t)
         reply = learner.decide(question=question)
         correct_answer, success = teacher.evaluate(t=t, reply=reply)
         learner.learn(question=question, reply=reply, correct_answer=correct_answer)
@@ -29,12 +29,13 @@ def main():
 
     np.random.seed(123)
 
-    task = Task()
-    teacher = Teacher(task=task)
+    task = TaskConnect()
+    teacher = Teacher(task=task, plan_questions_in_advance=True)
 
     for learner in (
         QLearner(task=task),
-        ActRLearner(task=task)
+        ActRLearner(task=task),
+        # ActRCogLearner(task=task)
     ):
 
         success = run_exercise(task, teacher, learner)
