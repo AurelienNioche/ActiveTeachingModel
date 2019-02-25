@@ -1,7 +1,4 @@
-from typing import List, Any
-
 import numpy as np
-import cmath
 
 from utils.functions import temporal_difference, softmax
 
@@ -122,18 +119,17 @@ class ActRLearner(Learner):
         """The probability of a chunk being above some retrieval threshold τ is"""
 
         p =  \
-            1 / \
-                (1 + np.exp
+            1 / (
+                    1 + np.exp
                     (
                         - (a - self._theta) / (self.square_root_2 * self._s)
                     )
                  )
-        print(p)
         return p
-        # return 1 if a > 0 else 0
 
     def update_time_presentation(self, question):
 
+        # noinspection PyTypeChecker
         self.time_presentation[question].append(self.t)
 
     def decide(self, question):
@@ -144,10 +140,11 @@ class ActRLearner(Learner):
         p = self.probability_of_retrieval_equation(a)
         r = np.random.random()
         if p > r:
-            return question
+            reply = question
         else:
-            return np.random.randint(self.task.n)
-        # return reply
+            reply = np.random.randint(self.task.n)
+
+        return reply
 
     def learn(self, question, reply, correct_answer):
 
@@ -178,12 +175,7 @@ class ActRCogLearner(ActRLearner):
 
             s_j = self.probability_of_retrieval_equation(self.base_level_learning_activation(j))
 
-            try:
-                assert 0 <= s_j <= 1
-            except AssertionError as e:
-                print(self.base_level_learning_activation(j))
-                print(s_j)
-                raise e
+            assert 0 <= s_j <= 1
 
             sum_source += \
                 self.g * self.task.c_graphic[i, j] * s_j + \

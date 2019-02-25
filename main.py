@@ -35,7 +35,7 @@ def main():
     for learner in (
         QLearner(task=task),
         ActRLearner(task=task),
-        # ActRCogLearner(task=task)
+        ActRCogLearner(task=task)
     ):
 
         success = run_exercise(task, teacher, learner)

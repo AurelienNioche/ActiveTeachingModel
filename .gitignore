@@ -121,3 +121,6 @@ fig
 
 # Parameters file
 model/parameters/parameters.json
+
+# Backup files
+CNN/backup

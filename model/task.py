@@ -34,9 +34,6 @@ class Task:
 
         reply = self.replies[question]
 
-        # print(f"question is {question}")
-        # print(f'Reply is {reply}')
-
         return reply
 
 
