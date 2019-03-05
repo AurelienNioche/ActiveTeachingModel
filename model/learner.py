@@ -97,6 +97,7 @@ class ActRLearner(Learner):
         IN FUTURE: ...and the activations it receives from elements attended to. """
 
         # noise = np.random.normal()
+        # print(self.base_level_learning_activation(i))
         return self.base_level_learning_activation(i)  # + noise
 
     def base_level_learning_activation(self, i):
@@ -153,7 +154,7 @@ class ActRLearner(Learner):
 
 class ActRCogLearner(ActRLearner):
 
-    def __init__(self, task, d=0.5, theta=0.0001, s=0.01, g=0.5, m=0.5):
+    def __init__(self, task, d=0.5, theta=0.0001, s=0.01, g=0.01, m=0.01):
 
         super().__init__(task, d, theta, s)
 
@@ -174,11 +175,12 @@ class ActRCogLearner(ActRLearner):
         for j in list_j:
 
             s_j = self.probability_of_retrieval_equation(self.base_level_learning_activation(j))
-
             assert 0 <= s_j <= 1
+            # s_j = self.base_level_learning_activation(j)
 
             sum_source += \
                 self.g * self.task.c_graphic[i, j] * s_j + \
                 self.m * self.task.c_semantic[i, j] * s_j
 
-        return sum_source / self.task.n
+        return sum_source  # / (2*(self.task.n-1))
+        # return sum_source

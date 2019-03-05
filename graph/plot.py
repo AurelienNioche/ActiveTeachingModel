@@ -19,7 +19,8 @@ def success_scatter_plot(successes, fig_name='backup.pdf'):
     plt.close()
 
 
-def success_curve(successes, fig_name='backup.pdf'):
+def success_curve(successes, fig_name='backup.pdf', font_size=42, line_width=3,
+                  label_size=22):
 
     y = []
     for i in range(1, len(successes)):
@@ -31,10 +32,14 @@ def success_curve(successes, fig_name='backup.pdf'):
 
     fig = plt.figure(figsize=(10, 10))
     ax = fig.add_subplot(111)
-    ax.set_ylabel('Success rate')
-    ax.set_xlabel('Time')
+    ax.set_ylabel('Success rate', fontsize=font_size)
+    ax.set_xlabel('Time', fontsize=font_size)
     ax.set_yticks((0, 1))
     ax.set_ylim((0, 1))
-    ax.plot(y, color="black")
+    ax.tick_params(axis="both", labelsize=label_size)
+    ax.plot(y, color="black", linewidth=line_width)
+
+    plt.tight_layout()
+
     plt.savefig(fname=f'{dir_path}/{fig_name}')
     plt.close()
