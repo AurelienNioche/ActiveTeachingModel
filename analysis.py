@@ -35,11 +35,11 @@ def _objective_act_r(parameters, questions, replies, n_items):
         question, reply = questions[t], replies[t]
 
         p = learner.p_choice(question=question, reply=reply)
-        if p == 0:
-            print('p=0')
-            return 0
-        else:
-            print(t, p)
+        # if p == 0:
+        #     print('p=0')
+        #     return 0
+        # else:
+        #     print(t, p)
 
         p_choices[t] = p
         learner.learn(question=question, reply=reply)
@@ -136,8 +136,8 @@ def get_data(user_id):
     for k in kanjis:
         meanings.append(Question.objects.filter(user_id=user_id, question=k)[0].correct_answer)
 
-    print(kanjis)
-    print(meanings)
+    # print(kanjis)
+    # print(meanings)
 
     n_items = len(kanjis)
 
@@ -159,11 +159,17 @@ def get_data(user_id):
 def main():
 
     users = User.objects.all().order_by('id')
-    user_id = users[2].id
 
-    questions, replies, n_items, possible_replies = get_data(user_id)
-    fit_rl(questions=questions, replies=replies, n_items=n_items, possible_replies=possible_replies)
-    fit_act_r(questions=questions, replies=replies, n_items=n_items)
+    for u in users:
+        user_id = u.id
+        print(user_id)
+        print("*" * 5)
+
+        questions, replies, n_items, possible_replies = get_data(user_id)
+        fit_rl(questions=questions, replies=replies, n_items=n_items, possible_replies=possible_replies)
+        fit_act_r(questions=questions, replies=replies, n_items=n_items)
+
+        print()
 
 
 if __name__ == "__main__":

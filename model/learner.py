@@ -173,6 +173,8 @@ class ActRLearner(Learner):
         a = self._activation_function(question)
         p = self._probability_of_retrieval_equation(a)
 
+        p = 0.25 + p*(1/(self.n_possible_replies - 1))
+
         if success:
             return p
         else:
