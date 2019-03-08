@@ -33,9 +33,9 @@ def main():
     teacher = Teacher(task=task, plan_questions_in_advance=True)
 
     for learner in (
-        QLearner(task=task),
-        ActRLearner(task=task),
-        ActRCogLearner(task=task)
+        QLearner(n_items=task.n),
+        ActRLearner(n_items=task.n),
+        ActRCogLearner(n_items=task.n, c_graphic=task.c_graphic, c_semantic=task.c_semantic)
     ):
 
         success = run_exercise(task, teacher, learner)
