@@ -56,12 +56,14 @@ def fit_act_r(questions, replies, n_items):
         bounds=((0.4, 0.6), (0.00001, 0.001), (0.005, 0.015)))  # method=SLSQP
 
     d, tau, s = res.x
-    log_likelihood_sum = res.fun
+    lls = res.fun
 
     best_param = {"d": d, "tau": tau, "s": s}
     n = len(questions)
+    k = len(best_param)
+    bic_v = bic(lls=lls, n=n, k=k)
 
-    return log_likelihood_sum, n, best_param, bic(log_likelihood_sum, n, len())
+    return lls, n, best_param, bic_v
 
 
 def _objective_rl(parameters, questions, replies, possible_replies, n_items):
@@ -99,11 +101,14 @@ def fit_rl(questions, replies, possible_replies, n_items):
         bounds=((0.00, 1.00), (0.001, 0.1)))  # method=SLSQP
 
     alpha, tau = res.x
-    log_likelihood_sum = res.fun
+    lls = res.fun
 
+    best_param ={'alpha': alpha, 'tau': tau}
     n = len(questions)
+    k = len(best_param)
+    bic_v = bic(lls=lls, n=n, k=k)
 
-    return log_likelihood_sum, n, {'alpha': alpha, 'tau': tau}
+    return lls, n, {'alpha': alpha, 'tau': tau}, bic_v
 
 
 def print_data():
@@ -174,11 +179,11 @@ def main():
 
         questions, replies, n_items, possible_replies = get_data(user_id)
 
-        lls, n, best_param = fit_rl(questions=questions, replies=replies, n_items=n_items, possible_replies=possible_replies)
-        print(f'Alpha: {best_param["alpha"]}, Tau: {best_param["tau"]}, LLS: {lls}')
+        lls, n, best_param, bic_v = fit_rl(questions=questions, replies=replies, n_items=n_items, possible_replies=possible_replies)
+        print(f'Alpha: {best_param["alpha"]}, Tau: {best_param["tau"]}, LLS: {lls}, BIC:{bic_v}')
 
-        lls, n, best_param = fit_act_r(questions=questions, replies=replies, n_items=n_items)
-        print(f'd: {best_param["d"]}, Tau: {best_param["tau"]}, s:{best_param["s"]}, LLS: {lls}')
+        lls, n, best_param, bic_v = fit_act_r(questions=questions, replies=replies, n_items=n_items)
+        print(f'd: {best_param["d"]}, Tau: {best_param["tau"]}, s:{best_param["s"]}, LLS: {lls}, BIC:{bic_v}')
 
         print()
 
