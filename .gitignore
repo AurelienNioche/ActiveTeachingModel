@@ -124,3 +124,6 @@ model/parameters/parameters.json
 
 # Backup files
 CNN/backup
+
+# Google pretrained word2vec model
+word2vec/data

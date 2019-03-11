@@ -148,8 +148,8 @@ def get_data(user_id):
     for k in kanjis:
         meanings.append(Question.objects.filter(user_id=user_id, question=k)[0].correct_answer)
 
-    # print(kanjis)
-    # print(meanings)
+    print(f"Kanji used: {kanjis}")
+    print(f"Corresponding meanings: {meanings}")
 
     n_items = len(kanjis)
 
@@ -180,10 +180,10 @@ def main():
         questions, replies, n_items, possible_replies = get_data(user_id)
 
         lls, n, best_param, bic_v = fit_rl(questions=questions, replies=replies, n_items=n_items, possible_replies=possible_replies)
-        print(f'Alpha: {best_param["alpha"]}, Tau: {best_param["tau"]}, LLS: {lls}, BIC:{bic_v}')
+        print(f'Alpha: {best_param["alpha"]}, Tau: {best_param["tau"]}, LLS: {lls:.2f}, BIC:{bic_v:.2f}')
 
         lls, n, best_param, bic_v = fit_act_r(questions=questions, replies=replies, n_items=n_items)
-        print(f'd: {best_param["d"]}, Tau: {best_param["tau"]}, s:{best_param["s"]}, LLS: {lls}, BIC:{bic_v}')
+        print(f'd: {best_param["d"]}, Tau: {best_param["tau"]}, s:{best_param["s"]:.3f}, LLS: {lls:.2f}, BIC:{bic_v:.2f}')
 
         print()
 
