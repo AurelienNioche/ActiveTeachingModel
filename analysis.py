@@ -16,6 +16,8 @@ from model.learner import QLearner, ActRLearner
 
 from task.parameters import n_possible_replies
 
+from utils.functions import bic
+
 
 def _objective_act_r(parameters, questions, replies, n_items):
 
@@ -56,7 +58,10 @@ def fit_act_r(questions, replies, n_items):
     d, tau, s = res.x
     log_likelihood_sum = res.fun
 
-    print(f'd: {d}, Tau: {tau}, s:{s}, LLS: {log_likelihood_sum}')
+    best_param = {"d": d, "tau": tau, "s": s}
+    n = len(questions)
+
+    return log_likelihood_sum, n, best_param, bic(log_likelihood_sum, n, len())
 
 
 def _objective_rl(parameters, questions, replies, possible_replies, n_items):
@@ -96,7 +101,9 @@ def fit_rl(questions, replies, possible_replies, n_items):
     alpha, tau = res.x
     log_likelihood_sum = res.fun
 
-    print(f'Alpha: {alpha}, Tau: {tau}, LLS: {log_likelihood_sum}')
+    n = len(questions)
+
+    return log_likelihood_sum, n, {'alpha': alpha, 'tau': tau}
 
 
 def print_data():
@@ -166,8 +173,12 @@ def main():
         print("*" * 5)
 
         questions, replies, n_items, possible_replies = get_data(user_id)
-        fit_rl(questions=questions, replies=replies, n_items=n_items, possible_replies=possible_replies)
-        fit_act_r(questions=questions, replies=replies, n_items=n_items)
+
+        lls, n, best_param = fit_rl(questions=questions, replies=replies, n_items=n_items, possible_replies=possible_replies)
+        print(f'Alpha: {best_param["alpha"]}, Tau: {best_param["tau"]}, LLS: {lls}')
+
+        lls, n, best_param = fit_act_r(questions=questions, replies=replies, n_items=n_items)
+        print(f'd: {best_param["d"]}, Tau: {best_param["tau"]}, s:{best_param["s"]}, LLS: {lls}')
 
         print()
 
