@@ -129,7 +129,7 @@ def _create_convulational_autoencoder(size):
     x = Conv2D(8, (3, 3), activation='relu', padding='same')(x)
     encoded = MaxPooling2D((2, 2), padding='same')(x)
 
-    # at this point the representation is (4, 4, 8) i.e. 128-dimensional
+    # at this point the representation is (13, 13, 8)
 
     x = Conv2D(8, (3, 3), activation='relu', padding='same')(encoded)
     x = UpSampling2D((2, 2))(x)
@@ -148,7 +148,19 @@ def _create_convulational_autoencoder(size):
     encoder = Model(inputs=autoencoder.input, outputs=autoencoder.get_layer('max_pooling2d_3').output)
     encoder.summary()
 
-    return autoencoder, encoder
+    encoded_input = Input(shape=autoencoder.layers[-7].input_shape[1:])
+    deco = autoencoder.layers[-7](encoded_input)
+    deco = autoencoder.layers[-6](deco)
+    deco = autoencoder.layers[-5](deco)
+    deco = autoencoder.layers[-4](deco)
+    deco = autoencoder.layers[-3](deco)
+    deco = autoencoder.layers[-2](deco)
+    deco = autoencoder.layers[-1](deco)
+
+    decoder = Model(encoded_input, deco)
+    decoder.summary()
+
+    return autoencoder, encoder, decoder
 
 
 def train_autoencoder(x_train, x_test, epochs=100, batch_size=128):
@@ -158,7 +170,7 @@ def train_autoencoder(x_train, x_test, epochs=100, batch_size=128):
     x_train = np.reshape(x_train, (len(x_train), x_train.shape[1], x_train.shape[2], 1))  # adapt this if using `channels_first` image data format
     x_test = np.reshape(x_test, (len(x_test), x_train.shape[1], x_train.shape[2], 1))  # adapt this if using `channels_first` image data format
 
-    autoencoder, encoder = _create_convulational_autoencoder(size=x_train.shape[1])
+    autoencoder, encoder, decoder = _create_convulational_autoencoder(size=x_train.shape[1])
 
     train = autoencoder.fit(
         x_train, x_train,
@@ -168,16 +180,18 @@ def train_autoencoder(x_train, x_test, epochs=100, batch_size=128):
         validation_data=(x_test, x_test),
         callbacks=[TensorBoard(log_dir='/tmp/autoencoder')])
 
-    return (autoencoder, encoder), train
+    return (autoencoder, encoder, decoder), train
 
 
-def get_encoded_decoded(encoder, autoencoder, x_test):
+def get_encoded_decoded(encoder, autoencoder, decoder, x_test):
     # encode and decode some digits
     # note that we take them from the *test* set
+    x_test = np.reshape(x_test, (len(x_test), x_test.shape[1], x_test.shape[2], 1))
     encoded_imgs = encoder.predict(x_test)
-    decoded_imgs = autoencoder.predict(x_test)
+    decoded_imgs = decoder.predict(encoded_imgs)
+    decoded_imgs_auto = autoencoder.predict(x_test)
 
-    return encoded_imgs, decoded_imgs
+    return encoded_imgs, decoded_imgs, decoded_imgs_auto
 
 
 def get_decoded_only(model, x_test):
@@ -196,7 +210,7 @@ def _example_dataset():
     return x_train, x_test
 
 
-def show_result(x_test, decoded_images):
+def show_result(x_test, decoded_images, decoded_images_auto):
 
     size = x_test.shape[1]
 
@@ -204,15 +218,22 @@ def show_result(x_test, decoded_images):
     plt.figure(figsize=(20, 4))
     for i in range(n):
         # display original
-        ax = plt.subplot(2, n, i + 1)
+        ax = plt.subplot(3, n, i + 1)
         plt.imshow(x_test[i].reshape(size, size))
         plt.gray()
         ax.get_xaxis().set_visible(False)
         ax.get_yaxis().set_visible(False)
 
         # display reconstruction
-        ax = plt.subplot(2, n, i + 1 + n)
+        ax = plt.subplot(3, n, i + 1 + n)
         plt.imshow(decoded_images[i].reshape(size, size))
+        plt.gray()
+        ax.get_xaxis().set_visible(False)
+        ax.get_yaxis().set_visible(False)
+
+        # display reconstruction
+        ax = plt.subplot(3, n, i + 1 + 2*n)
+        plt.imshow(decoded_images_auto[i].reshape(size, size))
         plt.gray()
         ax.get_xaxis().set_visible(False)
         ax.get_yaxis().set_visible(False)
@@ -278,14 +299,14 @@ def main(force=False):
 
     # Parameters
     img_size = 100
-    epochs = 200
+    epochs = 100
 
     # Seed
     np.random.seed(123)
 
     # Backup file
-    bkp_train_file = f'backup/backup_train.p'
-    bkp_model_files = ['backup/backup_autoencoder.h5', 'backup/backup_encoder.h5']
+    bkp_train_file = f'backup/train.p'
+    bkp_model_files = ['backup/autoencoder.h5', 'backup/encoder.h5', 'backup/decoder.h5']
 
     os.makedirs(bkp_train_file.split("/")[0], exist_ok=True)
     files_exist = np.all([os.path.exists(i) for i in bkp_model_files + [bkp_train_file]])
@@ -294,18 +315,19 @@ def main(force=False):
 
     if force or not files_exist:
 
-        (autoencoder, encoder), train = train_autoencoder(x_train, x_test, epochs=epochs)
+        (autoencoder, encoder, decoder), train = train_autoencoder(x_train, x_test, epochs=epochs)
 
         x_test = np.reshape(x_test, (len(x_test), x_test.shape[1], x_test.shape[2], 1))
 
         save_model_and_history(backup_train_file=bkp_train_file, backup_model_files=bkp_model_files,
-                               models=(autoencoder, encoder), train=train)
+                               models=(autoencoder, encoder, decoder), train=train)
     else:
-        (autoencoder, encoder), train = \
+        (autoencoder, encoder, decoder), train = \
             load_model_and_history(backup_train_file=bkp_train_file, backup_model_files=bkp_model_files)
 
-    encoded_images, decoded_images = get_encoded_decoded(x_test=x_test, encoder=encoder, autoencoder=autoencoder)
-    show_result(x_test=x_test, decoded_images=decoded_images)
+    encoded_images, decoded_images, decoded_images_auto = \
+        get_encoded_decoded(x_test=x_test, encoder=encoder, decoder=decoder, autoencoder=autoencoder)
+    show_result(x_test=x_test, decoded_images=decoded_images, decoded_images_auto=decoded_images_auto)
 
 
 if __name__ == "__main__":
