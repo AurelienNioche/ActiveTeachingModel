@@ -18,6 +18,9 @@ from task.parameters import n_possible_replies
 
 from utils.functions import bic
 
+import graph.model_comparison
+import graph.success
+
 
 def _objective_act_r(parameters, questions, replies, n_items):
 
@@ -136,7 +139,7 @@ def print_data():
         print()
 
 
-def get_data(user_id):
+def get_task_features(user_id):
 
     question_entries = [q for q in Question.objects.filter(user_id=user_id).order_by('t')]
 
@@ -150,6 +153,13 @@ def get_data(user_id):
 
     print(f"Kanji used: {kanjis}")
     print(f"Corresponding meanings: {meanings}")
+
+    return question_entries, kanjis, meanings
+
+
+def get_data(user_id):
+
+    question_entries, kanjis, meanings = get_task_features(user_id=user_id)
 
     n_items = len(kanjis)
 
@@ -172,6 +182,8 @@ def main():
 
     users = User.objects.all().order_by('id')
 
+    bic_data = [[], []]
+
     for u in users:
         user_id = u.id
         print(user_id)
@@ -182,10 +194,16 @@ def main():
         lls, n, best_param, bic_v = fit_rl(questions=questions, replies=replies, n_items=n_items, possible_replies=possible_replies)
         print(f'Alpha: {best_param["alpha"]}, Tau: {best_param["tau"]}, LLS: {lls:.2f}, BIC:{bic_v:.2f}')
 
+        bic_data[0].append(bic_v)
+
         lls, n, best_param, bic_v = fit_act_r(questions=questions, replies=replies, n_items=n_items)
         print(f'd: {best_param["d"]}, Tau: {best_param["tau"]}, s:{best_param["s"]:.3f}, LLS: {lls:.2f}, BIC:{bic_v:.2f}')
 
+        bic_data[1].append(bic_v)
         print()
+
+    graph.model_comparison.scatter_plot(data_list=bic_data, colors=["C0", "C1"], x_tick_labels=["RL", "ACT-R - -"],
+                                        f_name='model_comparison.pdf', y_label='BIC')
 
 
 if __name__ == "__main__":

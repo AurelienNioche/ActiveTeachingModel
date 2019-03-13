@@ -1,5 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import os
+
+FIG_FOLDER = "fig"
 
 
 def bar_plot(
@@ -9,17 +12,15 @@ def bar_plot(
         subplot_spec=None, fig=None, f_name=None, letter=None, labels=None):
 
     if fig is None:
-        print('create_figure')
         fig = plt.figure()
 
     if subplot_spec:
-        print('user subplot specifications')
         ax = fig.add_subplot(subplot_spec)
-    else:
-        print('create subplot')
-        ax = fig.add_subplot(111)
-    print(ax)
 
+    else:
+        ax = fig.add_subplot(111)
+
+    # If adding a letter
     if letter:
         ax.text(
             s=letter, x=-0.1, y=-0.68, horizontalalignment='center', verticalalignment='center',
@@ -87,26 +88,45 @@ def bar_plot(
         plt.savefig(f_name)
 
 
-def plot_example():
+def bar_example():
 
     np.random.seed(123)
     means = np.random.random(size=3)
     errors = np.random.random(size=3) / 100
     sig = [(0, 1, True), (0, 2, False)]
-    plot(means=means, errors=errors, sig=sig)
+    bar_plot(means=means, errors=errors, sig=sig)
 
     plt.show()
 
 
-def plot(results, color_gain, color_loss, ax):
+def scatter_plot(
+        data_list, colors=None, x_tick_labels=None, fontsize=10,
+        subplot_spec=None, fig=None, f_name=None, letter=None, y_lim=None, y_label=None,
+        h_line=None
+):
 
-    n = len(results.keys())
+    if fig is None:
+        fig = plt.figure()
 
-    tick_labels = [
-        "Loss\nvs\ngains", "Diff. $x +$\nSame $p$", "Diff. $x -$\nSame $p$",
-        "Diff. $p$\nSame $x +$", "Diff. $p$\nSame $x -$"]
+    if subplot_spec:
+        ax = fig.add_subplot(subplot_spec)
 
-    colors = ["black", color_gain, color_loss, color_gain, color_loss]
+    else:
+        ax = fig.add_subplot(111)
+
+    # If adding a letter
+    if letter:
+        ax.text(
+            s=letter, x=-0.1, y=-0.68, horizontalalignment='center', verticalalignment='center',
+            transform=ax.transAxes,
+            fontsize=20)
+
+    n = len(data_list)
+
+    # Colors
+    if colors is None:
+        colors = ["black" for _ in range(n)]
+
     positions = list(range(n))
 
     x_scatter = []
@@ -115,11 +135,11 @@ def plot(results, color_gain, color_loss, ax):
 
     values_box_plot = []
 
-    for i, cond in enumerate(results.keys()):
+    for i, data in enumerate(data_list):
 
         values_box_plot.append([])
 
-        for v in results[cond].values():
+        for v in data:
             # For box plot
             values_box_plot[-1].append(v)
 
@@ -128,33 +148,54 @@ def plot(results, color_gain, color_loss, ax):
             x_scatter.append(i)
             colors_scatter.append(colors[i])
 
-    fontsize = 10
-
     ax.scatter(x_scatter, y_scatter, c=colors_scatter, s=30, alpha=0.5, linewidth=0.0, zorder=1)
 
-    ax.axhline(0.5, linestyle='--', color='0.3', zorder=-10, linewidth=0.5)
-
-    ax.set_yticks(np.arange(0.4, 1.1, 0.2))
+    if h_line:
+        ax.axhline(h_line, linestyle='--', color='0.3', zorder=-10, linewidth=0.5)
 
     ax.tick_params(axis='both', labelsize=fontsize)
 
     # ax.set_xlabel("Type of control\nMonkey {}.".format(monkey), fontsize=fontsize)
     # ax.set_xlabel("Control type", fontsize=fontsize)
-    ax.set_ylabel("Success rate", fontsize=fontsize)
+    if y_label:
+        ax.set_ylabel(y_label, fontsize=fontsize)
 
-    ax.set_ylim(0.35, 1.02)
+    # ax.set_yticks(np.arange(0.4, 1.1, 0.2))
+
+    if y_lim:
+        ax.set_ylim(y_lim)
+
+    if x_tick_labels is None:
+        x_tick_labels = ["" for _ in range(n)]
 
     # Boxplot
-    bp = ax.boxplot(values_box_plot, positions=positions, labels=tick_labels, showfliers=False, zorder=2)
+    bp = ax.boxplot(values_box_plot, positions=positions, labels=x_tick_labels, showfliers=False, zorder=2)
 
     for e in ['boxes', 'caps', 'whiskers', 'medians']:  # Warning: only one box, but several whiskers by plot
         for b in bp[e]:
             b.set(color='black')
             # b.set_alpha(1)
 
-    ax.set_aspect(3)
+    # ax.set_aspect(3)
+    plt.tight_layout()
+
+    if f_name is not None:
+        os.makedirs(FIG_FOLDER, exist_ok=True)
+        plt.savefig(f'{FIG_FOLDER}/{f_name}')
+
+    else:
+        plt.show()
+
+
+def scatter_example():
+
+    mu, sigma = 0, 0.1  # mean and standard deviation
+    data_list = [np.random.normal(mu, sigma, 100)]
+    scatter_plot(
+        data_list=data_list
+    )
 
 
 if __name__ == "__main__":
 
-    plot_example()
+    scatter_example()

@@ -1,33 +1,74 @@
-import numpy as np
-
 from keras.layers import Input, Dense, Conv2D, MaxPooling2D, UpSampling2D
-from keras.models import Model
+from keras.models import Model, load_model
 # from keras import backend as K
-
-from keras.callbacks import TensorBoard
-from keras.models import load_model
+# from keras.callbacks import TensorBoard
 
 import matplotlib.pyplot as plt
-import os 
+import numpy as np
+import os
 import pickle
+from PIL import Image, ImageDraw, ImageFont
 
-from PIL import Image
+
+SCRIPT_FOLDER = os.path.dirname(os.path.abspath(__file__))
+BACKUP_FOLDER = f'{SCRIPT_FOLDER}/backup'
+IMG_FOLDER = f'{SCRIPT_FOLDER}/image'
+IMG_SIZE = 100
+EPOCHS = 100
 
 
-def _load_images(img_size, folder="image"):
+def _img_file(name):
 
-    n_images = len(os.listdir(folder))
+    return f"{IMG_FOLDER}/{name}.png"
 
-    train_data = np.zeros((n_images*2, img_size, img_size))
+
+def _create_images(
+        kanji_dic,
+        font='auto_encoder/font/arialunicodems.ttf',
+        text_color=(255, 255, 255),
+        background_color=(0, 0, 0)):
+
+    os.makedirs(IMG_FOLDER, exist_ok=True)
+    font_size = int(IMG_SIZE*2/3)
+
+    for name, character in kanji_dic.items():
+
+        img = Image.new('RGB', (IMG_SIZE, IMG_SIZE), color=background_color)
+
+        fnt = ImageFont.truetype(font, font_size)
+        d = ImageDraw.Draw(img)
+        w, h = d.textsize(character, font=fnt)
+        d.text(((IMG_SIZE-w)/2, (IMG_SIZE-h)/2 - h/10), character, font=fnt, fill=text_color)
+
+        if name is None:
+            name = ord(character)
+
+        img.save(_img_file(name))
+
+
+def _are_images_existing(kanji_dic):
+
+    for key in kanji_dic.keys():
+        if not os.path.exists(_img_file(name=key)):
+            return False
+    return True
+
+
+# --------------------------------------- #
+
+
+def _format_images():
+
+    n_images = len(os.listdir(IMG_FOLDER))
+    train_data = np.zeros((n_images * 2, IMG_SIZE, IMG_SIZE))
 
     i = 0
 
-    for img in os.listdir(folder):
-
-        path = os.path.join(folder, img)
+    for img in os.listdir(IMG_FOLDER):
+        path = os.path.join(IMG_FOLDER, img)
         img = Image.open(path)
         img = img.convert('L')
-        img = img.resize((img_size, img_size), Image.ANTIALIAS)
+        img = img.resize((IMG_SIZE, IMG_SIZE), Image.ANTIALIAS)
         train_data[i] = np.array(img)
 
         i += 1
@@ -35,7 +76,7 @@ def _load_images(img_size, folder="image"):
         # Basic Data Augmentation - Horizontal Flipping
         flip_img = Image.open(path)
         flip_img = flip_img.convert('L')
-        flip_img = flip_img.resize((img_size, img_size), Image.ANTIALIAS)
+        flip_img = flip_img.resize((IMG_SIZE, IMG_SIZE), Image.ANTIALIAS)
         flip_img = np.array(flip_img)
         flip_img = np.fliplr(flip_img)
         train_data[i] = flip_img
@@ -43,30 +84,60 @@ def _load_images(img_size, folder="image"):
         i += 1
 
     train_data /= 255.
-    # random.shuffle(train_data)
     return train_data
 
 
-def _show_example_image(train_data):
+def _training_data(kanji_dic, ratio_training_test=2/3):
 
-        print(train_data)
-        print(train_data[0].shape)
-        plt.imshow(train_data[0], cmap='gist_gray')
-        plt.show()
+    if not _are_images_existing(kanji_dic):
+        _create_images(kanji_dic=kanji_dic)
 
-
-def load_training_data(img_size, ratio=2/3):
-
-    train_data = _load_images(img_size=img_size)
+    train_data = _format_images()
 
     np.random.shuffle(train_data)
 
-    split = int(len(train_data) * ratio)
+    split = int(len(train_data) * ratio_training_test)
 
     x_train = train_data[:split]
     x_test = train_data[split:]
 
     return x_train, x_test
+
+
+def _show_image_example(train_data):
+
+    plt.imshow(train_data[0], cmap='gist_gray')
+    plt.show()
+
+# ----------------------------------------- #
+
+
+def get_formatted_image_for_cnn(kanji_id):
+
+    path = os.path.join(IMG_FOLDER, _img_file(kanji_id))
+    img = Image.open(path)
+    img = img.convert('L')
+    img = img.resize((IMG_SIZE, IMG_SIZE), Image.ANTIALIAS)
+    a_img = np.array(img, dtype='float32')
+    a_img /= 255.
+    a_img = np.reshape(a_img, (1, a_img.shape[0], a_img.shape[1], 1))
+    return a_img
+
+# ----------------------------------------- #
+
+
+def _example_dataset():
+
+    from keras.datasets import mnist
+
+    (x_train, _), (x_test, _) = mnist.load_data()
+
+    x_train = x_train.astype('float32') / 255.
+    x_test = x_test.astype('float32') / 255.
+
+    return x_train, x_test
+
+# ------------------------------------------------ #
 
 
 def _simple_autoencoder(size, encoding_dim=32):
@@ -117,6 +188,8 @@ def train_simple(x_train, x_test, encoding_dim=32, epochs=50, batch_size=256):
 
     return (autoencoder, encoder, decoder), train
 
+# -------------------------------------------------------- #
+
 
 def _create_convulational_autoencoder(size):
 
@@ -165,52 +238,44 @@ def _create_convulational_autoencoder(size):
 
 def train_autoencoder(x_train, x_test, epochs=100, batch_size=128):
 
-    # tensorboard --logdir=/tmp/autoencoder
-
     x_train = np.reshape(x_train, (len(x_train), x_train.shape[1], x_train.shape[2], 1))  # adapt this if using `channels_first` image data format
     x_test = np.reshape(x_test, (len(x_test), x_train.shape[1], x_train.shape[2], 1))  # adapt this if using `channels_first` image data format
 
     autoencoder, encoder, decoder = _create_convulational_autoencoder(size=x_train.shape[1])
 
-    train = autoencoder.fit(
+    history = autoencoder.fit(
         x_train, x_train,
         epochs=epochs,
         batch_size=batch_size,
         shuffle=True,
-        validation_data=(x_test, x_test),
-        callbacks=[TensorBoard(log_dir='/tmp/autoencoder')])
+        validation_data=(x_test, x_test))
 
-    return (autoencoder, encoder, decoder), train
-
-
-def get_encoded_decoded(encoder, autoencoder, decoder, x_test):
-    # encode and decode some digits
-    # note that we take them from the *test* set
-    x_test = np.reshape(x_test, (len(x_test), x_test.shape[1], x_test.shape[2], 1))
-    encoded_imgs = encoder.predict(x_test)
-    decoded_imgs = decoder.predict(encoded_imgs)
-    decoded_imgs_auto = autoencoder.predict(x_test)
-
-    return encoded_imgs, decoded_imgs, decoded_imgs_auto
+    return (autoencoder, encoder, decoder), history
 
 
-def get_decoded_only(model, x_test):
-    x_test = np.reshape(x_test, (len(x_test), x_test.shape[1], x_test.shape[2], 1))
-    return model.predict(x_test)
+# --------------------------------------------------------- #
 
 
-def _example_dataset():
-    from keras.datasets import mnist
+def get_encoded_decoded(encoder, autoencoder, decoder, x_test, convulational=True):
 
-    (x_train, _), (x_test, _) = mnist.load_data()
+    if convulational:
+        x_test = np.reshape(x_test, (len(x_test), x_test.shape[1], x_test.shape[2], 1))
 
-    x_train = x_train.astype('float32') / 255.
-    x_test = x_test.astype('float32') / 255.
+    else:
+        size = np.prod(x_test.shape[1:])
+        x_test = x_test.reshape((len(x_test), size))
 
-    return x_train, x_test
+    encoded_img = encoder.predict(x_test)
+    decoded_img = decoder.predict(encoded_img)
+    decoded_img_auto = autoencoder.predict(x_test)
+
+    return encoded_img, decoded_img, decoded_img_auto
+
+# -------------------------------------------------------- #
 
 
-def show_result(x_test, decoded_images, decoded_images_auto):
+def show_result(x_test, decoded_images, decoded_images_auto,
+                fig_file="fig/autoencoder_image_reconstruction.pdf"):
 
     size = x_test.shape[1]
 
@@ -237,99 +302,102 @@ def show_result(x_test, decoded_images, decoded_images_auto):
         plt.gray()
         ax.get_xaxis().set_visible(False)
         ax.get_yaxis().set_visible(False)
-    plt.show()
-
-
-def show_accuracy(train):
-
-    # Plot the accuracy and loss plots between training and validation data:
-    accuracy = train.history['acc']
-    val_accuracy = train.history['val_acc']
-    loss = train.history['loss']
-    val_loss = train.history['val_loss']
-    epochs = range(len(accuracy))
-
-    fig, (ax1, ax2) = plt.subplots(2, 1)
-
-    ax1.plot(epochs, accuracy, 'bo', label='Training accuracy')
-    ax1.plot(epochs, val_accuracy, 'b', label='Validation accuracy')
-    ax1.set_title('Training and validation accuracy')
-    ax1.legend()
-
-    ax2.plot(epochs, loss, 'bo', label='Training loss')
-    ax2.plot(epochs, val_loss, 'b', label='Validation loss')
-    ax2.set_title('Training and validation loss')
-    ax2.legend()
 
     plt.tight_layout()
 
-    fig_file = f"fig/training_and_validation_loss.pdf"
     os.makedirs(fig_file.split("/")[0], exist_ok=True)
     plt.savefig(fig_file)
 
 
-def save_model_and_history(backup_train_file, train, backup_model_files, models):
+def show_accuracy(train, fig_file="fig/autoencoder_validation_loss.pdf"):
+
+    # Plot the accuracy and loss plots between training and validation data:
+    # accuracy = train.history['acc']
+    # val_accuracy = train.history['val_acc']
+    loss = train.history['loss']
+    val_loss = train.history['val_loss']
+    epochs = range(len(loss))
+
+    # fig, (ax1, ax2) = plt.subplots(2, 1)
+
+    # ax1.plot(epochs, accuracy, 'bo', label='Training accuracy')
+    # ax1.plot(epochs, val_accuracy, 'b', label='Validation accuracy')
+    # ax1.set_title('Training and validation accuracy')
+    # ax1.legend()
+
+    fig, ax = plt.subplots()
+
+    ax.plot(epochs, loss, 'bo', label='Training loss')
+    ax.plot(epochs, val_loss, 'b', label='Validation loss')
+    ax.set_title('Training and validation loss')
+    ax.legend()
+
+    plt.tight_layout()
+
+    os.makedirs(fig_file.split("/")[0], exist_ok=True)
+    plt.savefig(fig_file)
+
+# -------------------------------------------------------- #
+
+
+def save_model_and_history(bkp_train_file, history, bkp_model_files, models):
 
     # Backup in pickle
-    os.makedirs(backup_train_file.split("/")[0], exist_ok=True)
-    pickle.dump(train, file=open(backup_train_file, 'wb'))
+    os.makedirs(bkp_train_file.split("/")[0], exist_ok=True)
+    pickle.dump(history, file=open(bkp_train_file, 'wb'))
 
-    for bmf, m in zip(backup_model_files, models):
+    for bmf, m in zip(bkp_model_files, models):
         m.save(bmf)
 
 
-def load_model_and_history(backup_train_file, backup_model_files):
+def load_model_and_history(bkp_train_file, bkp_model_files):
 
-    train = pickle.load(file=open(backup_train_file, 'rb'))
+    history = pickle.load(file=open(bkp_train_file, 'rb'))
 
-    models = [load_model(i) for i in backup_model_files]
+    models = [load_model(i) for i in bkp_model_files]
 
-    return models, train
+    return models, history
 
-
-# def evaluate_model(model, test_X, test_Y_one_hot):
-#
-#     # Model evaluation on the test set
-#     test_eval = model.evaluate(test_X, test_Y_one_hot, verbose=1)
-#     print('Test loss:', test_eval[0])
-#     print('Test accuracy:', test_eval[1])
+# -------------------------------------------------------- #
 
 
-def main(force=False):
-
-    # Parameters
-    img_size = 100
-    epochs = 100
+def get(kanji_dic, force=False):
 
     # Seed
     np.random.seed(123)
 
     # Backup file
-    bkp_train_file = f'backup/train.p'
-    bkp_model_files = ['backup/autoencoder.h5', 'backup/encoder.h5', 'backup/decoder.h5']
+    bkp_train_file = \
+        f'{BACKUP_FOLDER}/train.p'
+    bkp_model_files = [
+        f'{BACKUP_FOLDER}/autoencoder.h5',
+        f'{BACKUP_FOLDER}/encoder.h5',
+        f'{BACKUP_FOLDER}/decoder.h5']
 
-    os.makedirs(bkp_train_file.split("/")[0], exist_ok=True)
+    os.makedirs(BACKUP_FOLDER, exist_ok=True)
+
+    # Check if bkp files already exist
     files_exist = np.all([os.path.exists(i) for i in bkp_model_files + [bkp_train_file]])
-
-    x_train, x_test = load_training_data(img_size=img_size)
 
     if force or not files_exist:
 
-        (autoencoder, encoder, decoder), train = train_autoencoder(x_train, x_test, epochs=epochs)
+        # Get the data set
+        x_train, x_test = _training_data(kanji_dic=kanji_dic)
 
-        x_test = np.reshape(x_test, (len(x_test), x_test.shape[1], x_test.shape[2], 1))
+        # Create and train autoencoder
+        (autoencoder, encoder, decoder), history = train_autoencoder(x_train, x_test, epochs=EPOCHS)
 
-        save_model_and_history(backup_train_file=bkp_train_file, backup_model_files=bkp_model_files,
-                               models=(autoencoder, encoder, decoder), train=train)
+        # Save models and history
+        save_model_and_history(bkp_train_file=bkp_train_file, bkp_model_files=bkp_model_files,
+                               models=(autoencoder, encoder, decoder), history=history)
     else:
-        (autoencoder, encoder, decoder), train = \
-            load_model_and_history(backup_train_file=bkp_train_file, backup_model_files=bkp_model_files)
+        # Load models
+        (autoencoder, encoder, decoder), history = \
+            load_model_and_history(bkp_train_file=bkp_train_file, bkp_model_files=bkp_model_files)
 
-    encoded_images, decoded_images, decoded_images_auto = \
-        get_encoded_decoded(x_test=x_test, encoder=encoder, decoder=decoder, autoencoder=autoencoder)
-    show_result(x_test=x_test, decoded_images=decoded_images, decoded_images_auto=decoded_images_auto)
+    # encoded_images, decoded_images, decoded_images_auto = \
+    #     get_encoded_decoded(x_test=x_test, encoder=encoder, decoder=decoder, autoencoder=autoencoder)
+    # show_result(x_test=x_test, decoded_images=decoded_images, decoded_images_auto=decoded_images_auto)
+    # show_accuracy(history)
 
-
-if __name__ == "__main__":
-
-    main()
+    return autoencoder, encoder, decoder

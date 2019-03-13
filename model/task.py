@@ -40,7 +40,7 @@ class Task:
 class TaskConnect(Task):
 
     def __init__(self, config_file='model/parameters/parameters.json',
-                 n_graphic_dimension=2, n_semantic_dimension=2):
+                 nd_graphic=2, nd_semantic=2):
 
         super().__init__(config_file)
 
@@ -48,12 +48,12 @@ class TaskConnect(Task):
         self.c_semantic = np.zeros((self.n, self.n))
 
         # Let assume that semantic is 2d and graphic is 2d
-        self.compute_distances(n_graphic_dimension, n_semantic_dimension)
+        self.compute_distances(nd_graphic, nd_semantic)
 
-    def compute_distances(self, n_graphic_dimension, n_semantic_dimension):
+    def compute_distances(self, nd_graphic, n_semantic):
 
-        p_graphic = np.random.random(size=(self.n, n_graphic_dimension))
-        p_semantic = np.random.random(size=(self.n, n_semantic_dimension))
+        p_graphic = np.random.random(size=(self.n, nd_graphic))
+        p_semantic = np.random.random(size=(self.n, n_semantic))
 
         for i, j in it.combinations(range(self.n), r=2):
 
