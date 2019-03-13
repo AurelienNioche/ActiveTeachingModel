@@ -26,4 +26,4 @@ if __name__ == "__main__":
     word_list = ['七', '中', '二', '八', '力', '王', '生', '花', '虫', '足']
 
     for word in word_list:
-        create_image_from_character(word, 28)
+        create_image_from_character(word, 50)

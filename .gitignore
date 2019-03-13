@@ -127,3 +127,5 @@ CNN/backup
 
 # Google pretrained word2vec model
 word2vec/data
+
+auto_encoder/image

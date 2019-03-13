@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def load_training_data(img_size=28, folder="image"):
+def load_training_data(img_size, folder="image"):
 
     n_images = len(os.listdir(folder))
 
