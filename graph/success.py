@@ -5,7 +5,7 @@ import os
 dir_path = 'fig'
 
 
-def success_scatter_plot(successes, fig_name='backup.pdf'):
+def scatter_plot(successes, fig_name='backup.pdf'):
 
     os.makedirs(dir_path, exist_ok=True)
 
@@ -19,8 +19,8 @@ def success_scatter_plot(successes, fig_name='backup.pdf'):
     plt.close()
 
 
-def success_curve(successes, fig_name='backup.pdf', font_size=42, line_width=3,
-                  label_size=22):
+def curve(successes, fig_name='backup.pdf', font_size=42, line_width=3,
+          label_size=22):
 
     y = []
     for i in range(1, len(successes)):
