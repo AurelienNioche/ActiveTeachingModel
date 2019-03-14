@@ -37,7 +37,7 @@ def fit(questions, replies, n_items):
         bounds=((0.4, 0.6), (0.00001, 0.001), (0.005, 0.015)))  # method=SLSQP
 
     d, tau, s = res.x
-    lls = res.fun
+    lls = - res.fun
 
     best_param = {"d": d, "tau": tau, "s": s}
     n = len(questions)

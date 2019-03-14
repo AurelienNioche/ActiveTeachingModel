@@ -13,6 +13,7 @@ import numpy as np
 import behavior.data
 import fit.act_r
 import fit.rl
+import fit.generic
 
 import graph.model_comparison
 import graph.success
@@ -47,7 +48,7 @@ def model_comparison():
         # Get log-likelihood sum
         lls, best_param, bic_v = fit.rl.fit(questions=questions, replies=replies,
                                             n_items=n_items, possible_replies=possible_replies)
-        print(f'Alpha: {best_param["alpha"]}, Tau: {best_param["tau"]}, LLS: {lls:.2f}, BIC:{bic_v:.2f}')
+        print(f'Alpha: {best_param["alpha"]:.3f}, Tau: {best_param["tau"]:.3f}, LLS: {lls:.2f}, BIC:{bic_v:.2f}')
 
         data["bic"][0].append(bic_v)
 
@@ -55,7 +56,8 @@ def model_comparison():
         p_choices = fit.rl.get_p_choices(parameters=best_param, questions=questions, replies=replies,
                                          possible_replies=possible_replies, n_items=n_items)
 
-        data["p_choices"][0] += list(p_choices)
+        data["p_choices"][0].append(np.mean(p_choices))
+        # data["p_choices"][0] += list(p_choices)
 
         # ---------- #
         # ACT-R fitting
@@ -63,7 +65,7 @@ def model_comparison():
 
         # Get log-likelihood sum
         lls, best_param, bic_v = fit.act_r.fit(questions=questions, replies=replies, n_items=n_items)
-        print(f'd: {best_param["d"]}, Tau: {best_param["tau"]}, s:{best_param["s"]:.3f}, LLS: {lls:.2f}, BIC:{bic_v:.2f}')
+        print(f'd: {best_param["d"]:.3f}, Tau: {best_param["tau"]:.3f}, s:{best_param["s"]:.3f}, LLS: {lls:.2f}, BIC:{bic_v:.2f}')
 
         data["bic"][1].append(bic_v)
 
@@ -71,7 +73,8 @@ def model_comparison():
         p_choices = fit.act_r.get_p_choices(parameters=best_param, questions=questions, replies=replies,
                                             n_items=n_items)
 
-        data["p_choices"][1] += list(p_choices)
+        # data["p_choices"][1] += list(p_choices)
+        data["p_choices"][1].append(np.mean(p_choices))
 
         print()
 
