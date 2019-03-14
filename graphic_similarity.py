@@ -14,7 +14,7 @@ import pickle
 import numpy as np
 from itertools import combinations
 
-from analysis import get_task_features
+from behavior.data import task_features
 
 
 BACKUP_FOLDER = 'backup'
@@ -69,11 +69,9 @@ def main():
 
     users = User.objects.all().order_by('id')
 
-    bic_data = [[], []]
-
     for u in users:
 
-        question_entries, kanjis, meanings = get_task_features(user_id=u.id)
+        question_entries, kanjis, meanings = task_features(user_id=u.id)
 
         # n_kanji = len(kanjis)
         # a = np.zeros((n_kanji, n_kanji))

@@ -1,9 +1,19 @@
 import numpy as np
 
-from utils.functions import temporal_difference, softmax
-
-
 debug = False
+
+
+def softmax(x, temp):
+    try:
+        return np.exp(x / temp) / np.sum(np.exp(x / temp))
+    except (Warning, FloatingPointError) as w:
+        print(x, temp)
+        raise Exception(f'{w} [x={x}, temp={temp}]')
+
+
+def temporal_difference(v, obs, alpha):
+
+    return v + alpha*(obs-v)
 
 
 class Learner:
@@ -21,6 +31,29 @@ class Learner:
     def name(self):
         return type(self).__name__
 
+    def _p_choice(self, question, reply, possible_replies=None):
+        return 0
+
+    def get_p_choices(self, questions, replies, possible_replies=None):
+
+        t_max = len(questions)
+
+        p_choices = np.zeros(t_max)
+
+        for t in range(t_max):
+
+            question, reply = questions[t], replies[t]
+            possible_rep = None if possible_replies is None else possible_replies[t]
+
+            p = self._p_choice(question=question, reply=reply, possible_replies=possible_rep)
+            if p == 0:
+                return None
+
+            p_choices[t] = p
+            self.learn(question=question, reply=reply)
+
+        return p_choices
+
 
 class QLearner(Learner):
 
@@ -32,19 +65,7 @@ class QLearner(Learner):
         self.alpha = alpha
         self.tau = tau
 
-    def decide(self, question):
-
-        p = softmax(x=self.q[question, :], temp=self.tau)
-        reply = np.random.choice(np.arange(self.n), p=p)
-
-        if debug:
-            print(f'Question is: {question}')
-            print(f'P values are: {[f"{p_i:.02f}" for p_i in p]}')
-            print(f'Reply is {reply}')
-
-        return reply
-
-    def p_choice(self, question, reply, possible_replies):
+    def _p_choice(self, question, reply, possible_replies=None):
 
         x_i = self.q[question, reply]
         x = self.q[question, possible_replies]
@@ -57,6 +78,18 @@ class QLearner(Learner):
             raise Exception(f'{w} [x={x}, temp={self.tau}]')
 
         return p
+
+    def decide(self, question):
+
+        p = softmax(x=self.q[question, :], temp=self.tau)
+        reply = np.random.choice(np.arange(self.n), p=p)
+
+        if debug:
+            print(f'Question is: {question}')
+            print(f'P values are: {[f"{p_i:.02f}" for p_i in p]}')
+            print(f'Reply is {reply}')
+
+        return reply
 
     def learn(self, question, reply):
 
@@ -150,21 +183,7 @@ class ActRLearner(Learner):
         # noinspection PyTypeChecker
         self.time_presentation[question].append(self.t)
 
-    def decide(self, question):
-
-        self.t += 1
-
-        a = self._activation_function(question)
-        p = self._probability_of_retrieval_equation(a)
-        r = np.random.random()
-        if p > r:
-            reply = question
-        else:
-            reply = np.random.randint(self.n_chunk)
-
-        return reply
-
-    def p_choice(self, question, reply):
+    def _p_choice(self, question, reply, possible_replies=None):
 
         self.t += 1
 
@@ -179,6 +198,20 @@ class ActRLearner(Learner):
             return p
         else:
             return (1-p) / (self.n_possible_replies - 1)
+
+    def decide(self, question):
+
+        self.t += 1
+
+        a = self._activation_function(question)
+        p = self._probability_of_retrieval_equation(a)
+        r = np.random.random()
+        if p > r:
+            reply = question
+        else:
+            reply = np.random.randint(self.n_chunk)
+
+        return reply
 
     def learn(self, question, reply):
 
