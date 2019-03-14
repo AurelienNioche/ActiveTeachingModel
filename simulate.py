@@ -34,8 +34,8 @@ def main():
 
     for learner in (
         QLearner(n_items=task.n),
-        ActRLearner(n_items=task.n),
-        ActRCogLearner(n_items=task.n, c_graphic=task.c_graphic, c_semantic=task.c_semantic)
+        ActRLearner(n_items=task.n, t_max=task.t_max),
+        ActRCogLearner(n_items=task.n, t_max=task.t_max, c_graphic=task.c_graphic, c_semantic=task.c_semantic)
     ):
 
         success = run_exercise(task, teacher, learner)

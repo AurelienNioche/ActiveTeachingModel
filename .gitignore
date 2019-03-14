@@ -117,7 +117,7 @@ dmypy.json
 .idea
 
 # Figure folder
-fig
+/fig
 
 # Parameters file
 model/parameters/parameters.json
@@ -127,5 +127,10 @@ CNN/backup
 
 # Google pretrained word2vec model
 word2vec/data
+word2vec/backup
 
 auto_encoder/image
+auto_encoder/backup
+auto_encoder/fig
+
+/backup/

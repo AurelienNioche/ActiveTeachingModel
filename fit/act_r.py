@@ -26,15 +26,19 @@ def get_p_choices(parameters, questions, replies, n_items):
     else:
         d, tau, s = parameters["d"], parameters["tau"], parameters["s"]
 
-    learner = ActRLearner(n_items=n_items, n_possible_replies=n_possible_replies, d=d, tau=tau, s=s)
+    learner = ActRLearner(n_items=n_items, t_max=len(questions), n_possible_replies=n_possible_replies, d=d, tau=tau, s=s)
     return learner.get_p_choices(questions=questions, replies=replies)
 
 
 def fit(questions, replies, n_items):
 
-    res = scipy.optimize.minimize(
-        _objective, np.array([0.5, 0.0001, 0.00001]), args=(questions, replies, n_items),
-        bounds=((0.4, 0.6), (0.00001, 0.001), (0.005, 0.015)))  # method=SLSQP
+    # res = scipy.optimize.minimize(
+    #     _objective, np.array([0.5, 0.0001, 0.00001]), args=(questions, replies, n_items),
+    #     bounds=((0.4, 0.6), (0.00001, 0.001), (0.005, 0.015)))  # method=SLSQP
+
+    res = scipy.optimize.differential_evolution(
+        _objective, args=(questions, replies, n_items),
+        bounds=((0, 1.0), (0.00, 5), (0.0000001, 10)))
 
     d, tau, s = res.x
     lls = - res.fun

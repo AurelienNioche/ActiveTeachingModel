@@ -1,7 +1,7 @@
 import numpy as np
 
 debug = False
-
+np.seterr(all = 'raise')
 
 def softmax(x, temp):
     try:
@@ -73,8 +73,8 @@ class QLearner(Learner):
         try:
             p = np.exp(x_i / self.tau) / np.sum(np.exp(x / self.tau))
 
-        except (Warning, FloatingPointError) as w:
-            print(x, self.tau)
+        except (Warning, RuntimeWarning, FloatingPointError) as w:
+            # print(w, x, self.tau)
             raise Exception(f'{w} [x={x}, temp={self.tau}]')
 
         return p
@@ -115,11 +115,12 @@ class ActRLearner(Learner):
     * several slots (here: slot 1: kanji, slot2: meaning)
     """
 
-    def __init__(self, n_items, n_possible_replies=None, d=0.5, tau=0.0001, s=0.01):
+    def __init__(self, n_items, t_max, n_possible_replies=None, d=0.5, tau=0.0001, s=0.01):
 
         super().__init__()
 
         self.n_possible_replies = n_possible_replies if n_possible_replies is not None else n_items
+        self.p_random = 1/self.n_possible_replies
 
         # Number of memory unit
         self.n_chunk = n_items
@@ -138,8 +139,9 @@ class ActRLearner(Learner):
 
         # Time counter
         self.t = 0
+        self.t_max = t_max
 
-        self.square_root_2 = 2**(1/2)
+        # self.square_root_2 = 2**(1/2)
 
     def _activation_function(self, i):
 
@@ -156,7 +158,7 @@ class ActRLearner(Learner):
 
         # noinspection PyTypeChecker
         sum_a = np.sum([
-            (self.t - t_presentation)**(-self._d)
+            ((self.t - t_presentation) / self.t_max)**(-self._d)
             for t_presentation in self.time_presentation[i]
         ])
 
@@ -169,30 +171,36 @@ class ActRLearner(Learner):
 
         """The probability of a chunk being above some retrieval threshold τ is"""
 
-        p =  \
-            1 / (
-                    1 + np.exp
-                    (
-                        - (a - self._tau) / (self.square_root_2 * self._s)
-                    )
-                 )
-        return p
+        x = (self._tau - a) / self._s
+
+        # Avoid overflow
+        if x < -10**2:  # 1 / (1+exp(-1000)) equals approx 1.
+            return 1
+
+        elif x > 700:  # 1 / (1+exp(700)) equals approx 0.
+            return 0
+
+        else:
+            try:
+                return 1 / (1 + np.exp(x))
+            except FloatingPointError as e:
+                print(f'x={x}, tau = {self._tau}, a = {a}, s = {self._s}')
+                raise e
 
     def _update_time_presentation(self, question):
 
         # noinspection PyTypeChecker
         self.time_presentation[question].append(self.t)
+        self.t += 1
 
     def _p_choice(self, question, reply, possible_replies=None):
-
-        self.t += 1
 
         success = question == reply
 
         a = self._activation_function(question)
         p = self._probability_of_retrieval_equation(a)
 
-        p = 0.25 + p*(1/(self.n_possible_replies - 1))
+        p = self.p_random + p*(1 - self.p_random)
 
         if success:
             return p
@@ -200,8 +208,6 @@ class ActRLearner(Learner):
             return (1-p) / (self.n_possible_replies - 1)
 
     def decide(self, question):
-
-        self.t += 1
 
         a = self._activation_function(question)
         p = self._probability_of_retrieval_equation(a)

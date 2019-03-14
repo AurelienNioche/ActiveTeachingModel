@@ -48,7 +48,7 @@ def model_comparison():
         # Get log-likelihood sum
         lls, best_param, bic_v = fit.rl.fit(questions=questions, replies=replies,
                                             n_items=n_items, possible_replies=possible_replies)
-        print(f'Alpha: {best_param["alpha"]:.3f}, Tau: {best_param["tau"]:.3f}, LLS: {lls:.2f}, BIC:{bic_v:.2f}')
+        print(f'[RL] Alpha: {best_param["alpha"]:.3f}, Tau: {best_param["tau"]:.3f}, LLS: {lls:.2f}, BIC: {bic_v:.2f}')
 
         data["bic"][0].append(bic_v)
 
@@ -65,7 +65,8 @@ def model_comparison():
 
         # Get log-likelihood sum
         lls, best_param, bic_v = fit.act_r.fit(questions=questions, replies=replies, n_items=n_items)
-        print(f'd: {best_param["d"]:.3f}, Tau: {best_param["tau"]:.3f}, s:{best_param["s"]:.3f}, LLS: {lls:.2f}, BIC:{bic_v:.2f}')
+        print(f'[ACT-R] d: {best_param["d"]:.3f}, Tau: {best_param["tau"]:.3f}, s: {best_param["s"]:.3f}, '
+              f'LLS: {lls:.2f}, BIC: {bic_v:.2f}')
 
         data["bic"][1].append(bic_v)
 
@@ -79,7 +80,7 @@ def model_comparison():
         print()
 
     graph.model_comparison.scatter_plot(data_list=data["bic"], colors=["C0", "C1"], x_tick_labels=["RL", "ACT-R - -"],
-                                        f_name='model_comparison.pdf', y_label='BIC')
+                                        f_name='model_comparison.pdf', y_label='BIC', invert_y_axis=True)
 
     graph.model_comparison.scatter_plot(data_list=data["p_choices"], colors=["C0", "C1"],
                                         x_tick_labels=["RL", "ACT-R - -"],

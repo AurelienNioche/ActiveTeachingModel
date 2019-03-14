@@ -33,9 +33,13 @@ def get_p_choices(parameters, questions, replies, possible_replies, n_items):
 
 def fit(questions, replies, possible_replies, n_items):
 
-    res = scipy.optimize.minimize(
-        _objective, np.array([0.1, 0.01]), args=(questions, replies, possible_replies, n_items),
-        bounds=((0.00, 1.00), (0.001, 0.1)))  # method=SLSQP
+    res = scipy.optimize.differential_evolution(
+        _objective, args=(questions, replies, possible_replies, n_items),
+        bounds=[(0.00, 1.00), (0.0015, 0.5)])
+
+    # res = scipy.optimize.minimize(
+    #     _objective, np.array([0.1, 0.01]), args=(questions, replies, possible_replies, n_items),
+    #     bounds=((0.00, 1.00), (0.001, 0.1)))  # method=SLSQP
 
     alpha, tau = res.x
     lls = - res.fun

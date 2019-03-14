@@ -102,7 +102,7 @@ def bar_example():
 def scatter_plot(
         data_list, colors=None, x_tick_labels=None, fontsize=10,
         subplot_spec=None, fig=None, f_name=None, letter=None, y_lim=None, y_label=None,
-        h_line=None
+        h_line=None, invert_y_axis=False
 ):
 
     if fig is None:
@@ -164,6 +164,9 @@ def scatter_plot(
 
     if y_lim:
         ax.set_ylim(y_lim)
+
+    if invert_y_axis:
+        ax.invert_yaxis()
 
     if x_tick_labels is None:
         x_tick_labels = ["" for _ in range(n)]
