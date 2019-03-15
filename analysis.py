@@ -14,12 +14,91 @@ import behavior.data
 import fit.act_r
 import fit.rl
 import fit.generic
+import fit.act_r_plus
 
 import graph.model_comparison
 import graph.success
 
+import graphic_similarity.measure
+import semantic_similarity.measure
 
-N_MODELS = 2
+MODEL_NAMES = ["RL", "ACT-R -", "ACT +"]
+N_MODELS = len(MODEL_NAMES)
+
+
+def fit_rl(questions, replies, n_items, possible_replies, use_p_correct):
+
+    # Get log-likelihood sum
+    best_param = fit.rl.fit(questions=questions, replies=replies,
+                            n_items=n_items, possible_replies=possible_replies, use_p_correct=use_p_correct)
+
+    # Get probabilities with best param
+    p_choices = fit.rl.get_p_choices(parameters=best_param, questions=questions, replies=replies,
+                                     possible_replies=possible_replies, n_items=n_items, use_p_correct=use_p_correct)
+
+    mean_p = np.mean(p_choices)
+
+    lls = fit.generic.log_likelihood_sum(p_choices)
+
+    n = len(questions)
+    k = len(best_param)
+    bic = fit.generic.bic(lls=lls, n=n, k=k)
+
+    print(f'[RL] Alpha: {best_param["alpha"]:.3f}, Tau: {best_param["tau"]:.3f}, LLS: {lls:.2f}, '
+          f'BIC: {bic:.2f}, mean(P): {mean_p:.3f}')
+
+    return mean_p, bic
+
+
+def fit_act_r(questions, replies, n_items, use_p_correct):
+    # Get log-likelihood sum
+    best_param = fit.act_r.fit(questions=questions, replies=replies, n_items=n_items, use_p_correct=use_p_correct)
+
+    # Get probabilities with best param
+    p_choices = fit.act_r.get_p_choices(parameters=best_param, questions=questions, replies=replies,
+                                        n_items=n_items, use_p_correct=use_p_correct)
+
+    # data["p_choices"][1] += list(p_choices)
+    mean_p = np.mean(p_choices)
+
+    lls = fit.generic.log_likelihood_sum(p_choices)
+
+    n = len(questions)
+    k = len(best_param)
+    bic = fit.generic.bic(lls=lls, n=n, k=k)
+
+    print(f'[ACT-R -] d: {best_param["d"]:.3f}, Tau: {best_param["tau"]:.3f}, s: {best_param["s"]:.3f}, '
+          f'LLS: {lls:.2f}, BIC: {bic:.2f}, mean(P): {mean_p:.3f}')
+
+    return mean_p, bic
+
+
+def fit_act_r_plus(questions, replies, n_items, c_semantic, c_graphic, use_p_correct):
+
+    # Get log-likelihood sum
+    best_param = fit.act_r_plus.fit(
+        questions=questions, replies=replies, n_items=n_items,
+        c_semantic=c_semantic, c_graphic=c_graphic, use_p_correct=use_p_correct)
+
+    # Get probabilities with best param
+    p_choices = fit.act_r_plus.get_p_choices(
+        parameters=best_param, questions=questions, replies=replies,
+        c_graphic=c_graphic, c_semantic=c_semantic, n_items=n_items, use_p_correct=use_p_correct)
+
+    mean_p = np.mean(p_choices)
+
+    lls = fit.generic.log_likelihood_sum(p_choices)
+
+    n = len(questions)
+    k = len(best_param)
+    bic = fit.generic.bic(lls=lls, n=n, k=k)
+
+    print(f'[ACT-R +] '
+          f'd: {best_param["d"]:.3f}, Tau: {best_param["tau"]:.3f}, s: {best_param["s"]:.3f}, '
+          f'm: {best_param["m"]:.3f}, g: {best_param["g"]:.3f}, '
+          f'LLS: {lls:.2f}, BIC: {bic:.2f}, mean(P): {mean_p:.3f}')
+
+    return mean_p, bic
 
 
 def model_comparison():
@@ -28,8 +107,10 @@ def model_comparison():
 
     data = {
         "bic": [[] for _ in range(N_MODELS)],
-        "p_choices": [[] for _ in range(N_MODELS)]
+        "mean_p": [[] for _ in range(N_MODELS)]
     }
+
+    use_p_correct = True
 
     for u in users:
 
@@ -41,57 +122,42 @@ def model_comparison():
         # Get questions, replies, possible_replies, and number of different items
         questions, replies, n_items, possible_replies = behavior.data.get(user_id)
 
-        # ---------- #
-        # RL fitting
-        # ---------- #
+        # Get task parameters for ACT-R +
+        question_entries, kanjis, meanings = behavior.data.task_features(user_id=u.id)
+        c_graphic = graphic_similarity.measure.get(kanjis)
+        c_semantic = semantic_similarity.measure.get(meanings)
 
-        # Get log-likelihood sum
-        lls, best_param, bic_v = fit.rl.fit(questions=questions, replies=replies,
-                                            n_items=n_items, possible_replies=possible_replies)
-        print(f'[RL] Alpha: {best_param["alpha"]:.3f}, Tau: {best_param["tau"]:.3f}, LLS: {lls:.2f}, BIC: {bic_v:.2f}')
+        rl_mean_p, rl_bic = fit_rl(
+            questions=questions, replies=replies, n_items=n_items, possible_replies=possible_replies,
+            use_p_correct=use_p_correct)
+        act_r_mean_p, act_r_bic = fit_act_r(questions=questions, replies=replies, n_items=n_items,
+                                            use_p_correct=use_p_correct)
+        act_r_plus_mean_p, act_r_plus_bic = fit_act_r_plus(
+            questions=questions, replies=replies, n_items=n_items, c_semantic=c_semantic, c_graphic=c_graphic,
+            use_p_correct=use_p_correct
+        )
 
-        data["bic"][0].append(bic_v)
+        data["bic"][0].append(rl_bic)
+        data["bic"][1].append(act_r_bic)
+        data["bic"][2].append(act_r_plus_bic)
 
-        # Get probabilities with best param
-        p_choices = fit.rl.get_p_choices(parameters=best_param, questions=questions, replies=replies,
-                                         possible_replies=possible_replies, n_items=n_items)
-
-        data["p_choices"][0].append(np.mean(p_choices))
-        # data["p_choices"][0] += list(p_choices)
-
-        # ---------- #
-        # ACT-R fitting
-        # ---------- #
-
-        # Get log-likelihood sum
-        lls, best_param, bic_v = fit.act_r.fit(questions=questions, replies=replies, n_items=n_items)
-        print(f'[ACT-R] d: {best_param["d"]:.3f}, Tau: {best_param["tau"]:.3f}, s: {best_param["s"]:.3f}, '
-              f'LLS: {lls:.2f}, BIC: {bic_v:.2f}')
-
-        data["bic"][1].append(bic_v)
-
-        # Get probabilities with best param
-        p_choices = fit.act_r.get_p_choices(parameters=best_param, questions=questions, replies=replies,
-                                            n_items=n_items)
-
-        # data["p_choices"][1] += list(p_choices)
-        data["p_choices"][1].append(np.mean(p_choices))
+        data["mean_p"][0].append(rl_mean_p)
+        data["mean_p"][1].append(act_r_mean_p)
+        data["mean_p"][2].append(act_r_plus_mean_p)
 
         print()
 
-    graph.model_comparison.scatter_plot(data_list=data["bic"], colors=["C0", "C1"], x_tick_labels=["RL", "ACT-R - -"],
+    colors = [f"C{i}" for i in range(N_MODELS)]
+
+    graph.model_comparison.scatter_plot(data_list=data["bic"], colors=colors,
+                                        x_tick_labels=MODEL_NAMES,
                                         f_name='model_comparison.pdf', y_label='BIC', invert_y_axis=True)
 
-    graph.model_comparison.scatter_plot(data_list=data["p_choices"], colors=["C0", "C1"],
-                                        x_tick_labels=["RL", "ACT-R - -"],
+    graph.model_comparison.scatter_plot(data_list=data["mean_p"], colors=colors,
+                                        x_tick_labels=MODEL_NAMES,
                                         f_name='model_probabilities.pdf', y_label='p')
-
-
-def main():
-
-    model_comparison()
 
 
 if __name__ == "__main__":
 
-    main()
+    model_comparison()

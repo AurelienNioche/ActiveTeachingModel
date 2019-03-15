@@ -1,7 +1,8 @@
 import numpy as np
 
 debug = False
-np.seterr(all = 'raise')
+np.seterr(all='raise')
+
 
 def softmax(x, temp):
     try:
@@ -32,9 +33,12 @@ class Learner:
         return type(self).__name__
 
     def _p_choice(self, question, reply, possible_replies=None):
-        return 0
+        return -1
 
-    def get_p_choices(self, questions, replies, possible_replies=None):
+    def _p_correct(self, question, reply, possible_replies=None):
+        return -1
+
+    def get_p_choices(self, questions, replies, possible_replies=None, use_p_correct=False):
 
         t_max = len(questions)
 
@@ -45,7 +49,11 @@ class Learner:
             question, reply = questions[t], replies[t]
             possible_rep = None if possible_replies is None else possible_replies[t]
 
-            p = self._p_choice(question=question, reply=reply, possible_replies=possible_rep)
+            if use_p_correct:
+                p = self._p_correct(question=question, reply=reply, possible_replies=possible_rep)
+
+            else:
+                p = self._p_choice(question=question, reply=reply, possible_replies=possible_rep)
             if p == 0:
                 return None
 
@@ -65,19 +73,33 @@ class QLearner(Learner):
         self.alpha = alpha
         self.tau = tau
 
-    def _p_choice(self, question, reply, possible_replies=None):
-
-        x_i = self.q[question, reply]
-        x = self.q[question, possible_replies]
+    def _softmax_unique(self, x_i, x):
 
         try:
             p = np.exp(x_i / self.tau) / np.sum(np.exp(x / self.tau))
+            return p
 
         except (Warning, RuntimeWarning, FloatingPointError) as w:
             # print(w, x, self.tau)
             raise Exception(f'{w} [x={x}, temp={self.tau}]')
 
-        return p
+    def _p_choice(self, question, reply, possible_replies=None):
+
+        x_i = self.q[question, reply]
+        x = self.q[question, possible_replies]
+
+        return self._softmax_unique(x_i, x)
+
+    def _p_correct(self, question, reply, possible_replies=None):
+
+        x_correct = self.q[question, question]
+        x = self.q[question, possible_replies]
+
+        p_correct = self._softmax_unique(x_correct, x)
+        if question == reply:
+            return p_correct
+        else:
+            return 1-p_correct
 
     def decide(self, question):
 
@@ -115,7 +137,7 @@ class ActRLearner(Learner):
     * several slots (here: slot 1: kanji, slot2: meaning)
     """
 
-    def __init__(self, n_items, t_max, n_possible_replies=None, d=0.5, tau=0.0001, s=0.01):
+    def __init__(self, n_items, t_max, n_possible_replies, d=0.5, tau=0.0001, s=0.01):
 
         super().__init__()
 
@@ -207,6 +229,15 @@ class ActRLearner(Learner):
         else:
             return (1-p) / (self.n_possible_replies - 1)
 
+    def _p_correct(self, question, reply, possible_replies=None):
+
+        p_correct = self._p_choice(question=question, reply=question)
+
+        if question == reply:
+            return p_correct
+        else:
+            return 1-p_correct
+
     def decide(self, question):
 
         a = self._activation_function(question)
@@ -224,11 +255,11 @@ class ActRLearner(Learner):
         self._update_time_presentation(question)  # We suppose the response to be always correct if recalled
 
 
-class ActRCogLearner(ActRLearner):
+class ActRPlusLearner(ActRLearner):
 
-    def __init__(self, n_items, c_graphic, c_semantic, d=0.5, theta=0.0001, s=0.01, g=0.01, m=0.01):
+    def __init__(self, n_items, t_max, n_possible_replies, c_graphic, c_semantic, d=0.5, tau=0.0001, s=0.01, g=0.01, m=0.01):
 
-        super().__init__(n_items, d, theta, s)
+        super().__init__(n_items=n_items, t_max=t_max, n_possible_replies=n_possible_replies, d=d, tau=tau, s=s)
 
         self.c_graphic = c_graphic
         self.c_semantic = c_semantic

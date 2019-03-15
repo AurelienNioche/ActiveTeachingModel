@@ -29,7 +29,7 @@ def show_in_console():
         print()
 
 
-def task_features(user_id):
+def task_features(user_id, verbose=False):
 
     question_entries = [q for q in Question.objects.filter(user_id=user_id).order_by('t')]
 
@@ -41,8 +41,9 @@ def task_features(user_id):
     for k in kanjis:
         meanings.append(Question.objects.filter(user_id=user_id, question=k)[0].correct_answer)
 
-    print(f"Kanji used: {kanjis}")
-    print(f"Corresponding meanings: {meanings}")
+    if verbose:
+        print(f"Kanji used: {kanjis}")
+        print(f"Corresponding meanings: {meanings}")
 
     return question_entries, kanjis, meanings
 

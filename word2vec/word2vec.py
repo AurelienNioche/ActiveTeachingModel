@@ -1,51 +1,56 @@
 from gensim.models import KeyedVectors
 
-import pickle
 import os
+import numpy as np
 
 from itertools import combinations
 from datetime import datetime
 
-import uuid
+SCRIPT_FOLDER = os.path.dirname(os.path.abspath(__file__))
+BACKUP_FOLDER = f'{SCRIPT_FOLDER}/backup'
+DATA_FOLDER = f'{SCRIPT_FOLDER}/data'
+
+DATA = f'{DATA_FOLDER}/GoogleNews-vectors-negative300.bin'
+MODEL = f'{BACKUP_FOLDER}/word_vectors.kv'
 
 
-def _load_model(model_path='data/word_vectors.kv'):
+def _load_model():
 
     t0 = datetime.utcnow()
 
-    if not os.path.exists(model_path):
-        model = KeyedVectors.load_word2vec_format('data/GoogleNews-vectors-negative300.bin', binary=True)
-        model.save(model_path)
+    print('Load Word2Vec model...', end=" ")
+    if not os.path.exists(MODEL):
+        model = KeyedVectors.load_word2vec_format(DATA, binary=True)
+        model.save(MODEL)
 
     else:
-        model = KeyedVectors.load(model_path, mmap='r')
+        model = KeyedVectors.load(MODEL, mmap='r')
 
     t1 = datetime.utcnow()
 
-    print(f"Time to load: {t1 - t0}")
+    print(f"Done in {t1 - t0}")
 
     return model
 
 
-def get_semantic_distance(word_list):
+def evaluate_similarity(word_list):
 
-    word_list = word_list.sort()
+    model = _load_model()
 
-    list_id = str(uuid.uuid3(uuid.NAMESPACE_DNS, f"{word_list}"))
+    n_word = len(word_list)
 
-    backup_dic = f"data/{list_id}.p"
+    sim = np.zeros((n_word, n_word))
 
-    if not os.path.exists(backup_dic):
+    for a, b in combinations(word_list, 2):
 
-        model = _load_model()
+        similarity = model.similarity(a, b)
 
-        dic = {}
+        i = word_list.index(a)
+        j = word_list.index(b)
 
-        for a, b in combinations(word_list, 2):
+        sim[i, j] = similarity
+        sim[j, i] = similarity
 
-            distance = model.distance(a, b)
-            dic[(a, b)] = distance
-            dic[(b, a)] = distance
-            print(f"Distance between {a} & {b}: {distance}")
+        # print(f"Distance between {a} & {b}: {distance}")
 
-        pickle.dump(dic, file=open(backup_dic, 'wb'))
+    return similarity

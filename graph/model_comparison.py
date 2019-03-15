@@ -133,17 +133,11 @@ def scatter_plot(
     y_scatter = []
     colors_scatter = []
 
-    values_box_plot = []
+    values_box_plot = data_list
 
+    # For scatter
     for i, data in enumerate(data_list):
-
-        values_box_plot.append([])
-
         for v in data:
-            # For box plot
-            values_box_plot[-1].append(v)
-
-            # For scatter
             y_scatter.append(v)
             x_scatter.append(i)
             colors_scatter.append(colors[i])
@@ -193,10 +187,9 @@ def scatter_plot(
 def scatter_example():
 
     mu, sigma = 0, 0.1  # mean and standard deviation
-    data_list = [np.random.normal(mu, sigma, 100)]
-    scatter_plot(
-        data_list=data_list
-    )
+    n = 50
+    data_list = [np.random.normal(mu, sigma, size=n), np.random.poisson(lam=1, size=n)]
+    scatter_plot(data_list=data_list)
 
 
 if __name__ == "__main__":
