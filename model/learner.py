@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.stats import norm
 
 debug = False
 np.seterr(all='raise')
@@ -141,14 +142,13 @@ class ActRLearner(Learner):
 
         super().__init__()
 
+        self.n_items = n_items
+
         self.n_possible_replies = n_possible_replies if n_possible_replies is not None else n_items
         self.p_random = 1/self.n_possible_replies
 
-        # Number of memory unit
-        self.n_chunk = n_items
-
         # Time recording of presentations of chunks
-        self.time_presentation = [[] for _ in range(self.n_chunk)]
+        self.time_presentation = [[] for _ in range(self.n_items)]
 
         # Decay parameter
         self._d = d
@@ -246,7 +246,7 @@ class ActRLearner(Learner):
         if p > r:
             reply = question
         else:
-            reply = np.random.randint(self.n_chunk)
+            reply = np.random.randint(self.n_items)
 
         return reply
 
@@ -269,13 +269,13 @@ class ActRPlusLearner(ActRLearner):
 
     def _activation_function(self, i):
 
-        return self._base_level_learning_activation(i) + self.sum_source_activation(i)
+        return self._base_level_learning_activation(i) + self._sum_source_activation(i)
 
-    def sum_source_activation(self, i):
+    def _sum_source_activation(self, i):
 
         sum_source = 0
 
-        list_j = list(range(self.n_chunk))
+        list_j = list(range(self.n_items))
         list_j.remove(i)
 
         for j in list_j:
@@ -288,5 +288,72 @@ class ActRPlusLearner(ActRLearner):
                 self.g * self.c_graphic[i, j] * s_j + \
                 self.m * self.c_semantic[i, j] * s_j
 
-        return sum_source  # / (2*(self.task.n-1))
+        return (1/2) * (1/(self.n_items-1)) * sum_source
         # return sum_source
+
+
+class ActRPlusPlusLearner(ActRPlusLearner):
+
+    def __init__(self, n_items, t_max, n_possible_replies, c_graphic, c_semantic, d, tau, s, g, m,
+                 g_mu, g_sigma, m_mu, m_sigma):
+
+        self.g_mu = g_mu
+        self.g_sigma = g_sigma
+        self.m_mu = m_mu
+        self.m_sigma = m_sigma
+
+        super().__init__(
+            n_items=n_items, t_max=t_max, n_possible_replies=n_possible_replies, d=d, tau=tau, s=s,
+            g=g, m=m, c_graphic=c_graphic, c_semantic=c_semantic)
+
+    def _sum_source_activation(self, i):
+
+        sum_source = 0
+
+        list_j = list(range(self.n_items))
+        list_j.remove(i)
+
+        for j in list_j:
+
+            s_j = self._probability_of_retrieval_equation(self._base_level_learning_activation(j))
+            assert 0 <= s_j <= 1
+
+            if s_j > 0.001:
+
+                g_ij = self.c_graphic[i, j]
+                m_ij = self.c_semantic[i, j]
+
+                g_v = self.normal_pdf(g_ij, mu=self.g_mu, sigma=self.g_sigma) * self.g_sigma
+
+                m_v = self.normal_pdf(m_ij, mu=self.m_mu, sigma=self.m_sigma) * self.m_sigma
+
+                try:
+                    sum_source += \
+                        self.g * g_v * s_j + \
+                        self.m * m_v * s_j
+                except FloatingPointError as e:
+                    print(f'g={self.g}; g_v= {g_v} ; s_j = {s_j}, m={self.m}, m_v={m_v}')
+                    raise e
+
+        return (1/2) * (1/(self.n_items-1)) * sum_source
+
+    @classmethod
+    def normal_pdf(cls, x, mu, sigma):
+
+        sigma_squared = sigma ** 2
+
+        a = (x - mu) ** 2
+        b = 2 * sigma_squared
+        c = -a / b
+        if c < -700:  # exp(-700) equals approx 0
+            return 0
+
+        try:
+            d = np.exp(c)
+        except FloatingPointError as e:
+            print(f'x={x}; mu={mu}; sigma={sigma}')
+            raise e
+        e = (2 * np.pi * sigma_squared) ** (1 / 2)
+        f = 1 / e
+        return f * d
+
