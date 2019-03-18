@@ -5,7 +5,7 @@ import os
 dir_path = 'fig'
 
 
-def scatter_plot(successes, fig_name='backup.pdf'):
+def scatter(successes, fig_name='backup.pdf'):
 
     os.makedirs(dir_path, exist_ok=True)
 
@@ -25,8 +25,6 @@ def curve(successes, fig_name='backup.pdf', font_size=42, line_width=3,
     y = []
     for i in range(1, len(successes)):
         y.append(np.mean(successes[:i]))
-
-    print(y)
 
     os.makedirs(dir_path, exist_ok=True)
 

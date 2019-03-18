@@ -1,6 +1,6 @@
 import numpy as np
 
-import graph.success
+import plot.success
 
 from model.learner import QLearner, ActRLearner, ActRCogLearner
 from model.teacher import Teacher
@@ -21,8 +21,8 @@ def run_exercise(task, teacher, learner):
 
 def plot_results(success, condition='test'):
 
-    graph.success.scatter_plot(success, fig_name=f'{condition}_scatter.pdf')
-    graph.success.curve(success, fig_name=f'{condition}_curve.pdf')
+    plot.success.scatter(success, fig_name=f'{condition}_scatter.pdf')
+    plot.success.curve(success, fig_name=f'{condition}_curve.pdf')
 
 
 def main():

@@ -16,8 +16,8 @@ import fit.rl
 import fit.generic
 import fit.act_r_plus
 
-import graph.model_comparison
-import graph.success
+import plot.model_comparison
+import plot.success
 
 import graphic_similarity.measure
 import semantic_similarity.measure
@@ -110,7 +110,7 @@ def model_comparison():
         "mean_p": [[] for _ in range(N_MODELS)]
     }
 
-    use_p_correct = True
+    use_p_correct = False
 
     for u in users:
 
@@ -120,7 +120,7 @@ def model_comparison():
         print("*" * 5)
 
         # Get questions, replies, possible_replies, and number of different items
-        questions, replies, n_items, possible_replies = behavior.data.get(user_id)
+        questions, replies, n_items, possible_replies, success = behavior.data.get(user_id)
 
         # Get task parameters for ACT-R +
         question_entries, kanjis, meanings = behavior.data.task_features(user_id=u.id)
@@ -147,15 +147,18 @@ def model_comparison():
 
         print()
 
+        plot.success.curve(successes=success, fig_name=f'success_curve_u{user_id}.pdf')
+        plot.success.scatter(successes=success, fig_name=f'success_scatter_u{user_id}.pdf')
+
     colors = [f"C{i}" for i in range(N_MODELS)]
 
-    graph.model_comparison.scatter_plot(data_list=data["bic"], colors=colors,
-                                        x_tick_labels=MODEL_NAMES,
-                                        f_name='model_comparison.pdf', y_label='BIC', invert_y_axis=True)
+    plot.model_comparison.scatter_plot(data_list=data["bic"], colors=colors,
+                                       x_tick_labels=MODEL_NAMES,
+                                       f_name='model_comparison.pdf', y_label='BIC', invert_y_axis=True)
 
-    graph.model_comparison.scatter_plot(data_list=data["mean_p"], colors=colors,
-                                        x_tick_labels=MODEL_NAMES,
-                                        f_name='model_probabilities.pdf', y_label='p')
+    plot.model_comparison.scatter_plot(data_list=data["mean_p"], colors=colors,
+                                       x_tick_labels=MODEL_NAMES,
+                                       f_name='model_probabilities.pdf', y_label='p')
 
 
 if __name__ == "__main__":

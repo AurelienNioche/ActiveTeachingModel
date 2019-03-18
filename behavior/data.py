@@ -59,6 +59,8 @@ def get(user_id):
     questions = np.zeros(t_max, dtype=int)
     replies = np.zeros(t_max, dtype=int)
     possible_replies = np.zeros((t_max, n_possible_replies), dtype=int)
+    success = np.zeros(t_max, dtype=int)
+
     for t in range(t_max):
 
         questions[t] = kanjis.index(question_entries[t].question)
@@ -66,4 +68,6 @@ def get(user_id):
         for i in range(n_possible_replies):
             possible_replies[t, i] = meanings.index(getattr(question_entries[t], f'possible_reply_{i}'))
 
-    return questions, replies, n_items, possible_replies
+        success[t] = questions[t] == replies[t]
+
+    return questions, replies, n_items, possible_replies, success
