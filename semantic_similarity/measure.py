@@ -19,6 +19,8 @@ def create(word_list, backup):
 
 def get(word_list):
 
+    word_list = [i.lower() for i in word_list]
+
     list_id = str(uuid.uuid3(uuid.NAMESPACE_DNS, f"{word_list}"))
 
     backup = f"{BACKUP_FOLDER}/{list_id}.p"
