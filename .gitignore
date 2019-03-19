@@ -129,8 +129,12 @@ CNN/backup
 word2vec/data
 word2vec/backup
 
+graphic_similarity/backup
+semantic_similarity/backup
+
 auto_encoder/image
 auto_encoder/backup
 auto_encoder/fig
 
 /backup/
+word2vec/patch/
