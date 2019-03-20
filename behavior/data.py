@@ -44,13 +44,14 @@ def task_features(user_id, verbose=False):
     u_answers = np.unique(answers)
 
     meanings = list(u_answers)
+    meanings.sort()
     kanjis = []
     for m in meanings:
         try:
             kanji = Question.objects.filter(correct_answer=m)[0].question
 
         except IndexError:
-            kanji = Kanji.objects.filter(meaning=m)[0].kanji
+            kanji = Kanji.objects.filter(meaning=m).order_by('grade')[0].kanji
         kanjis.append(kanji)
 
     if verbose:
