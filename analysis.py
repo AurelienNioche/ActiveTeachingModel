@@ -131,7 +131,7 @@ def model_comparison():
 
     use_p_correct = False
 
-    for u in users:
+    for u in users[::-1]:
 
         # Get user id
         user_id = u.id
@@ -139,7 +139,7 @@ def model_comparison():
         print("*" * 5)
 
         # Get questions, replies, possible_replies, and number of different items
-        questions, replies, n_items, possible_replies, success = behavior.data.get(user_id)
+        questions, replies, n_items, possible_replies, success = behavior.data.get(user_id, verbose=True)
 
         # Get task parameters for ACT-R +
         question_entries, kanjis, meanings = behavior.data.task_features(user_id=u.id)

@@ -1,6 +1,6 @@
 import numpy as np
 
-from task.models import User, Question
+from task.models import User, Question, Kanji
 from task.parameters import n_possible_replies
 
 
@@ -33,13 +33,25 @@ def task_features(user_id, verbose=False):
 
     question_entries = [q for q in Question.objects.filter(user_id=user_id).order_by('t')]
 
-    items = [q.question for q in question_entries]
+    answers = []
 
-    kanjis = list(np.unique(items))
-    meanings = []
+    for q in question_entries:
 
-    for k in kanjis:
-        meanings.append(Question.objects.filter(user_id=user_id, question=k)[0].correct_answer)
+        for i in range(n_possible_replies):
+            answer = getattr(q, f'possible_reply_{i}')
+            answers.append(answer)
+
+    u_answers = np.unique(answers)
+
+    meanings = list(u_answers)
+    kanjis = []
+    for m in meanings:
+        try:
+            kanji = Question.objects.filter(correct_answer=m)[0].question
+
+        except IndexError:
+            kanji = Kanji.objects.filter(meaning=m)[0].kanji
+        kanjis.append(kanji)
 
     if verbose:
         print(f"Kanji used: {kanjis}")
@@ -48,9 +60,9 @@ def task_features(user_id, verbose=False):
     return question_entries, kanjis, meanings
 
 
-def get(user_id):
+def get(user_id, verbose=False):
 
-    question_entries, kanjis, meanings = task_features(user_id=user_id)
+    question_entries, kanjis, meanings = task_features(user_id=user_id, verbose=verbose)
 
     n_items = len(kanjis)
 
