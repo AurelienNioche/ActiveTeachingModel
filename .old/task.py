@@ -13,7 +13,6 @@ class Task:
         self.n = self.parameters['n']
 
         self.questions = np.arange(self.n)
-        self.replies = np.arange(self.n)
 
     @staticmethod
     def import_parameters(config_file):
@@ -29,12 +28,6 @@ class Task:
             print(f"Using the config file '{config_file}'")
 
         return parameters
-
-    def get_reply(self, question):
-
-        reply = self.replies[question]
-
-        return reply
 
 
 class TaskConnect(Task):

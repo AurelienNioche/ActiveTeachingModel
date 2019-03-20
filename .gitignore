@@ -119,22 +119,16 @@ dmypy.json
 # Figure folder
 /fig
 
-# Parameters file
-model/parameters/parameters.json
-
-# Backup files
-CNN/backup
-
-# Google pretrained word2vec model
+# Related to word2vec
 word2vec/data
 word2vec/backup
+word2vec/patch/
 
-graphic_similarity/backup
-semantic_similarity/backup
-
+# Related to autoencoder
 auto_encoder/image
 auto_encoder/backup
 auto_encoder/fig
 
-/backup/
-word2vec/patch/
+# Related to similarity assessment
+graphic_similarity/backup
+semantic_similarity/backup

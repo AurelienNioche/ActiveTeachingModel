@@ -50,13 +50,10 @@ class Teacher:
 
     def evaluate(self, t, reply):
 
-        correct_answer = self.task.get_reply(self.memory.questions[t])
-        success = correct_answer == reply
+        success = reply == self.memory.questions[t]
 
         self.memory.replies[t] = reply
         self.memory.successes[t] = success
-
-        return correct_answer, success
 
     def summarize(self):
 

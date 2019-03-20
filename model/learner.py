@@ -39,7 +39,9 @@ class Learner:
     def _p_correct(self, question, reply, possible_replies=None):
         return -1
 
-    def get_p_choices(self, questions, replies, possible_replies=None, use_p_correct=False):
+    def get_p_choices(self, exp):
+
+        questions, replies, possible_replies, use_p_correct = exp
 
         t_max = len(questions)
 
@@ -66,9 +68,13 @@ class Learner:
 
 class QLearner(Learner):
 
-    def __init__(self, n_items, alpha=0.01, tau=0.05):
+    def __init__(self, parameters, task_features):
 
         super().__init__()
+
+        alpha, tau = parameters
+        n_items, = task_features
+
         self.n = n_items
         self.q = np.zeros((self.n, self.n))
         self.alpha = alpha
@@ -138,9 +144,11 @@ class ActRLearner(Learner):
     * several slots (here: slot 1: kanji, slot2: meaning)
     """
 
-    def __init__(self, n_items, t_max, n_possible_replies, d=0.5, tau=0.0001, s=0.01):
+    def __init__(self, parameters, task_features):
 
         super().__init__()
+        d, tau, s = parameters
+        n_items, t_max, n_possible_replies = task_features
 
         self.n_items = n_items
 
@@ -257,9 +265,12 @@ class ActRLearner(Learner):
 
 class ActRPlusLearner(ActRLearner):
 
-    def __init__(self, n_items, t_max, n_possible_replies, c_graphic, c_semantic, d=0.5, tau=0.0001, s=0.01, g=0.01, m=0.01):
+    def __init__(self,  parameters, task_features):
 
-        super().__init__(n_items=n_items, t_max=t_max, n_possible_replies=n_possible_replies, d=d, tau=tau, s=s)
+        n_items, t_max, n_possible_replies, c_graphic, c_semantic = task_features
+        d, tau, s, g, m = parameters
+
+        super().__init__(parameters=(d, tau, s), task_features=(n_items, t_max, n_possible_replies, ))
 
         self.c_graphic = c_graphic
         self.c_semantic = c_semantic
@@ -294,17 +305,19 @@ class ActRPlusLearner(ActRLearner):
 
 class ActRPlusPlusLearner(ActRPlusLearner):
 
-    def __init__(self, n_items, t_max, n_possible_replies, c_graphic, c_semantic, d, tau, s, g, m,
-                 g_mu, g_sigma, m_mu, m_sigma):
+    def __init__(self, parameters, task_features):
+
+        d, tau, s, g, m, g_mu, g_sigma, m_mu, m_sigma = parameters
+        n_items, t_max, n_possible_replies, c_graphic, c_semantic = task_features
+
+        super().__init__(
+            parameters=(d, tau, s, g, m),
+            task_features=(n_items, t_max, n_possible_replies, c_graphic, c_semantic))
 
         self.g_mu = g_mu
         self.g_sigma = g_sigma
         self.m_mu = m_mu
         self.m_sigma = m_sigma
-
-        super().__init__(
-            n_items=n_items, t_max=t_max, n_possible_replies=n_possible_replies, d=d, tau=tau, s=s,
-            g=g, m=m, c_graphic=c_graphic, c_semantic=c_semantic)
 
     def _sum_source_activation(self, i):
 
