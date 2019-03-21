@@ -3,6 +3,7 @@ import numpy as np
 from model.learner import QLearner, ActRLearner, ActRPlusLearner, ActRPlusPlusLearner
 
 import scipy.optimize
+from hyperopt import hp, fmin, tpe
 
 import graphic_similarity.measure
 import semantic_similarity.measure
@@ -27,16 +28,17 @@ def _log_likelihood_sum(p_choices):
 
     return np.sum(np.log(p_choices))
 
-
-def _objective(parameters, model, task, exp):
-
-    agent = model(parameters, task)
-    p_choices = agent.get_p_choices(exp)
-
-    if p_choices is None:
-        return np.inf
-
-    return - _log_likelihood_sum(p_choices)
+#
+# def _objective(parameters, model, task, exp):
+#
+#     agent = model(parameters, task)
+#     p_choices = agent.get_p_choices(exp)
+#
+#     if p_choices is None:
+#         print("WARNING! Objective function returning 'None'")
+#         return np.inf
+#
+#     return - _log_likelihood_sum(p_choices)
 
 
 class Fit:
@@ -69,12 +71,38 @@ class Fit:
 
         return mean_p, lls, bic
 
-    def evaluate(self, model, bounds, task, exp):
+    def evaluate(self, model, space, task, exp):
 
-        res = scipy.optimize.differential_evolution(
-            _objective, args=(model, task, exp),
-            bounds=bounds)
-        best_param = res.x
+        def objective(parameters):
+
+            agent = model(parameters, task)
+            p_choices_ = agent.get_p_choices(exp)
+
+            if p_choices_ is None:
+                # print("WARNING! Objective function returning 'None'")
+                to_return = np.inf
+
+            else:
+                to_return = - _log_likelihood_sum(p_choices_)
+
+            # print(f"Objective returning: {to_return}")
+            return to_return
+
+        # res = scipy.optimize.differential_evolution(
+        #     _objective, args=(model, task, exp),
+        #     bounds=bounds)
+
+        # res = scipy.optimize.minimize(
+        #     x0=np.zeros(len(bounds)) * 0.5,
+        #     fun=_objective, args=(model, task, exp),
+        #     bounds=bounds)
+
+        best_param = fmin(fn=objective, space=space, algo=tpe.suggest, max_evals=10**3)
+
+        # print(best_param)
+        # best_param = res.x
+        # success = res.success
+        # print(f"Fit was successful: {success}")
 
         # Get probabilities with best param
         learner = model(best_param, task)
@@ -88,61 +116,98 @@ class Fit:
 
     def rl(self):
 
+        space = [
+            hp.uniform('alpha', 0, 1),
+            hp.uniform('tau', 0.002, 0.5)
+        ]
+
         task = self.n_items,
         exp = self.questions, self.replies, self.possible_replies, self.use_p_correct
         model = QLearner
-        bounds = [(0.00, 1.00), (0.0015, 0.5)]
+        # bounds = [(0.00, 1.00), (0.002, 0.5)]
 
-        return self.evaluate(model=model, bounds=bounds, task=task, exp=exp)
+        return self.evaluate(model=model, space=space, task=task, exp=exp)
 
     def act_r(self):
 
         task = self.n_items, self.t_max, self.n_possible_replies
         exp = self.questions, self.replies, self.possible_replies, self.use_p_correct
         model = ActRLearner
-        bounds = (
-            (0, 1.0),  # d
-            (0.00, 5),  # tau
-            (0.0000001, 10)  # s
+        # bounds = (
+        #     (0, 1.0),  # d
+        #     (0.00, 5),  # tau
+        #     (0.0000001, 10)  # s
+        # )
+
+        space = (
+            hp.uniform('d', 0, 1.0),  # d
+            hp.uniform('tau', 0.00, 5),  # tau
+            hp.uniform('s', 0.0000001, 10)  # s
         )
 
-        return self.evaluate(model=model, bounds=bounds, task=task, exp=exp)
+        return self.evaluate(model=model, space=space, task=task, exp=exp)
 
     def act_r_plus(self):
 
         task = self.n_items, self.t_max, self.n_possible_replies, self.c_graphic, self.c_semantic
         exp = self.questions, self.replies, self.possible_replies, self.use_p_correct
         model = ActRPlusLearner
-        bounds = (
-            (0, 1.0),  # d
-            (0.00, 10),  # tau
-            (0.0000001, 10),  # s
-            (-10, 10),  # g
-            (-10, 10))  # m
+        # bounds = (
+        #     (0, 1.0),  # d
+        #     (0.00, 10),  # tau
+        #     (0.0000001, 10),  # s
+        #     (-10, 10),  # g
+        #     (-10, 10))  # m
 
-        return self.evaluate(model=model, bounds=bounds, task=task, exp=exp)
+        space = (
+            hp.uniform('d', 0, 1.0),  # d
+            hp.uniform('tau', 0.00, 5),  # tau
+            hp.uniform('s', 0.0000001, 10),  # s
+            hp.uniform('g', -10, 10),
+            hp.uniform('m', -10, 10),
+        )
+
+        return self.evaluate(model=model, space=space, task=task, exp=exp)
 
     def act_r_plus_plus(self):
 
         task = self.n_items, self.t_max, self.n_possible_replies, self.c_graphic, self.c_semantic
         exp = self.questions, self.replies, self.possible_replies, self.use_p_correct
         model = ActRPlusPlusLearner
-        bounds = (
-            (0, 1.0),  # d
-            (0.00, 10),  # tau
-            (0.0000001, 10),  # s
-            (-1, 1),  # g
-            (-1, 1),  # m
-            (0, 1),  # g_mu
-            (0.01, 5),  # g_sigma
-            (0, 1),  # s_mu
-            (0.01, 5))  # s_sigma
+        # bounds = (
+        #     (0, 1.0),  # d
+        #     (0.00, 10),  # tau
+        #     (0.0000001, 10),  # s
+        #     (-1, 1),  # g
+        #     (-1, 1),  # m
+        #     (0, 1),  # g_mu
+        #     (0.01, 5),  # g_sigma
+        #     (0, 1),  # s_mu
+        #     (0.01, 5))  # s_sigma
 
-        return self.evaluate(model=model, bounds=bounds, task=task, exp=exp)
+        space = (
+            hp.uniform('d', 0, 1.0),  # d
+            hp.uniform('tau', 0.00, 5),  # tau
+            hp.uniform('s', 0.0000001, 10),  # s
+            hp.uniform('g', -10, 10),
+            hp.uniform('m', -10, 10),
+            hp.uniform('g_mu', 0, 1),  # g_mu
+            hp.uniform('g_sigma', 0.01, 5),  # g_sigma
+            hp.uniform('m_mu', 0, 1),  # s_mu
+            hp.uniform('m_sigma', 0.01, 5)  # s_sigma
+        )
+
+        return self.evaluate(model=model, space=space, task=task, exp=exp)
 
     @classmethod
     def print(cls, model_name, best_param, mean_p, lls, bic):
 
-        print(f'[{model_name}] Best param: ' + f'{[f"{i:.3f}" for i in best_param]}, ' +
+        if type(best_param) == dict:
+            best_param = {k: f"{v:.3f}" for k, v in best_param.items()}
+            dis_best_param = f"{best_param}, "
+        else:
+            dis_best_param = f'{[f"{i:.3f}" for i in best_param]}, '
+
+        print(f'[{model_name}] Best param: ' + dis_best_param +
               f"LLS: {lls:.2f}, " +
               f'BIC: {bic:.2f}, mean(P): {mean_p:.3f}')

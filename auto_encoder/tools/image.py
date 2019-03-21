@@ -18,6 +18,7 @@ BKP_MODEL = [
     f'{BACKUP_FOLDER}/decoder.h5']
 
 IMG_SIZE = 100
+N_ROTATION = 3
 EPOCHS = 100
 SEED = 123
 
@@ -64,30 +65,39 @@ def _are_images_existing(kanji_dic):
 
 # --------------------------------------- #
 
+def _open_image(path):
+
+    img = Image.open(path)
+    img = img.convert('L')
+    img = img.resize((IMG_SIZE, IMG_SIZE), Image.ANTIALIAS)
+    img = np.array(img)
+    return img
+
 
 def _format_images():
 
     n_images = len(os.listdir(IMG_FOLDER))
-    train_data = np.zeros((n_images * 2, IMG_SIZE, IMG_SIZE))
+    train_data = np.zeros((n_images * N_ROTATION, IMG_SIZE, IMG_SIZE))
 
     i = 0
 
     for img in os.listdir(IMG_FOLDER):
         path = os.path.join(IMG_FOLDER, img)
-        img = Image.open(path)
-        img = img.convert('L')
-        img = img.resize((IMG_SIZE, IMG_SIZE), Image.ANTIALIAS)
-        train_data[i] = np.array(img)
 
+        img = _open_image(path)
+
+        train_data[i] = img
         i += 1
 
         # Basic Data Augmentation - Horizontal Flipping
-        flip_img = Image.open(path)
-        flip_img = flip_img.convert('L')
-        flip_img = flip_img.resize((IMG_SIZE, IMG_SIZE), Image.ANTIALIAS)
-        flip_img = np.array(flip_img)
-        flip_img = np.fliplr(flip_img)
-        train_data[i] = flip_img
+        flip_h_img = np.fliplr(img)
+        train_data[i] = flip_h_img
+
+        i += 1
+
+        # Basic Data Augmentation - Vertical Flipping
+        flip_v_img = np.flipud(img)
+        train_data[i] = flip_v_img
 
         i += 1
 

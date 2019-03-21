@@ -1,0 +1,68 @@
+/usr/local/bin/python3.7 /Users/aureliennioche/Documents/PythonProjects/ActiveTeachingModel/analysis.py
+10
+*****
+Kanji used: ['玉', '青', '字', '子', '日', '八', '夕', '目', '五', '花', '林', '虫', '中', '王', '左', '足', '生', '名', '力', '田', '右', '七', '貝', '六', '空', '小', '三', '町', '木', '二']
+Corresponding meanings: ['Ball', 'Blue', 'Character', 'Child', 'Day', 'Eight', 'Evening', 'Eye', 'Five', 'Flower', 'Forest', 'Insect', 'Inside', 'King', 'Left', 'Leg', 'Living', 'Name', 'Power', 'Rice field', 'Right', 'Seven', 'Shellfish', 'Six', 'Sky', 'Small', 'Three', 'Town', 'Tree', 'Two']
+100%|██████████| 1000/1000 [00:06<00:00, 147.94it/s, best loss: 106.75864385160008]
+[QLearner] Best param: {'alpha': '0.019', 'tau': '0.015'}, LLS: -106.76, BIC: 222.71, mean(P): 0.508
+100%|██████████| 1000/1000 [00:08<00:00, 111.85it/s, best loss: 104.26957319385978]
+[ActRLearner] Best param: {'d': '0.213', 's': '0.155', 'tau': '0.952'}, LLS: -104.27, BIC: 222.32, mean(P): 0.516
+100%|██████████| 1000/1000 [00:47<00:00, 20.96it/s, best loss: 101.67086527933513]
+[ActRPlusLearner] Best param: {'d': '0.329', 'g': '2.470', 'm': '1.707', 's': '0.005', 'tau': '1.404'}, LLS: -101.67, BIC: 226.32, mean(P): 0.527
+100%|██████████| 1000/1000 [01:05<00:00, 15.33it/s, best loss: 102.60651532079989]
+[ActRPlusPlusLearner] Best param: {'d': '0.370', 'g': '-1.680', 'g_mu': '0.754', 'g_sigma': '1.303', 'm': '6.123', 'm_mu': '0.397', 'm_sigma': '1.773', 's': '0.012', 'tau': '1.591'}, LLS: -102.61, BIC: 246.57, mean(P): 0.517
+
+9
+*****
+Kanji used: ['青', '字', '八', '目', '花', '林', '虫', '中', '王', '左', '足', '生', '力', '田', '七', '貝', '六', '小', '木', '二']
+Corresponding meanings: ['Blue', 'Character', 'Eight', 'Eye', 'Flower', 'Forest', 'Insect', 'Inside', 'King', 'Left', 'Leg', 'Living', 'Power', 'Rice field', 'Seven', 'Shellfish', 'Six', 'Small', 'Tree', 'Two']
+100%|██████████| 1000/1000 [00:06<00:00, 145.39it/s, best loss: 70.03599473183185]
+[QLearner] Best param: {'alpha': '0.764', 'tau': '0.232'}, LLS: -70.04, BIC: 149.26, mean(P): 0.699
+100%|██████████| 1000/1000 [00:09<00:00, 109.66it/s, best loss: 69.13170533211189]
+[ActRLearner] Best param: {'d': '0.962', 's': '1.094', 'tau': '0.002'}, LLS: -69.13, BIC: 152.05, mean(P): 0.705
+100%|██████████| 1000/1000 [00:37<00:00, 26.95it/s, best loss: 68.20415561812806]
+[ActRPlusLearner] Best param: {'d': '0.918', 'g': '9.631', 'm': '8.908', 's': '0.922', 'tau': '1.428'}, LLS: -68.20, BIC: 159.38, mean(P): 0.702
+100%|██████████| 1000/1000 [00:55<00:00, 15.66it/s, best loss: 68.3665229168352]
+[ActRPlusPlusLearner] Best param: {'d': '1.000', 'g': '9.993', 'g_mu': '0.662', 'g_sigma': '0.527', 'm': '8.939', 'm_mu': '0.290', 'm_sigma': '4.910', 's': '1.182', 'tau': '1.671'}, LLS: -68.37, BIC: 178.09, mean(P): 0.710
+
+8
+*****
+Kanji used: ['八', '花', '虫', '中', '王', '足', '生', '力', '七', '二']
+Corresponding meanings: ['Eight', 'Flower', 'Insect', 'Inside', 'King', 'Leg', 'Living', 'Power', 'Seven', 'Two']
+100%|██████████| 1000/1000 [00:06<00:00, 101.93it/s, best loss: 54.40488276346658]
+[QLearner] Best param: {'alpha': '0.438', 'tau': '0.203'}, LLS: -54.40, BIC: 118.00, mean(P): 0.771
+100%|██████████| 1000/1000 [00:09<00:00, 100.81it/s, best loss: 52.10988731877677]
+[ActRLearner] Best param: {'d': '0.538', 's': '0.500', 'tau': '1.244'}, LLS: -52.11, BIC: 118.01, mean(P): 0.780
+100%|██████████| 1000/1000 [00:28<00:00, 31.71it/s, best loss: 51.827039348330544]
+[ActRPlusLearner] Best param: {'d': '0.715', 'g': '-1.768', 'm': '5.042', 's': '0.487', 'tau': '1.834'}, LLS: -51.83, BIC: 126.63, mean(P): 0.775
+100%|██████████| 1000/1000 [00:39<00:00, 25.43it/s, best loss: 52.14413138006747]
+[ActRPlusPlusLearner] Best param: {'d': '0.681', 'g': '1.560', 'g_mu': '0.729', 'g_sigma': '3.715', 'm': '6.257', 'm_mu': '0.818', 'm_sigma': '4.986', 's': '0.503', 'tau': '2.420'}, LLS: -52.14, BIC: 145.64, mean(P): 0.774
+
+7
+*****
+Kanji used: ['八', '花', '虫', '中', '王', '足', '生', '力', '七', '二']
+Corresponding meanings: ['Eight', 'Flower', 'Insect', 'Inside', 'King', 'Leg', 'Living', 'Power', 'Seven', 'Two']
+100%|██████████| 1000/1000 [00:06<00:00, 149.35it/s, best loss: 35.86761708963093]
+[QLearner] Best param: {'alpha': '0.999', 'tau': '0.203'}, LLS: -35.87, BIC: 80.93, mean(P): 0.856
+100%|██████████| 1000/1000 [00:09<00:00, 107.28it/s, best loss: 35.40666411520743]
+[ActRLearner] Best param: {'d': '0.787', 's': '0.921', 'tau': '0.001'}, LLS: -35.41, BIC: 84.60, mean(P): 0.857
+100%|██████████| 1000/1000 [00:25<00:00, 38.48it/s, best loss: 35.41014799470515]
+[ActRPlusLearner] Best param: {'d': '0.819', 'g': '-3.784', 'm': '-1.601', 's': '0.788', 'tau': '0.010'}, LLS: -35.41, BIC: 93.80, mean(P): 0.858
+100%|██████████| 1000/1000 [00:39<00:00, 25.34it/s, best loss: 35.33232027669094]
+[ActRPlusPlusLearner] Best param: {'d': '0.722', 'g': '2.580', 'g_mu': '0.700', 'g_sigma': '3.895', 'm': '-6.254', 'm_mu': '0.380', 'm_sigma': '0.318', 's': '0.800', 'tau': '0.001'}, LLS: -35.33, BIC: 112.02, mean(P): 0.856
+
+6
+*****
+Kanji used: ['八', '花', '虫', '中', '王', '足', '生', '力', '七', '二']
+Corresponding meanings: ['Eight', 'Flower', 'Insect', 'Inside', 'King', 'Leg', 'Living', 'Power', 'Seven', 'Two']
+100%|██████████| 1000/1000 [00:06<00:00, 144.76it/s, best loss: 108.4245216058584]
+[QLearner] Best param: {'alpha': '1.000', 'tau': '0.383'}, LLS: -108.42, BIC: 226.04, mean(P): 0.510
+100%|██████████| 1000/1000 [00:09<00:00, 106.10it/s, best loss: 108.43031088580919]
+[ActRLearner] Best param: {'d': '0.999', 's': '5.246', 'tau': '0.005'}, LLS: -108.43, BIC: 230.65, mean(P): 0.506
+100%|██████████| 1000/1000 [00:27<00:00, 36.81it/s, best loss: 106.66766272116882]
+[ActRPlusLearner] Best param: {'d': '0.884', 'g': '-9.598', 'm': '9.997', 's': '1.646', 'tau': '2.166'}, LLS: -106.67, BIC: 236.31, mean(P): 0.514
+100%|██████████| 1000/1000 [00:39<00:00, 25.03it/s, best loss: 108.1787632154979]
+[ActRPlusPlusLearner] Best param: {'d': '0.977', 'g': '6.611', 'g_mu': '0.095', 'g_sigma': '3.349', 'm': '9.979', 'm_mu': '0.769', 'm_sigma': '0.169', 's': '6.068', 'tau': '0.001'}, LLS: -108.18, BIC: 257.71, mean(P): 0.511
+
+
+Process finished with exit code 0

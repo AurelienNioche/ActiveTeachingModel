@@ -2,7 +2,7 @@ import numpy as np
 from scipy.stats import norm
 
 debug = False
-np.seterr(all='raise')
+# np.seterr(all='raise')
 
 
 def softmax(x, temp):
@@ -57,6 +57,7 @@ class Learner:
 
             else:
                 p = self._p_choice(question=question, reply=reply, possible_replies=possible_rep)
+
             if p == 0:
                 return None
 
@@ -70,15 +71,20 @@ class QLearner(Learner):
 
     def __init__(self, parameters, task_features):
 
-        super().__init__()
+        if type(parameters) == dict:
+            alpha, tau = parameters["alpha"], parameters["tau"]
+        else:
+            alpha, tau = parameters
 
-        alpha, tau = parameters
         n_items, = task_features
+
+        super().__init__()
 
         self.n = n_items
         self.q = np.zeros((self.n, self.n))
         self.alpha = alpha
         self.tau = tau
+        # print(f"alpha: {self.alpha}, tau:{self.tau}")
 
     def _softmax_unique(self, x_i, x):
 
@@ -122,18 +128,20 @@ class QLearner(Learner):
 
     def learn(self, question, reply):
 
-        success = question == reply  # We suppose matching (0,0), (1,1) ... (n,n)
+        # success = question == reply  # We suppose matching (0,0), (1,1) ... (n,n)
+        #
+        # old_q_value = self.q[question, reply]
+        # new_q_value = temporal_difference(v=old_q_value, obs=success, alpha=self.alpha)
+        #
+        # self.q[question, reply] = new_q_value
+        #
+        # if not success:
+        #     self.q[question, question] = temporal_difference(v=self.q[question, question], obs=1, alpha=self.alpha)
+        #
+        # if debug:
+        #     print(f'Old q value is {old_q_value}; New q value is {new_q_value}')
 
-        old_q_value = self.q[question, reply]
-        new_q_value = temporal_difference(v=old_q_value, obs=success, alpha=self.alpha)
-
-        self.q[question, reply] = new_q_value
-
-        if not success:
-            self.q[question, question] = temporal_difference(v=self.q[question, question], obs=1, alpha=self.alpha)
-
-        if debug:
-            print(f'Old q value is {old_q_value}; New q value is {new_q_value}')
+        self.q[question, question] = temporal_difference(v=self.q[question, question], obs=1, alpha=self.alpha)
 
 
 class ActRLearner(Learner):
@@ -147,7 +155,12 @@ class ActRLearner(Learner):
     def __init__(self, parameters, task_features):
 
         super().__init__()
-        d, tau, s = parameters
+
+        if type(parameters) == dict:
+            d, tau, s = parameters["d"], parameters["tau"], parameters["s"]
+        else:
+            d, tau, s = parameters
+
         n_items, t_max, n_possible_replies = task_features
 
         self.n_items = n_items
@@ -267,8 +280,12 @@ class ActRPlusLearner(ActRLearner):
 
     def __init__(self,  parameters, task_features):
 
+        if type(parameters) == dict:
+            d, tau, s, g, m = parameters["d"], parameters["tau"], parameters["s"], parameters["g"], parameters["m"]
+        else:
+            d, tau, s, g, m = parameters
+
         n_items, t_max, n_possible_replies, c_graphic, c_semantic = task_features
-        d, tau, s, g, m = parameters
 
         super().__init__(parameters=(d, tau, s), task_features=(n_items, t_max, n_possible_replies, ))
 
@@ -307,7 +324,13 @@ class ActRPlusPlusLearner(ActRPlusLearner):
 
     def __init__(self, parameters, task_features):
 
-        d, tau, s, g, m, g_mu, g_sigma, m_mu, m_sigma = parameters
+        if type(parameters) == dict:
+            d, tau, s, g, m, g_mu, g_sigma, m_mu, m_sigma = \
+                parameters["d"], parameters["tau"], parameters["s"], parameters["g"], parameters["m"], \
+                parameters["g_mu"], parameters["g_sigma"], parameters["m_mu"], parameters["m_sigma"]
+        else:
+            d, tau, s, g, m, g_mu, g_sigma, m_mu, m_sigma = parameters
+
         n_items, t_max, n_possible_replies, c_graphic, c_semantic = task_features
 
         super().__init__(

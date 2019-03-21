@@ -111,7 +111,8 @@ def get_simulated_data(model, parameters, kanjis, meanings, questions_list, poss
     return questions, replies, n_items, possible_replies, success
 
 
-def create_and_fit_simulated_data(model=QLearner, parameters=(0.1, 0.01), t_max=100, n_kanji=20, grade=1):
+def create_and_fit_simulated_data(model=QLearner, parameters=(0.1, 0.01), t_max=300, n_kanji=30, grade=1,
+                                  use_p_correct=False):
 
     kanjis, meanings, question_list, correct_answer_list, possible_replies_list = \
         create_questions(t_max=t_max, n_kanji=n_kanji, grade=grade)
@@ -131,7 +132,7 @@ def create_and_fit_simulated_data(model=QLearner, parameters=(0.1, 0.01), t_max=
     plot.success.curve(success, fig_name=f'simulated_curve.pdf')
 
     f = fit.Fit(questions=questions, replies=replies, possible_replies=possible_replies, n_items=n_items,
-                c_graphic=c_graphic, c_semantic=c_semantic)
+                c_graphic=c_graphic, c_semantic=c_semantic, use_p_correct=use_p_correct)
     f.rl()
     f.act_r()
     f.act_r_plus()
@@ -141,9 +142,13 @@ def create_and_fit_simulated_data(model=QLearner, parameters=(0.1, 0.01), t_max=
 def main():
 
     for m, p in (
-            (QLearner, (0.5, 0.2)),
+            (QLearner, {"alpha": 0.05, "tau": 0.01}),
+            (ActRLearner, {"d": 0.5, "tau": 0.05, "s": 0.4}),
+            (ActRPlusLearner, {"d": 0.5, "tau": 0.05, "s": 0.4, "m": 0.3, "g": 0.7}),
+            (ActRPlusPlusLearner, {"d": 0.5, "tau": 0.05, "s": 0.4, "m": 0.3, "g": 0.7,
+                                   "g_mu": 0.5, "g_sigma": 1.2, "m_mu": 0.2, "m_sigma": 2}),
     ):
-        create_and_fit_simulated_data(model=m, parameters=p)
+        create_and_fit_simulated_data(model=m, parameters=p, use_p_correct=False)
 
 
 if __name__ == "__main__":
