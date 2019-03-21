@@ -59,7 +59,7 @@ class Fit:
         self.t_max = len(self.questions)
         self.n_possible_replies = len(self.possible_replies[0])
 
-    def model_stats(self, p_choices, best_param):
+    def _model_stats(self, p_choices, best_param):
 
         mean_p = np.mean(p_choices)
 
@@ -71,12 +71,14 @@ class Fit:
 
         return mean_p, lls, bic
 
-    def evaluate(self, model, space, task, exp):
+    def _evaluate(self, model, space):
+
+        task, exp, fit_param = self._get_task_exp_fit_param()
 
         def objective(parameters):
 
             agent = model(parameters, task)
-            p_choices_ = agent.get_p_choices(exp)
+            p_choices_ = agent.get_p_choices(exp, fit_param)
 
             if p_choices_ is None:
                 # print("WARNING! Objective function returning 'None'")
@@ -106,13 +108,35 @@ class Fit:
 
         # Get probabilities with best param
         learner = model(best_param, task)
-        p_choices = learner.get_p_choices(exp)
+        p_choices = learner.get_p_choices(exp, fit_param)
 
         # Compute bic, etc.
-        mean_p, lls, bic = self.model_stats(p_choices=p_choices, best_param=best_param)
+        mean_p, lls, bic = self._model_stats(p_choices=p_choices, best_param=best_param)
 
-        self.print(model.__name__, best_param, mean_p, lls, bic)
+        self._print(model.__name__, best_param, mean_p, lls, bic)
         return mean_p, bic
+
+    def _get_task_exp_fit_param(self):
+
+        task = {
+            'n_items': self.n_items,
+            't_max': self.t_max,
+            'n_possible_replies': self.n_possible_replies,
+            'c_graphic': self.c_graphic,
+            'c_semantic': self.c_semantic
+        }
+
+        exp = {
+            'questions': self.questions,
+            'replies': self.replies,
+            'possible_replies': self.possible_replies
+        }
+
+        fit_param = {
+            'use_p_correct': self.use_p_correct
+        }
+
+        return task, exp, fit_param
 
     def rl(self):
 
@@ -121,17 +145,13 @@ class Fit:
             hp.uniform('tau', 0.002, 0.5)
         ]
 
-        task = self.n_items,
-        exp = self.questions, self.replies, self.possible_replies, self.use_p_correct
         model = QLearner
         # bounds = [(0.00, 1.00), (0.002, 0.5)]
 
-        return self.evaluate(model=model, space=space, task=task, exp=exp)
+        return self._evaluate(model=model, space=space)
 
     def act_r(self):
 
-        task = self.n_items, self.t_max, self.n_possible_replies
-        exp = self.questions, self.replies, self.possible_replies, self.use_p_correct
         model = ActRLearner
         # bounds = (
         #     (0, 1.0),  # d
@@ -145,12 +165,10 @@ class Fit:
             hp.uniform('s', 0.0000001, 10)  # s
         )
 
-        return self.evaluate(model=model, space=space, task=task, exp=exp)
+        return self._evaluate(model=model, space=space)
 
     def act_r_plus(self):
 
-        task = self.n_items, self.t_max, self.n_possible_replies, self.c_graphic, self.c_semantic
-        exp = self.questions, self.replies, self.possible_replies, self.use_p_correct
         model = ActRPlusLearner
         # bounds = (
         #     (0, 1.0),  # d
@@ -167,12 +185,10 @@ class Fit:
             hp.uniform('m', -10, 10),
         )
 
-        return self.evaluate(model=model, space=space, task=task, exp=exp)
+        return self._evaluate(model=model, space=space)
 
     def act_r_plus_plus(self):
 
-        task = self.n_items, self.t_max, self.n_possible_replies, self.c_graphic, self.c_semantic
-        exp = self.questions, self.replies, self.possible_replies, self.use_p_correct
         model = ActRPlusPlusLearner
         # bounds = (
         #     (0, 1.0),  # d
@@ -197,10 +213,10 @@ class Fit:
             hp.uniform('m_sigma', 0.01, 5)  # s_sigma
         )
 
-        return self.evaluate(model=model, space=space, task=task, exp=exp)
+        return self._evaluate(model=model, space=space)
 
     @classmethod
-    def print(cls, model_name, best_param, mean_p, lls, bic):
+    def _print(cls, model_name, best_param, mean_p, lls, bic):
 
         if type(best_param) == dict:
             best_param = {k: f"{v:.3f}" for k, v in best_param.items()}

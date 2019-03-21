@@ -85,10 +85,13 @@ def get_simulated_data(model, parameters, kanjis, meanings, questions_list, poss
     n_items = len(kanjis)
     t_max = len(possible_replies_list)
 
-    task_features = (n_items, )
-
-    if model in (ActRPlusLearner, ActRPlusPlusLearner):
-        task_features += (t_max, n_possible_replies, c_graphic, c_semantic)
+    task_features = {
+        'n_items': n_items,
+        't_max': t_max,
+        'n_possible_replies': n_possible_replies,
+        'c_graphic': c_graphic,
+        'c_semantic': c_semantic
+    }
 
     agent = model(parameters, task_features)
 
@@ -99,13 +102,13 @@ def get_simulated_data(model, parameters, kanjis, meanings, questions_list, poss
 
     for t in range(t_max):
         q = questions[t]
-        r = agent.decide(question=q)
+        for i in range(n_possible_replies):
+            possible_replies[t, i] = meanings.index(possible_replies_list[t][i])
+
+        r = agent.decide(question=q, possible_replies=possible_replies[t])
         agent.learn(question=q, reply=r)
 
         replies[t] = r
-
-        for i in range(n_possible_replies):
-            possible_replies[t, i] = meanings.index(possible_replies_list[t][i])
         success[t] = q == r
 
     return questions, replies, n_items, possible_replies, success
@@ -114,6 +117,7 @@ def get_simulated_data(model, parameters, kanjis, meanings, questions_list, poss
 def create_and_fit_simulated_data(model=QLearner, parameters=(0.1, 0.01), t_max=300, n_kanji=30, grade=1,
                                   use_p_correct=False):
 
+    print(f"Simulating {model.__name__} with parameters: {parameters}.")
     kanjis, meanings, question_list, correct_answer_list, possible_replies_list = \
         create_questions(t_max=t_max, n_kanji=n_kanji, grade=grade)
 
@@ -133,10 +137,17 @@ def create_and_fit_simulated_data(model=QLearner, parameters=(0.1, 0.01), t_max=
 
     f = fit.Fit(questions=questions, replies=replies, possible_replies=possible_replies, n_items=n_items,
                 c_graphic=c_graphic, c_semantic=c_semantic, use_p_correct=use_p_correct)
+    print()
     f.rl()
+    print()
     f.act_r()
+    print()
     f.act_r_plus()
+    print()
     f.act_r_plus_plus()
+    print()
+    print("****")
+    print()
 
 
 def main():

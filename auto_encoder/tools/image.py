@@ -9,6 +9,9 @@ SCRIPT_FOLDER = os.path.dirname(os.path.abspath(__file__))
 
 BACKUP_FOLDER = f'{SCRIPT_FOLDER}/../backup'
 IMG_FOLDER = f'{SCRIPT_FOLDER}/../image'
+FONT_FOLDER = f'{SCRIPT_FOLDER}/../font'
+
+FONT_FILE = f'{FONT_FOLDER}/arialunicodems.ttf'
 
 BKP_HISTORY = \
     f'{BACKUP_FOLDER}/history.p'
@@ -18,9 +21,11 @@ BKP_MODEL = [
     f'{BACKUP_FOLDER}/decoder.h5']
 
 IMG_SIZE = 100
-N_ROTATION = 3
+REL_FONT_SIZE = 0.98
+N_ROTATION = 4
 EPOCHS = 100
 SEED = 123
+RATIO_TRAINING_TEST = 5/6
 
 os.makedirs(BACKUP_FOLDER, exist_ok=True)
 os.makedirs(IMG_FOLDER, exist_ok=True)
@@ -33,12 +38,12 @@ def _img_file(name):
 
 def _create_images(
         kanji_dic,
-        font='auto_encoder/font/arialunicodems.ttf',
+        font=FONT_FILE,
         text_color=(255, 255, 255),
         background_color=(0, 0, 0)):
 
     os.makedirs(IMG_FOLDER, exist_ok=True)
-    font_size = int(IMG_SIZE*2/3)
+    font_size = int(IMG_SIZE)
 
     for name, character in kanji_dic.items():
 
@@ -74,7 +79,7 @@ def _open_image(path):
     return img
 
 
-def _format_images():
+def formatted_images():
 
     n_images = len(os.listdir(IMG_FOLDER))
     train_data = np.zeros((n_images * N_ROTATION, IMG_SIZE, IMG_SIZE))
@@ -92,29 +97,34 @@ def _format_images():
         # Basic Data Augmentation - Horizontal Flipping
         flip_h_img = np.fliplr(img)
         train_data[i] = flip_h_img
-
         i += 1
 
-        # Basic Data Augmentation - Vertical Flipping
+        # Vertical Flipping
         flip_v_img = np.flipud(img)
         train_data[i] = flip_v_img
+        i += 1
 
+        # Vertical and horizontal Flipping
+        flip_v_img = np.flipud(flip_h_img)
+        train_data[i] = flip_v_img
         i += 1
 
     train_data /= 255.
     return train_data
 
 
-def training_data(kanji_dic, ratio_training_test=2/3):
+def training_and_test_data(kanji_dic=None):
 
-    if not _are_images_existing(kanji_dic):
+    if kanji_dic is not None and not _are_images_existing(kanji_dic):
         _create_images(kanji_dic=kanji_dic)
 
-    train_data = _format_images()
+    train_data = formatted_images()
+
+    assert(len(train_data) > 0)
 
     np.random.shuffle(train_data)
 
-    split = int(len(train_data) * ratio_training_test)
+    split = int(len(train_data) * RATIO_TRAINING_TEST)
 
     x_train = train_data[:split]
     x_test = train_data[split:]

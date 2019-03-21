@@ -22,16 +22,16 @@ BACKUP_FOLDER = f'{SCRIPT_FOLDER}/backup'
 GRAPHIC_PROPERTIES = f'{BACKUP_FOLDER}/graphic_properties.p'
 
 
-def create_graphic_properties():
+def create_graphic_properties(force=False):
 
-    # Aviut ti ulirt
     from auto_encoder import auto_encoder
 
     kanji_entries = Kanji.objects.all().order_by('id')
     kanji_dic = {k.id: k.kanji for k in kanji_entries}
 
     # Get the trained models
-    autoencoder, encoder, decoder = auto_encoder.get_models(kanji_dic=kanji_dic)
+    (autoencoder, encoder, decoder), history = \
+        auto_encoder.get_models(kanji_dic=kanji_dic, force=force)
 
     n_kanji = len(kanji_dic)
 
@@ -75,7 +75,7 @@ def get_graphic_properties():
     return graphic_prop
 
 
-def create(kanji_list, backup):
+def create(kanji_list):
 
     graphic_prop = get_graphic_properties()
 
@@ -98,38 +98,9 @@ def create(kanji_list, backup):
         dist[i, j] = distance
         dist[j, i] = distance
 
-    #     print(f"Distance between {a} & {b}: {distance}")
-    #
-    # print()
-    # for a, b in combinations(kanji_list, 2):
-    #     x = graphic_prop[a]
-    #     y = graphic_prop[b]
-    #
-    #     distance = np.abs(np.linalg.norm(x) - np.linalg.norm(y))
-    #     print(f"Distance between {a} & {b}: {distance}")
-    #
-    # print()
-    # for a, b in combinations(kanji_list, 2):
-    #     x = graphic_prop[a]
-    #     y = graphic_prop[b]
-    #
-    #     distance = 0
-    #
-    #     for i in range(x.shape[0]):
-    #         for j in range(x.shape[1]):
-    #             for k in range(x.shape[2]):
-    #                 distance += (x[i, j, k] - y[i, j, k])**2
-    #
-    #     distance = distance**(1/2)
-    #
-    #     print(f"Distance between {a} & {b}: {distance}")
-
     dist /= np.max(dist)
 
     sim = 1 - dist
-
-    # Save in pickle
-    pickle.dump(obj=sim, file=open(backup, 'wb'))
 
     return sim
 
@@ -140,9 +111,42 @@ def get(kanji_list, force=False):
     backup = f"{BACKUP_FOLDER}/{list_id}.p"
 
     if not os.path.exists(backup) or force:
-        sim = create(kanji_list=kanji_list, backup=backup)
+        sim = create(kanji_list=kanji_list)
+        pickle.dump(obj=sim, file=open(backup, 'wb'))
 
     else:
         sim = pickle.load(file=open(backup, 'rb'))
 
     return sim
+
+
+def get_distance(kanji1, kanji2):
+
+    graphic_prop = get_graphic_properties()
+
+    x = graphic_prop[kanji1]
+    y = graphic_prop[kanji2]
+
+    # print(x.shape)
+
+    distance = np.abs(np.linalg.norm(x - y))
+    print(f"Distance between {kanji1} and {kanji2} is {distance:.3f}")
+
+
+def main():
+
+    # from auto_encoder import auto_encoder
+    #
+    # auto_encoder.evaluate_model()
+
+    # create_graphic_properties()
+    for a, b in combinations(['目', '耳', '犬', '大', '王', '玉', '夕', '二', '一',
+                              '左', '右'], r=2):
+        get_distance(a, b)
+
+
+if __name__ == "__main__":
+
+    main()
+
+    # create_graphic_properties(force=True)

@@ -53,9 +53,13 @@ def model_comparison():
                     c_graphic=c_graphic, c_semantic=c_semantic, use_p_correct=use_p_correct)
 
         rl_mean_p, rl_bic = f.rl()
+        print()
         act_r_mean_p, act_r_bic = f.act_r()
+        print()
         act_r_plus_mean_p, act_r_plus_bic = f.act_r_plus()
+        print()
         act_r_pp_mean_pp, act_r_pp_bic = f.act_r_plus_plus()
+        print()
 
         data["bic"][0].append(rl_bic)
         data["bic"][1].append(act_r_bic)
