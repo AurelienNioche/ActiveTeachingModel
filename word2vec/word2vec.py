@@ -85,6 +85,9 @@ def evaluate_similarity(word_list):
 
     sim = np.zeros((n_word, n_word))
 
+    for i in range(n_word):
+        sim[i, i] = np.nan
+
     for a, b in combinations(word_list, 2):
 
         i = word_list.index(a)

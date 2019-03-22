@@ -75,13 +75,16 @@ def get_graphic_properties():
     return graphic_prop
 
 
-def create(kanji_list):
+def create(kanji_list, force):
 
     graphic_prop = get_graphic_properties()
 
     n_kanji = len(kanji_list)
 
     dist = np.zeros((n_kanji, n_kanji))
+
+    for i in range(n_kanji):
+        dist[i, i] = np.nan
 
     for a, b in combinations(kanji_list, 2):
 
@@ -98,24 +101,39 @@ def create(kanji_list):
         dist[i, j] = distance
         dist[j, i] = distance
 
-    dist /= np.max(dist)
+    dist /= np.nanmax(dist)
 
     sim = 1 - dist
 
     return sim
 
 
-def get(kanji_list, force=False):
+def _normalize(a):
+    return np.interp(a, (np.nanmin(a), np.nanmax(a)), (0, 1))
+    # return # (x - np.min(x)) / (np.max(x) - np.min(x))
+
+
+def get(kanji_list, normalize=True, force=False, verbose=False):
 
     list_id = str(uuid.uuid3(uuid.NAMESPACE_DNS, f"{kanji_list}"))
     backup = f"{BACKUP_FOLDER}/{list_id}.p"
 
     if not os.path.exists(backup) or force:
-        sim = create(kanji_list=kanji_list)
+        sim = create(kanji_list=kanji_list, force=force)
         pickle.dump(obj=sim, file=open(backup, 'wb'))
 
     else:
         sim = pickle.load(file=open(backup, 'rb'))
+
+    if normalize:
+        sim = _normalize(sim)
+
+    if verbose:
+        for i, j in combinations(range(len(kanji_list)), r=2):
+            a = kanji_list[i]
+            b = kanji_list[j]
+            similarity = sim[i, j]
+            print(f"Similarity between {a} and {b} is: {similarity:.2f}")
 
     return sim
 

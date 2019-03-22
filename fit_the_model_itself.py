@@ -22,7 +22,7 @@ import semantic_similarity.measure
 from fit import fit
 
 
-def create_questions(t_max=100, n_kanji=20, grade=1):
+def create_questions(t_max=100, n_kanji=20, grade=1, verbose=False):
 
     # Seed
     np.random.seed(123)
@@ -76,6 +76,10 @@ def create_questions(t_max=100, n_kanji=20, grade=1):
         correct_answer_list.append(correct_answer)
         possible_replies_list.append(possible_replies)
 
+    if verbose:
+        print(f"Kanjis used are: {kanji}")
+        print(f"Meanings used are: {meaning}")
+
     return kanji, meaning, question_list, correct_answer_list, possible_replies_list
 
 
@@ -114,15 +118,22 @@ def get_simulated_data(model, parameters, kanjis, meanings, questions_list, poss
     return questions, replies, n_items, possible_replies, success
 
 
-def create_and_fit_simulated_data(model=QLearner, parameters=(0.1, 0.01), t_max=300, n_kanji=30, grade=1,
-                                  use_p_correct=False):
+def create_and_fit_simulated_data(model=None, parameters=None, t_max=300, n_kanji=30, grade=1,
+                                  use_p_correct=False, verbose=False, force=False):
+
+    if model is None and parameters is None:
+        model = model
+        parameters = {"alpha": 0.1, "tau": 0.01}
 
     print(f"Simulating {model.__name__} with parameters: {parameters}.")
+    print()
     kanjis, meanings, question_list, correct_answer_list, possible_replies_list = \
-        create_questions(t_max=t_max, n_kanji=n_kanji, grade=grade)
-
-    c_graphic = graphic_similarity.measure.get(kanjis)
-    c_semantic = semantic_similarity.measure.get(meanings)
+        create_questions(t_max=t_max, n_kanji=n_kanji, grade=grade, verbose=verbose)
+    print()
+    c_graphic = graphic_similarity.measure.get(kanjis, force=force, verbose=verbose)
+    print()
+    c_semantic = semantic_similarity.measure.get(meanings, force=force, verbose=verbose)
+    print()
 
     questions, replies, n_items, possible_replies, success = get_simulated_data(
         model=model,
@@ -144,13 +155,13 @@ def create_and_fit_simulated_data(model=QLearner, parameters=(0.1, 0.01), t_max=
     print()
     f.act_r_plus()
     print()
-    f.act_r_plus_plus()
+    # f.act_r_plus_plus()
     print()
     print("****")
     print()
 
 
-def main():
+def demo():
 
     for m, p in (
             (QLearner, {"alpha": 0.05, "tau": 0.01}),
@@ -160,6 +171,12 @@ def main():
                                    "g_mu": 0.5, "g_sigma": 1.2, "m_mu": 0.2, "m_sigma": 2}),
     ):
         create_and_fit_simulated_data(model=m, parameters=p, use_p_correct=False)
+
+
+def main():
+    model, parameters = ActRPlusLearner, {"d": 0.5, "tau": 0.05, "s": 0.4, "m": 0.3, "g": 0.7}
+
+    create_and_fit_simulated_data(model=model, parameters=parameters, verbose=True, t_max=500, n_kanji=70)
 
 
 if __name__ == "__main__":
