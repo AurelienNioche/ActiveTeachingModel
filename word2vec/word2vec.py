@@ -29,8 +29,13 @@ def _load_model():
 
     print('Load Word2Vec model...', end=" ")
     if not os.path.exists(MODEL):
-        model = KeyedVectors.load_word2vec_format(DATA, binary=True)
-        model.save(MODEL)
+        try:
+            model = KeyedVectors.load_word2vec_format(DATA, binary=True)
+            model.save(MODEL)
+        except Exception:
+            raise Exception(f"File '{DATA_FOLDER}/GoogleNews-vectors-negative300.bin' is missing. \n"
+                            f"File should be available at "
+                            f"'https://drive.google.com/file/d/0B7XkCwpI5KDYNlNUTTlSS21pQmM/edit'")
 
     else:
         model = KeyedVectors.load(MODEL, mmap='r')
