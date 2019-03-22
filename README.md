@@ -72,7 +72,7 @@ Analyse experimental results
 
 Check quality of model by fitting the model to itself
 
-    python3 fit_the_model_itself?.py 
+    python3 fit_the_model_itself.py 
     
 
 ### Other operations
