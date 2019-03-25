@@ -237,10 +237,8 @@ class ActRLearner(Learner):
             for t_presentation in self.time_presentation[i]
         ])
 
-        if sum_a > 0:
-            return np.log(sum_a)
-        else:
-            return -np.inf
+        b = np.log(sum_a) if sum_a > 0 else -np.inf
+        return b
 
     def _probability_of_retrieval_equation(self, a):
 
