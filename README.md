@@ -98,6 +98,18 @@ Remove the db
     
     dropdb ActiveTeaching 
 
+
+## Postgre error management
+
+Be sure that posgre sever is running
+    
+    brew services start postgre
+
+In case error 'psycopg2.OperationalError: could not connect to server: No such file or directory
+	Is the server running locally and accepting
+	connections on Unix domain socket "/tmp/.s.PGSQL.5432"?' appears while the server is running:
+
+    rm /usr/local/var/postgres/postmaster.pid
     
 ## Sources
 
