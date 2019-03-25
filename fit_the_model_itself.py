@@ -12,14 +12,17 @@ import numpy as np
 
 import plot.success
 
-from model.learner import QLearner, ActRLearner, ActRPlusLearner, ActRPlusPlusLearner
+from model.rl import QLearner
+from model.act_r import ActRLearner, ActRPlusLearner, ActRPlusPlusLearner
 
 from task.parameters import n_possible_replies
 
-import graphic_similarity.measure
-import semantic_similarity.measure
+import similarity_graphic.measure
+import similarity_semantic.measure
 
 from fit import fit
+
+from tqdm import tqdm
 
 
 def create_questions(t_max=100, n_kanji=20, grade=1, verbose=False):
@@ -77,14 +80,14 @@ def create_questions(t_max=100, n_kanji=20, grade=1, verbose=False):
         possible_replies_list.append(possible_replies)
 
     if verbose:
-        print(f"Kanjis used are: {kanji}")
-        print(f"Meanings used are: {meaning}")
+        print(f"Kanjis used are: {kanji}\n")
+        print(f"Meanings used are: {meaning}\n")
 
     return kanji, meaning, question_list, correct_answer_list, possible_replies_list
 
 
 def get_simulated_data(model, parameters, kanjis, meanings, questions_list, possible_replies_list,
-                       c_graphic=None, c_semantic=None):
+                       c_graphic=None, c_semantic=None, verbose=False):
 
     n_items = len(kanjis)
     t_max = len(possible_replies_list)
@@ -104,7 +107,13 @@ def get_simulated_data(model, parameters, kanjis, meanings, questions_list, poss
     success = np.zeros(t_max, dtype=int)
     possible_replies = np.zeros((t_max, n_possible_replies), dtype=int)
 
-    for t in range(t_max):
+    if verbose:
+        print(f"Generating data with model {model.__name__}...")
+        gen = tqdm(range(t_max))
+    else:
+        gen = range(t_max)
+
+    for t in gen:
         q = questions[t]
         for i in range(n_possible_replies):
             possible_replies[t, i] = meanings.index(possible_replies_list[t][i])
@@ -125,15 +134,12 @@ def create_and_fit_simulated_data(model=None, parameters=None, t_max=300, n_kanj
         model = model
         parameters = {"alpha": 0.1, "tau": 0.01}
 
-    print(f"Simulating {model.__name__} with parameters: {parameters}.")
-    print()
+    print(f"Simulating {model.__name__} with parameters: {parameters}.\n")
     kanjis, meanings, question_list, correct_answer_list, possible_replies_list = \
         create_questions(t_max=t_max, n_kanji=n_kanji, grade=grade, verbose=verbose)
-    print()
-    c_graphic = graphic_similarity.measure.get(kanjis, force=force, verbose=verbose)
-    print()
-    c_semantic = semantic_similarity.measure.get(meanings, force=force, verbose=verbose)
-    print()
+
+    c_graphic = similarity_graphic.measure.get(kanjis, force=force, verbose=verbose)
+    c_semantic = similarity_semantic.measure.get(meanings, force=force, verbose=verbose)
 
     questions, replies, n_items, possible_replies, success = get_simulated_data(
         model=model,
@@ -141,7 +147,8 @@ def create_and_fit_simulated_data(model=None, parameters=None, t_max=300, n_kanj
         kanjis=kanjis, meanings=meanings,
         questions_list=question_list,
         possible_replies_list=possible_replies_list,
-        c_graphic=c_graphic, c_semantic=c_semantic
+        c_graphic=c_graphic, c_semantic=c_semantic,
+        verbose=verbose
     )
 
     plot.success.curve(success, fig_name=f'simulated_curve.pdf')
@@ -156,9 +163,7 @@ def create_and_fit_simulated_data(model=None, parameters=None, t_max=300, n_kanj
     f.act_r_plus()
     print()
     # f.act_r_plus_plus()
-    print()
-    print("****")
-    print()
+    print("\n****\n")
 
 
 def demo():

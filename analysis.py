@@ -16,8 +16,8 @@ import behavior.data
 import plot.model_comparison
 import plot.success
 
-import graphic_similarity.measure
-import semantic_similarity.measure
+import similarity_graphic.measure
+import similarity_semantic.measure
 
 MODEL_NAMES = ["RL", "ACT-R -", "ACT-R +", "ACT-R ++"]
 N_MODELS = len(MODEL_NAMES)
@@ -46,8 +46,8 @@ def model_comparison():
 
         # Get task parameters for ACT-R +
         question_entries, kanjis, meanings = behavior.data.task_features(user_id=u.id)
-        c_graphic = graphic_similarity.measure.get(kanjis)
-        c_semantic = semantic_similarity.measure.get(meanings)
+        c_graphic = similarity_graphic.measure.get(kanjis)
+        c_semantic = similarity_semantic.measure.get(meanings)
 
         f = fit.Fit(questions=questions, replies=replies, possible_replies=possible_replies, n_items=n_items,
                     c_graphic=c_graphic, c_semantic=c_semantic, use_p_correct=use_p_correct)

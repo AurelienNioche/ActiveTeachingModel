@@ -1,44 +1,16 @@
 import numpy as np
 
-from model.learner import QLearner, ActRLearner, ActRPlusLearner, ActRPlusPlusLearner
+from model.rl import QLearner
+from model.act_r import ActRLearner, ActRPlusLearner, ActRPlusPlusLearner
 
-import scipy.optimize
+# import scipy.optimize
 from hyperopt import hp, fmin, tpe
-
-import graphic_similarity.measure
-import semantic_similarity.measure
 
 IDX_PARAMETERS = 0
 IDX_MODEL = 1
 IDX_ARGUMENTS = 2
 
-
-def _bic(lls, n, k):
-
-    """
-    :param lls: log-likelihood sum
-    :param n: number of observations
-    :param k: number of parameters
-    :return: BIC
-    """
-    return -2 * lls + np.log(n) * k
-
-
-def _log_likelihood_sum(p_choices):
-
-    return np.sum(np.log(p_choices))
-
-#
-# def _objective(parameters, model, task, exp):
-#
-#     agent = model(parameters, task)
-#     p_choices = agent.get_p_choices(exp)
-#
-#     if p_choices is None:
-#         print("WARNING! Objective function returning 'None'")
-#         return np.inf
-#
-#     return - _log_likelihood_sum(p_choices)
+MAX_EVALS = 500
 
 
 class Fit:
@@ -59,15 +31,23 @@ class Fit:
         self.t_max = len(self.questions)
         self.n_possible_replies = len(self.possible_replies[0])
 
+    def _bic(self, lls, k):
+        """
+        :param lls: log-likelihood sum
+        :param k: number of parameters
+        :return: BIC
+        """
+        return -2 * lls + np.log(self.t_max) * k
+
+    @classmethod
+    def _log_likelihood_sum(cls, p_choices):
+        return np.sum(np.log(p_choices))
+
     def _model_stats(self, p_choices, best_param):
 
         mean_p = np.mean(p_choices)
-
-        lls = _log_likelihood_sum(p_choices)
-
-        n = self.t_max
-        k = len(best_param)
-        bic = _bic(lls=lls, n=n, k=k)
+        lls = self._log_likelihood_sum(p_choices)
+        bic = self._bic(lls=lls, k=len(best_param))
 
         return mean_p, lls, bic
 
@@ -85,7 +65,7 @@ class Fit:
                 to_return = np.inf
 
             else:
-                to_return = - _log_likelihood_sum(p_choices_)
+                to_return = - self._log_likelihood_sum(p_choices_)
 
             # print(f"Objective returning: {to_return}")
             return to_return
@@ -99,7 +79,7 @@ class Fit:
         #     fun=_objective, args=(model, task, exp),
         #     bounds=bounds)
 
-        best_param = fmin(fn=objective, space=space, algo=tpe.suggest, max_evals=10**3)
+        best_param = fmin(fn=objective, space=space, algo=tpe.suggest, max_evals=MAX_EVALS)
 
         # print(best_param)
         # best_param = res.x

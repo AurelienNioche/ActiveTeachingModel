@@ -102,14 +102,17 @@ class ActRLearner(Learner):
         self.time_presentation[question].append(self.t)
         self.t += 1
 
+    def _p_retrieve(self, item):
+
+        a = self._activation_function(item)
+        return self._probability_of_retrieval_equation(a)
+
     def _p_choice(self, question, reply, possible_replies=None):
 
+        p_retrieve = self._p_retrieve(question)
+        p = self.p_random + p_retrieve*(1 - self.p_random)
+
         success = question == reply
-
-        a = self._activation_function(question)
-        p = self._probability_of_retrieval_equation(a)
-
-        p = self.p_random + p*(1 - self.p_random)
 
         if success:
             return p
@@ -127,13 +130,13 @@ class ActRLearner(Learner):
 
     def decide(self, question, possible_replies):
 
-        a = self._activation_function(question)
-        p = self._probability_of_retrieval_equation(a)
+        p_r = self._p_retrieve(question)
         r = np.random.random()
-        if p > r:
+
+        if p_r > r:
             reply = question
         else:
-            reply = np.random.randint(self.tk.n_items)
+            reply = np.random.choice(possible_replies)
 
         return reply
 
@@ -148,29 +151,47 @@ class ActRPlusLearner(ActRLearner):
 
         super().__init__(parameters=parameters, task_features=task_features)
 
-    def _activation_function(self, i):
+    def _p_retrieve(self, item):
 
-        return self._base_level_learning_activation(i) + self._sum_source_activation(i)
+        a_i = self._base_level_learning_activation(item)
+        g_i, m_i = self._g_and_m(item)
+        print(f"t={self.t}: a_i={a_i}; g_i={g_i}; m_i={m_i}")
 
-    def _sum_source_activation(self, i):
+        p_r = self._probability_of_retrieval_equation(
+            a_i + self.pr.g * g_i + self.pr.m * m_i
+        )
+        print(f"t={self.t}: p={p_r}")
 
-        sum_source = 0
+        return p_r
+
+    def _g_and_m(self, i):
+
+        g_i = 0
+        m_i = 0
 
         list_j = list(range(self.tk.n_items))
         list_j.remove(i)
 
         for j in list_j:
 
-            s_j = self._probability_of_retrieval_equation(self._base_level_learning_activation(j))
-            assert 0 <= s_j <= 1
-            # s_j = self.base_level_learning_activation(j)
+            b_j = self._base_level_learning_activation(j)
+            if b_j > 1:
+                np.seterr(all='raise')
 
-            sum_source += \
-                self.pr.g * self.tk.c_graphic[i, j] * s_j + \
-                self.pr.m * self.tk.c_semantic[i, j] * s_j
+                try:
+                    g_i += self.tk.c_graphic[i, j] * self._probability_of_retrieval_equation(b_j)
+                except:
+                    print(f'b_j: {b_j}, cg: {self.tk.c_graphic[i, j]}')
 
-        return (1/2) * (1/(self.tk.n_items-1)) * sum_source
-        # return sum_source
+                try:
+                    m_i += self.tk.c_semantic[i, j] * self._probability_of_retrieval_equation(b_j)
+                except:
+                    print(f'b_j: {b_j}, cs: {self.tk.c_semantic[i, j]}')
+
+                np.seterr(all='ignore')
+        g_i /= (self.tk.n_items - 1)
+        m_i /= (self.tk.n_items - 1)
+        return g_i, m_i
 
 
 class ActRPlusPlusLearner(ActRPlusLearner):
@@ -179,39 +200,27 @@ class ActRPlusPlusLearner(ActRPlusLearner):
 
         super().__init__(parameters=parameters, task_features=task_features)
 
-    def _sum_source_activation(self, i):
+    def _g_and_m(self, i):
 
-        sum_source = 0
+        g_i = 0
+        m_i = 0
 
         list_j = list(range(self.tk.n_items))
         list_j.remove(i)
 
         for j in list_j:
+            b_j = self._base_level_learning_activation(j)
 
-            s_j = self._probability_of_retrieval_equation(self._base_level_learning_activation(j))
-            assert 0 <= s_j <= 1
+            g_ij = self._normal_pdf(self.tk.c_graphic[i, j], mu=self.pr.g_mu, sigma=self.pr.g_sigma)
+            m_ij = self._normal_pdf(self.tk.c_semantic[i, j], mu=self.pr.m_mu, sigma=self.pr.m_sigma)
 
-            if s_j > 0.001:
+            g_i += g_ij * b_j
+            m_i += m_ij * b_j
 
-                g_ij = self.tk.c_graphic[i, j]
-                m_ij = self.tk.c_semantic[i, j]
-
-                g_v = self.normal_pdf(g_ij, mu=self.pr.g_mu, sigma=self.pr.g_sigma) * self.pr.g_sigma
-
-                m_v = self.normal_pdf(m_ij, mu=self.pr.m_mu, sigma=self.pr.m_sigma) * self.pr.m_sigma
-
-                try:
-                    sum_source += \
-                        self.pr.g * g_v * s_j + \
-                        self.pr.m * m_v * s_j
-                except FloatingPointError as e:
-                    print(f'g={self.pr.g}; g_v= {g_v} ; s_j = {s_j}, m={self.pr.m}, m_v={m_v}')
-                    raise e
-
-        return (1/2) * (1/(self.tk.n_items-1)) * sum_source
+        return g_i, m_i
 
     @classmethod
-    def normal_pdf(cls, x, mu, sigma):
+    def _normal_pdf(cls, x, mu, sigma):
 
         sigma_squared = sigma ** 2
 
@@ -229,150 +238,3 @@ class ActRPlusPlusLearner(ActRPlusLearner):
         e = (2 * np.pi * sigma_squared) ** (1 / 2)
         f = 1 / e
         return f * d
-
-
-
-# class ActRPlusLearner(ActRLearner):
-#
-#     def __init__(self,  parameters, task_features):
-#
-#         super().__init__(parameters=parameters, task_features=task_features)
-#
-#     def _activation_function(self, i):
-#
-#         return self.pr.s + self._normalized_activation(i) + self._sum_source_activation(i)
-#
-#     def _sum_source_activation(self, i):
-#
-#         sum_source = 0
-#
-#         list_j = list(range(self.tk.n_items))
-#         list_j.remove(i)
-#
-#         for j in list_j:
-#
-#             s_j = self._normalized_activation(j)
-#             assert 0 <= s_j <= 1
-#             # s_j = self.base_level_learning_activation(j)
-#
-#             sum_source += \
-#                 self.pr.g * self.tk.c_graphic[i, j] * s_j + \
-#                 self.pr.m * self.tk.c_semantic[i, j] * s_j
-#
-#         return (1/2) * (1/(self.tk.n_items-1)) * sum_source
-#         # return sum_source
-#
-#     def _normalized_activation(self, item):
-#
-#         a = self._base_level_learning_activation(item)
-#
-#         x = (self.pr.tau - a) / self.pr.s
-#
-#         # Avoid overflow
-#         if x < -10**2:  # 1 / (1+exp(-1000)) equals approx 1.
-#             return 1
-#
-#         elif x > 700:  # 1 / (1+exp(700)) equals approx 0.
-#             return 0
-#
-#         else:
-#             try:
-#                 return 1 / (1 + np.exp(x))
-#             except FloatingPointError as e:
-#                 print(f'x={x}, tau = {self.pr.tau}, a = {a}, s = {self.pr.s}')
-#                 raise e
-#
-#     def _probability_of_retrieval_equation(self, question):
-#
-#         a = self._activation_function(question)
-#
-#         """The probability of a chunk being above some retrieval threshold τ is"""
-#
-#         # x = (self.pr.tau - a) / self.pr.s
-#         #
-#         # # Avoid overflow
-#         # if x < -10**2:  # 1 / (1+exp(-1000)) equals approx 1.
-#         #     return 1
-#         #
-#         # elif x > 700:  # 1 / (1+exp(700)) equals approx 0.
-#         #     return 0
-#         #
-#         # else:
-#         #     try:
-#         #         return 1 / (1 + np.exp(x))
-#         #     except FloatingPointError as e:
-#         #         print(f'x={x}, tau = {self.pr.tau}, a = {a}, s = {self.pr.s}')
-#         #         raise e
-#
-#
-#     def decide(self, question, possible_replies):
-#
-#         a = self._activation_function(question)
-#         p = self._probability_of_retrieval_equation(a)
-#         r = np.random.random()
-#         if p > r:
-#             reply = question
-#         else:
-#             reply = np.random.randint(self.tk.n_items)
-#
-#         return reply
-#
-#
-#
-# class ActRPlusPlusLearner(ActRPlusLearner):
-#
-#     def __init__(self, parameters, task_features):
-#
-#         super().__init__(parameters=parameters, task_features=task_features)
-#
-#     def _sum_source_activation(self, i):
-#
-#         sum_source = 0
-#
-#         list_j = list(range(self.tk.n_items))
-#         list_j.remove(i)
-#
-#         for j in list_j:
-#
-#             s_j = self._probability_of_retrieval_equation(self._base_level_learning_activation(j))
-#             assert 0 <= s_j <= 1
-#
-#             if s_j > 0.001:
-#
-#                 g_ij = self.tk.c_graphic[i, j]
-#                 m_ij = self.tk.c_semantic[i, j]
-#
-#                 g_v = self.normal_pdf(g_ij, mu=self.pr.g_mu, sigma=self.pr.g_sigma) * self.pr.g_sigma
-#
-#                 m_v = self.normal_pdf(m_ij, mu=self.pr.m_mu, sigma=self.pr.m_sigma) * self.pr.m_sigma
-#
-#                 try:
-#                     sum_source += \
-#                         self.pr.g * g_v * s_j + \
-#                         self.pr.m * m_v * s_j
-#                 except FloatingPointError as e:
-#                     print(f'g={self.pr.g}; g_v= {g_v} ; s_j = {s_j}, m={self.pr.m}, m_v={m_v}')
-#                     raise e
-#
-#         return (1/2) * (1/(self.tk.n_items-1)) * sum_source
-#
-#     @classmethod
-#     def normal_pdf(cls, x, mu, sigma):
-#
-#         sigma_squared = sigma ** 2
-#
-#         a = (x - mu) ** 2
-#         b = 2 * sigma_squared
-#         c = -a / b
-#         if c < -700:  # exp(-700) equals approx 0
-#             return 0
-#
-#         try:
-#             d = np.exp(c)
-#         except FloatingPointError as e:
-#             print(f'x={x}; mu={mu}; sigma={sigma}')
-#             raise e
-#         e = (2 * np.pi * sigma_squared) ** (1 / 2)
-#         f = 1 / e
-#         return f * d
-#

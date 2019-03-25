@@ -130,6 +130,6 @@ auto_encoder/backup
 auto_encoder/fig
 
 # Related to similarity assessment
-graphic_similarity/backup
-semantic_similarity/backup
+similarity_graphic/backup
+similarity_semantic/backup
 Supprimerait model/parameters/
