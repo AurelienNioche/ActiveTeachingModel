@@ -5,9 +5,48 @@ from model.generic import Learner, Task
 
 class ActRParam:
 
-    def __init__(self, d, tau, s, g=None, m=None, g_mu=None, g_sigma=None,
-                 m_mu=None, m_sigma=None):
+    def __init__(self, d, tau, s):
 
+        # Decay parameter
+        self.d = d
+        # Retrieval threshold
+        self.tau = tau
+        # Noise in the activation levels
+        self.s = s
+
+
+class ActRMeaningParam:
+
+    def __init__(self, d, tau, s, m):
+
+        # Decay parameter
+        self.d = d
+        # Retrieval threshold
+        self.tau = tau
+        # Noise in the activation levels
+        self.s = s
+
+        self.m = m
+
+
+class ActRPlusParam:
+
+    def __init__(self, d, tau, s, g, m):
+
+        # Decay parameter
+        self.d = d
+        # Retrieval threshold
+        self.tau = tau
+        # Noise in the activation levels
+        self.s = s
+
+        self.g = g
+        self.m = m
+
+
+class ActRPlusPlusParam:
+
+    def __init__(self, d, tau, s, g, m, g_mu, g_sigma, m_mu, m_sigma):
         # Decay parameter
         self.d = d
         # Retrieval threshold
@@ -25,7 +64,7 @@ class ActRParam:
         self.m_sigma = m_sigma
 
 
-class ActRLearner(Learner):
+class ActR(Learner):
 
     """
     A chunk is composed of:
@@ -33,13 +72,13 @@ class ActRLearner(Learner):
     * several slots (here: slot 1: kanji, slot2: meaning)
     """
 
-    def __init__(self, parameters, task_features):
+    def __init__(self, task_features, parameters=None, verbose=False):
 
         super().__init__()
 
         if type(parameters) == dict:
             self.pr = ActRParam(**parameters)
-        else:
+        elif type(parameters) in (tuple, list):
             self.pr = ActRParam(*parameters)
 
         self.tk = Task(**task_features)
@@ -52,16 +91,18 @@ class ActRLearner(Learner):
         # Time counter
         self.t = 0
 
+        # Do print
+        self.verbose = verbose
+
         # self.square_root_2 = 2**(1/2)
 
     def _activation_function(self, i):
 
-        """The activation of a chunk is the sum of its base-level activation and some noise
-        IN FUTURE: ...and the activations it receives from elements attended to. """
+        """The activation of a chunk is the sum of its base-level activation"""
 
         # noise = np.random.normal()
-        # print(self.base_level_learning_activation(i))
-        return self._base_level_learning_activation(i)  # + noise
+        b = self._base_level_learning_activation(i)  # + noise
+        return b
 
     def _base_level_learning_activation(self, i):
 
@@ -69,7 +110,7 @@ class ActRLearner(Learner):
 
         # noinspection PyTypeChecker
         sum_a = np.sum([
-            ((self.t - t_presentation) / self.tk.t_max)**(-self.pr.d)
+            (self.t - t_presentation)**(-self.pr.d)
             for t_presentation in self.time_presentation[i]
         ])
 
@@ -105,26 +146,33 @@ class ActRLearner(Learner):
     def _p_retrieve(self, item):
 
         a = self._activation_function(item)
-        return self._probability_of_retrieval_equation(a)
+        p_retrieve = self._probability_of_retrieval_equation(a)
+        if self.verbose:
+            print(f"t={self.t}, a_i: {a:.3f}, p_r: {p_retrieve:.3f}")
+        return p_retrieve
 
     def _p_choice(self, question, reply, possible_replies=None):
 
         p_retrieve = self._p_retrieve(question)
-        p = self.p_random + p_retrieve*(1 - self.p_random)
+        p_correct = self.p_random + p_retrieve*(1 - self.p_random)
 
         success = question == reply
 
         if success:
-            return p
+            return p_correct
+
         else:
-            return (1-p) / (self.tk.n_possible_replies - 1)
+            p_failure = (1-p_correct) / (self.tk.n_possible_replies - 1)
+            return p_failure
 
     def _p_correct(self, question, reply, possible_replies=None):
 
         p_correct = self._p_choice(question=question, reply=question)
 
-        if question == reply:
+        correct = question == reply
+        if correct:
             return p_correct
+
         else:
             return 1-p_correct
 
@@ -138,6 +186,8 @@ class ActRLearner(Learner):
         else:
             reply = np.random.choice(possible_replies)
 
+        if self.verbose:
+            print(f't={self.t}: question {question}, reply {reply}')
         return reply
 
     def learn(self, question, reply):
@@ -145,22 +195,74 @@ class ActRLearner(Learner):
         self._update_time_presentation(question)  # We suppose the response to be always correct if recalled
 
 
-class ActRPlusLearner(ActRLearner):
+class ActRMeaning(ActR):
 
-    def __init__(self,  parameters, task_features):
+    def __init__(self,  parameters, task_features, verbose=False):
 
-        super().__init__(parameters=parameters, task_features=task_features)
+        if type(parameters) == dict:
+            self.pr = ActRMeaningParam(**parameters)
+        elif type(parameters) in (tuple, list):
+            self.pr = ActRMeaningParam(*parameters)
+
+        super().__init__(task_features=task_features, verbose=verbose)
+
+    def _p_retrieve(self, item):
+
+        a_i = self._base_level_learning_activation(item)
+        m_i = self._m(item)
+
+        p_r = self._probability_of_retrieval_equation(
+            a_i + self.pr.m * m_i
+        )
+        if self.verbose:
+            print(f"t={self.t}: a_i={a_i:.3f}; m_i={m_i:.3f};  p={p_r:.3f}")
+
+        return p_r
+
+    def _m(self, i):
+
+        m_i = 0
+
+        list_j = list(range(self.tk.n_items))
+        list_j.remove(i)
+
+        for j in list_j:
+
+            b_j = self._base_level_learning_activation(j)
+            if b_j > 0:
+                np.seterr(all='raise')
+
+                try:
+                    m_i += self.tk.c_semantic[i, j] * self._probability_of_retrieval_equation(b_j)
+                except:
+                    print(f'b_j: {b_j}, cs: {self.tk.c_semantic[i, j]}')
+
+                np.seterr(all='ignore')
+        m_i /= (self.tk.n_items - 1)
+        return m_i
+
+
+class ActRPlus(ActR):
+
+    def __init__(self, task_features, parameters, verbose=False):
+
+        if type(parameters) == dict:
+            self.pr = ActRPlusParam(**parameters)
+        elif type(parameters) in (tuple, list):
+            self.pr = ActRPlusParam(*parameters)
+
+        super().__init__(task_features=task_features, verbose=verbose)
 
     def _p_retrieve(self, item):
 
         a_i = self._base_level_learning_activation(item)
         g_i, m_i = self._g_and_m(item)
-        print(f"t={self.t}: a_i={a_i}; g_i={g_i}; m_i={m_i}")
 
         p_r = self._probability_of_retrieval_equation(
             a_i + self.pr.g * g_i + self.pr.m * m_i
         )
-        print(f"t={self.t}: p={p_r}")
+        if self.verbose:
+            print(f"t={self.t}: a_i={a_i:.3f}; g_i={g_i:.3f}; m_i={m_i:.3f};  p={p_r:.3f}")
 
         return p_r
 
@@ -194,11 +296,16 @@ class ActRPlusLearner(ActRLearner):
         return g_i, m_i
 
 
-class ActRPlusPlusLearner(ActRPlusLearner):
+class ActRPlusPlus(ActRPlus):
 
-    def __init__(self, parameters, task_features):
+    def __init__(self, parameters, task_features, verbose=False):
 
-        super().__init__(parameters=parameters, task_features=task_features)
+        if type(parameters) == dict:
+            self.pr = ActRPlusPlusParam(**parameters)
+        elif type(parameters) in (tuple, list):
+            self.pr = ActRPlusPlusParam(*parameters)
+
+        super().__init__(task_features=task_features, verbose=verbose)
 
     def _g_and_m(self, i):
 

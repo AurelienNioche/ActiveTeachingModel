@@ -1,7 +1,7 @@
 import numpy as np
 
 from model.rl import QLearner
-from model.act_r import ActRLearner, ActRPlusLearner, ActRPlusPlusLearner
+from model.act_r import ActR, ActRPlus, ActRPlusPlus, ActRMeaning
 
 # import scipy.optimize
 from hyperopt import hp, fmin, tpe
@@ -57,8 +57,8 @@ class Fit:
 
         def objective(parameters):
 
-            agent = model(parameters, task)
-            p_choices_ = agent.get_p_choices(exp, fit_param)
+            agent = model(parameters=parameters, task_features=task)
+            p_choices_ = agent.get_p_choices(exp=exp, fit_param=fit_param)
 
             if p_choices_ is None:
                 # print("WARNING! Objective function returning 'None'")
@@ -87,8 +87,8 @@ class Fit:
         # print(f"Fit was successful: {success}")
 
         # Get probabilities with best param
-        learner = model(best_param, task)
-        p_choices = learner.get_p_choices(exp, fit_param)
+        learner = model(parameters=best_param, task_features=task)
+        p_choices = learner.get_p_choices(exp=exp, fit_param=fit_param)
 
         # Compute bic, etc.
         mean_p, lls, bic = self._model_stats(p_choices=p_choices, best_param=best_param)
@@ -132,7 +132,7 @@ class Fit:
 
     def act_r(self):
 
-        model = ActRLearner
+        model = ActR
         # bounds = (
         #     (0, 1.0),  # d
         #     (0.00, 5),  # tau
@@ -141,15 +141,34 @@ class Fit:
 
         space = (
             hp.uniform('d', 0, 1.0),  # d
-            hp.uniform('tau', 0.00, 5),  # tau
-            hp.uniform('s', 0.0000001, 10)  # s
+            hp.uniform('tau', -5, 5),  # tau
+            hp.uniform('s', 0.0000001, 1)  # s
+        )
+
+        return self._evaluate(model=model, space=space)
+
+    def act_r_meaning(self):
+
+        model = ActRMeaning
+        # bounds = (
+        #     (0, 1.0),  # d
+        #     (0.00, 10),  # tau
+        #     (0.0000001, 10),  # s
+        #     (-10, 10),  # g
+        #     (-10, 10))  # m
+
+        space = (
+            hp.uniform('d', 0.0000001, 1.0),  # d
+            hp.uniform('tau', -5, 5),  # tau
+            hp.uniform('s', 0.0000001, 1),  # s
+            hp.uniform('m', 0, 1),
         )
 
         return self._evaluate(model=model, space=space)
 
     def act_r_plus(self):
 
-        model = ActRPlusLearner
+        model = ActRPlus
         # bounds = (
         #     (0, 1.0),  # d
         #     (0.00, 10),  # tau
@@ -169,7 +188,7 @@ class Fit:
 
     def act_r_plus_plus(self):
 
-        model = ActRPlusPlusLearner
+        model = ActRPlusPlus
         # bounds = (
         #     (0, 1.0),  # d
         #     (0.00, 10),  # tau

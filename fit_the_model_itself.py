@@ -13,7 +13,7 @@ import numpy as np
 import plot.success
 
 from model.rl import QLearner
-from model.act_r import ActRLearner, ActRPlusLearner, ActRPlusPlusLearner
+from model.act_r import ActR, ActRMeaning, ActRPlus, ActRPlusPlus
 
 from task.parameters import n_possible_replies
 
@@ -100,7 +100,7 @@ def get_simulated_data(model, parameters, kanjis, meanings, questions_list, poss
         'c_semantic': c_semantic
     }
 
-    agent = model(parameters, task_features)
+    agent = model(parameters, task_features, verbose)
 
     questions = np.asarray([kanjis.index(q) for q in questions_list], dtype=int)
     replies = np.zeros(t_max, dtype=int)
@@ -164,31 +164,31 @@ def create_and_fit_simulated_data(model=None, parameters=None, t_max=300, n_kanj
 
     f = fit.Fit(questions=questions, replies=replies, possible_replies=possible_replies, n_items=n_items,
                 c_graphic=c_graphic, c_semantic=c_semantic, use_p_correct=use_p_correct)
-    print()
-    f.rl()
-    print()
-    f.act_r()
-    print()
-    f.act_r_plus()
-    print()
+    # print()
+    # f.rl()
+    # print()
+    # f.act_r()
+    f.act_r_meaning()
+    # f.act_r_plus()
     # f.act_r_plus_plus()
-    print("\n****\n")
+    # print("\n****\n")
 
 
 def demo():
 
     for m, p in (
             (QLearner, {"alpha": 0.05, "tau": 0.01}),
-            (ActRLearner, {"d": 0.5, "tau": 0.05, "s": 0.4}),
-            (ActRPlusLearner, {"d": 0.5, "tau": 0.05, "s": 0.4, "m": 0.3, "g": 0.7}),
-            (ActRPlusPlusLearner, {"d": 0.5, "tau": 0.05, "s": 0.4, "m": 0.3, "g": 0.7,
-                                   "g_mu": 0.5, "g_sigma": 1.2, "m_mu": 0.2, "m_sigma": 2}),
+            (ActR, {"d": 0.5, "tau": 0.05, "s": 0.4}),
+            (ActRPlus, {"d": 0.5, "tau": 0.05, "s": 0.4, "m": 0.3, "g": 0.7}),
+            (ActRPlusPlus, {"d": 0.5, "tau": 0.05, "s": 0.4, "m": 0.3, "g": 0.7,
+                            "g_mu": 0.5, "g_sigma": 1.2, "m_mu": 0.2, "m_sigma": 2}),
     ):
-        create_and_fit_simulated_data(model=m, parameters=p, use_p_correct=False)
+        create_and_fit_simulated_data(model=m, parameters=p, use_p_correct=False, verbose=True)
 
 
 def main():
-    model, parameters = ActRPlusLearner, {"d": 0.5, "tau": 0.05, "s": 0.4, "m": 0.3, "g": 0.7}
+    m, p = ActRMeaning, {"d": 0.5, "tau": 0.5, "s": 0.5, "m": 0.7}
+    create_and_fit_simulated_data(model=m, parameters=p, verbose=True, use_p_correct=True)
 
     # create_and_fit_simulated_data(model=model, parameters=parameters, verbose=True, t_max=500, n_kanji=70)
 

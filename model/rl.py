@@ -12,7 +12,7 @@ class QParam:
 
 class QLearner(Learner):
 
-    def __init__(self, parameters, task_features):
+    def __init__(self, parameters, task_features, verbose=False):
 
         super().__init__()
 
@@ -25,6 +25,8 @@ class QLearner(Learner):
 
         self.q = np.zeros((self.tk.n_items, self.tk.n_items))
         # print(f"alpha: {self.alpha}, tau:{self.tau}")
+
+        self.verbose = verbose
 
     def _softmax(self, x):
         try:
@@ -70,7 +72,7 @@ class QLearner(Learner):
         p = self._softmax(x=self.q[question, possible_replies])
         reply = np.random.choice(possible_replies, p=p)
 
-        if debug:
+        if self.verbose:
             print(f'Question is: {question}')
             print(f'P values are: {[f"{p_i:.02f}" for p_i in p]}')
             print(f'Reply is {reply}')

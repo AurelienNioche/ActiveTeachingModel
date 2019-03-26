@@ -19,30 +19,27 @@ import plot.success
 import similarity_graphic.measure
 import similarity_semantic.measure
 
-MODEL_NAMES = ["RL", "ACT-R -", "ACT-R +", "ACT-R ++"]
-N_MODELS = len(MODEL_NAMES)
-
 
 def model_comparison():
+
+    models = "rl", "act_r", "act_r_meaning"
+    n_models = len(models)
 
     users = User.objects.all().order_by('id')
 
     data = {
-        "bic": [[] for _ in range(N_MODELS)],
-        "mean_p": [[] for _ in range(N_MODELS)]
+        "bic": [[] for _ in range(n_models)],
+        "mean_p": [[] for _ in range(n_models)]
     }
 
-    use_p_correct = False
+    use_p_correct = True
 
     for u in users[::-1]:
 
-        # Get user id
-        user_id = u.id
-        print(user_id)
-        print("*" * 5)
+        print(f'{u.id}\n{"*" * 5}')
 
         # Get questions, replies, possible_replies, and number of different items
-        questions, replies, n_items, possible_replies, success = behavior.data.get(user_id, verbose=True)
+        questions, replies, n_items, possible_replies, success = behavior.data.get(user_id=u.id, verbose=True)
 
         # Get task parameters for ACT-R +
         question_entries, kanjis, meanings = behavior.data.task_features(user_id=u.id)
@@ -52,38 +49,22 @@ def model_comparison():
         f = fit.Fit(questions=questions, replies=replies, possible_replies=possible_replies, n_items=n_items,
                     c_graphic=c_graphic, c_semantic=c_semantic, use_p_correct=use_p_correct)
 
-        rl_mean_p, rl_bic = f.rl()
-        print()
-        act_r_mean_p, act_r_bic = f.act_r()
-        print()
-        act_r_plus_mean_p, act_r_plus_bic = f.act_r_plus()
-        print()
-        act_r_pp_mean_pp, act_r_pp_bic = f.act_r_plus_plus()
-        print()
+        for i, m in enumerate(models):
+            mean_p, bic = getattr(f, m)()
+            data["bic"][i].append(bic)
+            data["mean_p"][i].append(mean_p)
 
-        data["bic"][0].append(rl_bic)
-        data["bic"][1].append(act_r_bic)
-        data["bic"][2].append(act_r_plus_bic)
-        data["bic"][3].append(act_r_pp_bic)
+        plot.success.curve(successes=success, fig_name=f'success_curve_u{u.id}.pdf')
+        plot.success.scatter(successes=success, fig_name=f'success_scatter_u{u.id}.pdf')
 
-        data["mean_p"][0].append(rl_mean_p)
-        data["mean_p"][1].append(act_r_mean_p)
-        data["mean_p"][2].append(act_r_plus_mean_p)
-        data["mean_p"][3].append(act_r_pp_mean_pp)
-
-        print()
-
-        plot.success.curve(successes=success, fig_name=f'success_curve_u{user_id}.pdf')
-        plot.success.scatter(successes=success, fig_name=f'success_scatter_u{user_id}.pdf')
-
-    colors = [f"C{i}" for i in range(N_MODELS)]
+    colors = [f"C{i}" for i in range(n_models)]
 
     plot.model_comparison.scatter_plot(data_list=data["bic"], colors=colors,
-                                       x_tick_labels=MODEL_NAMES,
+                                       x_tick_labels=[i.replace('_', ' ') for i in models],
                                        f_name='model_comparison.pdf', y_label='BIC', invert_y_axis=True)
 
     plot.model_comparison.scatter_plot(data_list=data["mean_p"], colors=colors,
-                                       x_tick_labels=MODEL_NAMES,
+                                       x_tick_labels=[i.replace('_', ' ') for i in models],
                                        f_name='model_probabilities.pdf', y_label='p')
 
 
