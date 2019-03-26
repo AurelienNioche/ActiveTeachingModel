@@ -127,8 +127,7 @@ def get_simulated_data(model, parameters, kanjis, meanings, questions_list, poss
     return questions, replies, n_items, possible_replies, success
 
 
-def create_and_fit_simulated_data(model=None, parameters=None, t_max=300, n_kanji=30, grade=1,
-                                  use_p_correct=False, verbose=False, force=False):
+def create_simulated_data(model=None, parameters=None, t_max=300, n_kanji=30, grade=1, verbose=False, force=False):
 
     if model is None and parameters is None:
         model = model
@@ -152,6 +151,16 @@ def create_and_fit_simulated_data(model=None, parameters=None, t_max=300, n_kanj
     )
 
     plot.success.curve(success, fig_name=f'simulated_curve.pdf')
+
+    return questions, replies, n_items, possible_replies, c_graphic, c_semantic
+
+
+def create_and_fit_simulated_data(model=None, parameters=None, t_max=300, n_kanji=30, grade=1,
+                                  use_p_correct=False, verbose=False, force=False):
+
+    questions, replies, n_items, possible_replies, c_graphic, c_semantic = create_simulated_data(
+        model=model, parameters=parameters, t_max=t_max, n_kanji=n_kanji,
+        grade=grade, verbose=verbose, force=force)
 
     f = fit.Fit(questions=questions, replies=replies, possible_replies=possible_replies, n_items=n_items,
                 c_graphic=c_graphic, c_semantic=c_semantic, use_p_correct=use_p_correct)
@@ -181,7 +190,7 @@ def demo():
 def main():
     model, parameters = ActRPlusLearner, {"d": 0.5, "tau": 0.05, "s": 0.4, "m": 0.3, "g": 0.7}
 
-    create_and_fit_simulated_data(model=model, parameters=parameters, verbose=True, t_max=500, n_kanji=70)
+    # create_and_fit_simulated_data(model=model, parameters=parameters, verbose=True, t_max=500, n_kanji=70)
 
 
 if __name__ == "__main__":
