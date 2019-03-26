@@ -56,7 +56,7 @@ def task_features(user_id, verbose=False):
 
     if verbose:
         print(f"Kanji used: {kanjis}")
-        print(f"Corresponding meanings: {meanings}")
+        print(f"Corresponding meanings: {meanings}\n")
 
     return question_entries, kanjis, meanings
 

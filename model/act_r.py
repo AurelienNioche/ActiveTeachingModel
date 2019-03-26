@@ -29,6 +29,20 @@ class ActRMeaningParam:
         self.m = m
 
 
+class ActRGraphicParam:
+
+    def __init__(self, d, tau, s, g):
+
+        # Decay parameter
+        self.d = d
+        # Retrieval threshold
+        self.tau = tau
+        # Noise in the activation levels
+        self.s = s
+
+        self.g = g
+
+
 class ActRPlusParam:
 
     def __init__(self, d, tau, s, g, m):
@@ -76,10 +90,14 @@ class ActR(Learner):
 
         super().__init__()
 
-        if type(parameters) == dict:
+        if parameters is None:
+            pass  # ActR is used as abstract class
+        elif type(parameters) == dict:
             self.pr = ActRParam(**parameters)
-        elif type(parameters) in (tuple, list):
+        elif type(parameters) in (tuple, list, np.ndarray):
             self.pr = ActRParam(*parameters)
+        else:
+            raise Exception(f"Type {type(parameters)} is not handled for parameters")
 
         self.tk = Task(**task_features)
 
@@ -201,8 +219,10 @@ class ActRMeaning(ActR):
 
         if type(parameters) == dict:
             self.pr = ActRMeaningParam(**parameters)
-        elif type(parameters) in (tuple, list):
+        elif type(parameters) in (tuple, list, np.ndarray):
             self.pr = ActRMeaningParam(*parameters)
+        else:
+            raise Exception(f"Type {type(parameters)} is not handled for parameters")
 
         super().__init__(task_features=task_features, verbose=verbose)
 
@@ -242,14 +262,65 @@ class ActRMeaning(ActR):
         return m_i
 
 
+class ActRGraphic(ActR):
+
+    def __init__(self,  parameters, task_features, verbose=False):
+
+        if type(parameters) == dict:
+            self.pr = ActRGraphicParam(**parameters)
+        elif type(parameters) in (tuple, list, np.ndarray):
+            self.pr = ActRGraphicParam(*parameters)
+        else:
+            raise Exception(f"Type {type(parameters)} is not handled for parameters")
+
+        super().__init__(task_features=task_features, verbose=verbose)
+
+    def _p_retrieve(self, item):
+
+        a_i = self._base_level_learning_activation(item)
+        g_i = self._g(item)
+
+        p_r = self._probability_of_retrieval_equation(
+            a_i + self.pr.g * g_i
+        )
+        if self.verbose:
+            print(f"t={self.t}: a_i={a_i:.3f}; g_i={g_i:.3f};  p={p_r:.3f}")
+
+        return p_r
+
+    def _g(self, i):
+
+        g_i = 0
+
+        list_j = list(range(self.tk.n_items))
+        list_j.remove(i)
+
+        for j in list_j:
+
+            b_j = self._base_level_learning_activation(j)
+            if b_j > 0:
+                np.seterr(all='raise')
+
+                try:
+                    g_i += self.tk.c_graphic[i, j] * self._probability_of_retrieval_equation(b_j)
+                except:
+                    print(f'b_j: {b_j}, cs: {self.tk.c_graphic[i, j]}')
+
+                np.seterr(all='ignore')
+        g_i /= (self.tk.n_items - 1)
+        return g_i
+
+
 class ActRPlus(ActR):
 
     def __init__(self, task_features, parameters, verbose=False):
 
         if type(parameters) == dict:
             self.pr = ActRPlusParam(**parameters)
-        elif type(parameters) in (tuple, list):
+        elif type(parameters) in (tuple, list, np.ndarray):
             self.pr = ActRPlusParam(*parameters)
+        else:
+            raise Exception(f"Type {type(parameters)} is not handled for parameters")
 
         super().__init__(task_features=task_features, verbose=verbose)
 
@@ -302,8 +373,10 @@ class ActRPlusPlus(ActRPlus):
 
         if type(parameters) == dict:
             self.pr = ActRPlusPlusParam(**parameters)
-        elif type(parameters) in (tuple, list):
+        elif type(parameters) in (tuple, list, np.ndarray):
             self.pr = ActRPlusPlusParam(*parameters)
+        else:
+            raise Exception(f"Type {type(parameters)} is not handled for parameters")
 
         super().__init__(task_features=task_features, verbose=verbose)
 

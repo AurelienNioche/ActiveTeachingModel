@@ -1,21 +1,21 @@
 import numpy as np
 
 from model.rl import QLearner
-from model.act_r import ActR, ActRPlus, ActRPlusPlus, ActRMeaning
+from model.act_r import ActR, ActRPlus, ActRPlusPlus, ActRMeaning, ActRGraphic
 
-# import scipy.optimize
+import scipy.optimize
 from hyperopt import hp, fmin, tpe
 
 IDX_PARAMETERS = 0
 IDX_MODEL = 1
 IDX_ARGUMENTS = 2
 
-MAX_EVALS = 500
+MAX_EVALS = 500  # Only if tpe
 
 
 class Fit:
 
-    def __init__(self, questions, replies, n_items, possible_replies, use_p_correct=False,
+    def __init__(self, questions, replies, n_items, possible_replies, method='tpe', use_p_correct=False,
                  c_graphic=None, c_semantic=None):
 
         self.questions = questions
@@ -24,6 +24,7 @@ class Fit:
         self.possible_replies = possible_replies
 
         self.use_p_correct = use_p_correct
+        self.method = method
 
         self.c_graphic = c_graphic
         self.c_semantic = c_semantic
@@ -51,7 +52,7 @@ class Fit:
 
         return mean_p, lls, bic
 
-    def _evaluate(self, model, space):
+    def _evaluate(self, model, bounds):
 
         task, exp, fit_param = self._get_task_exp_fit_param()
 
@@ -60,31 +61,40 @@ class Fit:
             agent = model(parameters=parameters, task_features=task)
             p_choices_ = agent.get_p_choices(exp=exp, fit_param=fit_param)
 
-            if p_choices_ is None:
+            if p_choices_ is None or np.any(np.isnan(p_choices_)):
                 # print("WARNING! Objective function returning 'None'")
                 to_return = np.inf
 
             else:
                 to_return = - self._log_likelihood_sum(p_choices_)
 
-            # print(f"Objective returning: {to_return}")
             return to_return
 
-        # res = scipy.optimize.differential_evolution(
-        #     _objective, args=(model, task, exp),
-        #     bounds=bounds)
+        if self.method == 'tpe':  # Tree of Parzen Estimators
 
-        # res = scipy.optimize.minimize(
-        #     x0=np.zeros(len(bounds)) * 0.5,
-        #     fun=_objective, args=(model, task, exp),
-        #     bounds=bounds)
+            space = [hp.uniform(*b) for b in bounds]
+            best_param = fmin(fn=objective, space=space, algo=tpe.suggest, max_evals=MAX_EVALS)
 
-        best_param = fmin(fn=objective, space=space, algo=tpe.suggest, max_evals=MAX_EVALS)
+        elif self.method in ('de', 'L-BFGS-B', 'TNC', 'COBYLA', 'SLSQP'):  # Differential evolution
 
-        # print(best_param)
-        # best_param = res.x
-        # success = res.success
-        # print(f"Fit was successful: {success}")
+            bounds_scipy = [b[-2:] for b in bounds]
+
+            print("Finding best parameters...", end=' ')
+
+            if self.method == 'de':
+                res = scipy.optimize.differential_evolution(
+                        func=objective, bounds=bounds_scipy)
+            else:
+                x0 = np.zeros(len(bounds)) * 0.5
+                res = scipy.optimize.minimize(fun=objective, bounds=bounds_scipy, x0=x0)
+
+            best_param = {b[0]: v for b, v in zip(bounds, res.x)}
+            print(f"{res.message} [best loss: {res.fun}]")
+            if not res.success:
+                raise Exception(f"The fit did not succeed with method {self.method}.")
+
+        else:
+            raise Exception(f'Method {self.method} is not defined')
 
         # Get probabilities with best param
         learner = model(parameters=best_param, task_features=task)
@@ -120,109 +130,87 @@ class Fit:
 
     def rl(self):
 
-        space = [
-            hp.uniform('alpha', 0, 1),
-            hp.uniform('tau', 0.002, 0.5)
-        ]
-
+        bounds = (
+            ('alpha', 0, 1),
+            ('tau', 0.002, 0.5)
+        )
         model = QLearner
-        # bounds = [(0.00, 1.00), (0.002, 0.5)]
 
-        return self._evaluate(model=model, space=space)
+        return self._evaluate(model=model, bounds=bounds)
 
     def act_r(self):
 
         model = ActR
-        # bounds = (
-        #     (0, 1.0),  # d
-        #     (0.00, 5),  # tau
-        #     (0.0000001, 10)  # s
-        # )
-
-        space = (
-            hp.uniform('d', 0, 1.0),  # d
-            hp.uniform('tau', -5, 5),  # tau
-            hp.uniform('s', 0.0000001, 1)  # s
+        bounds = (
+            ('d', 0, 1.0),
+            ('tau', -5, 5),
+            ('s', 0.0000001, 1)
         )
 
-        return self._evaluate(model=model, space=space)
+        return self._evaluate(model=model, bounds=bounds)
 
     def act_r_meaning(self):
 
         model = ActRMeaning
-        # bounds = (
-        #     (0, 1.0),  # d
-        #     (0.00, 10),  # tau
-        #     (0.0000001, 10),  # s
-        #     (-10, 10),  # g
-        #     (-10, 10))  # m
-
-        space = (
-            hp.uniform('d', 0.0000001, 1.0),  # d
-            hp.uniform('tau', -5, 5),  # tau
-            hp.uniform('s', 0.0000001, 1),  # s
-            hp.uniform('m', 0, 1),
+        bounds = (
+            ('d', 0.0000001, 1.0), 
+            ('tau', -5, 5),
+            ('s', 0.0000001, 1),
+            ('m', -1, 1),
         )
 
-        return self._evaluate(model=model, space=space)
+        return self._evaluate(model=model, bounds=bounds)
+    
+    def act_r_graphic(self):
 
+        model = ActRGraphic
+        bounds = (
+            ('d', 0.0000001, 1.0), 
+            ('tau', -5, 5),
+            ('s', 0.0000001, 1), 
+            ('g', -1, 1),
+        )
+
+        return self._evaluate(model=model, bounds=bounds)
+    
     def act_r_plus(self):
 
         model = ActRPlus
-        # bounds = (
-        #     (0, 1.0),  # d
-        #     (0.00, 10),  # tau
-        #     (0.0000001, 10),  # s
-        #     (-10, 10),  # g
-        #     (-10, 10))  # m
-
-        space = (
-            hp.uniform('d', 0, 1.0),  # d
-            hp.uniform('tau', 0.00, 5),  # tau
-            hp.uniform('s', 0.0000001, 10),  # s
-            hp.uniform('g', -10, 10),
-            hp.uniform('m', -10, 10),
+        bounds = (
+            ('d', 0, 1.0),
+            ('tau', 0.00, 5),
+            ('s', 0.0000001, 10),
+            ('g', -10, 10),
+            ('m', -10, 10),
         )
 
-        return self._evaluate(model=model, space=space)
+        return self._evaluate(model=model, bounds=bounds)
 
     def act_r_plus_plus(self):
 
         model = ActRPlusPlus
-        # bounds = (
-        #     (0, 1.0),  # d
-        #     (0.00, 10),  # tau
-        #     (0.0000001, 10),  # s
-        #     (-1, 1),  # g
-        #     (-1, 1),  # m
-        #     (0, 1),  # g_mu
-        #     (0.01, 5),  # g_sigma
-        #     (0, 1),  # s_mu
-        #     (0.01, 5))  # s_sigma
-
-        space = (
-            hp.uniform('d', 0, 1.0),  # d
-            hp.uniform('tau', 0.00, 5),  # tau
-            hp.uniform('s', 0.0000001, 10),  # s
-            hp.uniform('g', -10, 10),
-            hp.uniform('m', -10, 10),
-            hp.uniform('g_mu', 0, 1),  # g_mu
-            hp.uniform('g_sigma', 0.01, 5),  # g_sigma
-            hp.uniform('m_mu', 0, 1),  # s_mu
-            hp.uniform('m_sigma', 0.01, 5)  # s_sigma
+        bounds = (
+            ('d', 0, 1.0),
+            ('tau', 0.00, 5),
+            ('s', 0.0000001, 10),
+            ('g', -10, 10),
+            ('m', -10, 10),
+            ('g_mu', 0, 1),
+            ('g_sigma', 0.01, 5),
+            ('m_mu', 0, 1),
+            ('m_sigma', 0.01, 5)
         )
 
-        return self._evaluate(model=model, space=space)
+        return self._evaluate(model=model, bounds=bounds)
 
     @classmethod
     def _print(cls, model_name, best_param, mean_p, lls, bic):
 
         if type(best_param) == dict:
-            best_param = {k: f"{v:.3f}" for k, v in best_param.items()}
-            dis_best_param = f"{best_param}, "
+            dis_best_param = ''.join(f'{k}={round(v, 3)}, ' for k, v in best_param.items())
         else:
             dis_best_param = f'{[f"{i:.3f}" for i in best_param]}, '
 
         print(f'[{model_name}] Best param: ' + dis_best_param +
-              f"LLS: {lls:.2f}, " +
-              f'BIC: {bic:.2f}, mean(P): {mean_p:.3f}')
+              f"LLS: {round(lls, 2)}, " +
+              f'BIC: {round(bic, 2)}, mean(P): {round(mean_p, 3)}\n')

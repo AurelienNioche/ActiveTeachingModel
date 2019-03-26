@@ -18,8 +18,10 @@ class QLearner(Learner):
 
         if type(parameters) == dict:
             self.pr = QParam(**parameters)
-        else:
+        elif type(parameters) in (list, tuple, np.ndarray):
             self.pr = QParam(*parameters)
+        else:
+            raise Exception(f"Type {type(parameters)} is not handled for parameters")
 
         self.tk = Task(**task_features)
 

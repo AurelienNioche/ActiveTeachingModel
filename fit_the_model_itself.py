@@ -127,7 +127,8 @@ def get_simulated_data(model, parameters, kanjis, meanings, questions_list, poss
     return questions, replies, n_items, possible_replies, success
 
 
-def create_simulated_data(model=None, parameters=None, t_max=300, n_kanji=30, grade=1, verbose=False, force=False):
+def create_simulated_data(model=None, parameters=None, t_max=300, n_kanji=30, grade=1, verbose=False, force=False,
+                          plot_success=False):
 
     if model is None and parameters is None:
         model = model
@@ -150,20 +151,21 @@ def create_simulated_data(model=None, parameters=None, t_max=300, n_kanji=30, gr
         verbose=verbose
     )
 
-    plot.success.curve(success, fig_name=f'simulated_curve.pdf')
+    if plot_success:
+        plot.success.curve(success, fig_name=f'simulated_curve.pdf')
 
     return questions, replies, n_items, possible_replies, c_graphic, c_semantic
 
 
 def create_and_fit_simulated_data(model=None, parameters=None, t_max=300, n_kanji=30, grade=1,
-                                  use_p_correct=False, verbose=False, force=False):
+                                  use_p_correct=False, verbose=False, force=False, fit_method='tpe'):
 
     questions, replies, n_items, possible_replies, c_graphic, c_semantic = create_simulated_data(
         model=model, parameters=parameters, t_max=t_max, n_kanji=n_kanji,
         grade=grade, verbose=verbose, force=force)
 
     f = fit.Fit(questions=questions, replies=replies, possible_replies=possible_replies, n_items=n_items,
-                c_graphic=c_graphic, c_semantic=c_semantic, use_p_correct=use_p_correct)
+                c_graphic=c_graphic, c_semantic=c_semantic, use_p_correct=use_p_correct, method=fit_method)
     # print()
     # f.rl()
     # print()

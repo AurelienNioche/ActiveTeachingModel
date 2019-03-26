@@ -20,9 +20,10 @@ import similarity_graphic.measure
 import similarity_semantic.measure
 
 
-def model_comparison():
+def model_comparison(use_p_correct=True, method='de'):
 
-    models = "rl", "act_r", "act_r_meaning"
+    models = "rl", "act_r", "act_r_meaning", "act_r_graphic"
+    models = models[::-1]
     n_models = len(models)
 
     users = User.objects.all().order_by('id')
@@ -32,11 +33,11 @@ def model_comparison():
         "mean_p": [[] for _ in range(n_models)]
     }
 
-    use_p_correct = True
+    print(f"Fit parameters: use_p_correct={use_p_correct}; method='{method}'\n")
 
-    for u in users[::-1]:
+    for u in users:
 
-        print(f'{u.id}\n{"*" * 5}')
+        print(f'{u.id}\n{"*" * 5}\n')
 
         # Get questions, replies, possible_replies, and number of different items
         questions, replies, n_items, possible_replies, success = behavior.data.get(user_id=u.id, verbose=True)
@@ -47,7 +48,7 @@ def model_comparison():
         c_semantic = similarity_semantic.measure.get(meanings)
 
         f = fit.Fit(questions=questions, replies=replies, possible_replies=possible_replies, n_items=n_items,
-                    c_graphic=c_graphic, c_semantic=c_semantic, use_p_correct=use_p_correct)
+                    c_graphic=c_graphic, c_semantic=c_semantic, use_p_correct=use_p_correct, method=method)
 
         for i, m in enumerate(models):
             mean_p, bic = getattr(f, m)()
@@ -67,7 +68,12 @@ def model_comparison():
                                        x_tick_labels=[i.replace('_', ' ') for i in models],
                                        f_name='model_probabilities.pdf', y_label='p')
 
+    print('-' * 10)
+
 
 if __name__ == "__main__":
 
-    model_comparison()
+    methods = 'tpe', 'de'  # 'SLSQP', 'L-BFGS-B', 'TNC', 'COBYLA', 'SLSQP',
+
+    for me in methods:
+        model_comparison(method=me)

@@ -1,0 +1,95 @@
+/usr/local/bin/python3.7 /Users/aureliennioche/Documents/PythonProjects/ActiveTeachingModel/analysis.py
+Fit parameters: use_p_correct=True; method='de'
+
+6
+*****
+
+Kanji used: ['八', '花', '虫', '中', '王', '足', '生', '力', '七', '二']
+Corresponding meanings: ['Eight', 'Flower', 'Insect', 'Inside', 'King', 'Leg', 'Living', 'Power', 'Seven', 'Two']
+
+Finding best parameters... Optimization terminated successfully. [best loss: 64.95842287009418]
+[ActRGraphic] Best param: d=0.738, tau=-1.002, s=1.0, g=0.911, LLS: -64.96, BIC: 148.3, mean(P): 0.596
+
+Finding best parameters... Optimization terminated successfully. [best loss: 65.0925828139284]
+[ActRMeaning] Best param: d=0.761, tau=-1.09, s=1.0, m=1.0, LLS: -65.09, BIC: 148.57, mean(P): 0.595
+
+Finding best parameters... Optimization terminated successfully. [best loss: 65.32026834908785]
+[ActR] Best param: d=0.762, tau=-1.103, s=1.0, LLS: -65.32, BIC: 144.43, mean(P): 0.593
+
+Finding best parameters... Optimization terminated successfully. [best loss: 61.76268609702422]
+[QLearner] Best param: alpha=0.995, tau=0.387, LLS: -61.76, BIC: 132.72, mean(P): 0.594
+
+7
+*****
+
+Kanji used: ['八', '花', '虫', '中', '王', '足', '生', '力', '七', '二']
+Corresponding meanings: ['Eight', 'Flower', 'Insect', 'Inside', 'King', 'Leg', 'Living', 'Power', 'Seven', 'Two']
+
+Finding best parameters... Optimization terminated successfully. [best loss: 22.326737127865012]
+[ActRGraphic] Best param: d=0.529, tau=-3.154, s=0.944, g=-0.976, LLS: -22.33, BIC: 63.03, mean(P): 0.891
+
+Finding best parameters... Optimization terminated successfully. [best loss: 22.352918401395897]
+[ActRMeaning] Best param: d=0.664, tau=-3.352, s=0.976, m=0.985, LLS: -22.35, BIC: 63.09, mean(P): 0.891
+
+Finding best parameters... Optimization terminated successfully. [best loss: 22.483570033522007]
+[ActR] Best param: d=0.688, tau=-3.572, s=1.0, LLS: -22.48, BIC: 58.75, mean(P): 0.891
+
+Finding best parameters... Optimization terminated successfully. [best loss: 22.98933769246452]
+[QLearner] Best param: alpha=1.0, tau=0.201, LLS: -22.99, BIC: 55.17, mean(P): 0.891
+
+8
+*****
+
+Kanji used: ['八', '花', '虫', '中', '王', '足', '生', '力', '七', '二']
+Corresponding meanings: ['Eight', 'Flower', 'Insect', 'Inside', 'King', 'Leg', 'Living', 'Power', 'Seven', 'Two']
+
+Finding best parameters... Optimization terminated successfully. [best loss: 31.153094736497962]
+[ActRGraphic] Best param: d=0.579, tau=-1.32, s=0.497, g=-0.193, LLS: -31.15, BIC: 80.69, mean(P): 0.827
+
+Finding best parameters... Optimization terminated successfully. [best loss: 30.861233708826287]
+[ActRMeaning] Best param: d=0.56, tau=-1.128, s=0.473, m=0.991, LLS: -30.86, BIC: 80.1, mean(P): 0.827
+
+Finding best parameters... Optimization terminated successfully. [best loss: 31.1885343456825]
+[ActR] Best param: d=0.588, tau=-1.368, s=0.523, LLS: -31.19, BIC: 76.16, mean(P): 0.826
+
+Finding best parameters... Optimization terminated successfully. [best loss: 33.479555092020654]
+[QLearner] Best param: alpha=0.448, tau=0.205, LLS: -33.48, BIC: 76.15, mean(P): 0.817
+
+9
+*****
+
+Kanji used: ['青', '字', '八', '目', '花', '林', '虫', '中', '王', '左', '足', '生', '力', '田', '七', '貝', '六', '小', '木', '二']
+Corresponding meanings: ['Blue', 'Character', 'Eight', 'Eye', 'Flower', 'Forest', 'Insect', 'Inside', 'King', 'Left', 'Leg', 'Living', 'Power', 'Rice field', 'Seven', 'Shellfish', 'Six', 'Small', 'Tree', 'Two']
+
+Finding best parameters... Optimization terminated successfully. [best loss: 38.57250109463156]
+[ActRGraphic] Best param: d=0.977, tau=-4.194, s=1.0, g=0.563, LLS: -38.57, BIC: 95.53, mean(P): 0.79
+
+Finding best parameters... Optimization terminated successfully. [best loss: 38.56255758736546]
+[ActRMeaning] Best param: d=1.0, tau=-4.271, s=1.0, m=1.0, LLS: -38.56, BIC: 95.51, mean(P): 0.79
+
+Finding best parameters... Optimization terminated successfully. [best loss: 38.57914904323386]
+[ActR] Best param: d=1.0, tau=-4.278, s=1.0, LLS: -38.58, BIC: 90.94, mean(P): 0.79
+
+Finding best parameters... Optimization terminated successfully. [best loss: 39.45602426450501]
+[QLearner] Best param: alpha=0.759, tau=0.231, LLS: -39.46, BIC: 88.1, mean(P): 0.786
+
+10
+*****
+
+Kanji used: ['玉', '青', '字', '子', '日', '八', '夕', '目', '五', '花', '林', '虫', '中', '王', '左', '足', '生', '名', '力', '田', '右', '七', '貝', '六', '空', '小', '三', '町', '木', '二']
+Corresponding meanings: ['Ball', 'Blue', 'Character', 'Child', 'Day', 'Eight', 'Evening', 'Eye', 'Five', 'Flower', 'Forest', 'Insect', 'Inside', 'King', 'Left', 'Leg', 'Living', 'Name', 'Power', 'Rice field', 'Right', 'Seven', 'Shellfish', 'Six', 'Sky', 'Small', 'Three', 'Town', 'Tree', 'Two']
+
+Finding best parameters... Optimization terminated successfully. [best loss: 40.78932751670936]
+[ActRGraphic] Best param: d=0.288, tau=-0.026, s=0.0, g=0.852, LLS: -40.79, BIC: 99.96, mean(P): 0.778
+
+Finding best parameters... Optimization terminated successfully. [best loss: 40.78932751670936]
+[ActRMeaning] Best param: d=0.272, tau=-0.007, s=0.0, m=0.684, LLS: -40.79, BIC: 99.96, mean(P): 0.778
+
+Finding best parameters... Optimization terminated successfully. [best loss: 44.572910296403364]
+[ActR] Best param: d=0.211, tau=0.029, s=0.118, LLS: -44.57, BIC: 102.93, mean(P): 0.738
+
+Finding best parameters... Optimization terminated successfully. [best loss: 47.089979737597936]
+[QLearner] Best param: alpha=0.002, tau=0.002, LLS: -47.09, BIC: 103.37, mean(P): 0.699
+
+
+Process finished with exit code 0
