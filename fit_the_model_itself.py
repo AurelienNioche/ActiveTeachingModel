@@ -171,6 +171,7 @@ def create_and_fit_simulated_data(model=None, parameters=None, t_max=300, n_kanj
     # print()
     # f.act_r()
     f.act_r_meaning()
+    # best_param, mean_p, lls, bic = f.act_r_meaning()
     # f.act_r_plus()
     # f.act_r_plus_plus()
     # print("\n****\n")

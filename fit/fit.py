@@ -104,7 +104,7 @@ class Fit:
         mean_p, lls, bic = self._model_stats(p_choices=p_choices, best_param=best_param)
 
         self._print(model.__name__, best_param, mean_p, lls, bic)
-        return mean_p, bic
+        return best_param, mean_p, lls, bic
 
     def _get_task_exp_fit_param(self):
 
@@ -203,14 +203,11 @@ class Fit:
 
         return self._evaluate(model=model, bounds=bounds)
 
-    @classmethod
-    def _print(cls, model_name, best_param, mean_p, lls, bic):
+    def _print(self, model_name, best_param, mean_p, lls, bic):
 
-        if type(best_param) == dict:
-            dis_best_param = ''.join(f'{k}={round(v, 3)}, ' for k, v in best_param.items())
-        else:
-            dis_best_param = f'{[f"{i:.3f}" for i in best_param]}, '
+        dsp_use_p_correct = "p_correct" if self.use_p_correct else "p_choice"
+        dsp_best_param = ''.join(f'{k}={round(best_param[k], 3)}, ' for k in sorted(best_param.keys()))
 
-        print(f'[{model_name}] Best param: ' + dis_best_param +
+        print(f'[{model_name} - {self.method} - {dsp_use_p_correct}] Best param: ' + dsp_best_param +
               f"LLS: {round(lls, 2)}, " +
               f'BIC: {round(bic, 2)}, mean(P): {round(mean_p, 3)}\n')
