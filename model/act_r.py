@@ -126,16 +126,36 @@ class ActR(Learner):
 
         """The base-level activation measures how much time has elapsed since the jth use:"""
 
+        max_b = np.log(1 + np.sum([i**self.pr.d for i in range(self.tk.t_max, 0, -1)]))
+
         # noinspection PyTypeChecker
         sum_a = np.sum([
             (self.t - t_presentation)**(-self.pr.d)
             for t_presentation in self.time_presentation[i]
         ])
 
-        b = np.log(sum_a) if sum_a > 0 else -np.inf
+        if sum_a > 0:
+            b = np.log(1 + sum_a) / max_b
+        else:
+            b = 0
+
+        assert 0 <= b <= 1
         return b
 
-    def _probability_of_retrieval_equation(self, a):
+    # def _base_level_learning_activation(self, i):
+    #
+    #     """The base-level activation measures how much time has elapsed since the jth use:"""
+    #
+    #     # noinspection PyTypeChecker
+    #     sum_a = np.sum([
+    #         (self.t - t_presentation)**(-self.pr.d)
+    #         for t_presentation in self.time_presentation[i]
+    #     ])
+    #
+    #     b = np.log(sum_a) if sum_a > 0 else -np.inf
+    #     return b
+
+    def _sigmoid_function(self, a):
 
         """The probability of a chunk being above some retrieval threshold τ is"""
 
@@ -164,7 +184,7 @@ class ActR(Learner):
     def _p_retrieve(self, item):
 
         a = self._activation_function(item)
-        p_retrieve = self._probability_of_retrieval_equation(a)
+        p_retrieve = self._sigmoid_function(a)
         if self.verbose:
             print(f"t={self.t}, a_i: {a:.3f}, p_r: {p_retrieve:.3f}")
         return p_retrieve
@@ -213,35 +233,71 @@ class ActR(Learner):
         self._update_time_presentation(question)  # We suppose the response to be always correct if recalled
 
 
+class ActROriginal(ActR):
+
+    def __init__(self, task_features, parameters=None, verbose=False):
+
+        super().__init__(task_features=task_features, parameters=parameters, verbose=verbose)
+
+    def _base_level_learning_activation(self, i):
+
+        """The base-level activation measures how much time has elapsed since the jth use:"""
+
+        # noinspection PyTypeChecker
+        sum_a = np.sum([
+            (self.t - t_presentation)**(-self.pr.d)
+            for t_presentation in self.time_presentation[i]
+        ])
+
+        b = np.log(sum_a) if sum_a > 0 else -np.inf
+        return b
+
+
 class ActRMeaning(ActR):
 
-    def __init__(self,  parameters, task_features, verbose=False):
+    def __init__(self,  task_features, parameters=None, verbose=False):
 
-        if type(parameters) == dict:
-            self.pr = ActRMeaningParam(**parameters)
-        elif type(parameters) in (tuple, list, np.ndarray):
-            self.pr = ActRMeaningParam(*parameters)
-        else:
-            raise Exception(f"Type {type(parameters)} is not handled for parameters")
+        if parameters is not None:
+
+            if type(parameters) == dict:
+                self.pr = ActRMeaningParam(**parameters)
+
+            elif type(parameters) in (tuple, list, np.ndarray):
+                self.pr = ActRMeaningParam(*parameters)
+
+            else:
+                raise Exception(f"Type {type(parameters)} is not handled for parameters")
 
         super().__init__(task_features=task_features, verbose=verbose)
+
+        if parameters is not None:
+            self.x = self.pr.m
+            self.c_x = self.tk.c_semantic
 
     def _p_retrieve(self, item):
 
         a_i = self._base_level_learning_activation(item)
-        m_i = self._m(item)
+        if a_i > 0:
+            x_i = self._x(item)
+        else:
+            x_i = 0
+        # sig_a_i = self._sigmoid_function(a_i)
+        #
+        # p_r = sig_a_i + m_i
+        #
+        # p_r = p_r if p_r <= 1 else 1
 
-        p_r = self._probability_of_retrieval_equation(
-            a_i + self.pr.m * m_i
+        p_r = self._sigmoid_function(
+            a_i + self.x * x_i
         )
         if self.verbose:
-            print(f"t={self.t}: a_i={a_i:.3f}; m_i={m_i:.3f};  p={p_r:.3f}")
+            print(f"t={self.t}: a_i={a_i:.3f}; x_i={x_i:.3f};  p={p_r:.3f}")
 
         return p_r
 
-    def _m(self, i):
+    def _x(self, i):
 
-        m_i = 0
+        x_i = 0
 
         list_j = list(range(self.tk.n_items))
         list_j.remove(i)
@@ -250,19 +306,13 @@ class ActRMeaning(ActR):
 
             b_j = self._base_level_learning_activation(j)
             if b_j > 0:
-                np.seterr(all='raise')
+                x_i += self.c_x[i, j] * b_j
 
-                try:
-                    m_i += self.tk.c_semantic[i, j] * self._probability_of_retrieval_equation(b_j)
-                except:
-                    print(f'b_j: {b_j}, cs: {self.tk.c_semantic[i, j]}')
-
-                np.seterr(all='ignore')
-        m_i /= (self.tk.n_items - 1)
-        return m_i
+        x_i /= (self.tk.n_items - 1)
+        return x_i
 
 
-class ActRGraphic(ActR):
+class ActRGraphic(ActRMeaning):
 
     def __init__(self,  parameters, task_features, verbose=False):
 
@@ -275,40 +325,8 @@ class ActRGraphic(ActR):
 
         super().__init__(task_features=task_features, verbose=verbose)
 
-    def _p_retrieve(self, item):
-
-        a_i = self._base_level_learning_activation(item)
-        g_i = self._g(item)
-
-        p_r = self._probability_of_retrieval_equation(
-            a_i + self.pr.g * g_i
-        )
-        if self.verbose:
-            print(f"t={self.t}: a_i={a_i:.3f}; g_i={g_i:.3f};  p={p_r:.3f}")
-
-        return p_r
-
-    def _g(self, i):
-
-        g_i = 0
-
-        list_j = list(range(self.tk.n_items))
-        list_j.remove(i)
-
-        for j in list_j:
-
-            b_j = self._base_level_learning_activation(j)
-            if b_j > 0:
-                np.seterr(all='raise')
-
-                try:
-                    g_i += self.tk.c_graphic[i, j] * self._probability_of_retrieval_equation(b_j)
-                except:
-                    print(f'b_j: {b_j}, cs: {self.tk.c_graphic[i, j]}')
-
-                np.seterr(all='ignore')
-        g_i /= (self.tk.n_items - 1)
-        return g_i
+        self.c_x = self.tk.c_graphic
+        self.x = self.pr.g
 
 
 class ActRPlus(ActR):
@@ -329,7 +347,7 @@ class ActRPlus(ActR):
         a_i = self._base_level_learning_activation(item)
         g_i, m_i = self._g_and_m(item)
 
-        p_r = self._probability_of_retrieval_equation(
+        p_r = self._sigmoid_function(
             a_i + self.pr.g * g_i + self.pr.m * m_i
         )
         if self.verbose:
@@ -352,12 +370,12 @@ class ActRPlus(ActR):
                 np.seterr(all='raise')
 
                 try:
-                    g_i += self.tk.c_graphic[i, j] * self._probability_of_retrieval_equation(b_j)
+                    g_i += self.tk.c_graphic[i, j] * self._sigmoid_function(b_j)
                 except:
                     print(f'b_j: {b_j}, cg: {self.tk.c_graphic[i, j]}')
 
                 try:
-                    m_i += self.tk.c_semantic[i, j] * self._probability_of_retrieval_equation(b_j)
+                    m_i += self.tk.c_semantic[i, j] * self._sigmoid_function(b_j)
                 except:
                     print(f'b_j: {b_j}, cs: {self.tk.c_semantic[i, j]}')
 

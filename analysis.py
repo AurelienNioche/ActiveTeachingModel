@@ -50,9 +50,8 @@ def fit_method_comparision(use_p_correct=True, methods=('de', 'tpe')):
         print('-' * 10)
 
 
-def model_comparison(use_p_correct=True, method='de'):
+def model_comparison(use_p_correct=True, method='de', models=("rl", "act_r", "act_r_meaning", "act_r_graphic")):
 
-    models = "rl", "act_r", "act_r_meaning", "act_r_graphic"
     models = models[::-1]
     n_models = len(models)
 
@@ -112,7 +111,7 @@ def model_comparison(use_p_correct=True, method='de'):
 
 def main():
 
-    fit_method_comparision()
+    model_comparison(models=("rl", "act_r", "act_r_meaning", "act_r_graphic"))
 
 
 if __name__ == "__main__":

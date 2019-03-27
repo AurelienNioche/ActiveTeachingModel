@@ -208,6 +208,6 @@ class Fit:
         dsp_use_p_correct = "p_correct" if self.use_p_correct else "p_choice"
         dsp_best_param = ''.join(f'{k}={round(best_param[k], 3)}, ' for k in sorted(best_param.keys()))
 
-        print(f'[{model_name} - {self.method} - {dsp_use_p_correct}] Best param: ' + dsp_best_param +
+        print(f"[{model_name} - '{self.method}' - {dsp_use_p_correct}] Best param: " + dsp_best_param +
               f"LLS: {round(lls, 2)}, " +
               f'BIC: {round(bic, 2)}, mean(P): {round(mean_p, 3)}\n')

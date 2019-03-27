@@ -13,7 +13,7 @@ import numpy as np
 import plot.success
 
 from model.rl import QLearner
-from model.act_r import ActR, ActRMeaning, ActRPlus, ActRPlusPlus
+from model.act_r import ActR, ActRMeaning, ActRPlus, ActRPlusPlus, ActRGraphic
 
 from task.parameters import n_possible_replies
 
@@ -100,7 +100,7 @@ def get_simulated_data(model, parameters, kanjis, meanings, questions_list, poss
         'c_semantic': c_semantic
     }
 
-    agent = model(parameters, task_features, verbose)
+    agent = model(parameters=parameters, task_features=task_features, verbose=verbose)
 
     questions = np.asarray([kanjis.index(q) for q in questions_list], dtype=int)
     replies = np.zeros(t_max, dtype=int)
@@ -134,7 +134,9 @@ def create_simulated_data(model=None, parameters=None, t_max=300, n_kanji=30, gr
         model = model
         parameters = {"alpha": 0.1, "tau": 0.01}
 
-    print(f"Simulating {model.__name__} with parameters: {parameters}.\n")
+    print(f"Simulating {model.__name__} with parameters: "
+          f"{''.join(f'{k}={round(parameters[k], 3)}, ' for k in sorted(parameters.keys()))[:-2]}...", end=' ')
+
     kanjis, meanings, question_list, correct_answer_list, possible_replies_list = \
         create_questions(t_max=t_max, n_kanji=n_kanji, grade=grade, verbose=verbose)
 
@@ -152,7 +154,9 @@ def create_simulated_data(model=None, parameters=None, t_max=300, n_kanji=30, gr
     )
 
     if plot_success:
-        plot.success.curve(success, fig_name=f'simulated_curve.pdf')
+        plot.success.curve(success, fig_name=f'simulated_{model.__name__}.pdf')
+
+    print("Done!\n")
 
     return questions, replies, n_items, possible_replies, c_graphic, c_semantic
 
@@ -171,10 +175,11 @@ def create_and_fit_simulated_data(model=None, parameters=None, t_max=300, n_kanj
     # print()
     # f.act_r()
     f.act_r_meaning()
+    f.act_r_graphic()
     # best_param, mean_p, lls, bic = f.act_r_meaning()
     # f.act_r_plus()
     # f.act_r_plus_plus()
-    # print("\n****\n")
+    print("\n" + ''.join("_" * 10) + "\n")
 
 
 def demo():
@@ -190,9 +195,14 @@ def demo():
 
 
 def main():
-    m, p = ActRMeaning, {"d": 0.5, "tau": 0.5, "s": 0.5, "m": 0.7}
-    create_and_fit_simulated_data(model=m, parameters=p, verbose=True, use_p_correct=True)
 
+    m, p = ActRMeaning, {"d": 0.5, "tau": 0.5, "s": 0.5, "m": 0.7}
+    create_and_fit_simulated_data(model=m, parameters=p, verbose=False, use_p_correct=True, fit_method='de',
+                                  t_max=600)
+
+    # m, p = ActRGraphic, {"d": 0.5, "tau": 0.5, "s": 0.5, "g": 0.7}
+    # create_and_fit_simulated_data(model=m, parameters=p, verbose=False, use_p_correct=True, fit_method='de',
+    #                               t_max=600)
     # create_and_fit_simulated_data(model=model, parameters=parameters, verbose=True, t_max=500, n_kanji=70)
 
 
