@@ -1,17 +1,21 @@
+import os
+import json
+
 import matplotlib.pyplot as plt
 import numpy as np
-import pickle
 from PIL import Image, ImageDraw, ImageFont
-import os
 
 
 SCRIPT_FOLDER = os.path.dirname(os.path.abspath(__file__))
 
+DATA_FOLDER = f'{SCRIPT_FOLDER}/../data'
 BACKUP_FOLDER = f'{SCRIPT_FOLDER}/../backup'
 IMG_FOLDER = f'{SCRIPT_FOLDER}/../image'
 FONT_FOLDER = f'{SCRIPT_FOLDER}/../font'
 
 FONT_FILE = f'{FONT_FOLDER}/arialunicodems.ttf'
+
+KANJI_DIC = f'{DATA_FOLDER}/kanji.json'
 
 BKP_HISTORY = \
     f'{BACKUP_FOLDER}/history.p'
@@ -27,8 +31,14 @@ EPOCHS = 100
 SEED = 123
 RATIO_TRAINING_TEST = 5/6
 
+TEXT_COLOR = (255, 255, 255)
+BACKGROUND_COLOR = (0, 0, 0)
+
 os.makedirs(BACKUP_FOLDER, exist_ok=True)
 os.makedirs(IMG_FOLDER, exist_ok=True)
+
+
+kanji_dic = json.load(open(KANJI_DIC, 'r'))
 
 
 def _img_file(name):
@@ -36,23 +46,20 @@ def _img_file(name):
     return f"{IMG_FOLDER}/{name}.png"
 
 
-def _create_images(
-        kanji_dic,
-        font=FONT_FILE,
-        text_color=(255, 255, 255),
-        background_color=(0, 0, 0)):
+def _create_images():
 
-    os.makedirs(IMG_FOLDER, exist_ok=True)
     font_size = int(IMG_SIZE)
 
-    for name, character in kanji_dic.items():
+    # kanji_dic = {k: i for i, k in enumerate(kanji_list)}
 
-        img = Image.new('RGB', (IMG_SIZE, IMG_SIZE), color=background_color)
+    for character, name in kanji_dic.items():
 
-        fnt = ImageFont.truetype(font, font_size)
+        img = Image.new('RGB', (IMG_SIZE, IMG_SIZE), color=BACKGROUND_COLOR)
+
+        fnt = ImageFont.truetype(FONT_FILE, font_size)
         d = ImageDraw.Draw(img)
         w, h = d.textsize(character, font=fnt)
-        d.text(((IMG_SIZE-w)/2, (IMG_SIZE-h)/2 - h/10), character, font=fnt, fill=text_color)
+        d.text(((IMG_SIZE-w)/2, (IMG_SIZE-h)/2 - h/10), character, font=fnt, fill=TEXT_COLOR)
 
         if name is None:
             name = ord(character)
@@ -60,7 +67,7 @@ def _create_images(
         img.save(_img_file(name))
 
 
-def _are_images_existing(kanji_dic):
+def _images_exist():
 
     for key in kanji_dic.keys():
         if not os.path.exists(_img_file(name=key)):
@@ -113,10 +120,10 @@ def formatted_images():
     return train_data
 
 
-def training_and_test_data(kanji_dic=None):
+def training_and_test_data():
 
-    if kanji_dic is not None and not _are_images_existing(kanji_dic):
-        _create_images(kanji_dic=kanji_dic)
+    if not _images_exist():
+        _create_images()
 
     train_data = formatted_images()
 
@@ -140,7 +147,9 @@ def _show_image_example(train_data):
 # ----------------------------------------- #
 
 
-def get_formatted_image_for_cnn(kanji_id):
+def get_formatted_image_for_cnn(kanji):
+
+    kanji_id = kanji_dic[kanji]
 
     path = os.path.join(IMG_FOLDER, _img_file(kanji_id))
     img = Image.open(path)
@@ -154,9 +163,9 @@ def get_formatted_image_for_cnn(kanji_id):
 # --------------------------------------- #
 
 
-def get_encoded_decoded(encoder, autoencoder, decoder, x_test, convulational=True):
+def get_encoded_decoded(encoder, autoencoder, decoder, x_test, convolutional=True):
 
-    if convulational:
+    if convolutional:
         x_test = np.reshape(x_test, (len(x_test), x_test.shape[1], x_test.shape[2], 1))
 
     else:

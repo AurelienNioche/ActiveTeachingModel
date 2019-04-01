@@ -1,10 +1,10 @@
 import numpy as np
 
-from keras.layers import Input, Conv2D, MaxPooling2D, UpSampling2D
-from keras.models import Model
-
 
 def _create_convulational_autoencoder(size):
+
+    from keras.layers import Input, Conv2D, MaxPooling2D, UpSampling2D
+    from keras.models import Model
 
     input_img = Input(shape=(size, size, 1))  # adapt this if using `channels_first` image data format
 
@@ -51,8 +51,8 @@ def _create_convulational_autoencoder(size):
 
 def train_autoencoder(x_train, x_test, epochs=100, batch_size=128):
 
-    x_train = np.reshape(x_train, (len(x_train), x_train.shape[1], x_train.shape[2], 1))  # adapt this if using `channels_first` image data format
-    x_test = np.reshape(x_test, (len(x_test), x_train.shape[1], x_train.shape[2], 1))  # adapt this if using `channels_first` image data format
+    x_train = np.reshape(x_train, (len(x_train), x_train.shape[1], x_train.shape[2], 1))
+    x_test = np.reshape(x_test, (len(x_test), x_train.shape[1], x_train.shape[2], 1))
 
     autoencoder, encoder, decoder = _create_convulational_autoencoder(size=x_train.shape[1])
 

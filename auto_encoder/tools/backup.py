@@ -1,8 +1,6 @@
 import os
 import pickle
 
-from keras.models import load_model
-
 
 SCRIPT_FOLDER = os.path.dirname(os.path.abspath(__file__))
 BACKUP_FOLDER = f'{SCRIPT_FOLDER}/../backup'
@@ -28,6 +26,8 @@ def save_model_and_history(history, models):
 
 
 def load_model_and_history():
+
+    from keras.models import load_model
 
     history = pickle.load(file=open(BKP_HISTORY, 'rb'))
     models = [load_model(i) for i in BKP_MODEL]

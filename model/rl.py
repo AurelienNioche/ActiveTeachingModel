@@ -83,6 +83,9 @@ class QLearner(Learner):
 
     def learn(self, question, reply):
 
+        self.q[question, question] = \
+            self._temporal_difference(v=self.q[question, question])
+
         # success = question == reply  # We suppose matching (0,0), (1,1) ... (n,n)
         #
         # old_q_value = self.q[question, reply]
@@ -95,6 +98,3 @@ class QLearner(Learner):
         #
         # if debug:
         #     print(f'Old q value is {old_q_value}; New q value is {new_q_value}')
-
-        self.q[question, question] = \
-            self._temporal_difference(v=self.q[question, question])

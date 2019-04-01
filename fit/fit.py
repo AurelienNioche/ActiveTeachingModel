@@ -156,7 +156,7 @@ class Fit:
             ('d', 0.0000001, 1.0), 
             ('tau', -5, 5),
             ('s', 0.0000001, 1),
-            ('m', -1, 1),
+            ('m', -2, 2),
         )
 
         return self._evaluate(model=model, bounds=bounds)
@@ -168,7 +168,7 @@ class Fit:
             ('d', 0.0000001, 1.0), 
             ('tau', -5, 5),
             ('s', 0.0000001, 1), 
-            ('g', -1, 1),
+            ('g', -2, 2),
         )
 
         return self._evaluate(model=model, bounds=bounds)
