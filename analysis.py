@@ -42,8 +42,7 @@ class Tee(object):
             f.flush()
 
     def __del__(self):
-        for f in self.files:
-            f.close()
+        self.files[-1].close()
 
 
 def fit_method_comparision(use_p_correct=True, methods=('de', 'tpe')):
