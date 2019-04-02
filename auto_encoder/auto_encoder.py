@@ -169,7 +169,7 @@ class Similarity:
 
         kanji_list = list(image.kanji_dic.keys())
 
-        n_kanji = len()
+        n_kanji = len(kanji_list)
 
         # Dimension of the entry of the encoder
         dim_entry = encoder.layers[0].input_shape[1:]

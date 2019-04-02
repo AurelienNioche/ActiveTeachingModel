@@ -8,6 +8,8 @@ application = get_wsgi_application()
 # Your application specific imports
 from task.models import User
 
+# import logging
+
 from fit import fit
 
 import behavior.data
@@ -18,6 +20,30 @@ import plot.success
 
 import similarity_graphic.measure
 import similarity_semantic.measure
+
+LOG_DIR = "log"
+os.makedirs(LOG_DIR, exist_ok=True)
+
+import sys
+
+
+class Tee(object):
+    def __init__(self, f):
+
+        self.files = (sys.stdout, open(f, 'w'))
+
+    def write(self, obj):
+        for f in self.files:
+            f.write(obj)
+            f.flush()  # If you want the output to be visible immediately
+
+    def flush(self):
+        for f in self.files:
+            f.flush()
+
+    def __del__(self):
+        for f in self.files:
+            f.close()
 
 
 def fit_method_comparision(use_p_correct=True, methods=('de', 'tpe')):
@@ -50,7 +76,16 @@ def fit_method_comparision(use_p_correct=True, methods=('de', 'tpe')):
         print('-' * 10)
 
 
-def model_comparison(use_p_correct=True, method='de', models=("rl", "act_r", "act_r_meaning", "act_r_graphic")):
+def model_comparison(use_p_correct=True, fit_method='de', sim_graphic_method='sim_search',
+                     models=("rl", "act_r", "act_r_meaning", "act_r_graphic")):
+
+    # logging.basicConfig(
+    #     filename=f'fit_{fit_method}_{sim_graphic_method}_{"correct" if use_p_correct else "choice"}.log',
+    #     level=logging.DEBUG)
+    # # noinspection PyShadowingBuiltins
+    # print = logging.info
+
+    sys.stdout = Tee(f'{LOG_DIR}/fit_{fit_method}_{sim_graphic_method}_{"correct" if use_p_correct else "choice"}.log')
 
     models = models[::-1]
     n_models = len(models)
@@ -62,7 +97,8 @@ def model_comparison(use_p_correct=True, method='de', models=("rl", "act_r", "ac
         "mean_p": [[] for _ in range(n_models)]
     }
 
-    print(f"Fit parameters: use_p_correct={use_p_correct}; method='{method}'\n")
+    print(f"Fit parameters: use_p_correct={use_p_correct}; method='{fit_method}'\n")
+    print(f"Graphic similarity: method={sim_graphic_method}'\n")
 
     for u in users:
 
@@ -77,12 +113,12 @@ def model_comparison(use_p_correct=True, method='de', models=("rl", "act_r", "ac
 
         # Get kanji's connections
         question_entries, kanjis, meanings = behavior.data.task_features(user_id=u.id)
-        c_graphic = similarity_graphic.measure.get(kanjis)
+        c_graphic = similarity_graphic.measure.get(kanjis, method=sim_graphic_method)
         c_semantic = similarity_semantic.measure.get(meanings)
 
         # Get the fit
         f = fit.Fit(questions=questions, replies=replies, possible_replies=possible_replies, n_items=n_items,
-                    c_graphic=c_graphic, c_semantic=c_semantic, use_p_correct=use_p_correct, method=method)
+                    c_graphic=c_graphic, c_semantic=c_semantic, use_p_correct=use_p_correct, method=fit_method)
 
         # Keep trace of bic and mean_p
         for i, m in enumerate(models):
@@ -97,13 +133,13 @@ def model_comparison(use_p_correct=True, method='de', models=("rl", "act_r", "ac
     # Plot BICs
     plot.model_comparison.scatter_plot(data_list=data["bic"], colors=colors,
                                        x_tick_labels=[i.replace('_', ' ') for i in models],
-                                       f_name=f'model_comparison_{method}_{dsp_use_p_correct}.pdf',
+                                       f_name=f'model_comparison_{fit_method}_{dsp_use_p_correct}.pdf',
                                        y_label='BIC', invert_y_axis=True)
 
     # Plot average means
     plot.model_comparison.scatter_plot(data_list=data["mean_p"], colors=colors,
                                        x_tick_labels=[i.replace('_', ' ') for i in models],
-                                       f_name=f'model_probabilities_{method}_{dsp_use_p_correct}.pdf',
+                                       f_name=f'model_probabilities_{fit_method}_{dsp_use_p_correct}.pdf',
                                        y_label='p')
 
     print('-' * 10)
@@ -111,7 +147,9 @@ def model_comparison(use_p_correct=True, method='de', models=("rl", "act_r", "ac
 
 def main():
 
-    model_comparison(models=("rl", "act_r", "act_r_meaning", "act_r_graphic"))
+    for sim_graphic_method in ("auto_encoder", "sim_search"):
+        model_comparison(models=("rl", "act_r", "act_r_meaning", "act_r_graphic"),
+                         sim_graphic_method=sim_graphic_method)
 
 
 if __name__ == "__main__":
