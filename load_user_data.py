@@ -1,7 +1,7 @@
 import os
 
 # Django specific settings
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ActiveTeachingServer.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ActiveTeachingModel.settings")
 # Ensure settings are read
 from django.core.wsgi import get_wsgi_application
 

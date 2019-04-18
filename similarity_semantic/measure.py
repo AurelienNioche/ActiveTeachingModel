@@ -12,9 +12,9 @@ BACKUP_FOLDER = f'{SCRIPT_FOLDER}/backup'
 os.makedirs(BACKUP_FOLDER, exist_ok=True)
 
 
-def create(word_list, backup):
+def create(word_list, backup, use_nan):
 
-    sim = word2vec.evaluate_similarity(word_list)
+    sim = word2vec.evaluate_similarity(word_list=word_list, use_nan=use_nan)
     pickle.dump(sim, file=open(backup, 'wb'))
     return sim
 
@@ -23,7 +23,7 @@ def _normalize(a):
     return np.interp(a, (np.nanmin(a), np.nanmax(a)), (0, 1))
 
 
-def get(word_list, normalize=True, force=False, verbose=False):
+def get(word_list, normalize=False, force=False, verbose=False):
 
     word_list = [i.lower() for i in word_list]
 
@@ -32,7 +32,7 @@ def get(word_list, normalize=True, force=False, verbose=False):
     backup = f"{BACKUP_FOLDER}/{list_id}.p"
 
     if not os.path.exists(backup) or force:
-        sim = create(word_list=word_list, backup=backup)
+        sim = create(word_list=word_list, backup=backup, use_nan=normalize)
 
     else:
         sim = pickle.load(file=open(backup, 'rb'))

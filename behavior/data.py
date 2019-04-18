@@ -52,6 +52,7 @@ def task_features(user_id, verbose=False):
 
         except IndexError:
             kanji = Kanji.objects.filter(meaning=m).order_by('grade')[0].kanji
+
         kanjis.append(kanji)
 
     if verbose:

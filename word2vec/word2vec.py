@@ -77,7 +77,7 @@ def _replacement(model, word):
     return new_word
 
 
-def evaluate_similarity(word_list):
+def evaluate_similarity(word_list, use_nan=False):
 
     model = _load_model()
 
@@ -85,8 +85,9 @@ def evaluate_similarity(word_list):
 
     sim = np.zeros((n_word, n_word))
 
-    for i in range(n_word):
-        sim[i, i] = np.nan
+    if use_nan:
+        for i in range(n_word):
+            sim[i, i] = np.nan
 
     for a, b in combinations(word_list, 2):
 
