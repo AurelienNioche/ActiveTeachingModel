@@ -44,10 +44,11 @@ Create user and db
 
 Prepare the DB (make migrations and migrate)
 
-    python3 manage.py makemigrations
+    python3 manage.py makemigrations admin auth contenttypes sessions task
+
     python3 manage.py migrate
     
-Create superuser in order to have access to admin interface
+Optional: Create superuser in order to have access to admin interface
 
     python3 manage.py createsuperuser
     
@@ -55,7 +56,7 @@ Create superuser in order to have access to admin interface
     
 Import kanji data in db
     
-    python3 prepare_db.py
+    python3 fill_kanji_table.py
     
 ### Import user data
 
