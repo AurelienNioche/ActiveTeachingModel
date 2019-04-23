@@ -15,7 +15,7 @@ import plot.success
 from model.rl import QLearner
 from model.act_r import ActR, ActRMeaning, ActRPlus, ActRPlusPlus, ActRGraphic
 
-from task.parameters import n_possible_replies
+from task.parameters import N_POSSIBLE_REPLIES
 
 import similarity_graphic.measure
 import similarity_semantic.measure
@@ -70,7 +70,7 @@ def create_questions(t_max=100, n_kanji=20, grade=1, verbose=False):
 
         possible_replies = \
             [correct_answer, ] + \
-            list(np.random.choice(meaning_without_correct, size=n_possible_replies - 1, replace=False))
+            list(np.random.choice(meaning_without_correct, size=N_POSSIBLE_REPLIES - 1, replace=False))
 
         # Randomize the order of possible replies
         np.random.shuffle(possible_replies)
@@ -95,7 +95,7 @@ def get_simulated_data(model, parameters, kanjis, meanings, questions_list, poss
     task_features = {
         'n_items': n_items,
         't_max': t_max,
-        'n_possible_replies': n_possible_replies,
+        'n_possible_replies': N_POSSIBLE_REPLIES,
         'c_graphic': c_graphic,
         'c_semantic': c_semantic
     }
@@ -105,7 +105,7 @@ def get_simulated_data(model, parameters, kanjis, meanings, questions_list, poss
     questions = np.asarray([kanjis.index(q) for q in questions_list], dtype=int)
     replies = np.zeros(t_max, dtype=int)
     success = np.zeros(t_max, dtype=int)
-    possible_replies = np.zeros((t_max, n_possible_replies), dtype=int)
+    possible_replies = np.zeros((t_max, N_POSSIBLE_REPLIES), dtype=int)
 
     if verbose:
         print(f"Generating data with model {model.__name__}...")
@@ -115,7 +115,7 @@ def get_simulated_data(model, parameters, kanjis, meanings, questions_list, poss
 
     for t in gen:
         q = questions[t]
-        for i in range(n_possible_replies):
+        for i in range(N_POSSIBLE_REPLIES):
             possible_replies[t, i] = meanings.index(possible_replies_list[t][i])
 
         r = agent.decide(question=q, possible_replies=possible_replies[t])

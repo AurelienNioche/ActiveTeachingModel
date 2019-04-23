@@ -1,7 +1,7 @@
 import numpy as np
 
 from task.models import User, Question, Kanji
-from task.parameters import n_possible_replies
+from task.parameters import N_POSSIBLE_REPLIES
 
 
 def show_in_console():
@@ -37,7 +37,7 @@ def task_features(user_id, verbose=False):
 
     for q in question_entries:
 
-        for i in range(n_possible_replies):
+        for i in range(N_POSSIBLE_REPLIES):
             answer = getattr(q, f'possible_reply_{i}')
             answers.append(answer)
 
@@ -72,14 +72,14 @@ def get(user_id, verbose=False):
 
     questions = np.zeros(t_max, dtype=int)
     replies = np.zeros(t_max, dtype=int)
-    possible_replies = np.zeros((t_max, n_possible_replies), dtype=int)
+    possible_replies = np.zeros((t_max, N_POSSIBLE_REPLIES), dtype=int)
     success = np.zeros(t_max, dtype=int)
 
     for t in range(t_max):
 
         questions[t] = kanjis.index(question_entries[t].question)
         replies[t] = meanings.index(question_entries[t].reply)
-        for i in range(n_possible_replies):
+        for i in range(N_POSSIBLE_REPLIES):
             possible_replies[t, i] = meanings.index(getattr(question_entries[t], f'possible_reply_{i}'))
 
         success[t] = questions[t] == replies[t]

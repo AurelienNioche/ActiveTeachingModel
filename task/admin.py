@@ -3,7 +3,7 @@ from django.contrib import admin
 # Register your models here.
 from . models import User, Question, Kanji, Parameter, PredefinedQuestion
 
-from . parameters import n_possible_replies
+from . parameters import N_POSSIBLE_REPLIES
 
 
 class UserAdmin(admin.ModelAdmin):
@@ -14,7 +14,7 @@ class UserAdmin(admin.ModelAdmin):
 class QuestionAdmin(admin.ModelAdmin):
     list_display = (
         "user_id", "t", "question", "correct_answer", "reply", "time_display", "time_reply") \
-        + tuple(f"possible_reply_{i}" for i in range(n_possible_replies))
+        + tuple(f"possible_reply_{i}" for i in range(N_POSSIBLE_REPLIES))
 
 
 class KanjiAdmin(admin.ModelAdmin):
@@ -31,7 +31,7 @@ class ParameterAdmin(admin.ModelAdmin):
 class PredefinedQuestionAdmin(admin.ModelAdmin):
     list_display = (
         "t", "question", "correct_answer") \
-        + tuple(f"possible_reply_{i}" for i in range(n_possible_replies))
+        + tuple(f"possible_reply_{i}" for i in range(N_POSSIBLE_REPLIES))
 
 
 admin.site.register(User, UserAdmin)

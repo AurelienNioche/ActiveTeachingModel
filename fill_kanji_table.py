@@ -18,7 +18,8 @@ from utils import AskUser
 @AskUser
 def fill_kanji_table():
 
-    Kanji.objects.all().delete()
+    if len(Kanji.objects.all()):
+        Kanji.objects.all().delete()
     os.system('psql ActiveTeaching < data/kanji_table.sql')
 
 

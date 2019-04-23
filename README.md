@@ -9,6 +9,7 @@
 * gensim
 * keras
 * django, psycopg2-binary
+* pillow
 
 
 ### PostgreSQL

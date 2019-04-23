@@ -1,1 +1,1 @@
-n_possible_replies = 6
+N_POSSIBLE_REPLIES = 6
