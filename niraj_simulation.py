@@ -11,6 +11,8 @@ from task.models import Kanji
 import similarity_graphic.measure
 import similarity_semantic.measure
 
+import solver
+
 import numpy as np
 
 from model.rl import QLearner
@@ -36,45 +38,57 @@ class Teacher:
     Customize this as you want (except 'grade' and 'n_items' as in this case, you need a specific db
     """
 
-    def __init__(self, n_items=20, t_max=100, grade=1, **kwargs):
+    def __init__(self, n_items=20, t_max=100, grade=1):
 
         self.t_max = t_max
         self.n_items = n_items
         self.grade = grade
 
-        self.kwargs = kwargs  # Extra arguments
-
         self.kanjis, self.meanings = self.kanji_and_meaning
 
-    def ask(self, **kwargs):
+        self.graphic_similarity = similarity_graphic.measure.get(self.kanjis)
+        self.semantic_similarity = similarity_semantic.measure.get(self.meanings)
+
+    def ask(self, questions, successes):
 
         """
         Especially this part
         """
 
-        print(f"I ask a new question based on args '{kwargs}'")  # This is fake for now
+        # print(f"I ask a new question based on args '{kwargs}'")  # This is fake for now
 
+        question = solver.getNextNode(
+            Questions=questions,
+            Responses=successes,
+            GraphicalSimilarity=self.graphic_similarity,
+            SemanticSimilarity=self.semantic_similarity
+        )
+        #
+        # possible_replies = np.random.choice(np.arange(self.n_items), size=N_POSSIBLE_REPLIES)
+        # question = np.random.choice(possible_replies)
 
-        possible_replies = np.random.choice(np.arange(self.n_items), size=N_POSSIBLE_REPLIES)
-        question = np.random.choice(possible_replies)
+        # Select randomly possible replies, including the correct one
+        all_replies = list(range(self.n_items))
+        all_replies.remove(question)
+        possible_replies = [question, ] + list(np.random.choice(all_replies, size=N_POSSIBLE_REPLIES-1))
+        possible_replies = np.array(possible_replies)
+        np.random.shuffle(possible_replies)
 
         print(f"Question chosen: {self.kanjis[question]}; "
               f"correct answer: {self.meanings[question]}; "
               f"possible replies: {self.meanings[possible_replies]};")
+
         return question, possible_replies
 
     @property
     def task_features(self):
 
-        c_graphic = similarity_graphic.measure.get(self.kanjis)
-        c_semantic = similarity_semantic.measure.get(self.meanings)
-
         return {
             'n_items': self.n_items,
             't_max': self.t_max,
             'n_possible_replies': N_POSSIBLE_REPLIES,
-            'c_graphic': c_graphic,
-            'c_semantic': c_semantic
+            'c_graphic': self.graphic_similarity,
+            'c_semantic': self.semantic_similarity
         }
 
     @property
@@ -129,10 +143,10 @@ def run_simulation(model, parameters, teacher, verbose=False):
 
     questions = []
     replies = []
-    success = []
+    successes = []
 
     for _ in gen:
-        question, possible_replies = teacher.ask(replies=replies, success=success)
+        question, possible_replies = teacher.ask(questions=questions, successes=successes)
 
         reply = agent.decide(question=question, possible_replies=possible_replies)
         agent.learn(question=question, reply=reply)
@@ -140,9 +154,9 @@ def run_simulation(model, parameters, teacher, verbose=False):
         # For backup
         questions.append(question)
         replies.append(reply)
-        success.append(reply == question)  # We assume that the matching is (0,0), (1, 1), (n, n)
+        successes.append(reply == question)  # We assume that the matching is (0,0), (1, 1), (n, n)
 
-    return questions, replies, success
+    return questions, replies, successes
 
 
 def demo_all(t_max=100):
@@ -180,10 +194,10 @@ def demo(t_max=100, n_items=30):
 
     model, parameters = ActRMeaning, {"d": 0.5, "tau": 0.05, "s": 0.05, "m": 0.7}
     teacher = Teacher(t_max=t_max, n_items=n_items)
-    questions, replies, success = run_simulation(model=model, parameters=parameters, teacher=teacher)
+    questions, replies, successes = run_simulation(model=model, parameters=parameters, teacher=teacher)
 
-    plot.success.curve(success, fig_name=f'niraj_simulated_{model.__name__}_curve.pdf')
-    plot.success.scatter(success, fig_name=f'niraj_simulated_{model.__name__}_scatter.pdf')
+    plot.success.curve(successes, fig_name=f'niraj_simulated_{model.__name__}_curve.pdf')
+    plot.success.scatter(successes, fig_name=f'niraj_simulated_{model.__name__}_scatter.pdf')
 
 
 if __name__ == "__main__":
