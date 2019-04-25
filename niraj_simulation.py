@@ -54,6 +54,7 @@ class Teacher:
 
         print(f"I ask a new question based on args '{kwargs}'")  # This is fake for now
 
+
         possible_replies = np.random.choice(np.arange(self.n_items), size=N_POSSIBLE_REPLIES)
         question = np.random.choice(possible_replies)
 
