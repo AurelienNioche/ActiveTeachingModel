@@ -134,7 +134,9 @@ def run_simulation(model, parameters, teacher, verbose=False):
         agent.learn(question=question, reply=reply)
 
         replies.append(reply)
-        success.append(reply==question)  # We assume that the matching is (0,0), (1, 1), (n, n)
+        success.append(reply == question)  # We assume that the matching is (0,0), (1, 1), (n, n)
+
+    return replies, success
 
 
 def demo_all(t_max=100):
