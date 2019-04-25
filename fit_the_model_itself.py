@@ -140,8 +140,8 @@ def create_simulated_data(model=None, parameters=None, t_max=300, n_kanji=30, gr
     kanjis, meanings, question_list, correct_answer_list, possible_replies_list = \
         create_questions(t_max=t_max, n_kanji=n_kanji, grade=grade, verbose=verbose)
 
-    c_graphic = similarity_graphic.measure.get(kanjis, force=force, verbose=verbose)
-    c_semantic = similarity_semantic.measure.get(meanings, force=force, verbose=verbose)
+    c_graphic = similarity_graphic.measure.get(kanjis, verbose=verbose)
+    c_semantic = similarity_semantic.measure.get(meanings, verbose=verbose)
 
     questions, replies, n_items, possible_replies, success = get_simulated_data(
         model=model,
@@ -196,10 +196,11 @@ def demo():
 
 def main():
 
-    m, p = ActRMeaning, {"d": 0.5, "tau": 0.5, "s": 0.5, "m": 0.7}
-    create_and_fit_simulated_data(model=m, parameters=p, verbose=False, use_p_correct=True, fit_method='de',
-                                  t_max=600)
+    m, p = ActRMeaning, {"d": 0.5, "tau": 0.05, "s": 0.05, "m": 0.7}
+    # create_and_fit_simulated_data(model=m, parameters=p, verbose=False, use_p_correct=True, fit_method='de',
+    #                               t_max=600)
 
+    create_simulated_data(model=m, parameters=p, verbose=False, t_max=300, n_kanji=30, plot_success=True)
     # m, p = ActRGraphic, {"d": 0.5, "tau": 0.5, "s": 0.5, "g": 0.7}
     # create_and_fit_simulated_data(model=m, parameters=p, verbose=False, use_p_correct=True, fit_method='de',
     #                               t_max=600)

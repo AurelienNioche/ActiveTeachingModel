@@ -16,6 +16,8 @@ import numpy as np
 from model.rl import QLearner
 from model.act_r import ActR, ActRMeaning, ActRGraphic, ActRPlus
 
+import plot.success
+
 from task.parameters import N_POSSIBLE_REPLIES
 
 from tqdm import tqdm
@@ -124,6 +126,7 @@ def run_simulation(model, parameters, teacher, verbose=False):
     else:
         gen = range(t_max)
 
+    questions = []
     replies = []
     success = []
 
@@ -133,10 +136,12 @@ def run_simulation(model, parameters, teacher, verbose=False):
         reply = agent.decide(question=question, possible_replies=possible_replies)
         agent.learn(question=question, reply=reply)
 
+        # For backup
+        questions.append(question)
         replies.append(reply)
         success.append(reply == question)  # We assume that the matching is (0,0), (1, 1), (n, n)
 
-    return replies, success
+    return questions, replies, success
 
 
 def demo_all(t_max=100):
@@ -161,7 +166,7 @@ def demo_all(t_max=100):
         run_simulation(model=m, parameters=p, teacher=teacher)
 
 
-def demo(t_max=100):
+def demo(t_max=100, n_items=30):
 
     """
     parameter mapping between paper (left) and code (right):
@@ -172,12 +177,15 @@ def demo(t_max=100):
     psi: m
     """
 
-    m, p = ActRMeaning, {"d": 0.5, "tau": 0.5, "s": 0.5, "m": 0.7}
-    teacher = Teacher(t_max=t_max)
-    run_simulation(model=m, parameters=p, teacher=teacher)
+    model, parameters = ActRMeaning, {"d": 0.5, "tau": 0.05, "s": 0.05, "m": 0.7}
+    teacher = Teacher(t_max=t_max, n_items=n_items)
+    questions, replies, success = run_simulation(model=model, parameters=parameters, teacher=teacher)
+
+    plot.success.curve(success, fig_name=f'niraj_simulated_{model.__name__}_curve.pdf')
+    plot.success.scatter(success, fig_name=f'niraj_simulated_{model.__name__}_scatter.pdf')
 
 
 if __name__ == "__main__":
 
-    demo_all()
+    demo()
 
