@@ -29,7 +29,7 @@ OR if you don't want/need a background service:
 ### Pre-trained word2vec network
 
 * Download at url: https://drive.google.com/file/d/0B7XkCwpI5KDYNlNUTTlSS21pQmM/edit
-* Move the .bin in 
+* Move the .bin in the folder 'word2vec/data' 
 
     
 ## Prepare database

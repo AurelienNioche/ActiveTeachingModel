@@ -120,7 +120,7 @@ dmypy.json
 /fig
 
 # Related to word2vec
-word2vec/data
+word2vec/data/GoogleNews-vectors-negative300.bin
 word2vec/backup
 word2vec/patch/
 
@@ -138,3 +138,4 @@ data/user_and_question_tables2.sql
 
 Supprimerait task/migrations/0001_initial.py
 Supprimerait task/migrations/__init__.py
+log/

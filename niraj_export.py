@@ -16,7 +16,7 @@ import similarity_graphic.measure
 import similarity_semantic.measure
 
 
-DATA_FOLDER = "Niraj"
+DATA_FOLDER = "niraj_export"
 
 
 os.makedirs(DATA_FOLDER, exist_ok=True)
