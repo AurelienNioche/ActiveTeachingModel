@@ -2,6 +2,8 @@ import numpy as np
 
 from model.generic import Learner, Task
 
+import task.parameters
+
 
 class QParam:
 
@@ -51,6 +53,13 @@ class QLearner(Learner):
             # print(w, x, self.tau)
             raise Exception(f'{w} [x={x}, temp={self.pr.tau}]')
 
+    def p_recall(self, item):
+
+        x_i = self.q[item, item]
+        x = [x_i, ] + [0, ] * (task.parameters.N_POSSIBLE_REPLIES - 1)
+
+        return self._softmax_unique(x_i, x)
+
     def _p_choice(self, question, reply, possible_replies):
 
         x_i = self.q[question, reply]
@@ -81,7 +90,7 @@ class QLearner(Learner):
 
         return reply
 
-    def learn(self, question, reply):
+    def learn(self, question):
 
         self.q[question, question] = \
             self._temporal_difference(v=self.q[question, question])

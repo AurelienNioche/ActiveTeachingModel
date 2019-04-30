@@ -33,7 +33,7 @@ class Learner:
     def decide(self, question, possible_replies):
         return 0
 
-    def learn(self, question, reply):
+    def learn(self, question):
         pass
 
     @property
@@ -45,6 +45,10 @@ class Learner:
 
     def _p_correct(self, question, reply, possible_replies):
         return -1
+
+    def p_recall(self, item):
+
+        return 0.5
 
     def get_p_choices(self, exp, fit_param=None):
 

@@ -181,7 +181,7 @@ class ActR(Learner):
         self.time_presentation[question].append(self.t)
         self.t += 1
 
-    def _p_retrieve(self, item):
+    def p_recall(self, item):
 
         a = self._activation_function(item)
         p_retrieve = self._sigmoid_function(a)
@@ -191,7 +191,7 @@ class ActR(Learner):
 
     def _p_choice(self, question, reply, possible_replies=None):
 
-        p_retrieve = self._p_retrieve(question)
+        p_retrieve = self.p_recall(question)
         p_correct = self.p_random + p_retrieve*(1 - self.p_random)
 
         success = question == reply
@@ -216,7 +216,7 @@ class ActR(Learner):
 
     def decide(self, question, possible_replies):
 
-        p_r = self._p_retrieve(question)
+        p_r = self.p_recall(question)
         r = np.random.random()
 
         if p_r > r:
@@ -228,9 +228,9 @@ class ActR(Learner):
             print(f't={self.t}: question {question}, reply {reply}')
         return reply
 
-    def learn(self, question, reply):
+    def learn(self, question):
 
-        self._update_time_presentation(question)  # We suppose the response to be always correct if recalled
+        self._update_time_presentation(question)
 
 
 class ActROriginal(ActR):
@@ -274,7 +274,7 @@ class ActRMeaning(ActR):
             self.x = self.pr.m
             self.c_x = self.tk.c_semantic
 
-    def _p_retrieve(self, item):
+    def p_recall(self, item):
 
         a_i = self._base_level_learning_activation(item)
         if a_i > 0:
@@ -342,7 +342,7 @@ class ActRPlus(ActR):
 
         super().__init__(task_features=task_features, verbose=verbose)
 
-    def _p_retrieve(self, item):
+    def p_recall(self, item):
 
         a_i = self._base_level_learning_activation(item)
         g_i, m_i = self._g_and_m(item)
@@ -371,12 +371,12 @@ class ActRPlus(ActR):
 
                 try:
                     g_i += self.tk.c_graphic[i, j] * self._sigmoid_function(b_j)
-                except:
+                except Exception:
                     print(f'b_j: {b_j}, cg: {self.tk.c_graphic[i, j]}')
 
                 try:
                     m_i += self.tk.c_semantic[i, j] * self._sigmoid_function(b_j)
-                except:
+                except Exception:
                     print(f'b_j: {b_j}, cs: {self.tk.c_semantic[i, j]}')
 
                 np.seterr(all='ignore')

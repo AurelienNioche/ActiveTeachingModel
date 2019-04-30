@@ -119,7 +119,7 @@ def get_simulated_data(model, parameters, kanjis, meanings, questions_list, poss
             possible_replies[t, i] = meanings.index(possible_replies_list[t][i])
 
         r = agent.decide(question=q, possible_replies=possible_replies[t])
-        agent.learn(question=q, reply=r)
+        agent.learn(question=q)
 
         replies[t] = r
         success[t] = q == r
