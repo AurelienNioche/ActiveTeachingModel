@@ -16,17 +16,17 @@ def _simple_autoencoder(size, encoding_dim=32):
     # "decoded" is the lossy reconstruction of the input
     decoded = Dense(size, activation='sigmoid')(encoded)
 
-    # this model maps an input to its reconstruction
+    # this learner maps an input to its reconstruction
     autoencoder = Model(input_img, decoded)
 
-    # this model maps an input to its encoded representation
+    # this learner maps an input to its encoded representation
     encoder = Model(input_img, encoded)
 
     # create a placeholder for an encoded (32-dimensional) input
     encoded_input = Input(shape=(encoding_dim,))
-    # retrieve the last layer of the autoencoder model
+    # retrieve the last layer of the autoencoder learner
     decoder_layer = autoencoder.layers[-1]
-    # create the decoder model
+    # create the decoder learner
     decoder = Model(encoded_input, decoder_layer(encoded_input))
 
     autoencoder.compile(optimizer='adadelta', loss='binary_crossentropy')

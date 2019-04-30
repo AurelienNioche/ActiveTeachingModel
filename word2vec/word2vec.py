@@ -27,7 +27,7 @@ def _load_model():
 
     t0 = datetime.utcnow()
 
-    print('Load Word2Vec model...', end=" ")
+    print('Load Word2Vec learner...', end=" ")
     if not os.path.exists(MODEL):
         try:
             model = KeyedVectors.load_word2vec_format(DATA, binary=True)

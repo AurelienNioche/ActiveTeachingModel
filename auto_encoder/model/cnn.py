@@ -30,7 +30,7 @@ def _create_convulational_autoencoder(size):
 
     autoencoder.summary()
 
-    # this model maps an input to its encoded representation
+    # this learner maps an input to its encoded representation
     encoder = Model(inputs=autoencoder.input, outputs=autoencoder.get_layer('max_pooling2d_3').output)
     encoder.summary()
 

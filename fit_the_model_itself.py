@@ -12,8 +12,8 @@ import numpy as np
 
 import plot.success
 
-from model.rl import QLearner
-from model.act_r import ActR, ActRMeaning, ActRPlus, ActRPlusPlus, ActRGraphic
+from learner.rl import QLearner
+from learner.act_r import ActR, ActRMeaning, ActRPlus, ActRPlusPlus, ActRGraphic
 
 from task.parameters import N_POSSIBLE_REPLIES
 
@@ -197,14 +197,14 @@ def demo():
 def main():
 
     m, p = ActRMeaning, {"d": 0.5, "tau": 0.05, "s": 0.05, "m": 0.7}
-    # create_and_fit_simulated_data(model=m, parameters=p, verbose=False, use_p_correct=True, fit_method='de',
+    # create_and_fit_simulated_data(learner=m, parameters=p, verbose=False, use_p_correct=True, fit_method='de',
     #                               t_max=600)
 
     create_simulated_data(model=m, parameters=p, verbose=False, t_max=300, n_kanji=30, plot_success=True)
     # m, p = ActRGraphic, {"d": 0.5, "tau": 0.5, "s": 0.5, "g": 0.7}
-    # create_and_fit_simulated_data(model=m, parameters=p, verbose=False, use_p_correct=True, fit_method='de',
+    # create_and_fit_simulated_data(learner=m, parameters=p, verbose=False, use_p_correct=True, fit_method='de',
     #                               t_max=600)
-    # create_and_fit_simulated_data(model=model, parameters=parameters, verbose=True, t_max=500, n_kanji=70)
+    # create_and_fit_simulated_data(learner=learner, parameters=parameters, verbose=True, t_max=500, n_kanji=70)
 
 
 if __name__ == "__main__":

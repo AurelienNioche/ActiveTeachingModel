@@ -1,6 +1,6 @@
 import numpy as np
 
-from model.generic import Learner, Task
+from learner.generic import Learner, Task
 
 
 class ActRParam:
@@ -126,8 +126,6 @@ class ActR(Learner):
 
         """The base-level activation measures how much time has elapsed since the jth use:"""
 
-        max_b = np.log(1 + np.sum([i**self.pr.d for i in range(self.tk.t_max, 0, -1)]))
-
         # noinspection PyTypeChecker
         sum_a = np.sum([
             (self.t - t_presentation)**(-self.pr.d)
@@ -135,6 +133,7 @@ class ActR(Learner):
         ])
 
         if sum_a > 0:
+            max_b = np.log(1 + np.sum([i ** self.pr.d for i in range(self.tk.t_max, 0, -1)]))
             b = np.log(1 + sum_a) / max_b
         else:
             b = 0

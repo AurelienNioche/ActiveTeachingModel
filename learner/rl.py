@@ -1,6 +1,6 @@
 import numpy as np
 
-from model.generic import Learner, Task
+from learner.generic import Learner, Task
 
 import task.parameters
 

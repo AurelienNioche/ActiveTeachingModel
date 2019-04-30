@@ -5,7 +5,7 @@ import itertools as it
 
 class Task:
 
-    def __init__(self, config_file='model/parameters/parameters.json'):
+    def __init__(self, config_file='learner/parameters/parameters.json'):
 
         self.parameters = self.import_parameters(config_file)
 
@@ -21,7 +21,7 @@ class Task:
             parameters = json.load(open(config_file))
 
         except FileNotFoundError:
-            config_file = 'model/parameters/default.json'
+            config_file = 'learner/parameters/default.json'
             parameters = json.load(open(config_file))
 
         finally:
@@ -32,7 +32,7 @@ class Task:
 
 class TaskConnect(Task):
 
-    def __init__(self, config_file='model/parameters/parameters.json',
+    def __init__(self, config_file='learner/parameters/parameters.json',
                  nd_graphic=2, nd_semantic=2):
 
         super().__init__(config_file)
