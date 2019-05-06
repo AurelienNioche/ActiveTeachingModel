@@ -66,5 +66,5 @@ def run(n_items=25, t_max=150, model=ActRPlus, parameters=None, track_p_recall=F
 
 if __name__ == "__main__":
 
-    run(track_p_recall=True)
+    run(track_p_recall=False)
 
