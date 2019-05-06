@@ -56,25 +56,25 @@ Optional: Create superuser in order to have access to admin interface
     
 Import kanji data in db
     
-    python3 fill_kanji_table.py
+    python3 db_fill_kanji_table.py
     
 ### Import user data
 
 Load user data
     
-    python3 load_user_data.py
+    python3 db_user_data_load.py
     
 ## Run scripts
 
 
 Analyse experimental results
 
-    python3 analysis.py
+    python3 data_analysis.py
     
 
 Check quality of model by fitting the model to itself
 
-    python3 fit_the_model_itself.py 
+    python3 model_evalulation.py 
     
 
 ### Other operations
@@ -89,7 +89,7 @@ Use the (classic) Django command
 
 Backup user data
 
-    python3 backup_user_data.py
+    python3 db_user_data_dump.py
 
 ...can be also done by dumping data using pg commands:
 
