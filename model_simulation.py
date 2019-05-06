@@ -1,6 +1,7 @@
 from learner.act_r_custom import ActRPlus
 from teacher.random_teacher import RandomTeacher
-import matplotlib.pyplot as plt
+
+import plot.p_recall
 
 
 def main(t_max=300, n_items=6):
@@ -10,8 +11,7 @@ def main(t_max=300, n_items=6):
                      task_features=teacher.task_features, track_p_recall=True)
     questions, replies, successes = teacher.teach(agent=agent)
 
-    plt.plot(agent.p)
-    plt.show()
+    plot.p_recall.curve(agent.p)
 
 
 if __name__ == "__main__":

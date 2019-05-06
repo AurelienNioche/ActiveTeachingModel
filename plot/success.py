@@ -1,19 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import os
 
-dir_path = 'fig'
-
-
-def save_fig(fig_name):
-
-    os.makedirs(dir_path, exist_ok=True)
-
-    file_name = f'{dir_path}/{fig_name}'
-    plt.savefig(fname=f'{dir_path}/{fig_name}')
-
-    print(f'Figure "{file_name}" created.')
-    plt.close()
+from plot.generic import save_fig
 
 
 def scatter(successes, fig_name='backup.pdf'):
@@ -34,8 +22,6 @@ def curve(successes, fig_name='backup.pdf', font_size=42, line_width=3,
     y = []
     for i in range(1, len(successes)):
         y.append(np.mean(successes[:i]))
-
-    os.makedirs(dir_path, exist_ok=True)
 
     fig = plt.figure(figsize=(10, 10))
     ax = fig.add_subplot(111)
