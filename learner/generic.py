@@ -28,12 +28,15 @@ class Exp:
 class Learner:
 
     def __init__(self):
-        pass
+        self.questions = []
 
     def decide(self, question, possible_replies):
         return 0
 
     def learn(self, question):
+        pass
+
+    def unlearn(self):
         pass
 
     @property

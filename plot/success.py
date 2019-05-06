@@ -5,9 +5,18 @@ import os
 dir_path = 'fig'
 
 
-def scatter(successes, fig_name='backup.pdf'):
+def save_fig(fig_name):
 
     os.makedirs(dir_path, exist_ok=True)
+
+    file_name = f'{dir_path}/{fig_name}'
+    plt.savefig(fname=f'{dir_path}/{fig_name}')
+
+    print(f'Figure "{file_name}" created.')
+    plt.close()
+
+
+def scatter(successes, fig_name='backup.pdf'):
 
     fig = plt.figure(figsize=(10, 2))
     ax = fig.add_subplot(111)
@@ -15,8 +24,8 @@ def scatter(successes, fig_name='backup.pdf'):
     ax.set_xlabel('Time')
     ax.set_yticks((0, 1))
     ax.scatter(x=np.arange(len(successes)), y=successes, alpha=0.2, color="black")
-    plt.savefig(fname=f'{dir_path}/{fig_name}')
-    plt.close()
+
+    save_fig(fig_name)
 
 
 def curve(successes, fig_name='backup.pdf', font_size=42, line_width=3,
@@ -39,5 +48,4 @@ def curve(successes, fig_name='backup.pdf', font_size=42, line_width=3,
 
     plt.tight_layout()
 
-    plt.savefig(fname=f'{dir_path}/{fig_name}')
-    plt.close()
+    save_fig(fig_name)

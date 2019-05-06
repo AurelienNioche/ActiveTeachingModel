@@ -18,18 +18,14 @@ import similarity_graphic.measure
 import similarity_semantic.measure
 
 
-BKP_FOLDER = "tracking_bkp"
+BKP_FOLDER = "bkp_learning_material"
 
 os.makedirs(BKP_FOLDER, exist_ok=True)
 
 
 class TrackingTeacher:
 
-    """
-    Customize this as you want (except 'grade' and 'n_items' as in this case, you need a specific db
-    """
-
-    def __init__(self, n_items=20, t_max=100, grade=1, handle_similarities=True):
+    def __init__(self, n_items=20, t_max=100, grade=1, handle_similarities=True, verbose=False):
 
         assert n_items >= N_POSSIBLE_REPLIES, \
             "The number of items have to be superior to the number of possible replies"
@@ -46,17 +42,17 @@ class TrackingTeacher:
         else:
             self.graphic_similarity, self.semantic_similarity = None, None
 
+        self.verbose = verbose
+
+        self.questions = []
+        self.replies = []
+        self.successes = []
+
+        self.agent = None
+
     def ask(self):
 
-        question = np.random.randint(self.n_items)
-
-        possible_replies = self.get_possible_replies(question)
-
-        print(f"Question chosen: {self.kanjis[question]}; "
-              f"correct answer: {self.meanings[question]}; "
-              f"possible replies: {self.meanings[possible_replies]};")
-
-        return question, possible_replies
+        raise NotImplementedError("Tracking Teacher is a meta-class. Ask method need to be overridden")
 
     def get_possible_replies(self, question):
 
@@ -117,9 +113,7 @@ class TrackingTeacher:
 
     def teach(self, agent):
 
-        questions = []
-        replies = []
-        successes = []
+        self.agent = agent
 
         for _ in range(self.t_max):
             question, possible_replies = self.ask()
@@ -128,8 +122,8 @@ class TrackingTeacher:
             agent.learn(question=question)
 
             # For backup
-            questions.append(question)
-            replies.append(reply)
-            successes.append(reply == question)  # We assume that the matching is (0,0), (1, 1), (n, n)
+            self.questions.append(question)
+            self.replies.append(reply)
+            self.successes.append(reply == question)  # We assume that the matching is (0,0), (1, 1), (n, n)
 
-        return questions, replies, successes
+        return self.questions, self.replies, self.successes

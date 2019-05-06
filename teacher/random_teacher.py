@@ -1,11 +1,9 @@
-import copy
+import numpy as np
 
 from teacher.tracking_teacher import TrackingTeacher
 
-from solver import solver
 
-
-class NirajTeacher(TrackingTeacher):
+class RandomTeacher(TrackingTeacher):
 
     def __init__(self, n_items=20, t_max=100, grade=1, handle_similarities=True, verbose=False):
 
@@ -14,12 +12,7 @@ class NirajTeacher(TrackingTeacher):
 
     def ask(self):
 
-        question = solver.get_next_node(
-            questions=self.questions,
-            successes=self.successes,
-            agent=copy.deepcopy(self.agent),
-            n_items=self.n_items
-        )
+        question = np.random.randint(self.n_items)
 
         possible_replies = self.get_possible_replies(question)
 

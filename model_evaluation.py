@@ -13,7 +13,8 @@ import numpy as np
 import plot.success
 
 from learner.rl import QLearner
-from learner.act_r import ActR, ActRMeaning, ActRPlus, ActRPlusPlus, ActRGraphic
+from learner.act_r import ActR
+from learner.act_r_custom import ActRMeaning, ActRGraphic, ActRPlus, ActRPlusPlus
 
 from task.parameters import N_POSSIBLE_REPLIES
 

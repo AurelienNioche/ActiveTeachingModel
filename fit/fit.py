@@ -1,7 +1,8 @@
 import numpy as np
 
 from learner.rl import QLearner
-from learner.act_r import ActR, ActRPlus, ActRPlusPlus, ActRMeaning, ActRGraphic
+from learner.act_r import ActR
+from learner.act_r_custom import ActRMeaning, ActRGraphic, ActRPlus, ActRPlusPlus
 
 import scipy.optimize
 from hyperopt import hp, fmin, tpe
