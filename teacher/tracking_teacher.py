@@ -10,6 +10,8 @@ from task.models import Kanji
 
 import pickle
 
+from tqdm import tqdm
+
 import numpy as np
 
 from task.parameters import N_POSSIBLE_REPLIES
@@ -115,7 +117,7 @@ class TrackingTeacher:
 
         self.agent = agent
 
-        for _ in range(self.t_max):
+        for _ in tqdm(range(self.t_max)):
             question, possible_replies = self.ask()
 
             reply = agent.decide(question=question, possible_replies=possible_replies)
