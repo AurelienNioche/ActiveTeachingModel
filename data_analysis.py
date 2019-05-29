@@ -14,16 +14,21 @@ from fit import fit
 
 import behavior.data
 
+import pickle
+
 
 import plot.model_comparison
 import plot.success
 
 from learner.act_r import ActR
 from learner.rl import QLearner
-from learner.act_r_custom import ActRMeaning, ActRGraphic
+from learner.act_r_custom import ActRMeaning, ActRGraphic, ActRPlus
 
 LOG_DIR = "log"
+BKP_FOLDER = "bkp/model_comparison"
+
 os.makedirs(LOG_DIR, exist_ok=True)
+os.makedirs(BKP_FOLDER, exist_ok=True)
 
 import sys
 
@@ -46,19 +51,11 @@ class Tee(object):
         self.files[-1].close()
 
 
-def model_comparison(use_p_correct=True, fit_method='de',
-                     models=("rl", "act_r", "act_r_meaning", "act_r_graphic")):
-
-    # logging.basicConfig(
-    #     filename=f'fit_{fit_method}_{sim_graphic_method}_{"correct" if use_p_correct else "choice"}.log',
-    #     level=logging.DEBUG)
-    # # noinspection PyShadowingBuiltins
-    # print = logging.info
+def _get_model_comparison_data(models, use_p_correct=True, fit_method='de'):
 
     sys.stdout = Tee(f'{LOG_DIR}/fit_{fit_method}_{"correct" if use_p_correct else "choice"}.log')
 
     models = models[::-1]
-    n_models = len(models)
     model_labels = [m.__name__ for m in models]
 
     users = User.objects.all().order_by('id')
@@ -72,7 +69,7 @@ def model_comparison(use_p_correct=True, fit_method='de',
     print(f"Fit parameters: use_p_correct={use_p_correct}; method='{fit_method}'\n")
     # print(f"Graphic similarity: method={sim_graphic_method}'\n")
 
-    for u in users[:2]:
+    for u in users:
 
         print(f'{u.id}\n{"*" * 5}\n')
 
@@ -98,19 +95,30 @@ def model_comparison(use_p_correct=True, fit_method='de',
             for ms in measures:
                 data[ms][m.__name__].append(fit_r[ms])
 
-    # Prepare for plot
-    colors = [f"C{i}" for i in range(n_models)]
+    return data
+
+
+def model_comparison(models, use_p_correct=True, fit_method='de'):
+
     dsp_use_p_correct = "p_correct" if use_p_correct else "p_choice"
 
+    file_path = f"{BKP_FOLDER}/model_comparison_{fit_method}_{dsp_use_p_correct}.p"
+    if not os.path.exists(file_path):
+        data = _get_model_comparison_data(models=models, use_p_correct=use_p_correct, fit_method=fit_method)
+        pickle.dump(data, open(file_path, 'wb'))
+    else:
+        data = pickle.load(open(file_path, 'rb'))
+
+    # Prepare for plot
+    colors = [f"C{i}" for i in range(len(models))]
+
     # Plot BICs
-    plot.model_comparison.scatter_plot(data_list=data["bic"], colors=colors,
-                                       x_tick_labels=model_labels,
+    plot.model_comparison.scatter_plot(data["bic"], colors=colors,
                                        f_name=f'model_comparison_{fit_method}_{dsp_use_p_correct}.pdf',
                                        y_label='BIC', invert_y_axis=True)
 
     # Plot average means
-    plot.model_comparison.scatter_plot(data_list=data["mean_p"], colors=colors,
-                                       x_tick_labels=model_labels,
+    plot.model_comparison.scatter_plot(data["mean_p"], colors=colors,
                                        f_name=f'model_probabilities_{fit_method}_{dsp_use_p_correct}.pdf',
                                        y_label='p')
 
@@ -119,7 +127,7 @@ def model_comparison(use_p_correct=True, fit_method='de',
 
 def main():
 
-    model_comparison(models=(QLearner, ActR, ActRGraphic, ActRMeaning))
+    model_comparison(models=(QLearner, ActR, ActRMeaning, ActRGraphic, ActRPlus), use_p_correct=False)
 
 
 if __name__ == "__main__":

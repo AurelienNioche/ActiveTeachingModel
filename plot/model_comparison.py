@@ -86,6 +86,7 @@ def bar_plot(
 
     if f_name is not None:
         plt.savefig(f_name)
+        print(f"Fig '{f_name}' has been created.")
 
 
 def bar_example():
@@ -100,7 +101,7 @@ def bar_example():
 
 
 def scatter_plot(
-        results, colors=None, x_tick_labels=None, fontsize=10,
+        results, colors=None, fontsize=10,
         subplot_spec=None, fig=None, f_name=None, letter=None, y_lim=None, y_label=None,
         h_line=None, invert_y_axis=False
 ):
@@ -135,9 +136,11 @@ def scatter_plot(
     y_scatter = []
     colors_scatter = []
 
-    for i, cond in enumerate(results.keys()):
+    x_tick_labels = sorted(results.keys())
 
-        for v in results[cond]:
+    for i, label in enumerate(x_tick_labels):
+
+        for v in results[label]:
 
             # For boxplot
             values_box_plot[i].append(v)
@@ -167,9 +170,6 @@ def scatter_plot(
     if invert_y_axis:
         ax.invert_yaxis()
 
-    if x_tick_labels is None:
-        x_tick_labels = ["" for _ in range(n)]
-
     # Boxplot
     bp = ax.boxplot(values_box_plot, positions=positions, labels=x_tick_labels, showfliers=False, zorder=2)
 
@@ -183,7 +183,9 @@ def scatter_plot(
 
     if f_name is not None:
         os.makedirs(FIG_FOLDER, exist_ok=True)
-        plt.savefig(f'{FIG_FOLDER}/{f_name}')
+        f_name = f'{FIG_FOLDER}/{f_name}'
+        plt.savefig(f_name)
+        print(f"Fig '{f_name}' has been created.")
 
     else:
         plt.show()
