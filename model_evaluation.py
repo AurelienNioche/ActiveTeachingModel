@@ -107,7 +107,7 @@ def main(model=ActR):
 
     if not os.path.exists(file_path):
 
-        max_ = 30
+        max_ = 100
         seeds = range(max_)
 
         pool = multiprocessing.Pool()
@@ -141,4 +141,4 @@ def main(model=ActR):
 
 if __name__ == "__main__":
 
-    main()
+    main(ActR)

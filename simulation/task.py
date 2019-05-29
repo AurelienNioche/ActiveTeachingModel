@@ -102,7 +102,7 @@ class Task:
             correct_answer = self.meaning[q_idx[t]]
 
             # Select possible replies
-            meaning_without_correct = self.meaning.copy()
+            meaning_without_correct = list(self.meaning.copy())
             meaning_without_correct.remove(correct_answer)
 
             possible_replies = \
