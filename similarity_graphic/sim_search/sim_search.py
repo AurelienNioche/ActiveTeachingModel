@@ -21,8 +21,9 @@ class StrokeSimilarity:
         self.n_stroke_types = 0
 
         self.signatures = {}
-        with open(STROKE_SOURCE, 'r') as i_stream:
+        with open(STROKE_SOURCE, 'rb') as i_stream:
             for i, line in enumerate(i_stream):
+                line=line.decode()
                 kanji, raw_strokes = line.rstrip().split()
 
                 # Decode from bytes
