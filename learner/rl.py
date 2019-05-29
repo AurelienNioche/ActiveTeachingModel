@@ -1,6 +1,6 @@
 import numpy as np
 
-from learner.generic import Learner, Task
+from learner.generic import Learner
 
 import task.parameters
 
@@ -14,20 +14,22 @@ class QParam:
 
 class QLearner(Learner):
 
-    def __init__(self, parameters, task_features, verbose=False):
+    bounds = ('alpha', 0, 1), ('tau', 0.002, 0.5)
+
+    def __init__(self, param, tk, verbose=False):
 
         super().__init__()
 
-        if type(parameters) == dict:
-            self.pr = QParam(**parameters)
-        elif type(parameters) in (list, tuple, np.ndarray):
-            self.pr = QParam(*parameters)
+        if type(param) == dict:
+            self.pr = QParam(**param)
+        elif type(param) in (list, tuple, np.ndarray):
+            self.pr = QParam(*param)
         else:
-            raise Exception(f"Type {type(parameters)} is not handled for parameters")
+            raise Exception(f"Type {type(param)} is not handled for parameters")
 
-        self.tk = Task(**task_features)
+        self.tk = tk
 
-        self.q = np.zeros((self.tk.n_items, self.tk.n_items))
+        self.q = np.zeros((self.tk.n_item, self.tk.n_item))
         # print(f"alpha: {self.alpha}, tau:{self.tau}")
 
         self.verbose = verbose

@@ -100,7 +100,7 @@ def bar_example():
 
 
 def scatter_plot(
-        data_list, colors=None, x_tick_labels=None, fontsize=10,
+        results, colors=None, x_tick_labels=None, fontsize=10,
         subplot_spec=None, fig=None, f_name=None, letter=None, y_lim=None, y_label=None,
         h_line=None, invert_y_axis=False
 ):
@@ -121,25 +121,30 @@ def scatter_plot(
             transform=ax.transAxes,
             fontsize=20)
 
-    n = len(data_list)
+    n = len(results.keys())
 
     # Colors
     if colors is None:
         colors = ["black" for _ in range(n)]
 
+    # For boxplot
     positions = list(range(n))
+    values_box_plot = [[] for _ in range(n)]
 
     x_scatter = []
     y_scatter = []
     colors_scatter = []
 
-    values_box_plot = data_list
+    for i, cond in enumerate(results.keys()):
 
-    # For scatter
-    for i, data in enumerate(data_list):
-        for v in data:
-            y_scatter.append(v)
+        for v in results[cond]:
+
+            # For boxplot
+            values_box_plot[i].append(v)
+
+            # For scatter
             x_scatter.append(i)
+            y_scatter.append(v)
             colors_scatter.append(colors[i])
 
     ax.scatter(x_scatter, y_scatter, c=colors_scatter, s=30, alpha=0.5, linewidth=0.0, zorder=1)

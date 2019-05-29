@@ -11,10 +11,10 @@ from teacher.niraj_teacher import NirajTeacher
 from teacher.random_teacher import RandomTeacher
 
 
-def run(n_items=25, t_max=150, model=ActRPlus, parameters=None, track_p_recall=False):
+def run(n_item=25, t_max=150, model=ActRPlus, param=None, track_p_recall=False):
 
     """
-    :param n_items: Positive integer (above the number of possible answers displayed)
+    :param n_item: Positive integer (above the number of possible answers displayed)
 
     :param t_max: Positive integer (zero excluded)
 
@@ -24,7 +24,7 @@ def run(n_items=25, t_max=150, model=ActRPlus, parameters=None, track_p_recall=F
         * ActRGraphic
         * ActRPlus
 
-    :param parameters: dictionary containing the parameters when creating the instance of the learner.
+    :param param: dictionary containing the parameters when creating the instance of the learner.
 
         Parameter mapping between paper (left) and code (right):
         lambda: d
@@ -38,11 +38,11 @@ def run(n_items=25, t_max=150, model=ActRPlus, parameters=None, track_p_recall=F
     :return: None
     """
 
-    parameters = {"d": 0.5, "tau": 0.01, "s": 0.06, "m": 0.3, "g": 0.7} if parameters is None else parameters
+    param = {"d": 0.5, "tau": 0.01, "s": 0.06, "m": 0.3, "g": 0.7} if param is None else param
 
     # Create data with Niraj's solver
-    teacher = NirajTeacher(t_max=t_max, n_items=n_items, grade=1)
-    learner = model(parameters=parameters, task_features=teacher.task_features, track_p_recall=track_p_recall)
+    teacher = NirajTeacher(t_max=t_max, n_item=n_item, grade=1)
+    learner = model(param=param, tk=teacher.tk, track_p_recall=track_p_recall)
 
     questions, replies, successes = teacher.teach(agent=learner)
 
@@ -53,8 +53,8 @@ def run(n_items=25, t_max=150, model=ActRPlus, parameters=None, track_p_recall=F
         plot.p_recall.curve(p_recall=learner.p, fig_name=f'niraj_opt_teaching_{model.__name__}_p_recall.pdf')
 
     # Create data with random selection of questions
-    teacher = RandomTeacher(t_max=t_max, n_items=n_items, grade=1)
-    learner = model(parameters=parameters, task_features=teacher.task_features, track_p_recall=track_p_recall)
+    teacher = RandomTeacher(t_max=t_max, n_item=n_item, grade=1)
+    learner = model(param=param, tk=teacher.tk, track_p_recall=track_p_recall)
     questions, replies, successes = teacher.teach(agent=learner)
 
     plot.success.curve(successes, fig_name=f'niraj_rdm_teaching_{model.__name__}_success_curve.pdf')

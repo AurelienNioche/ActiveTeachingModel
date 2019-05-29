@@ -67,22 +67,24 @@ class ActRPlusPlusParam:
 
 class ActRMeaning(ActR):
 
-    def __init__(self,  task_features, parameters=None, verbose=False, track_p_recall=False):
+    bounds = ('d', 0.0000001, 1.0), ('tau', -5, 5), ('s', 0.0000001, 1), ('m', -2, 2)
 
-        if parameters is not None:
+    def __init__(self, tk, param=None, verbose=False, track_p_recall=False):
 
-            if type(parameters) == dict:
-                self.pr = ActRMeaningParam(**parameters)
+        if param is not None:
 
-            elif type(parameters) in (tuple, list, np.ndarray):
-                self.pr = ActRMeaningParam(*parameters)
+            if type(param) == dict:
+                self.pr = ActRMeaningParam(**param)
+
+            elif type(param) in (tuple, list, np.ndarray):
+                self.pr = ActRMeaningParam(*param)
 
             else:
-                raise Exception(f"Type {type(parameters)} is not handled for parameters")
+                raise Exception(f"Type {type(param)} is not handled for parameters")
 
-        super().__init__(task_features=task_features, verbose=verbose, track_p_recall=track_p_recall)
+        super().__init__(tk, verbose=verbose, track_p_recall=track_p_recall)
 
-        if parameters is not None:
+        if param is not None:
             self.x = self.pr.m
             self.c_x = self.tk.c_semantic
 
@@ -106,7 +108,7 @@ class ActRMeaning(ActR):
 
         x_i = 0
 
-        list_j = list(range(self.tk.n_items))
+        list_j = list(range(self.tk.n_item))
         list_j.remove(i)
 
         for j in list_j:
@@ -115,22 +117,24 @@ class ActRMeaning(ActR):
             if b_j > 0:
                 x_i += self.c_x[i, j] * b_j
 
-        x_i /= (self.tk.n_items - 1)
+        x_i /= (self.tk.n_item - 1)
         return x_i
 
 
 class ActRGraphic(ActRMeaning):
 
-    def __init__(self,  parameters, task_features, verbose=False, track_p_recall=False):
+    bounds = ('d', 0.0000001, 1.0), ('tau', -5, 5), ('s', 0.0000001, 1), ('g', -2, 2)
 
-        if type(parameters) == dict:
-            self.pr = ActRGraphicParam(**parameters)
-        elif type(parameters) in (tuple, list, np.ndarray):
-            self.pr = ActRGraphicParam(*parameters)
+    def __init__(self, param, tk, verbose=False, track_p_recall=False):
+
+        if type(param) == dict:
+            self.pr = ActRGraphicParam(**param)
+        elif type(param) in (tuple, list, np.ndarray):
+            self.pr = ActRGraphicParam(*param)
         else:
-            raise Exception(f"Type {type(parameters)} is not handled for parameters")
+            raise Exception(f"Type {type(param)} is not handled for parameters")
 
-        super().__init__(task_features=task_features, verbose=verbose, track_p_recall=track_p_recall)
+        super().__init__(tk=tk, verbose=verbose, track_p_recall=track_p_recall)
 
         self.c_x = self.tk.c_graphic
         self.x = self.pr.g
@@ -138,16 +142,18 @@ class ActRGraphic(ActRMeaning):
 
 class ActRPlus(ActR):
 
-    def __init__(self, task_features, parameters, verbose=False, track_p_recall=False):
+    bounds = ('d', 0, 1.0), ('tau', 0.00, 5), ('s', 0.0000001, 10), ('g', -10, 10), ('m', -10, 10)
 
-        if type(parameters) == dict:
-            self.pr = ActRPlusParam(**parameters)
-        elif type(parameters) in (tuple, list, np.ndarray):
-            self.pr = ActRPlusParam(*parameters)
+    def __init__(self, tk, param, verbose=False, track_p_recall=False):
+
+        if type(param) == dict:
+            self.pr = ActRPlusParam(**param)
+        elif type(param) in (tuple, list, np.ndarray):
+            self.pr = ActRPlusParam(*param)
         else:
-            raise Exception(f"Type {type(parameters)} is not handled for parameters")
+            raise Exception(f"Type {type(param)} is not handled for parameters")
 
-        super().__init__(task_features=task_features, verbose=verbose, track_p_recall=track_p_recall)
+        super().__init__(tk=tk, verbose=verbose, track_p_recall=track_p_recall)
 
     def p_recall(self, item):
 
@@ -167,7 +173,7 @@ class ActRPlus(ActR):
         g_i = 0
         m_i = 0
 
-        list_j = list(range(self.tk.n_items))
+        list_j = list(range(self.tk.n_item))
         list_j.remove(i)
 
         for j in list_j:
@@ -187,30 +193,33 @@ class ActRPlus(ActR):
                     print(f'b_j: {b_j}, cs: {self.tk.c_semantic[i, j]}')
 
                 np.seterr(all='ignore')
-        g_i /= (self.tk.n_items - 1)
-        m_i /= (self.tk.n_items - 1)
+        g_i /= (self.tk.n_item - 1)
+        m_i /= (self.tk.n_item - 1)
         return g_i, m_i
 
 
 class ActRPlusPlus(ActRPlus):
 
-    def __init__(self, parameters, task_features, verbose=False, track_p_recall=False):
+    bounds = ('d', 0, 1.0), ('tau', 0.00, 5), ('s', 0.0000001, 10), ('g', -10, 10), \
+        ('m', -10, 10), ('g_mu', 0, 1), ('g_sigma', 0.01, 5), ('m_mu', 0, 1), ('m_sigma', 0.01, 5)
 
-        if type(parameters) == dict:
-            self.pr = ActRPlusPlusParam(**parameters)
-        elif type(parameters) in (tuple, list, np.ndarray):
-            self.pr = ActRPlusPlusParam(*parameters)
+    def __init__(self, param, tk, verbose=False, track_p_recall=False):
+
+        if type(param) == dict:
+            self.pr = ActRPlusPlusParam(**param)
+        elif type(param) in (tuple, list, np.ndarray):
+            self.pr = ActRPlusPlusParam(*param)
         else:
-            raise Exception(f"Type {type(parameters)} is not handled for parameters")
+            raise Exception(f"Type {type(param)} is not handled for parameters")
 
-        super().__init__(task_features=task_features, verbose=verbose, track_p_recall=track_p_recall)
+        super().__init__(tk=tk, verbose=verbose, track_p_recall=track_p_recall)
 
     def _g_and_m(self, i):
 
         g_i = 0
         m_i = 0
 
-        list_j = list(range(self.tk.n_items))
+        list_j = list(range(self.tk.n_item))
         list_j.remove(i)
 
         for j in list_j:

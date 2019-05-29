@@ -8,10 +8,8 @@ from itertools import combinations
 
 
 try:
-    from auto_encoder.tools import backup
-    from auto_encoder.tools import image
-    from auto_encoder.model import cnn
-    from auto_encoder.tools import evaluation
+    from similarity_graphic.auto_encoder.tools import image, evaluation, backup
+    from similarity_graphic.auto_encoder.model import cnn
 except ModuleNotFoundError:
     from pathlib import Path  # if you haven't already done so
 
@@ -25,10 +23,10 @@ except ModuleNotFoundError:
     except ValueError:  # Already removed
         pass
 
-    from auto_encoder.tools import backup
-    from auto_encoder.tools import image
-    from auto_encoder.model import cnn
-    from auto_encoder.tools import evaluation
+    from similarity_graphic.auto_encoder import backup
+    from similarity_graphic.auto_encoder import image
+    from similarity_graphic.auto_encoder import cnn
+    from similarity_graphic.auto_encoder import evaluation
 
 SCRIPT_FOLDER = os.path.dirname(os.path.abspath(__file__))
 BACKUP_FOLDER = f'{SCRIPT_FOLDER}/backup'

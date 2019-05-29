@@ -4,7 +4,7 @@ import pickle
 import uuid
 from itertools import combinations
 
-from word2vec import word2vec
+from similarity_semantic.word2vec import word2vec
 
 SCRIPT_FOLDER = os.path.dirname(os.path.abspath(__file__))
 BACKUP_FOLDER = f'{SCRIPT_FOLDER}/backup'

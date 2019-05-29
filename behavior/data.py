@@ -3,6 +3,9 @@ import numpy as np
 from task.models import User, Question, Kanji
 from task.parameters import N_POSSIBLE_REPLIES
 
+import similarity_graphic.measure
+import similarity_semantic.measure
+
 
 def show_in_console():
 
@@ -29,59 +32,69 @@ def show_in_console():
         print()
 
 
-def task_features(user_id, verbose=False):
+class UserTask:
 
-    question_entries = [q for q in Question.objects.filter(user_id=user_id).order_by('t')]
+    def __init__(self, user_id, verbose=False, compute_connections=True):
 
-    answers = []
+        self.question_entries = [q for q in Question.objects.filter(user_id=user_id).order_by('t')]
 
-    for q in question_entries:
+        self.t_max = self.question_entries[-1].t
 
-        for i in range(N_POSSIBLE_REPLIES):
-            answer = getattr(q, f'possible_reply_{i}')
-            answers.append(answer)
+        answers = []
 
-    u_answers = np.unique(answers)
+        for q in self.question_entries:
 
-    meanings = list(u_answers)
-    meanings.sort()
-    kanjis = []
-    for m in meanings:
-        try:
-            kanji = Question.objects.filter(correct_answer=m)[0].question
+            for i in range(N_POSSIBLE_REPLIES):
+                answer = getattr(q, f'possible_reply_{i}')
+                answers.append(answer)
 
-        except IndexError:
-            kanji = Kanji.objects.filter(meaning=m).order_by('grade')[0].kanji
+        u_answers = np.unique(answers)
 
-        kanjis.append(kanji)
+        self.meaning = list(u_answers)
+        self.meaning.sort()
+        self.kanji = []
 
-    if verbose:
-        print(f"Kanji used: {kanjis}")
-        print(f"Corresponding meanings: {meanings}\n")
+        for m in self.meaning:
+            try:
+                k = Question.objects.filter(correct_answer=m)[0].question
 
-    return question_entries, kanjis, meanings
+            except IndexError:
+                k = Kanji.objects.filter(meaning=m).order_by('grade')[0].kanji
+
+            self.kanji.append(k)
+
+        self.n_item = len(self.kanji)
+        self.n_possible_replies = N_POSSIBLE_REPLIES
+
+        if compute_connections:
+            self.c_graphic = similarity_graphic.measure.get(self.kanji)
+            self.c_semantic = similarity_semantic.measure.get(self.meaning)
+
+        if verbose:
+            print(f"Kanji used: {self.kanji}")
+            print(f"Corresponding meanings: {self.meaning}\n")
 
 
-def get(user_id, verbose=False):
+class UserData:
 
-    question_entries, kanjis, meanings = task_features(user_id=user_id, verbose=verbose)
+    def __init__(self, user_id, verbose):
 
-    n_items = len(kanjis)
+        self.tk = UserTask(user_id=user_id, verbose=verbose)
 
-    t_max = question_entries[-1].t
+        self.n_items = self.tk.n_item
+        t_max = self.tk.t_max
 
-    questions = np.zeros(t_max, dtype=int)
-    replies = np.zeros(t_max, dtype=int)
-    possible_replies = np.zeros((t_max, N_POSSIBLE_REPLIES), dtype=int)
-    success = np.zeros(t_max, dtype=int)
+        self.questions = np.zeros(t_max, dtype=int)
+        self.replies = np.zeros(t_max, dtype=int)
+        self.possible_replies = np.zeros((t_max, self.tk.n_possible_replies), dtype=int)
+        self.success = np.zeros(t_max, dtype=int)
 
-    for t in range(t_max):
+        for t in range(t_max):
 
-        questions[t] = kanjis.index(question_entries[t].question)
-        replies[t] = meanings.index(question_entries[t].reply)
-        for i in range(N_POSSIBLE_REPLIES):
-            possible_replies[t, i] = meanings.index(getattr(question_entries[t], f'possible_reply_{i}'))
+            self.questions[t] = self.tk.kanji.index(self.tk.question_entries[t].question)
+            self.replies[t] = self.tk.meaning.index(self.tk.question_entries[t].reply)
+            for i in range(N_POSSIBLE_REPLIES):
+                self.possible_replies[t, i] = \
+                    self.tk.meaning.index(getattr(self.tk.question_entries[t], f'possible_reply_{i}'))
 
-        success[t] = questions[t] == replies[t]
-
-    return questions, replies, n_items, possible_replies, success
+            self.success[t] = self.questions[t] == self.replies[t]

@@ -17,8 +17,9 @@ from itertools import combinations
 # import uuid
 
 
-from auto_encoder import auto_encoder
-from sim_search import sim_search
+from similarity_graphic.auto_encoder import auto_encoder
+from similarity_graphic.sim_search import sim_search
+
 
 # SCRIPT_FOLDER = os.path.dirname(os.path.abspath(__file__))
 # BACKUP_FOLDER = f'{SCRIPT_FOLDER}/backup'

@@ -4,13 +4,13 @@ from teacher.random_teacher import RandomTeacher
 import plot.p_recall
 
 
-def main(t_max=300, n_items=6):
+def main(t_max=300, n_item=6):
 
-    teacher = RandomTeacher(t_max=t_max, n_items=n_items, handle_similarities=False)
-    agent = ActRPlus(parameters={"d": 0.5, "tau": 0.01, "s": 0.06, "m": 0.3, "g": 0.7},
-                     task_features=teacher.task_features, track_p_recall=True)
-    questions, replies, successes = teacher.teach(agent=agent)
-
+    teacher = RandomTeacher(t_max=t_max, n_item=n_item, handle_similarities=False)
+    agent = ActRPlus(param={"d": 0.5, "tau": 0.01, "s": 0.06, "m": 0.3, "g": 0.7},
+                     tk=teacher.tk, track_p_recall=True)
+    # questions, replies, successes = teacher.teach(agent=agent)
+    teacher.teach(agent=agent)
     plot.p_recall.curve(agent.p)
 
 

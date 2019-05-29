@@ -1,6 +1,6 @@
 import numpy as np
 
-from learner.generic import Learner, Task
+from learner.generic import Learner
 
 
 class ActRParam:
@@ -17,31 +17,33 @@ class ActRParam:
 
 class ActR(Learner):
 
+    bounds = ('d', 0, 1.0), ('tau', -5, 5), ('s', 0.0000001, 1)
+
     """
     A chunk is composed of:
     * a type (here: means)
     * several slots (here: slot 1: kanji, slot2: meaning)
     """
 
-    def __init__(self, task_features, parameters=None, verbose=False, track_p_recall=False):
+    def __init__(self, tk, param=None, verbose=False, track_p_recall=False):
 
         super().__init__()
 
-        if parameters is None:
+        if param is None:
             pass  # ActR is used as abstract class
-        elif type(parameters) == dict:
-            self.pr = ActRParam(**parameters)
-        elif type(parameters) in (tuple, list, np.ndarray):
-            self.pr = ActRParam(*parameters)
+        elif type(param) == dict:
+            self.pr = ActRParam(**param)
+        elif type(param) in (tuple, list, np.ndarray):
+            self.pr = ActRParam(*param)
         else:
-            raise Exception(f"Type {type(parameters)} is not handled for parameters")
+            raise Exception(f"Type {type(param)} is not handled for parameters")
 
-        self.tk = Task(**task_features)
+        self.tk = tk
 
         self.p_random = 1/self.tk.n_possible_replies
 
         # Time recording of presentations of chunks
-        self.time_presentation = [[] for _ in range(self.tk.n_items)]
+        self.time_presentation = [[] for _ in range(self.tk.n_item)]
 
         # Time counter
         self.t = 0
@@ -52,8 +54,8 @@ class ActR(Learner):
         self.track_p_recall = track_p_recall
 
         if self.track_p_recall:
-            self.p = np.zeros((self.tk.t_max, self.tk.n_items))
-            self.a = np.zeros((self.tk.t_max, self.tk.n_items))
+            self.p = np.zeros((self.tk.t_max, self.tk.n_item))
+            self.a = np.zeros((self.tk.t_max, self.tk.n_item))
 
     def _activation_function(self, i):
 
@@ -161,7 +163,7 @@ class ActR(Learner):
         self._update_time_presentation(question)
 
         if self.track_p_recall:
-            for i in range(self.tk.n_items):
+            for i in range(self.tk.n_item):
                 self.p[self.t - 1, i] = self.p_recall(i)
                 self.a[self.t - 1, i] = self._activation_function(i)
 
@@ -179,9 +181,9 @@ class ActR(Learner):
 
 class ActROriginal(ActR):
 
-    def __init__(self, task_features, parameters=None, verbose=False):
+    def __init__(self, tk, param=None, verbose=False):
 
-        super().__init__(task_features=task_features, parameters=parameters, verbose=verbose)
+        super().__init__(tk=tk, param=param, verbose=verbose)
 
     def _base_level_learning_activation(self, i):
 

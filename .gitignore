@@ -120,14 +120,14 @@ dmypy.json
 /fig
 
 # Related to word2vec
-word2vec/data/GoogleNews-vectors-negative300.bin
-word2vec/backup
-word2vec/patch/
+similarity_semantic/word2vec/data/GoogleNews-vectors-negative300.bin
+similarity_semantic/word2vec/backup
+similarity_semantic/word2vec/patch/
 
 # Related to autoencoder
-auto_encoder/image
-auto_encoder/backup
-auto_encoder/fig
+similarity_graphic/auto_encoder/image
+similarity_graphic/auto_encoder/backup
+similarity_graphic/auto_encoder/fig
 
 # Related to similarity assessment
 similarity_graphic/backup
