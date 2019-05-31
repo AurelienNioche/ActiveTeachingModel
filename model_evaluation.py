@@ -4,11 +4,14 @@ import numpy as np
 
 from learner.rl import QLearner
 from learner.act_r import ActR
+from learner.act_r_custom import ActRMeaning, ActRGraphic, ActRPlus
 
 from simulation.task import Task
 from simulation.data import SimulatedData
 
 from fit import fit
+
+from utils import utils
 
 from tqdm import tqdm
 
@@ -20,7 +23,7 @@ import matplotlib.pyplot as plt
 
 import scipy.stats
 
-DATA_FOLDER = "bkp"
+DATA_FOLDER = os.path.join("bkp", "model_evaluation")
 FIG_FOLDER = "fig"
 
 os.makedirs(DATA_FOLDER, exist_ok=True)
@@ -29,7 +32,7 @@ os.makedirs(FIG_FOLDER, exist_ok=True)
 
 class SimulationAndFit:
 
-    def __init__(self, model, t_max=300, n_kanji=30, grade=1, verbose=False, fit_param=None, fit_method='de'):
+    def __init__(self, model, t_max=300, n_kanji=30, grade=1, verbose=False, fit_param=None):
 
         self.model = model
 
@@ -38,7 +41,6 @@ class SimulationAndFit:
         self.verbose = verbose
 
         self.fit_param = fit_param
-        self.fit_method = fit_method
 
     def __call__(self, seed):
 
@@ -50,7 +52,7 @@ class SimulationAndFit:
             param[bound[0]] = np.random.uniform(bound[1], bound[2])
 
         data = SimulatedData(model=self.model, param=param, tk=self.tk, verbose=self.verbose)
-        f = fit.Fit(model=self.model, tk=self.tk, data=data, fit_param=self.fit_param, method=self.fit_method)
+        f = fit.Fit(model=self.model, tk=self.tk, data=data, fit_param=self.fit_param)
         fit_r = f.evaluate()
         return \
             {
@@ -59,7 +61,7 @@ class SimulationAndFit:
             }
 
 
-def create_fig(data, model):
+def create_fig(data, extension=''):
 
     # Create fig
     fig, axes = plt.subplots(nrows=len(data.keys()), figsize=(5, 10))
@@ -94,25 +96,29 @@ def create_fig(data, model):
         i += 1
 
     plt.tight_layout()
-    f_name = f"parameter_recovery_{model.__name__}.pdf"
+    f_name = f"parameter_recovery{extension}.pdf"
     fig_path = os.path.join(FIG_FOLDER, f_name)
     plt.savefig(fig_path)
     print(f"Figure '{fig_path}' created.\n")
     plt.tight_layout()
 
 
-def main(model=ActR):
+def main(model, max_=100, t_max=500, n_kanji=30, fit_param=None):
 
-    file_path = f"{DATA_FOLDER}/parameter_recovery_{model.__name__}.p"
+    fit_param = fit.Fit.fit_param_(fit_param)
+
+    extension = f'_{model.__name__}_n{max_}_t{t_max}_k{n_kanji}_' \
+        f'{utils.dic2string(fit_param)}'
+
+    file_path = os.path.join(DATA_FOLDER, f"parameter_recovery_{extension}.p")
 
     if not os.path.exists(file_path):
 
-        max_ = 100
         seeds = range(max_)
 
         pool = multiprocessing.Pool()
         results = list(tqdm(pool.imap_unordered(
-            SimulationAndFit(model=model, t_max=300, n_kanji=60), seeds
+            SimulationAndFit(model=model, t_max=t_max, n_kanji=n_kanji, fit_param=fit_param), seeds
         ), total=max_))
 
         r_keys = list(results[0].keys())
@@ -136,9 +142,9 @@ def main(model=ActR):
     else:
         data = pickle.load(open(file_path, 'rb'))
 
-    create_fig(data=data, model=model)
+    create_fig(data=data, extension=extension)
 
 
 if __name__ == "__main__":
 
-    main(ActR)
+    main(ActRMeaning)

@@ -189,16 +189,3 @@ def scatter_plot(
 
     else:
         plt.show()
-
-
-def scatter_example():
-
-    mu, sigma = 0, 0.1  # mean and standard deviation
-    n = 50
-    data_list = [np.random.normal(mu, sigma, size=n), np.random.poisson(lam=1, size=n)]
-    scatter_plot(data_list=data_list)
-
-
-if __name__ == "__main__":
-
-    scatter_example()

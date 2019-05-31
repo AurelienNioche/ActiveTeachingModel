@@ -16,6 +16,7 @@ import behavior.data
 
 import pickle
 
+import numpy as np
 
 import plot.model_comparison
 import plot.success
@@ -32,44 +33,29 @@ os.makedirs(BKP_FOLDER, exist_ok=True)
 
 import sys
 
-
-class Tee(object):
-    def __init__(self, f):
-
-        self.files = (sys.stdout, open(f, 'w'))
-
-    def write(self, obj):
-        for f in self.files:
-            f.write(obj)
-            f.flush()  # If you want the output to be visible immediately
-
-    def flush(self):
-        for f in self.files:
-            f.flush()
-
-    def __del__(self):
-        self.files[-1].close()
+from utils import utils
 
 
-def _get_model_comparison_data(models, use_p_correct=True, fit_method='de'):
+def _get_model_comparison_data(models, fit_param):
 
-    sys.stdout = Tee(f'{LOG_DIR}/fit_{fit_method}_{"correct" if use_p_correct else "choice"}.log')
+    sys.stdout = utils.Tee(f'{LOG_DIR}/fit_{utils.dic2string(fit_param)}.log')
 
     models = models[::-1]
     model_labels = [m.__name__ for m in models]
 
     users = User.objects.all().order_by('id')
+    n_users = len(users)
 
     measures = "bic", "mean_p"
 
     data = {
-        k: {ml: [] for ml in model_labels} for k in measures
+        k: {ml: np.zeros(n_users) for ml in model_labels} for k in measures
     }
 
-    print(f"Fit parameters: use_p_correct={use_p_correct}; method='{fit_method}'\n")
+    print(f"Fit parameters: {fit_param}'\n")
     # print(f"Graphic similarity: method={sim_graphic_method}'\n")
 
-    for u in users:
+    for i, u in enumerate(users):
 
         print(f'{u.id}\n{"*" * 5}\n')
 
@@ -86,25 +72,24 @@ def _get_model_comparison_data(models, use_p_correct=True, fit_method='de'):
         for m in models:
 
             # Get the fit
-            f = fit.Fit(tk=tk, model=m, data=u_data, method='de',
-                        fit_param={'use_p_correct': use_p_correct}, verbose=True)
+            f = fit.Fit(tk=tk, model=m, data=u_data, fit_param=fit_param, verbose=True)
 
             fit_r = f.evaluate()
 
             # Keep trace of bic and mean_p
             for ms in measures:
-                data[ms][m.__name__].append(fit_r[ms])
+                data[ms][m.__name__][i] = fit_r[ms]
 
     return data
 
 
-def model_comparison(models, use_p_correct=True, fit_method='de'):
+def model_comparison(models, fit_param=None):
 
-    dsp_use_p_correct = "p_correct" if use_p_correct else "p_choice"
+    fit_param = fit.Fit.fit_param_(fit_param)
 
-    file_path = f"{BKP_FOLDER}/model_comparison_{fit_method}_{dsp_use_p_correct}.p"
+    file_path = f"{BKP_FOLDER}/model_comparison_{utils.dic2string(fit_param)}.p"
     if not os.path.exists(file_path):
-        data = _get_model_comparison_data(models=models, use_p_correct=use_p_correct, fit_method=fit_method)
+        data = _get_model_comparison_data(models=models, fit_param=fit_param)
         pickle.dump(data, open(file_path, 'wb'))
     else:
         data = pickle.load(open(file_path, 'rb'))
@@ -114,12 +99,12 @@ def model_comparison(models, use_p_correct=True, fit_method='de'):
 
     # Plot BICs
     plot.model_comparison.scatter_plot(data["bic"], colors=colors,
-                                       f_name=f'model_comparison_{fit_method}_{dsp_use_p_correct}.pdf',
+                                       f_name=f'model_comparison_{utils.dic2string(fit_param)}.pdf',
                                        y_label='BIC', invert_y_axis=True)
 
     # Plot average means
     plot.model_comparison.scatter_plot(data["mean_p"], colors=colors,
-                                       f_name=f'model_probabilities_{fit_method}_{dsp_use_p_correct}.pdf',
+                                       f_name=f'model_probabilities_{utils.dic2string(fit_param)}.pdf',
                                        y_label='p')
 
     print('-' * 10)
@@ -127,7 +112,8 @@ def model_comparison(models, use_p_correct=True, fit_method='de'):
 
 def main():
 
-    model_comparison(models=(QLearner, ActR, ActRMeaning, ActRGraphic, ActRPlus), use_p_correct=False)
+    # model_comparison(models=(QLearner, ActR, ActRMeaning, ActRGraphic, ActRPlus), use_p_correct=False)
+    model_comparison(models=(QLearner, ActR, ActRMeaning, ActRGraphic, ActRPlus))
 
 
 if __name__ == "__main__":

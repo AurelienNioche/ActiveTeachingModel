@@ -88,6 +88,8 @@ class ActRMeaning(ActR):
             self.x = self.pr.m
             self.c_x = self.tk.c_semantic
 
+        self.items = np.arange(self.tk.n_item)
+
     def p_recall(self, item):
 
         a_i = self._base_level_learning_activation(item)
@@ -106,18 +108,19 @@ class ActRMeaning(ActR):
 
     def _x(self, i):
 
-        x_i = 0
+        # x_i = 0
 
-        list_j = list(range(self.tk.n_item))
-        list_j.remove(i)
+        list_j = self.items[self.items != i]
 
-        for j in list_j:
+        x_i = (self._sigmoid_function(self._base_level_learning_activation(list_j))*self.c_x[i, list_j]).sum()
 
-            b_j = self._base_level_learning_activation(j)
-            if b_j > 0:
-                x_i += self.c_x[i, j] * b_j
+        # for j in list_j:
+        #
+        #     b_j = self._base_level_learning_activation(j)
+        #     if b_j > 0:
+        #         x_i += self.c_x[i, j] * b_j
 
-        x_i /= (self.tk.n_item - 1)
+        # x_i /= (self.tk.n_item - 1)
         return x_i
 
 
@@ -154,6 +157,8 @@ class ActRPlus(ActR):
             raise Exception(f"Type {type(param)} is not handled for parameters")
 
         super().__init__(tk=tk, verbose=verbose, track_p_recall=track_p_recall)
+
+        self.items = np.arange(self.tk.n_item)
 
     def p_recall(self, item):
 
@@ -193,8 +198,8 @@ class ActRPlus(ActR):
                     print(f'b_j: {b_j}, cs: {self.tk.c_semantic[i, j]}')
 
                 np.seterr(all='ignore')
-        g_i /= (self.tk.n_item - 1)
-        m_i /= (self.tk.n_item - 1)
+        # g_i /= (self.tk.n_item - 1)
+        # m_i /= (self.tk.n_item - 1)
         return g_i, m_i
 
 

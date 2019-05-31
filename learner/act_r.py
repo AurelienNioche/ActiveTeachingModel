@@ -43,7 +43,8 @@ class ActR(Learner):
         self.p_random = 1/self.tk.n_possible_replies
 
         # Time recording of presentations of chunks
-        self.time_presentation = [[] for _ in range(self.tk.n_item)]
+        self.hist = np.ones(tk.t_max) * -99
+        # self.time_presentation = [[] for _ in range(self.tk.n_item)]
 
         # Time counter
         self.t = 0
@@ -69,26 +70,31 @@ class ActR(Learner):
 
         """The base-level activation measures how much time has elapsed since the jth use:"""
 
-        # noinspection PyTypeChecker
-        sum_a = np.sum([
-            (self.t - t_presentation)**(-self.pr.d)
-            for t_presentation in self.time_presentation[i]
-        ])
-
-        if sum_a > 0:
-            max_b = np.log(1 + np.sum([i ** self.pr.d for i in range(self.tk.t_max, 0, -1)]))
-            b = np.log(1 + sum_a) / max_b
-        else:
-            b = 0
-
-        assert 0 <= b <= 1
-        return b
+        # # noinspection PyTypeChecker
+        # sum_a = np.sum([
+        #     (self.t - t_presentation)**(-self.pr.d)
+        #     for t_presentation in self.time_presentation[i]
+        # ])
+        #
+        # if sum_a > 0:
+        #     max_b = np.log(1 + np.sum([i ** self.pr.d for i in range(self.tk.t_max, 0, -1)]))
+        #     b = np.log(1 + sum_a) / max_b
+        # else:
+        #     b = 0
+        #
+        # assert 0 <= b <= 1
+        # return b
+        time_presentation = np.asarray(self.hist == i).nonzero()[0]
+        if not time_presentation.shape[0]:
+            return -np.inf
+        time_elapsed = self.t - time_presentation
+        return np.log(np.power(time_elapsed, -self.pr.d).sum())
 
     def _sigmoid_function(self, a):
 
         """The probability of a chunk being above some retrieval threshold τ is"""
 
-        x = (self.pr.tau - a) / self.pr.s
+        x = (self.pr.tau - a) / (self.pr.s*np.square(2))
 
         # Avoid overflow
         if x < -10**2:  # 1 / (1+exp(-1000)) equals approx 1.
@@ -107,7 +113,8 @@ class ActR(Learner):
     def _update_time_presentation(self, question):
 
         # noinspection PyTypeChecker
-        self.time_presentation[question].append(self.t)
+        self.hist[self.t] = question
+        # self.time_presentation[question].append(self.t)
         self.t += 1
 
     def p_recall(self, item):
@@ -169,31 +176,34 @@ class ActR(Learner):
 
     def unlearn(self):
 
-        try:
-            last_question = self.questions.pop()
-        except IndexError:
-            raise AssertionError("I can not unlearn something that has not been learned!")
+        # try:
+        #     last_question = self.questions.pop()
+        # except IndexError:
+        #     raise AssertionError("I can not unlearn something that has not been learned!")
 
         self.t -= 1
 
-        self.time_presentation[last_question].pop()
+        self.hist[self.t] = -99
 
 
-class ActROriginal(ActR):
-
-    def __init__(self, tk, param=None, verbose=False):
-
-        super().__init__(tk=tk, param=param, verbose=verbose)
-
-    def _base_level_learning_activation(self, i):
-
-        """The base-level activation measures how much time has elapsed since the jth use:"""
-
-        # noinspection PyTypeChecker
-        sum_a = np.sum([
-            (self.t - t_presentation)**(-self.pr.d)
-            for t_presentation in self.time_presentation[i]
-        ])
-
-        b = np.log(sum_a) if sum_a > 0 else -np.inf
-        return b
+# class ActROriginal(ActR):
+# #
+# #     def __init__(self, tk, param=None, verbose=False):
+# #
+# #         super().__init__(tk=tk, param=param, verbose=verbose)
+# #
+# #     def _base_level_learning_activation(self, i):
+# #
+# #         """The base-level activation measures how much time has elapsed since the jth use:"""
+# #
+# #         # # noinspection PyTypeChecker
+# #         # sum_a = np.sum([
+# #         #     (self.t - t_presentation)**(-self.pr.d)
+# #         #     for t_presentation in self.time_presentation[i]
+# #         # ])
+# #         #
+# #         # b = np.log(sum_a) if sum_a > 0 else -np.inf
+# #         # return b
+# #         sum_a = np.sum((self.t - np.asarray(self.a == i).nonzero()[0]) ** (-self.pr.d))
+# #         b = np.log(sum_a) if sum_a > 0 else -np.inf
+# #         return b

@@ -12,10 +12,14 @@ MAX_EVALS = 500  # Only if tpe
 
 class Fit:
 
-    def __init__(self, tk, model, data, method='de', fit_param=None, verbose=False):
+    default_fit_param = {
+        'use_p_correct': False,
+        'method': 'de'
+    }
 
-        self.method = method
-        self.fit_param = fit_param if fit_param is not None else {}
+    def __init__(self, tk, model, data, fit_param=None, verbose=False):
+
+        self.fit_param = fit_param
 
         self.tk = tk
         self.model = model
@@ -59,19 +63,19 @@ class Fit:
 
             return to_return
 
-        if self.method == 'tpe':  # Tree of Parzen Estimators
+        if self.fit_param['method'] == 'tpe':  # Tree of Parzen Estimators
 
             space = [hp.uniform(*b) for b in self.model.bounds]
             best_param = fmin(fn=objective, space=space, algo=tpe.suggest, max_evals=MAX_EVALS)
 
-        elif self.method in ('de', 'L-BFGS-B', 'TNC', 'COBYLA', 'SLSQP'):  # Differential evolution
+        elif self.fit_param['method'] in ('de', 'L-BFGS-B', 'TNC', 'COBYLA', 'SLSQP'):  # Differential evolution
 
             bounds_scipy = [b[-2:] for b in self.model.bounds]
 
             if self.verbose:
                 print("Finding best parameters...", end=' ')
 
-            if self.method == 'de':
+            if self.fit_param['method'] == 'de':
                 res = scipy.optimize.differential_evolution(
                         func=objective, bounds=bounds_scipy)
             else:
@@ -82,10 +86,10 @@ class Fit:
             if self.verbose:
                 print(f"{res.message} [best loss: {res.fun}]")
             if not res.success:
-                raise Exception(f"The fit did not succeed with method {self.method}.")
+                raise Exception(f"The fit did not succeed with method {self.fit_param['method']}.")
 
         else:
-            raise Exception(f'Method {self.method} is not defined')
+            raise Exception(f"Method {self.fit_param['method']} is not defined")
 
         # Get probabilities with best param
         learner = self.model(param=best_param, tk=self.tk)
@@ -109,8 +113,17 @@ class Fit:
         dsp_use_p_correct = "p_correct" if self.fit_param.get("use_p_correct") else "p_choice"
         dsp_best_param = ''.join(f'{k}={round(best_param[k], 3)}, ' for k in sorted(best_param.keys()))
 
-        print(f"[{model_name} - '{self.method}' - {dsp_use_p_correct}] Best param: " + dsp_best_param +
+        print(f"[{model_name} - '{self.fit_param['method']}' - {dsp_use_p_correct}] Best param: " + dsp_best_param +
               f"LLS: {round(lls, 2)}, " +
               f'BIC: {round(bic, 2)}, mean(P): {round(mean_p, 3)}\n')
 
         print("\n" + ''.join("_" * 10) + "\n")
+
+    @classmethod
+    def fit_param_(cls, fit_param):
+
+        fit_param_ = cls.default_fit_param
+        if fit_param is not None:
+            fit_param_.update(fit_param_)
+
+        return fit_param_

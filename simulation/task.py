@@ -16,7 +16,7 @@ import similarity_graphic.measure
 import similarity_semantic.measure
 
 import pickle
-BKP_FOLDER = "bkp/bkp_learning_material"
+BKP_FOLDER = "bkp/learning_material"
 
 os.makedirs(BKP_FOLDER, exist_ok=True)
 

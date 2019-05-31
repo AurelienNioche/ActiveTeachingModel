@@ -54,3 +54,32 @@ class AskUser:
         self.f(**kwargs)
         print("Done!")
 
+
+import sys
+
+
+class Tee(object):
+    """"
+    exemple of usage: sys.stdout = Tee(f'{LOG_DIR}/log.log')
+    """
+
+    def __init__(self, f):
+
+        self.files = (sys.stdout, open(f, 'w'))
+
+    def write(self, obj):
+        for f in self.files:
+            f.write(obj)
+            f.flush()  # If you want the output to be visible immediately
+
+    def flush(self):
+        for f in self.files:
+            f.flush()
+
+    def __del__(self):
+        self.files[-1].close()
+
+
+def dic2string(dic):
+    return str(dic).replace(' ', '_').replace('{', '')\
+        .replace('}', '').replace("'", '').replace(':', '').replace(',', '')
