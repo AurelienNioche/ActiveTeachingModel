@@ -26,12 +26,12 @@ from similarity_graphic.sim_search import sim_search
 # GRAPHIC_PROPERTIES = f'{BACKUP_FOLDER}/graphic_properties.p'
 
 
-# def _normalize(a):
-#     return np.interp(a, (np.nanmin(a), np.nanmax(a)), (0, 1))
+def _normalize(a):
+    return np.interp(a, (np.nanmin(a), np.nanmax(a)), (0, 1))
     # return # (x - np.min(x)) / (np.max(x) - np.min(x))
 
 
-def get(kanji_list, method='sim_search', verbose=False):
+def get(kanji_list, method='sim_search',  normalize_similarity=False, verbose=False):
 
     if method == 'auto_encoder':
         s = auto_encoder.get_similarity()
@@ -44,13 +44,19 @@ def get(kanji_list, method='sim_search', verbose=False):
     sim_array = np.zeros((n_kanji, n_kanji))
     for i, j in combinations(range(n_kanji), r=2):
 
-        a = kanji_list[i]
-        b = kanji_list[j]
-        similarity = s(a, b)
+        if i == j and normalize_similarity:
+            similarity = np.nan
+        else:
+            a = kanji_list[i]
+            b = kanji_list[j]
+            similarity = s(a, b)
 
         sim_array[i, j] = sim_array[j, i] = similarity
-        if verbose:
+        if verbose and i != j:
             print(f"Similarity between {a} and {b} is: {similarity:.2f}")
+
+    if normalize_similarity:
+        sim_array = _normalize(sim_array)
 
     return sim_array
 

@@ -32,11 +32,14 @@ os.makedirs(FIG_FOLDER, exist_ok=True)
 
 class SimulationAndFit:
 
-    def __init__(self, model, t_max=300, n_kanji=30, grade=1, verbose=False, fit_param=None):
+    def __init__(self, model, t_max=300, n_kanji=30, grade=1, normalize_similarity=False,
+                 verbose=False, fit_param=None):
 
         self.model = model
 
-        self.tk = Task(t_max=t_max, n_kanji=n_kanji, grade=grade, verbose=verbose)
+        self.tk = Task(t_max=t_max, n_kanji=n_kanji, grade=grade,
+                       normalize_similarity=normalize_similarity,
+                       verbose=verbose)
 
         self.verbose = verbose
 
@@ -87,7 +90,7 @@ def create_fig(data, extension=''):
         ax.set_xlim(min_, max_)
         ax.set_ylim(min_, max_)
 
-        ticks_positions = [round(i, 2) for i in np.linspace(min_, max_, 4)]
+        ticks_positions = [round(i, 2) for i in np.linspace(min_, max_, 3)]
 
         ax.set_xticks(ticks_positions)
         ax.set_yticks(ticks_positions)
@@ -103,11 +106,11 @@ def create_fig(data, extension=''):
     plt.tight_layout()
 
 
-def main(model, max_=100, t_max=500, n_kanji=30, fit_param=None):
+def main(model, max_=20, t_max=300, n_kanji=30, normalize_similarity=True, fit_param=None):
 
     fit_param = fit.Fit.fit_param_(fit_param)
 
-    extension = f'_{model.__name__}_n{max_}_t{t_max}_k{n_kanji}_' \
+    extension = f'_{model.__name__}{model.version}_n{max_}_t{t_max}_k{n_kanji}_' \
         f'{utils.dic2string(fit_param)}'
 
     file_path = os.path.join(DATA_FOLDER, f"parameter_recovery_{extension}.p")
@@ -118,7 +121,8 @@ def main(model, max_=100, t_max=500, n_kanji=30, fit_param=None):
 
         pool = multiprocessing.Pool()
         results = list(tqdm(pool.imap_unordered(
-            SimulationAndFit(model=model, t_max=t_max, n_kanji=n_kanji, fit_param=fit_param), seeds
+            SimulationAndFit(model=model, t_max=t_max, n_kanji=n_kanji, normalize_similarity=normalize_similarity,
+                             fit_param=fit_param), seeds
         ), total=max_))
 
         r_keys = list(results[0].keys())
@@ -147,4 +151,4 @@ def main(model, max_=100, t_max=500, n_kanji=30, fit_param=None):
 
 if __name__ == "__main__":
 
-    main(ActRMeaning)
+    main(ActR)

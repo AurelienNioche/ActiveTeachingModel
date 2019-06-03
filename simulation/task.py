@@ -23,7 +23,8 @@ os.makedirs(BKP_FOLDER, exist_ok=True)
 
 class Task:
 
-    def __init__(self, t_max=100, n_kanji=20, grade=1, verbose=False, seed=123, compute_connections=True,
+    def __init__(self, t_max=100, n_kanji=20, grade=1, verbose=False, seed=123, compute_similarity=True,
+                 normalize_similarity=False,
                  generate_full_task=True):
 
         # Seed
@@ -36,9 +37,11 @@ class Task:
 
         self.kanji, self.meaning = self.kanji_and_meaning
 
-        if compute_connections:
-            self.c_graphic = similarity_graphic.measure.get(self.kanji, verbose=verbose)
-            self.c_semantic = similarity_semantic.measure.get(self.meaning, verbose=verbose)
+        if compute_similarity:
+            self.c_graphic = similarity_graphic.measure.get(self.kanji, normalize_similarity=normalize_similarity,
+                                                            verbose=verbose)
+            self.c_semantic = similarity_semantic.measure.get(self.meaning, verbose=verbose,
+                                                              normalize_similarity=normalize_similarity)
 
         if verbose:
             print(f"Kanjis used are: {self.kanji}\n")

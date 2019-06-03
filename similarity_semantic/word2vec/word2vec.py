@@ -99,10 +99,10 @@ def evaluate_similarity(word_list, use_nan=False):
         elif b not in model.vocab:
             b = _replacement(model=model, word=b)
 
-        similarity = model.similarity(a, b)
+        raw_similarity = model.similarity(a, b)
 
-        sim[i, j] = similarity
-        sim[j, i] = similarity
+        sim[i, j] = np.abs(raw_similarity)
+        sim[j, i] = np.abs(raw_similarity)
 
         # print(f"Distance between {a} & {b}: {distance}")
 

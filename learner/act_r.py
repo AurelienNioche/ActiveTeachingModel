@@ -17,7 +17,8 @@ class ActRParam:
 
 class ActR(Learner):
 
-    bounds = ('d', 0, 1.0), ('tau', -5, 5), ('s', 0.0000001, 1)
+    version = 2.1
+    bounds = ('d', 0.000001, 1.0), ('tau', -5, 5), ('s', 0.0000001, 1)
 
     """
     A chunk is composed of:
@@ -56,7 +57,6 @@ class ActR(Learner):
 
         if self.track_p_recall:
             self.p = np.zeros((self.tk.t_max, self.tk.n_item))
-            self.a = np.zeros((self.tk.t_max, self.tk.n_item))
 
     def _activation_function(self, i):
 
@@ -172,7 +172,6 @@ class ActR(Learner):
         if self.track_p_recall:
             for i in range(self.tk.n_item):
                 self.p[self.t - 1, i] = self.p_recall(i)
-                self.a[self.t - 1, i] = self._activation_function(i)
 
     def unlearn(self):
 

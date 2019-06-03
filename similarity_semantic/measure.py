@@ -6,16 +6,15 @@ from itertools import combinations
 
 from similarity_semantic.word2vec import word2vec
 
-SCRIPT_FOLDER = os.path.dirname(os.path.abspath(__file__))
-BACKUP_FOLDER = f'{SCRIPT_FOLDER}/backup'
+# SCRIPT_FOLDER = os.path.dirname(os.path.abspath(__file__))
+BACKUP_FOLDER = f'bkp/similarity_semantic'
 
 os.makedirs(BACKUP_FOLDER, exist_ok=True)
 
 
-def create(word_list, backup, use_nan):
+def create(word_list, use_nan):
 
     sim = word2vec.evaluate_similarity(word_list=word_list, use_nan=use_nan)
-    pickle.dump(sim, file=open(backup, 'wb'))
     return sim
 
 
@@ -23,7 +22,7 @@ def _normalize(a):
     return np.interp(a, (np.nanmin(a), np.nanmax(a)), (0, 1))
 
 
-def get(word_list, normalize=False, force=False, verbose=False):
+def get(word_list, normalize_similarity=False, force=False, verbose=False):
 
     word_list = [i.lower() for i in word_list]
 
@@ -32,12 +31,13 @@ def get(word_list, normalize=False, force=False, verbose=False):
     backup = f"{BACKUP_FOLDER}/{list_id}.p"
 
     if not os.path.exists(backup) or force:
-        sim = create(word_list=word_list, backup=backup, use_nan=normalize)
+        sim = create(word_list=word_list, use_nan=normalize_similarity)
+        pickle.dump(sim, file=open(backup, 'wb'))
 
     else:
         sim = pickle.load(file=open(backup, 'rb'))
 
-    if normalize:
+    if normalize_similarity:
         sim = _normalize(sim)
 
     if verbose:

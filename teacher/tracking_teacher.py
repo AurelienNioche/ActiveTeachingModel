@@ -24,13 +24,15 @@ os.makedirs(BKP_FOLDER, exist_ok=True)
 
 class TrackingTeacher:
 
-    def __init__(self, n_item=20, t_max=100, grade=1, handle_similarities=True, verbose=False):
+    def __init__(self, n_item=20, t_max=100, grade=1, handle_similarities=True, normalize_similarity=False,
+                 verbose=False):
 
         assert n_item >= N_POSSIBLE_REPLIES, \
             "The number of items have to be superior to the number of possible replies"
 
-        self.tk = Task(n_kanji=n_item, t_max=t_max, grade=grade, compute_connections=handle_similarities,
-                       generate_full_task=False)
+        self.tk = Task(n_kanji=n_item, t_max=t_max, grade=grade, compute_similarity=handle_similarities,
+                       normalize_similarity=normalize_similarity,
+                       generate_full_task=False, verbose=verbose)
 
         self.verbose = verbose
 

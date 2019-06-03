@@ -113,7 +113,7 @@ def model_comparison(models, fit_param=None):
 def main():
 
     # model_comparison(models=(QLearner, ActR, ActRMeaning, ActRGraphic, ActRPlus), use_p_correct=False)
-    model_comparison(models=(QLearner, ActR, ActRMeaning, ActRGraphic, ActRPlus))
+    model_comparison(models=(QLearner, ActR, ActRMeaning, ActRGraphic, ActRPlus), fit_param={'use_p_correct': True})
 
 
 if __name__ == "__main__":

@@ -1,28 +1,6 @@
 import numpy as np
-# from scipy.stats import norm
 
-debug = False
 # np.seterr(all='raise')
-
-
-# class Task:
-#
-#     def __init__(self, t_max, n_possible_replies, n_items, c_graphic=None, c_semantic=None):
-#
-#         self.t_max = t_max
-#         self.n_possible_replies = n_possible_replies
-#         self.n_items = n_items
-#         self.c_graphic = c_graphic
-#         self.c_semantic = c_semantic
-
-
-# class Exp:
-#
-#     def __init__(self, questions, replies, possible_replies):
-#
-#         self.questions = questions
-#         self.replies = replies
-#         self.possible_replies = possible_replies
 
 
 class Learner:

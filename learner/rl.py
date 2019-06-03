@@ -14,6 +14,7 @@ class QParam:
 
 class QLearner(Learner):
 
+    version = 1.0
     bounds = ('alpha', 0, 1), ('tau', 0.002, 0.5)
 
     def __init__(self, param, tk, verbose=False):

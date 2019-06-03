@@ -139,3 +139,6 @@ data/user_and_question_tables2.sql
 Supprimerait task/migrations/0001_initial.py
 Supprimerait task/migrations/__init__.py
 log/
+bkp/model_comparison/*
+bkp/model_evaluation/*
+bkp/similarity_semantic/
