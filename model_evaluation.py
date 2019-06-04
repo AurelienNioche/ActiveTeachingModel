@@ -4,7 +4,7 @@ import numpy as np
 
 from learner.rl import QLearner
 from learner.act_r import ActR
-from learner.act_r_custom import ActRMeaning, ActRGraphic, ActRPlus
+from learner.act_r_custom import ActRMeaning, ActRGraphic, ActRPlus, ActR2
 
 from simulation.task import Task
 from simulation.data import SimulatedData

@@ -36,7 +36,7 @@ import sys
 from utils import utils
 
 
-def _get_model_comparison_data(models, fit_param):
+def _get_model_comparison_data(models, fit_param, normalize_similarity=False, verbose=False):
 
     sys.stdout = utils.Tee(f'{LOG_DIR}/fit_{utils.dic2string(fit_param)}.log')
 
@@ -60,7 +60,7 @@ def _get_model_comparison_data(models, fit_param):
         print(f'{u.id}\n{"*" * 5}\n')
 
         # Get user data
-        u_data = behavior.data.UserData(user_id=u.id, verbose=True)
+        u_data = behavior.data.UserData(user_id=u.id, normalize_similarity=normalize_similarity, verbose=verbose)
 
         # Plot the success curves
         plot.success.curve(successes=u_data.success, fig_name=f'success_curve_u{u.id}.pdf')
@@ -72,7 +72,7 @@ def _get_model_comparison_data(models, fit_param):
         for m in models:
 
             # Get the fit
-            f = fit.Fit(tk=tk, model=m, data=u_data, fit_param=fit_param, verbose=True)
+            f = fit.Fit(tk=tk, model=m, data=u_data, fit_param=fit_param, verbose=verbose)
 
             fit_r = f.evaluate()
 
@@ -83,13 +83,14 @@ def _get_model_comparison_data(models, fit_param):
     return data
 
 
-def model_comparison(models, fit_param=None):
+def model_comparison(models, fit_param=None, normalize_similarity=False, verbose=False):
 
     fit_param = fit.Fit.fit_param_(fit_param)
 
-    file_path = f"{BKP_FOLDER}/model_comparison_{utils.dic2string(fit_param)}.p"
+    file_path = f"{BKP_FOLDER}/model_comparison_{utils.dic2string(fit_param)}_norm_{normalize_similarity}.p"
     if not os.path.exists(file_path):
-        data = _get_model_comparison_data(models=models, fit_param=fit_param)
+        data = _get_model_comparison_data(models=models, fit_param=fit_param,
+                                          normalize_similarity=normalize_similarity, verbose=verbose)
         pickle.dump(data, open(file_path, 'wb'))
     else:
         data = pickle.load(open(file_path, 'rb'))
@@ -113,7 +114,8 @@ def model_comparison(models, fit_param=None):
 def main():
 
     # model_comparison(models=(QLearner, ActR, ActRMeaning, ActRGraphic, ActRPlus), use_p_correct=False)
-    model_comparison(models=(QLearner, ActR, ActRMeaning, ActRGraphic, ActRPlus), fit_param={'use_p_correct': True})
+    model_comparison(models=(QLearner, ActR, ActRMeaning, ActRGraphic, ActRPlus), fit_param={'use_p_correct': True},
+                     normalize_similarity=True, verbose=True)
 
 
 if __name__ == "__main__":

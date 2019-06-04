@@ -17,7 +17,7 @@ class ActRParam:
 
 class ActR(Learner):
 
-    version = 2.1
+    version = 2.2
     bounds = ('d', 0.000001, 1.0), ('tau', -5, 5), ('s', 0.0000001, 1)
 
     """

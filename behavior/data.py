@@ -34,7 +34,7 @@ def show_in_console():
 
 class UserTask:
 
-    def __init__(self, user_id, verbose=False, compute_connections=True):
+    def __init__(self, user_id, normalize_simililarity=False, verbose=False, compute_similarity=True):
 
         self.question_entries = [q for q in Question.objects.filter(user_id=user_id).order_by('t')]
 
@@ -66,9 +66,9 @@ class UserTask:
         self.n_item = len(self.kanji)
         self.n_possible_replies = N_POSSIBLE_REPLIES
 
-        if compute_connections:
-            self.c_graphic = similarity_graphic.measure.get(self.kanji)
-            self.c_semantic = similarity_semantic.measure.get(self.meaning)
+        if compute_similarity:
+            self.c_graphic = similarity_graphic.measure.get(self.kanji, normalize_similarity=normalize_simililarity)
+            self.c_semantic = similarity_semantic.measure.get(self.meaning, normalize_similarity=normalize_simililarity)
 
         if verbose:
             print(f"Kanji used: {self.kanji}")
@@ -77,9 +77,9 @@ class UserTask:
 
 class UserData:
 
-    def __init__(self, user_id, verbose):
+    def __init__(self, user_id, normalize_similarity=False, verbose=False):
 
-        self.tk = UserTask(user_id=user_id, verbose=verbose)
+        self.tk = UserTask(user_id=user_id, normalize_simililarity=normalize_similarity, verbose=verbose)
 
         self.n_items = self.tk.n_item
         t_max = self.tk.t_max
