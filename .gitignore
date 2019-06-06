@@ -128,7 +128,10 @@ similarity_graphic/auto_encoder/image
 similarity_graphic/auto_encoder/backup
 similarity_graphic/auto_encoder/fig
 
-# Related to similarity assessment
+# Related to fit and model comparison/evaluation
 log/
 bkp/model_comparison/*
 bkp/model_evaluation/*
+
+# Related to use data
+data/user_and_question_tables2.sql
