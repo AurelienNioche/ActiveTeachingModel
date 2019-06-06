@@ -151,4 +151,4 @@ def main(model, max_=20, t_max=300, n_kanji=30, normalize_similarity=True, fit_p
 
 if __name__ == "__main__":
 
-    main(ActR)
+    main(ActRGraphic, max_=100)
