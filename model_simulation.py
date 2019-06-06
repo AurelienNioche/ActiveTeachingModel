@@ -1,5 +1,5 @@
 from learner.act_r_custom import ActRMeaning
-from teacher.random_teacher import RandomTeacher
+from teacher.random import RandomTeacher
 
 import plot.p_recall
 

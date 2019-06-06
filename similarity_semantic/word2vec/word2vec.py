@@ -1,5 +1,3 @@
-from gensim.models import KeyedVectors
-
 import os
 import numpy as np
 
@@ -10,26 +8,27 @@ import json
 
 SCRIPT_FOLDER = os.path.dirname(os.path.abspath(__file__))
 
-BACKUP_FOLDER = f'{SCRIPT_FOLDER}/backup'
-DATA_FOLDER = f'{SCRIPT_FOLDER}/data'
-PATCH_FOLDER = f'{SCRIPT_FOLDER}/patch'
+BACKUP_FOLDER = os.path.join('bkp', 'similarity_semantic', 'word2vec')
+DATA_FOLDER = os.path.join('data', 'word2vec')
 
 os.makedirs(BACKUP_FOLDER, exist_ok=True)
 os.makedirs(DATA_FOLDER, exist_ok=True)
-os.makedirs(PATCH_FOLDER, exist_ok=True)
 
-DATA = f'{DATA_FOLDER}/GoogleNews-vectors-negative300.bin'
-MODEL = f'{BACKUP_FOLDER}/word_vectors.kv'
-REPLACEMENT_DIC = f'{PATCH_FOLDER}/replacement.json'
+DATA = os.path.join(DATA_FOLDER, 'GoogleNews-vectors-negative300.bin')
+MODEL = os.path.join(BACKUP_FOLDER, 'word_vectors.kv')
+REPLACEMENT_DIC = os.path.join(DATA_FOLDER, 'replacement.json')
 
 
 def _load_model():
 
+    from gensim.models import KeyedVectors
+
     t0 = datetime.utcnow()
 
-    print('Load Word2Vec learner...', end=" ")
+    print('Load Word2Vec data...', end=" ", flush=True)
     if not os.path.exists(MODEL):
         try:
+            print('Loading from the "bin" file, it can take a while...', end=" ", flush=True)
             model = KeyedVectors.load_word2vec_format(DATA, binary=True)
             model.save(MODEL)
         except Exception:

@@ -1,34 +1,20 @@
-import os
-# Django specific settings
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ActiveTeachingModel.settings")
-# Ensure settings are read
-from django.core.wsgi import get_wsgi_application
-application = get_wsgi_application()
-
-# Your application specific imports
-from task.models import Kanji
-
-import pickle
-
 import numpy as np
 
 from task.parameters import N_POSSIBLE_REPLIES
-
 from simulation.task import Task
 
 
-BKP_FOLDER = "bkp_learning_material"
-
-os.makedirs(BKP_FOLDER, exist_ok=True)
-
-
-class TrackingTeacher:
+class GenericTeacher:
 
     def __init__(self, n_item=20, t_max=100, grade=1, handle_similarities=True, normalize_similarity=False,
                  verbose=False):
 
         assert n_item >= N_POSSIBLE_REPLIES, \
-            "The number of items have to be superior to the number of possible replies"
+            f"The number of items have to be superior to the number of possible replies " \
+            f"(set to {N_POSSIBLE_REPLIES} in 'task/parameters.py')"
+
+        assert grade != 1 or n_item <= 79, \
+            "The number of items has to be inferior to 80 if selected grade is 1."
 
         self.tk = Task(n_kanji=n_item, t_max=t_max, grade=grade, compute_similarity=handle_similarities,
                        normalize_similarity=normalize_similarity,

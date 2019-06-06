@@ -1,9 +1,29 @@
 # ActiveTeachingModel
 
+Note: All commands are given based on the assumption of using the Homebrew's package manager (MacOs). 
+Small changes are expected under Linux and/or Windows. 
 
-## Dependencies
+## Minimal configuration
 
-### Python libraries
+#### Python 3
+
+    brew install python3
+
+#### Python libraries
+
+* numpy, matplotlib, scipy
+
+        pip3 install numpy matplotlib scipy
+
+## Complete configuration
+
+### Dependencies
+
+#### Python 3
+
+    brew install python3
+
+#### Python libraries
 
 * numpy, matplotlib, scipy
 * gensim
@@ -11,8 +31,9 @@
 * django, psycopg2-binary
 * pillow
 
+        pip3 install numpy matplotlib scipy gensim keras django psycopg2-binary pillow
 
-### PostgreSQL
+#### PostgreSQL
 
 Install postgresql (all commands are given considering the application running under MacOs)
 
@@ -26,13 +47,13 @@ OR if you don't want/need a background service:
 
     pg_ctl -D /usr/local/var/postgres start
     
-### Pre-trained word2vec network
+#### Pre-trained word2vec network
 
 * Download at url: https://drive.google.com/file/d/0B7XkCwpI5KDYNlNUTTlSS21pQmM/edit
 * Move the .bin in the folder 'word2vec/data' 
 
     
-## Prepare database
+### Prepare database
 
 Create user and db
 
@@ -64,7 +85,7 @@ Load user data
     
     python3 db_user_data_load.py
     
-## Run scripts
+### Run scripts
 
 
 Analyse experimental results

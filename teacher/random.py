@@ -1,9 +1,9 @@
 import numpy as np
 
-from teacher.tracking_teacher import TrackingTeacher
+from teacher.metaclass import GenericTeacher
 
 
-class RandomTeacher(TrackingTeacher):
+class RandomTeacher(GenericTeacher):
 
     def __init__(self, n_item=20, t_max=100, grade=1, handle_similarities=True, normalize_similarity=False,
                  verbose=False):

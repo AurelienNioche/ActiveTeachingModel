@@ -1,7 +1,7 @@
 import time
 
 from learner.act_r_custom import ActRPlus
-from teacher.random_teacher import RandomTeacher
+from teacher.random import RandomTeacher
 
 
 def main(t_max=300, n_items=6, model=ActRPlus, parameters=None, track_p_recall=False):

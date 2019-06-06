@@ -1,11 +1,11 @@
 import copy
 
-from teacher.tracking_teacher import TrackingTeacher
+from teacher.metaclass import GenericTeacher
 
-from solver import solver
+import solver.avya
 
 
-class NirajTeacher(TrackingTeacher):
+class AvyaTeacher(GenericTeacher):
 
     def __init__(self, n_item=20, t_max=100, grade=1, handle_similarities=True, verbose=False):
 
@@ -14,7 +14,7 @@ class NirajTeacher(TrackingTeacher):
 
     def ask(self):
 
-        question = solver.get_next_node(
+        question = solver.avya.get_next_node(
             questions=self.questions,
             successes=self.successes,
             agent=copy.deepcopy(self.agent),

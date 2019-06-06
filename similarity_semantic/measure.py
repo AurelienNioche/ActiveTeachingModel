@@ -1,19 +1,19 @@
-import numpy as np
 import os
 import pickle
 import uuid
 from itertools import combinations
 
-from similarity_semantic.word2vec import word2vec
+import numpy as np
 
 # SCRIPT_FOLDER = os.path.dirname(os.path.abspath(__file__))
-BACKUP_FOLDER = f'bkp/similarity_semantic'
+BACKUP_FOLDER = os.path.join('bkp', 'similarity_semantic')
 
 os.makedirs(BACKUP_FOLDER, exist_ok=True)
 
 
 def create(word_list, use_nan):
 
+    from similarity_semantic.word2vec import word2vec
     sim = word2vec.evaluate_similarity(word_list=word_list, use_nan=use_nan)
     return sim
 
@@ -28,7 +28,7 @@ def get(word_list, normalize_similarity=False, force=False, verbose=False):
 
     list_id = str(uuid.uuid3(uuid.NAMESPACE_DNS, f"{word_list}"))
 
-    backup = f"{BACKUP_FOLDER}/{list_id}.p"
+    backup = os.path.join(BACKUP_FOLDER, f"{list_id}.p")
 
     if not os.path.exists(backup) or force:
         sim = create(word_list=word_list, use_nan=normalize_similarity)

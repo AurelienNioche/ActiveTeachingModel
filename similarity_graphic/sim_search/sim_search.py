@@ -1,3 +1,8 @@
+"""
+Adapted from https://github.com/larsyencken/simsearch
+Related paper: https://www.aclweb.org/anthology/C08-1131
+"""
+
 import os
 
 import numpy as np
@@ -14,7 +19,6 @@ STROKE_SOURCE = os.path.join(DATA_DIR, 'stroke_ulrich')
 
 class StrokeSimilarity:
     """The similarity between two kanji depending on the edit distance between stroke sequences for both kanji."""
-    """Adapted from Lars Yencken"""
 
     def __init__(self):
         self.stroke_types = {}
@@ -23,7 +27,7 @@ class StrokeSimilarity:
         self.signatures = {}
         with open(STROKE_SOURCE, 'rb') as i_stream:
             for i, line in enumerate(i_stream):
-                line=line.decode()
+                line = line.decode()
                 kanji, raw_strokes = line.rstrip().split()
 
                 # Decode from bytes

@@ -120,9 +120,8 @@ dmypy.json
 /fig
 
 # Related to word2vec
-similarity_semantic/word2vec/data/GoogleNews-vectors-negative300.bin
-similarity_semantic/word2vec/backup
-similarity_semantic/word2vec/patch/
+data/word2vec/GoogleNews-vectors-negative300.bin
+bkp/similarity_semantic/word2vec/
 
 # Related to autoencoder
 similarity_graphic/auto_encoder/image
@@ -130,15 +129,6 @@ similarity_graphic/auto_encoder/backup
 similarity_graphic/auto_encoder/fig
 
 # Related to similarity assessment
-similarity_graphic/backup
-similarity_semantic/backup
-Supprimerait model/parameters/
-Niraj/
-data/user_and_question_tables2.sql
-
-Supprimerait task/migrations/0001_initial.py
-Supprimerait task/migrations/__init__.py
 log/
 bkp/model_comparison/*
 bkp/model_evaluation/*
-bkp/similarity_semantic/

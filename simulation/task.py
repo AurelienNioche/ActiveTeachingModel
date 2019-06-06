@@ -1,12 +1,4 @@
 import os
-# Django specific settings
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ActiveTeachingModel.settings")
-# Ensure settings are read
-from django.core.wsgi import get_wsgi_application
-application = get_wsgi_application()
-
-# Your application specific imports
-from task.models import Kanji
 
 import numpy as np
 
@@ -16,7 +8,7 @@ import similarity_graphic.measure
 import similarity_semantic.measure
 
 import pickle
-BKP_FOLDER = "bkp/learning_material"
+BKP_FOLDER = os.path.join('bkp', 'learning_material')
 
 os.makedirs(BKP_FOLDER, exist_ok=True)
 
@@ -53,10 +45,20 @@ class Task:
     @property
     def kanji_and_meaning(self):
 
+        # Backup file
         bkp_file = f"{BKP_FOLDER}/kanji_meaning_n{self.n_item}_g{self.grade}.p"
         if os.path.exists(bkp_file):
             kanji, meaning = pickle.load(open(bkp_file, 'rb'))
             return kanji, meaning
+
+        # Django specific settings
+        os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ActiveTeachingModel.settings")
+        # Ensure settings are read
+        from django.core.wsgi import get_wsgi_application
+        application = get_wsgi_application()
+
+        # Your application specific imports
+        from task.models import Kanji
 
         # Seed
         np.random.seed(123)
