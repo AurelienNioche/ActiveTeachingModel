@@ -151,4 +151,4 @@ def main(model, max_=20, t_max=300, n_kanji=30, normalize_similarity=True, fit_p
 
 if __name__ == "__main__":
 
-    main(ActRPlus, max_=100, n_kanji=79, t_max=1000)
+    main(ActRPlus, max_=100, n_kanji=79, t_max=2000)

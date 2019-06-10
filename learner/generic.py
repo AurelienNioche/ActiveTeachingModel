@@ -5,6 +5,9 @@ import numpy as np
 
 class Learner:
 
+    version = 0.0
+    bounds = ('<name of parameter>', 0.0000001, 1.0),
+
     def __init__(self):
         self.questions = []
 
