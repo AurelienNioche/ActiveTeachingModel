@@ -6,7 +6,7 @@ from simulation.task import Task
 
 class GenericTeacher:
 
-    def __init__(self, n_item=20, t_max=100, grade=1, handle_similarities=True, normalize_similarity=False,
+    def __init__(self, n_item=20, t_max=100, grade=1, seed=123, handle_similarities=True, normalize_similarity=False,
                  verbose=False):
 
         assert n_item >= N_POSSIBLE_REPLIES, \
@@ -16,7 +16,7 @@ class GenericTeacher:
         assert grade != 1 or n_item <= 79, \
             "The number of items has to be inferior to 80 if selected grade is 1."
 
-        self.tk = Task(n_kanji=n_item, t_max=t_max, grade=grade, compute_similarity=handle_similarities,
+        self.tk = Task(n_kanji=n_item, t_max=t_max, grade=grade, seed=seed, compute_similarity=handle_similarities,
                        normalize_similarity=normalize_similarity,
                        generate_full_task=False, verbose=verbose)
 
