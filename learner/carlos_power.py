@@ -5,14 +5,14 @@ import numpy as np
 from learner.generic import Learner
 
 
-class ExponentialParam:
+class PowerParam:
     def __init__(self, alpha, beta, n_0):
         self.alpha = alpha
         self.beta = beta
         self.n_0 = n_0
 
 
-class Exponential(Learner):
+class Power(Learner):
 
     def __init__(self, param, tk, verbose=True):
         self.verbose = verbose
@@ -21,11 +21,12 @@ class Exponential(Learner):
         if param is None:
             pass
         elif type(param) == dict:
-            self.pr = ExponentialParam(**param)
+            self.pr = PowerParam(**param)
         elif type(param) in (tuple, list, np.ndarray):
-            self.pr = ExponentialParam(*param)
+            self.pr = PowerParam(*param)
         else:
-            raise Exception(f"Type {type(param)} is not handled for parameters")
+            raise Exception(
+                f"Type {type(param)} is not handled for parameters")
 
         self.hist = np.zeros(self.tk.t_max, dtype=int)
         self.success = np.zeros(self.tk.t_max, dtype=bool)

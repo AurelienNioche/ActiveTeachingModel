@@ -25,7 +25,8 @@ class Exponential(Learner):
         elif type(param) in (tuple, list, np.ndarray):
             self.pr = ExponentialParam(*param)
         else:
-            raise Exception(f"Type {type(param)} is not handled for parameters")
+            raise Exception(
+                f"Type {type(param)} is not handled for parameters")
 
         self.hist = np.zeros(self.tk.t_max, dtype=int)
         self.success = np.zeros(self.tk.t_max, dtype=bool)
