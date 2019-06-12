@@ -3,6 +3,7 @@ from teacher.random import RandomTeacher
 
 import plot.p_recall
 
+
 def main(t_max=300, n_item=30):
 
     teacher = RandomTeacher(t_max=t_max, n_item=n_item,
@@ -10,7 +11,7 @@ def main(t_max=300, n_item=30):
                             normalize_similarity=True,
                             verbose=False, seed=10)
 
-    agent = Power(param={"alpha": 0.5, "beta": 0.01, "n_0": 0.06},
+    agent = Power(param={"alpha": 0.9, "beta": 0.5, "n_0": 0.9, "w": 2},
                   tk=teacher.tk)
     # questions, replies, successes = teacher.teach(agent=agent)
     teacher.teach(agent=agent)

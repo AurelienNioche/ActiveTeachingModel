@@ -60,7 +60,9 @@ class Exponential(Learner):
 
         Simplified version: http://learning.mpi-sws.org/memorize/
 
-        m(t) = exp(-n(t)(t-t_{last review})
+        m(t) = exp(-n(t) * (t - t_{last review})
+
+        alpha, beta and n_0 are parameters we learn from the data
         """
 
         occurrences = (self.hist == question).nonzero()[0]  # returns indexes

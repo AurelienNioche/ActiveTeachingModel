@@ -6,10 +6,11 @@ from learner.generic import Learner
 
 
 class PowerParam:
-    def __init__(self, alpha, beta, n_0):
+    def __init__(self, alpha, beta, n_0, w):
         self.alpha = alpha
         self.beta = beta
         self.n_0 = n_0
+        self.w = w
 
 
 class Power(Learner):
@@ -60,7 +61,10 @@ class Power(Learner):
 
         Simplified version: http://learning.mpi-sws.org/memorize/
 
-        m(t) = exp(-n(t)(t-t_{last review})
+        m(t) = (1 + w * (t - t_{last review}))^{-n(t)}
+
+        alpha, beta and n_0 are parameters we learn from the data
+        w is a parameter we learn from the data
         """
 
         occurrences = (self.hist == question).nonzero()[0]  # returns indexes
@@ -86,7 +90,8 @@ class Power(Learner):
 
         self.last_forgetting_rate = forgetting_rate
 
-        p_r = math.exp(-forgetting_rate * (self.t - t_last_review))
+        p_r = (1 + self.pr.w * (self.t - t_last_review))\
+            ** - self.last_forgetting_rate
 
         return p_r
 
