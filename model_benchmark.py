@@ -1,10 +1,10 @@
 import time
 
-from learner.act_r_custom import ActRPlus
+from learner.act_r_custom import Exponential
 from teacher.random import RandomTeacher
 
 
-def main(t_max=300, n_items=6, model=ActRPlus, parameters=None, track_p_recall=False):
+def main(t_max=300, n_items=6, model=Exponential, parameters=None, track_p_recall=False):
 
     parameters = {"d": 0.5, "tau": 0.01, "s": 0.06, "m": 0.3, "g": 0.7} if parameters is None else parameters
 

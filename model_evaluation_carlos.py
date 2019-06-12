@@ -9,10 +9,7 @@ import scipy.stats
 from tqdm import tqdm
 
 from fit import fit
-from learner.rl import QLearner
-from learner.act_r import ActR
-from learner.act_r_custom import ActRMeaning, ActRGraphic, ActRPlus, ActR2
-from learner.act_r_custom import ActRPlus
+from learner.carlos_exponential import Exponential
 from simulation.data import SimulatedData
 from simulation.task import Task
 from utils import utils
@@ -109,7 +106,7 @@ def main(model, max_=20, t_max=300, n_kanji=30, normalize_similarity=True,
 
     fit_param = fit.Fit.fit_param_(fit_param)
 
-    extension = f'_{model.__name__}{model.version}_n{max_}_t{t_max}_k{n_kanji}_' \
+    extension = f'_{model.__name__}{model.version}_n{max_}_t{t_max}_k{n_kanji}' \
         f'{utils.dic2string(fit_param)}'
 
     file_path = os.path.join(DATA_FOLDER, f"parameter_recovery_{extension}.p")
@@ -151,4 +148,7 @@ def main(model, max_=20, t_max=300, n_kanji=30, normalize_similarity=True,
 
 if __name__ == "__main__":
 
-    main(ActRPlus, max_=100, n_kanji=79, t_max=2000)
+    main(Exponential, max_=100, n_kanji=29, t_max=300, fit_param={
+        'use_p_correct': True,
+        'method': 'de'  # fi
+    })

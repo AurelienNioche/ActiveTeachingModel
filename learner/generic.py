@@ -12,22 +12,22 @@ class Learner:
         self.questions = []
 
     def decide(self, question, possible_replies):
-        return 0
+        raise NotImplementedError
 
     def learn(self, question):
-        pass
+        raise NotImplementedError
 
     def unlearn(self):
-        pass
+        raise NotImplementedError
 
     def _p_choice(self, question, reply, possible_replies):
-        return -1
+        raise NotImplementedError
 
     def _p_correct(self, question, reply, possible_replies):
-        return -1
+        raise NotImplementedError
 
     def p_recall(self, item):
-        return 0.5
+        raise NotImplementedError
 
     def get_p_choices(self, data, fit_param=None):
 
@@ -41,10 +41,13 @@ class Learner:
             possible_rep = data.possible_replies[t]
 
             if fit_param.get('use_p_correct'):
-                p = self._p_correct(question=question, reply=reply, possible_replies=possible_rep)
+                print("asdfghjkl")
+                p = self._p_correct(question=question, reply=reply,
+                                    possible_replies=possible_rep)
 
             else:
-                p = self._p_choice(question=question, reply=reply, possible_replies=possible_rep)
+                p = self._p_choice(question=question, reply=reply,
+                                   possible_replies=possible_rep)
 
             if p == 0:
                 return None

@@ -3,7 +3,7 @@ import plot.p_recall
 
 from learner.rl import QLearner
 from learner.act_r import ActR
-from learner.act_r_custom import ActRMeaning, ActRGraphic, ActRPlus
+from learner.act_r_custom import ActRMeaning, ActRGraphic, Exponential
 from teacher.niraj import NirajTeacher
 from teacher.avya import AvyaTeacher
 from teacher.tugce import TugceTeacher
@@ -60,10 +60,10 @@ def run(student_model, student_param=None, teacher_model=None,  n_item=25, grade
         elif student_model == ActRGraphic:
             student_param = {"d": 0.5, "tau": 0.01, "s": 0.06, "g": 0.1}
 
-        elif student_model == ActRPlus:
+        elif student_model == Exponential:
             student_param = {"d": 0.5, "tau": 0.01, "s": 0.06, "m": 0.1, "g": 0.1}
 
-    assert student_model in (ActR, ActRMeaning, ActRGraphic, ActRPlus, QLearner), "Student model not recognized."
+    assert student_model in (ActR, ActRMeaning, ActRGraphic, Exponential, QLearner), "Student model not recognized."
     assert teacher_model in (NirajTeacher, AvyaTeacher, TugceTeacher, RandomTeacher), "Teacher model not recognized."
 
     teacher = teacher_model(t_max=t_max, n_item=n_item, grade=grade)

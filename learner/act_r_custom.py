@@ -227,7 +227,7 @@ class ActRGraphic(ActRMeaning):
         self.x = self.pr.g
 
 
-class ActRPlus(ActRMeaning):
+class Exponential(ActRMeaning):
 
     bounds = ('d', 0.0000001, 1.0), ('tau', 0.00, 5), ('s', 0.0000001, 10), ('g', -0.1, 0.1), ('m', -0.1, 0.1)
 

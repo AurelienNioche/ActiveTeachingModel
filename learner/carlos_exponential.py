@@ -14,6 +14,9 @@ class ExponentialParam:
 
 class Exponential(Learner):
 
+    version = 0.0
+    bounds = ('alpha', 0.000001, 1.0), ('beta', 0.000001, 1.0), ('n_0', 0.0000001, 1)
+
     def __init__(self, param, tk, verbose=True):
         self.verbose = verbose
         self.tk = tk
@@ -33,6 +36,7 @@ class Exponential(Learner):
         self.t = 0
         self.last_reply = None
         self.last_forgetting_rate = self.pr.n_0
+        self.p_random = 1/self.tk.n_possible_replies
 
         super().__init__()
 
@@ -96,3 +100,17 @@ class Exponential(Learner):
         self.hist[self.t] = question
         self.success[self.t] = self.last_reply == question
         self.t += 1
+
+    def _p_choice(self, question, reply, possible_replies=None):
+
+        p_retrieve = self.p_recall(question)
+        p_correct = self.p_random + p_retrieve*(1 - self.p_random)
+
+        success = question == reply
+
+        if success:
+            return p_correct
+
+        else:
+            p_failure = (1-p_correct) / (self.tk.n_possible_replies - 1)
+            return p_failure

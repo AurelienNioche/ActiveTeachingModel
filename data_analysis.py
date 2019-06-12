@@ -23,7 +23,7 @@ import plot.success
 
 from learner.act_r import ActR
 from learner.rl import QLearner
-from learner.act_r_custom import ActRMeaning, ActRGraphic, ActRPlus
+from learner.act_r_custom import ActRMeaning, ActRGraphic, Exponential
 
 LOG_DIR = "log"
 BKP_FOLDER = "bkp/model_comparison"
@@ -114,7 +114,7 @@ def model_comparison(models, fit_param=None, normalize_similarity=False, verbose
 def main():
 
     # model_comparison(models=(QLearner, ActR, ActRMeaning, ActRGraphic, ActRPlus), use_p_correct=False)
-    model_comparison(models=(QLearner, ActR, ActRMeaning, ActRGraphic, ActRPlus), fit_param={'use_p_correct': True},
+    model_comparison(models=(QLearner, ActR, ActRMeaning, ActRGraphic, Exponential), fit_param={'use_p_correct': True},
                      normalize_similarity=True, verbose=True)
 
 
