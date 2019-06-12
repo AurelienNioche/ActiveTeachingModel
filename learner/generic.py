@@ -41,7 +41,6 @@ class Learner:
             possible_rep = data.possible_replies[t]
 
             if fit_param.get('use_p_correct'):
-                print("asdfghjkl")
                 p = self._p_correct(question=question, reply=reply,
                                     possible_replies=possible_rep)
 

@@ -122,8 +122,8 @@ class Fit:
     @classmethod
     def fit_param_(cls, fit_param):
 
-        fit_param_ = cls.default_fit_param
+        complete_fit_param = cls.default_fit_param
         if fit_param is not None:
-            fit_param_.update(fit_param_)
+            complete_fit_param.update(fit_param)
 
-        return fit_param_
+        return complete_fit_param
