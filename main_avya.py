@@ -3,7 +3,7 @@ import plot.p_recall
 
 from learner.rl import QLearner
 from learner.act_r import ActR
-from learner.act_r_custom import ActRMeaning, ActRGraphic, Exponential
+from learner.act_r_custom import ActRMeaning, ActRGraphic, ActRPlus
 from teacher.niraj import NirajTeacher
 from teacher.avya import AvyaTeacher
 from teacher.tugce import TugceTeacher

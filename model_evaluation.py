@@ -11,8 +11,8 @@ from tqdm import tqdm
 from fit import fit
 from learner.rl import QLearner
 from learner.act_r import ActR
-from learner.act_r_custom import ActRMeaning, ActRGraphic, Exponential, ActR2
-from learner.act_r_custom import Exponential
+from learner.act_r_custom import ActRMeaning, ActRGraphic, ActRPlus
+
 from simulation.data import SimulatedData
 from simulation.task import Task
 from utils import utils
