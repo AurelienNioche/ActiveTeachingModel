@@ -1,12 +1,13 @@
 from learner.carlos_power import Power
 from learner.carlos_exponential import Exponential
+from learner.carlos_decay import Decay
 from teacher.random import RandomTeacher
 
 import plot.p_recall
 import plot.success
 
 
-def run(model, parameters, t_max=300, n_item=30):
+def run(model, parameters, t_max=3000, n_item=30):
 
     teacher = RandomTeacher(t_max=t_max, n_item=n_item,
                             handle_similarities=True,
@@ -31,7 +32,8 @@ def run(model, parameters, t_max=300, n_item=30):
 
 def main():
     # run(Exponential, {"alpha": 0.9, "beta": 0.5, "n_0": 0.9})
-    run(Power, {"alpha": 0.9, "beta": 0.5, "n_0": 0.9, "w": 5})
+    # run(Power, {"alpha": 0.9, "beta": 0.5, "n_0": 0.9, "w": 5})
+    run(Decay, {"difficulty": 1})
 
 
 if __name__ == "__main__":
