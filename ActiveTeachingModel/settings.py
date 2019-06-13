@@ -32,6 +32,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'duolingo.apps.DuolingoConfig',
     'task.apps.TaskConfig',
     'django.contrib.admin',
     'django.contrib.auth',

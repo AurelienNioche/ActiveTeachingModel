@@ -83,6 +83,8 @@ class ActR(Learner):
 
         if self.continuous_time:
             time_presentation = self.times[self.hist == i]
+            if not time_presentation.shape[0]:
+                return 0  # This item has never been seen
             time_elapsed = self.t_c - time_presentation
         else:
             time_presentation = np.asarray(self.hist == i).nonzero()[0]

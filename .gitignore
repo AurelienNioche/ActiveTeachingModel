@@ -116,6 +116,9 @@ dmypy.json
 # Pycharm
 .idea
 
+# MacOs
+.DS_Store
+
 # Figure folder
 /fig
 
@@ -135,6 +138,7 @@ bkp/model_evaluation/*
 
 # Related to use data
 data/user_and_question_tables2.sql
+data/duolingo.csv
 
-.DS_Store
 task/migrations/*
+duolingo/migrations/*
