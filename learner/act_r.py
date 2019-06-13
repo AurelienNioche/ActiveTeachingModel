@@ -26,7 +26,8 @@ class ActR(Learner):
     * several slots (here: slot 1: kanji, slot2: meaning)
     """
 
-    def __init__(self, tk, param=None, verbose=False, track_p_recall=False):
+    def __init__(self, tk, param=None, continuous_time=False,
+                 verbose=False, track_p_recall=False):
 
         super().__init__()
 
@@ -37,7 +38,8 @@ class ActR(Learner):
         elif type(param) in (tuple, list, np.ndarray):
             self.pr = ActRParam(*param)
         else:
-            raise Exception(f"Type {type(param)} is not handled for parameters")
+            raise Exception(f"Type {type(param)} "
+                            f"is not handled for parameters")
 
         self.tk = tk
 
@@ -50,13 +52,17 @@ class ActR(Learner):
         # Time counter
         self.t = 0
 
-        # Do print
+        # Options
         self.verbose = verbose
-
         self.track_p_recall = track_p_recall
+        self.continuous_time = continuous_time
 
         if self.track_p_recall:
             self.p = np.zeros((self.tk.t_max, self.tk.n_item))
+
+        if self.continuous_time:
+            self.times = np.zeros(self.tk.t_max)
+            self.t_c = 0
 
     def _activation_function(self, i):
 
@@ -68,31 +74,29 @@ class ActR(Learner):
 
     def _base_level_learning_activation(self, i):
 
-        """The base-level activation measures how much time has elapsed since the jth use:"""
+        """The base-level activation measures
+        how much time has elapsed since the jth use:"""
 
-        # # noinspection PyTypeChecker
-        # sum_a = np.sum([
-        #     (self.t - t_presentation)**(-self.pr.d)
-        #     for t_presentation in self.time_presentation[i]
-        # ])
-        #
-        # if sum_a > 0:
-        #     max_b = np.log(1 + np.sum([i ** self.pr.d for i in range(self.tk.t_max, 0, -1)]))
-        #     b = np.log(1 + sum_a) / max_b
-        # else:
-        #     b = 0
-        #
-        # assert 0 <= b <= 1
-        # return b
-        time_presentation = np.asarray(self.hist == i).nonzero()[0]
-        if not time_presentation.shape[0]:
-            return -np.inf
-        time_elapsed = self.t - time_presentation
-        return np.log(np.power(time_elapsed, -self.pr.d).sum())
+        return np.log(self._presentation_effect(i))
+
+    def _presentation_effect(self, i):
+
+        if self.continuous_time:
+            time_presentation = self.times[self.hist == i]
+            time_elapsed = self.t_c - time_presentation
+        else:
+            time_presentation = np.asarray(self.hist == i).nonzero()[0]
+            if not time_presentation.shape[0]:
+                return 0  # This item has never been seen
+            time_elapsed = self.t - time_presentation
+
+        # Presentation effect
+        return np.power(time_elapsed, -self.pr.d).sum()
 
     def _sigmoid_function(self, a):
 
-        """The probability of a chunk being above some retrieval threshold τ is"""
+        """The probability of a chunk being above
+        some retrieval threshold τ is"""
 
         x = (self.pr.tau - a) / (self.pr.s*np.square(2))
 
@@ -103,12 +107,11 @@ class ActR(Learner):
         elif x > 700:  # 1 / (1+exp(700)) equals approx 0.
             return 0
 
-        else:
-            try:
-                return 1 / (1 + np.exp(x))
-            except FloatingPointError as e:
-                print(f'x={x}, tau = {self.pr.tau}, a = {a}, s = {self.pr.s}')
-                raise e
+        try:
+            return 1 / (1 + np.exp(x))
+        except FloatingPointError as e:
+            print(f'x={x}, tau = {self.pr.tau}, a = {a}, s = {self.pr.s}')
+            raise e
 
     def _update_time_presentation(self, question):
 
@@ -178,7 +181,8 @@ class ActR(Learner):
         # try:
         #     last_question = self.questions.pop()
         # except IndexError:
-        #     raise AssertionError("I can not unlearn something that has not been learned!")
+        #     raise AssertionError("I can not unlearn something
+        #     that has not been learned!")
 
         self.t -= 1
 

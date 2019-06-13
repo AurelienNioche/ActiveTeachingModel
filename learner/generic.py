@@ -11,10 +11,10 @@ class Learner:
     def __init__(self):
         self.questions = []
 
-    def decide(self, question, possible_replies):
+    def decide(self, question, possible_replies, time=None):
         raise NotImplementedError
 
-    def learn(self, question):
+    def learn(self, question, time=None):
         raise NotImplementedError
 
     def unlearn(self):

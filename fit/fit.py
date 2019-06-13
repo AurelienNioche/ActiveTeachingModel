@@ -14,7 +14,7 @@ class Fit:
 
     default_fit_param = {
         'use_p_correct': False,
-        'method': 'de'
+        'method': 'de'  # de: Differential Evolution
     }
 
     def __init__(self, tk, model, data, fit_param=None, verbose=False):
@@ -52,7 +52,8 @@ class Fit:
         def objective(param):
 
             agent = self.model(param=param, tk=self.tk)
-            p_choices_ = agent.get_p_choices(data=self.data, fit_param=self.fit_param)
+            p_choices_ = agent.get_p_choices(data=self.data,
+                                             fit_param=self.fit_param)
 
             if p_choices_ is None or np.any(np.isnan(p_choices_)):
                 # print("WARNING! Objective function returning 'None'")
@@ -66,9 +67,11 @@ class Fit:
         if self.fit_param['method'] == 'tpe':  # Tree of Parzen Estimators
 
             space = [hp.uniform(*b) for b in self.model.bounds]
-            best_param = fmin(fn=objective, space=space, algo=tpe.suggest, max_evals=MAX_EVALS)
+            best_param = fmin(fn=objective, space=space, algo=tpe.suggest,
+                              max_evals=MAX_EVALS)
 
-        elif self.fit_param['method'] in ('de', 'L-BFGS-B', 'TNC', 'COBYLA', 'SLSQP'):  # Differential evolution
+        elif self.fit_param['method'] in \
+                ('de', 'L-BFGS-B', 'TNC', 'COBYLA', 'SLSQP'):
 
             bounds_scipy = [b[-2:] for b in self.model.bounds]
 
@@ -80,23 +83,27 @@ class Fit:
                         func=objective, bounds=bounds_scipy)
             else:
                 x0 = np.zeros(len(self.model.bounds)) * 0.5
-                res = scipy.optimize.minimize(fun=objective, bounds=bounds_scipy, x0=x0)
+                res = scipy.optimize.minimize(fun=objective,
+                                              bounds=bounds_scipy, x0=x0)
 
             best_param = {b[0]: v for b, v in zip(self.model.bounds, res.x)}
             if self.verbose:
                 print(f"{res.message} [best loss: {res.fun}]")
             if not res.success:
-                raise Exception(f"The fit did not succeed with method {self.fit_param['method']}.")
+                raise Exception(f"The fit did not succeed with method "
+                                f"{self.fit_param['method']}.")
 
         else:
             raise Exception(f"Method {self.fit_param['method']} is not defined")
 
         # Get probabilities with best param
         learner = self.model(param=best_param, tk=self.tk)
-        p_choices = learner.get_p_choices(data=self.data, fit_param=self.fit_param)
+        p_choices = learner.get_p_choices(data=self.data,
+                                          fit_param=self.fit_param)
 
         # Compute bic, etc.
-        mean_p, lls, bic = self._model_stats(p_choices=p_choices, best_param=best_param)
+        mean_p, lls, bic = self._model_stats(p_choices=p_choices,
+                                             best_param=best_param)
 
         if self.verbose:
             self._print(self.model.__name__, best_param, mean_p, lls, bic)
