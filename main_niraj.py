@@ -60,10 +60,10 @@ def run(student_model, student_param=None, teacher_model=None,  n_item=25, grade
         elif student_model == ActRGraphic:
             student_param = {"d": 0.5, "tau": 0.01, "s": 0.06, "g": 0.1}
 
-        elif student_model == Exponential:
+        elif student_model == ActRPlus:
             student_param = {"d": 0.5, "tau": 0.01, "s": 0.06, "m": 0.1, "g": 0.1}
 
-    assert student_model in (ActR, ActRMeaning, ActRGraphic, Exponential, QLearner), "Student model not recognized."
+    assert student_model in (ActR, ActRMeaning, ActRGraphic, ActRPlus, QLearner), "Student model not recognized."
     assert teacher_model in (NirajTeacher, AvyaTeacher, TugceTeacher, RandomTeacher), "Teacher model not recognized."
 
     teacher = teacher_model(t_max=t_max, n_item=n_item, grade=grade)
