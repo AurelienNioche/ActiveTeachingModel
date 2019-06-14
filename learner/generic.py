@@ -20,13 +20,13 @@ class Learner:
     def unlearn(self):
         raise NotImplementedError
 
-    def _p_choice(self, question, reply, possible_replies):
+    def _p_choice(self, question, reply, possible_replies, time=None):
         raise NotImplementedError
 
-    def _p_correct(self, question, reply, possible_replies):
+    def _p_correct(self, question, reply, possible_replies, time=None):
         raise NotImplementedError
 
-    def p_recall(self, item):
+    def p_recall(self, item, time=None):
         raise NotImplementedError
 
     def get_p_choices(self, data, fit_param=None):

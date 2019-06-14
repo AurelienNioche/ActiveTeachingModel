@@ -1,6 +1,4 @@
 import os
-import django.db.utils
-import psycopg2
 
 # Django specific settings
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ActiveTeachingModel.settings")
@@ -19,9 +17,12 @@ import pandas as pd
 import numpy as np
 from tqdm import tqdm
 
+from utils.utils import AskUser
+
 RAW_DATA = "./data/duolingo.csv"
 
 
+@AskUser
 def main():
     # Load Data
     print('Loading raw data...', end=" ", flush=True)
@@ -35,7 +36,7 @@ def main():
     print(f'Number of lines: {n_lines}\n'
           f'Number of subjects: {n_subjects}')
 
-    items = []
+    # items = []
     for i in tqdm(range(n_lines)):
 
         it = Item(
@@ -52,10 +53,11 @@ def main():
             session_seen=df_duo['session_seen'][i],
             session_correct=df_duo['session_correct'][i],
         )
-        items.append(it)
+        # items.append(it)
+        it.save(force_insert=True)
 
     # Call bulk_create to create records in a single call
-    Item.objects.bulk_create(items)
+    # Item.objects.bulk_create(items)
 
 
 if __name__ == "__main__":

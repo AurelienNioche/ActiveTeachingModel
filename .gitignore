@@ -138,7 +138,9 @@ bkp/model_evaluation/*
 
 # Related to use data
 data/user_and_question_tables2.sql
+data/duolinguo.sql
 data/duolingo.csv
 
 task/migrations/*
 duolingo/migrations/*
+

@@ -55,14 +55,14 @@ class ActR(Learner):
         # Options
         self.verbose = verbose
         self.track_p_recall = track_p_recall
+
+        # For continuous time
         self.continuous_time = continuous_time
+        self.times = np.zeros(self.tk.t_max)
+        self.t_c = 0
 
         if self.track_p_recall:
             self.p = np.zeros((self.tk.t_max, self.tk.n_item))
-
-        if self.continuous_time:
-            self.times = np.zeros(self.tk.t_max)
-            self.t_c = 0
 
     def _activation_function(self, i):
 
@@ -115,14 +115,15 @@ class ActR(Learner):
             print(f'x={x}, tau = {self.pr.tau}, a = {a}, s = {self.pr.s}')
             raise e
 
-    def _update_time_presentation(self, question):
+    def _update_time_presentation(self, question, time=None):
 
         # noinspection PyTypeChecker
         self.hist[self.t] = question
         # self.time_presentation[question].append(self.t)
+        self.times[self.t] = time
         self.t += 1
 
-    def p_recall(self, item):
+    def p_recall(self, item, time=None):
 
         a = self._activation_function(item)
         p_retrieve = self._sigmoid_function(a)
@@ -130,9 +131,9 @@ class ActR(Learner):
             print(f"t={self.t}, a_i: {a:.3f}, p_r: {p_retrieve:.3f}")
         return p_retrieve
 
-    def _p_choice(self, question, reply, possible_replies=None):
+    def _p_choice(self, question, reply, possible_replies=None, time=None):
 
-        p_retrieve = self.p_recall(question)
+        p_retrieve = self.p_recall(question, time=time)
         p_correct = self.p_random + p_retrieve*(1 - self.p_random)
 
         success = question == reply
@@ -144,9 +145,10 @@ class ActR(Learner):
             p_failure = (1-p_correct) / (self.tk.n_possible_replies - 1)
             return p_failure
 
-    def _p_correct(self, question, reply, possible_replies=None):
+    def _p_correct(self, question, reply, possible_replies=None, time=None):
 
-        p_correct = self._p_choice(question=question, reply=question)
+        p_correct = \
+            self._p_choice(question=question, reply=question, time=time)
 
         correct = question == reply
         if correct:
@@ -155,9 +157,9 @@ class ActR(Learner):
         else:
             return 1-p_correct
 
-    def decide(self, question, possible_replies):
+    def decide(self, question, possible_replies, time=None):
 
-        p_r = self.p_recall(question)
+        p_r = self.p_recall(question, time=time)
         r = np.random.random()
 
         if p_r > r:
@@ -169,9 +171,8 @@ class ActR(Learner):
             print(f't={self.t}: question {question}, reply {reply}')
         return reply
 
-    def learn(self, question):
+    def learn(self, question, time=None):
 
-        self.questions.append(question)
         self._update_time_presentation(question)
 
         if self.track_p_recall:
@@ -189,6 +190,7 @@ class ActR(Learner):
         self.t -= 1
 
         self.hist[self.t] = -99
+        self.times[self.t] = -1
 
 
 # class ActROriginal(ActR):
