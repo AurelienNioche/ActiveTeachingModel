@@ -9,7 +9,7 @@ class Learner:
     bounds = ('<name of parameter>', 0.0000001, 1.0),
 
     def __init__(self):
-        self.questions = []
+        pass
 
     def decide(self, question, possible_replies, time=None):
         raise NotImplementedError
@@ -39,19 +39,22 @@ class Learner:
 
             question, reply = data.questions[t], data.replies[t]
             possible_rep = data.possible_replies[t]
+            time = data.times[t]
 
             if fit_param.get('use_p_correct'):
                 p = self._p_correct(question=question, reply=reply,
-                                    possible_replies=possible_rep)
+                                    possible_replies=possible_rep,
+                                    time=time)
 
             else:
                 p = self._p_choice(question=question, reply=reply,
-                                   possible_replies=possible_rep)
+                                   possible_replies=possible_rep,
+                                   time=time)
 
             if p == 0:
                 return None
 
             p_choices[t] = p
-            self.learn(question=question)
+            self.learn(question=question, time=time)
 
         return p_choices

@@ -60,7 +60,9 @@ def _get_model_comparison_data(models, fit_param, normalize_similarity=False, ve
         print(f'{u.id}\n{"*" * 5}\n')
 
         # Get user data
-        u_data = behavior.aalto.UserData(user_id=u.id, normalize_similarity=normalize_similarity, verbose=verbose)
+        u_data = behavior.aalto.UserData(
+            user_id=u.id,
+            normalize_similarity=normalize_similarity, verbose=verbose)
 
         # Plot the success curves
         plot.success.curve(successes=u_data.success, fig_name=f'success_curve_u{u.id}.pdf')
