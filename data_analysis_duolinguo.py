@@ -30,7 +30,7 @@ def translate(word, src='ja', dest='en'):
 
 def subjects_selection():
 
-    file_path = os.path.join("data", "selection.p")
+    file_path = os.path.join("data", "selection_all.p")
     if os.path.exists(file_path):
         return pickle.load(open(file_path, 'rb'))
 
@@ -125,4 +125,4 @@ def main():
 
 if __name__ == "__main__":
 
-    main()
+    subjects_selection()
