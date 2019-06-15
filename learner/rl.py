@@ -56,21 +56,21 @@ class QLearner(Learner):
             # print(w, x, self.tau)
             raise Exception(f'{w} [x={x}, temp={self.pr.tau}]')
 
-    def p_recall(self, item):
+    def p_recall(self, item, time=None):
 
         x_i = self.q[item, item]
         x = [x_i, ] + [0, ] * (task.parameters.N_POSSIBLE_REPLIES - 1)
 
         return self._softmax_unique(x_i, x)
 
-    def _p_choice(self, question, reply, possible_replies):
+    def _p_choice(self, question, reply, possible_replies, time=None):
 
         x_i = self.q[question, reply]
         x = self.q[question, possible_replies]
 
         return self._softmax_unique(x_i, x)
 
-    def _p_correct(self, question, reply, possible_replies):
+    def _p_correct(self, question, reply, possible_replies, time=None):
 
         x_correct = self.q[question, question]
         x = self.q[question, possible_replies]
@@ -81,7 +81,7 @@ class QLearner(Learner):
         else:
             return 1-p_correct
 
-    def decide(self, question, possible_replies):
+    def decide(self, question, possible_replies, time=None):
 
         p = self._softmax(x=self.q[question, possible_replies])
         reply = np.random.choice(possible_replies, p=p)
@@ -93,7 +93,7 @@ class QLearner(Learner):
 
         return reply
 
-    def learn(self, question):
+    def learn(self, question, time=None):
 
         self.q[question, question] = \
             self._temporal_difference(v=self.q[question, question])

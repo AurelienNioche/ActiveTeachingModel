@@ -19,7 +19,7 @@ class Fit:
 
     def __init__(self, tk, model, data, fit_param=None, verbose=False):
 
-        self.fit_param = fit_param
+        self.fit_param = self.fit_param_(fit_param)
 
         self.tk = tk
         self.model = model
@@ -117,10 +117,13 @@ class Fit:
 
     def _print(self, model_name, best_param, mean_p, lls, bic):
 
-        dsp_use_p_correct = "p_correct" if self.fit_param.get("use_p_correct") else "p_choice"
-        dsp_best_param = ''.join(f'{k}={round(best_param[k], 3)}, ' for k in sorted(best_param.keys()))
+        dsp_upr = "p_correct" if self.fit_param.get("use_p_correct") \
+            else "p_choice"
+        dsp_bp = ''.join(f'{k}={round(best_param[k], 3)}, '
+                         for k in sorted(best_param.keys()))
 
-        print(f"[{model_name} - '{self.fit_param['method']}' - {dsp_use_p_correct}] Best param: " + dsp_best_param +
+        print(f"[{model_name} - '{self.fit_param['method']}' - {dsp_upr}]"
+              f"Best param: " + dsp_bp +
               f"LLS: {round(lls, 2)}, " +
               f'BIC: {round(bic, 2)}, mean(P): {round(mean_p, 3)}\n')
 

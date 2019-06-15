@@ -10,7 +10,7 @@ from task.models import User
 
 import pickle
 
-import behavior.data
+import behavior.aalto
 
 import similarity_graphic.measure
 import similarity_semantic.measure
@@ -31,10 +31,10 @@ def export():
         print(f'{u.id}\n{"*" * 5}\n')
 
         # Get questions, replies, possible_replies, and number of different items
-        questions, replies, n_items, possible_replies, success = behavior.data.get(user_id=u.id, verbose=True)
+        questions, replies, n_items, possible_replies, success = behavior.aalto.get(user_id=u.id, verbose=True)
 
         # Get task parameters for ACT-R +
-        question_entries, kanjis, meanings = behavior.data.task_features(user_id=u.id)
+        question_entries, kanjis, meanings = behavior.aalto.task_features(user_id=u.id)
 
         c_graphic = similarity_graphic.measure.get(kanjis)
         c_semantic = similarity_semantic.measure.get(meanings)
