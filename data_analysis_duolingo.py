@@ -160,9 +160,10 @@ def fit_user(u_id='u:iOIr', ignore_times=False):
         np.asarray(Item.objects.filter(user_id=u_id).order_by('timestamp')
                    .values_list('lexeme_id', 'lexeme_string')).T
 
-    h_seen, h_correct, time_stamp = \
+    h_seen, h_correct, s_seen, s_correct, time_stamp = \
         np.asarray(Item.objects.filter(user_id=u_id).order_by('timestamp')
                    .values_list('history_seen', 'history_correct',
+                                'session_seen', 'session_correct',
                                 'timestamp')).T
 
     unq_lex_id, lex_idx = np.unique(lexeme_id, return_inverse=True)
@@ -175,39 +176,30 @@ def fit_user(u_id='u:iOIr', ignore_times=False):
     replies = []
     times = []
 
-    n_unq_lex = len(unq_lex_id)
-
-    # previous_h_seen = np.zeros(n_unq_lex, dtype=int)
-    previous_h_correct = np.ones(n_unq_lex, dtype=int) * -1
-
     for i in range(n):
 
         # Get the idx of the lexeme
         l_idx = lex_idx[i]
 
-        if previous_h_correct[l_idx] == -1:
-            previous_h_correct[l_idx] = h_correct[i]
-            if l_idx == 0:
-                print('ignore')
-            continue
+        # if previous_h_correct[l_idx] == -1:
+        #     previous_h_correct[l_idx] = h_correct[i]
+        #     if l_idx == 0:
+        #         print('ignore')
+        #     continue
+        success = np.zeros(s_seen[i], dtype=bool)
+        success[:s_correct[i]] = 1
 
-        success = bool(h_correct[i] - previous_h_correct[l_idx])
+        to_add = [-1, l_idx]
 
-        if success:
-            replies.append(l_idx)
-        else:
-            replies.append(-1)
+        for s in success:
+            questions.append(l_idx)
+            replies.append(to_add[int(s)])
+            times.append(time_stamp[i])
+            t_max += 1
 
-        questions.append(l_idx)
-
-        times.append(time_stamp[i])
-
-        if l_idx == 0:
-            print(h_correct[i], h_seen[i])
-
-        # For next iteration
-        previous_h_correct[l_idx] = h_correct[i]
-        t_max += 1
+        # if l_idx == 0:
+        #     print(h_correct[i], h_seen[i], s_correct[i], s_seen[i],
+        #           time_stamp[i], success)
 
     model = ActR
 
@@ -225,8 +217,9 @@ def fit_user(u_id='u:iOIr', ignore_times=False):
     success = data.questions == data.replies
     plot.success.curve(successes=success,
                        fig_name=f'success_curve_u{u_id}.pdf')
-    plot.success.scatter(successes=success,
-                         fig_name=f'success_scatter_u{u_id}.pdf')
+    plot.success.multi_curve(questions=questions, replies=replies,
+                             fig_name=f'success_curve_u{u_id}_multi.pdf',
+                             max_lines=4)
 
     f = fit.Fit(tk=tk, model=model, data=data, verbose=True)
 
@@ -236,14 +229,16 @@ def fit_user(u_id='u:iOIr', ignore_times=False):
 
 def main():
 
-    # a = subjects_selection_trials_n()
-    #
-    # best_length_idx = np.argsort([i for i, j in map(n_trial, a)])
-    #
-    # selected_u = a[best_length_idx[-1]]
-    # print("selected user:", selected_u)
-    # print(n_trial(selected_u))
-    fit_user('u:bcH_', ignore_times=True)
+    a = subjects_selection_trials_n()
+
+    best_length_idx = np.argsort([i for i, j in map(n_trial, a)])
+
+    selected_u = a[best_length_idx[-2]]
+    print("selected user:", selected_u)
+
+    # 'u:bcH_'
+    print(n_trial(selected_u))
+    fit_user(selected_u, ignore_times=True)
 
     # print(translate('leer', 'es'))
 

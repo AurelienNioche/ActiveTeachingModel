@@ -36,7 +36,7 @@ import sys
 from utils import utils
 
 
-def fit_user(model=ActR, user_id=10, verbose=True, fit_param=None,
+def fit_user(user_id=7, model=ActR, verbose=True, fit_param=None,
              normalize_similarity=True):
     # data
     data = behavior.aalto.UserData(
@@ -50,7 +50,8 @@ def fit_user(model=ActR, user_id=10, verbose=True, fit_param=None,
     return fit_r
 
 
-def _get_model_comparison_data(models, fit_param, normalize_similarity=False, verbose=False):
+def _get_model_comparison_data(models, fit_param, normalize_similarity=False,
+                               verbose=False):
 
     sys.stdout = utils.Tee(f'{LOG_DIR}/fit_{utils.dic2string(fit_param)}.log')
 
@@ -79,8 +80,10 @@ def _get_model_comparison_data(models, fit_param, normalize_similarity=False, ve
             normalize_similarity=normalize_similarity, verbose=verbose)
 
         # Plot the success curves
-        plot.success.curve(successes=u_data.success, fig_name=f'success_curve_u{u.id}.pdf')
-        plot.success.scatter(successes=u_data.success, fig_name=f'success_scatter_u{u.id}.pdf')
+        plot.success.curve(successes=u_data.success,
+                           fig_name=f'success_curve_u{u.id}.pdf')
+        plot.success.scatter(successes=u_data.success,
+                             fig_name=f'success_scatter_u{u.id}.pdf')
 
         # Get task features
         tk = u_data.tk
@@ -88,7 +91,8 @@ def _get_model_comparison_data(models, fit_param, normalize_similarity=False, ve
         for m in models:
 
             # Get the fit
-            f = fit.Fit(tk=tk, model=m, data=u_data, fit_param=fit_param, verbose=verbose)
+            f = fit.Fit(tk=tk, model=m, data=u_data, fit_param=fit_param,
+                        verbose=verbose)
 
             fit_r = f.evaluate()
 
@@ -99,14 +103,18 @@ def _get_model_comparison_data(models, fit_param, normalize_similarity=False, ve
     return data
 
 
-def model_comparison(models, fit_param=None, normalize_similarity=False, verbose=False):
+def model_comparison(models, fit_param=None, normalize_similarity=False,
+                     verbose=False):
 
     fit_param = fit.Fit.fit_param_(fit_param)
 
-    file_path = f"{BKP_FOLDER}/model_comparison_{utils.dic2string(fit_param)}_norm_{normalize_similarity}.p"
+    file_path = f"{BKP_FOLDER}/" \
+        f"model_comparison_{utils.dic2string(fit_param)}" \
+        f"_norm_{normalize_similarity}.p"
     if not os.path.exists(file_path):
-        data = _get_model_comparison_data(models=models, fit_param=fit_param,
-                                          normalize_similarity=normalize_similarity, verbose=verbose)
+        data = _get_model_comparison_data(
+            models=models, fit_param=fit_param,
+            normalize_similarity=normalize_similarity, verbose=verbose)
         pickle.dump(data, open(file_path, 'wb'))
     else:
         data = pickle.load(open(file_path, 'rb'))
@@ -115,14 +123,16 @@ def model_comparison(models, fit_param=None, normalize_similarity=False, verbose
     colors = [f"C{i}" for i in range(len(models))]
 
     # Plot BICs
-    plot.model_comparison.scatter_plot(data["bic"], colors=colors,
-                                       f_name=f'model_comparison_{utils.dic2string(fit_param)}.pdf',
-                                       y_label='BIC', invert_y_axis=True)
+    plot.model_comparison.scatter_plot(
+        data["bic"], colors=colors,
+        f_name=f'model_comparison_{utils.dic2string(fit_param)}.pdf',
+        y_label='BIC', invert_y_axis=True)
 
     # Plot average means
-    plot.model_comparison.scatter_plot(data["mean_p"], colors=colors,
-                                       f_name=f'model_probabilities_{utils.dic2string(fit_param)}.pdf',
-                                       y_label='p')
+    plot.model_comparison.scatter_plot(
+        data["mean_p"], colors=colors,
+        f_name=f'model_probabilities_{utils.dic2string(fit_param)}.pdf',
+        y_label='p')
 
     print('-' * 10)
 

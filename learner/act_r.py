@@ -43,8 +43,10 @@ class ActR(Learner):
 
         self.tk = tk
 
-        self.p_random = 1/self.tk.n_possible_replies \
-            if self.tk.n_possible_replies is not None else None
+        if self.tk.n_possible_replies is not None:
+            self.p_random = 1/self.tk.n_possible_replies
+        else:
+            self.p_random = 0.25
 
         # Time recording of presentations of chunks
         self.hist = np.ones(tk.t_max) * -99
@@ -146,7 +148,14 @@ class ActR(Learner):
 
         else:
             # Ignore in computation of reply the alternatives
-            p_choice = p_recall if success else 1-p_recall
+            # p_choice = p_recall if success else 1-p_recall
+            p_correct = self.p_random + p_recall * (1 - self.p_random)
+
+            if success:
+                p_choice = p_correct
+
+            else:
+                p_choice = (1 - p_correct)
 
         return p_choice
 

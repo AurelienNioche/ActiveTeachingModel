@@ -124,7 +124,7 @@ dmypy.json
 
 # Related to word2vec
 data/word2vec/GoogleNews-vectors-negative300.bin
-bkp/similarity_semantic/word2vec/
+bkp/similarity_semantic/*
 
 # Related to autoencoder
 similarity_graphic/auto_encoder/image
