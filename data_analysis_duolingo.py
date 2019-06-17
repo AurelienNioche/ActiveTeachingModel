@@ -201,4 +201,4 @@ def main():
 
 if __name__ == "__main__":
 
-    subjects_selection_trials_n()
+    main()

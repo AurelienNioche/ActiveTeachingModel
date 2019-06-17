@@ -134,6 +134,11 @@ In case error 'psycopg2.OperationalError: could not connect to server: No such f
 
     rm /usr/local/var/postgres/postmaster.pid
     
+In case of troubles with permissions
+   
+    $ psql ActiveTeaching postgres
+    ActiveTeaching=> \du
+    
 ## Sources
 
 ### Kanji database

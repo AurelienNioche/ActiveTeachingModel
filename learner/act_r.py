@@ -78,7 +78,11 @@ class ActR(Learner):
         """The base-level activation measures
         how much time has elapsed since the jth use:"""
 
-        return np.log(self._presentation_effect(i))
+        pe = self._presentation_effect(i)
+        if pe > 0.0001:
+            return np.log(pe)
+        else:
+            return - np.inf
 
     def _presentation_effect(self, i):
 
