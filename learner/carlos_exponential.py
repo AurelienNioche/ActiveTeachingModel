@@ -40,7 +40,7 @@ class Exponential(Learner):
 
         super().__init__()
 
-    def decide(self, question, possible_replies):
+    def decide(self, question, possible_replies, time=None):
 
         p_r = self.p_recall(question)
         r = np.random.random()
@@ -57,7 +57,7 @@ class Exponential(Learner):
 
         return reply
 
-    def p_recall(self, question):
+    def p_recall(self, question, time=None):
         """
         Models from Tabibian et al. (2019). PNAS 116 (10) 3988-3993;
         https://doi.org/10.1073/pnas.1815156116
@@ -96,12 +96,12 @@ class Exponential(Learner):
 
         return p_r
 
-    def learn(self, question):
+    def learn(self, question, time=None):
         self.hist[self.t] = question
         self.success[self.t] = self.last_reply == question
         self.t += 1
 
-    def _p_choice(self, question, reply, possible_replies=None):
+    def _p_choice(self, question, reply, possible_replies=None, time=None):
 
         p_retrieve = self.p_recall(question)
         p_correct = self.p_random + p_retrieve*(1 - self.p_random)

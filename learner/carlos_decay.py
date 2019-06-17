@@ -35,7 +35,7 @@ class Decay(Learner):
 
         super().__init__()
 
-    def decide(self, question, possible_replies):
+    def decide(self, question, possible_replies, time=None):
 
         p_r = self.p_recall(question)
         r = np.random.random()
@@ -52,7 +52,7 @@ class Decay(Learner):
 
         return reply
 
-    def p_recall(self, question):
+    def p_recall(self, question, time=None):
         """
         Fun stuffz
         """
