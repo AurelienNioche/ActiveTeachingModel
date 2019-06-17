@@ -214,7 +214,8 @@ class ActR(Learner):
 # #
 # #     def _base_level_learning_activation(self, i):
 # #
-# #         """The base-level activation measures how much time has elapsed since the jth use:"""
+# #         """The base-level activation measures how much time has elapsed
+# #         since the jth use:"""
 # #
 # #         # # noinspection PyTypeChecker
 # #         # sum_a = np.sum([
@@ -224,6 +225,7 @@ class ActR(Learner):
 # #         #
 # #         # b = np.log(sum_a) if sum_a > 0 else -np.inf
 # #         # return b
-# #         sum_a = np.sum((self.t - np.asarray(self.a == i).nonzero()[0]) ** (-self.pr.d))
+# #         sum_a = np.sum((self.t - np.asarray(self.a == i).nonzero()[0])
+#           ** (-self.pr.d))
 # #         b = np.log(sum_a) if sum_a > 0 else -np.inf
 # #         return b

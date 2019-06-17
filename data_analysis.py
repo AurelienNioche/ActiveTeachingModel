@@ -36,7 +36,8 @@ import sys
 from utils import utils
 
 
-def _get_model_comparison_data(models, fit_param, normalize_similarity=False, verbose=False):
+def _get_model_comparison_data(models, fit_param, normalize_similarity=False,
+                               verbose=False):
 
     sys.stdout = utils.Tee(f'{LOG_DIR}/fit_{utils.dic2string(fit_param)}.log')
 
@@ -65,8 +66,10 @@ def _get_model_comparison_data(models, fit_param, normalize_similarity=False, ve
             normalize_similarity=normalize_similarity, verbose=verbose)
 
         # Plot the success curves
-        plot.success.curve(successes=u_data.success, fig_name=f'success_curve_u{u.id}.pdf')
-        plot.success.scatter(successes=u_data.success, fig_name=f'success_scatter_u{u.id}.pdf')
+        plot.success.curve(successes=u_data.success,
+                           fig_name=f'success_curve_u{u.id}.pdf')
+        plot.success.scatter(successes=u_data.success,
+                             fig_name=f'success_scatter_u{u.id}.pdf')
 
         # Get task features
         tk = u_data.tk
@@ -74,7 +77,8 @@ def _get_model_comparison_data(models, fit_param, normalize_similarity=False, ve
         for m in models:
 
             # Get the fit
-            f = fit.Fit(tk=tk, model=m, data=u_data, fit_param=fit_param, verbose=verbose)
+            f = fit.Fit(tk=tk, model=m, data=u_data, fit_param=fit_param,
+                        verbose=verbose)
 
             fit_r = f.evaluate()
 
@@ -85,7 +89,8 @@ def _get_model_comparison_data(models, fit_param, normalize_similarity=False, ve
     return data
 
 
-def model_comparison(models, fit_param=None, normalize_similarity=False, verbose=False):
+def model_comparison(models, fit_param=None,
+                     normalize_similarity=False, verbose=False):
 
     fit_param = fit.Fit.fit_param_(fit_param)
 

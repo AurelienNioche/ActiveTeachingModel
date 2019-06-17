@@ -139,6 +139,10 @@ In case of troubles with permissions
     $ psql ActiveTeaching postgres
     ActiveTeaching=> \du
     
+In case the user does not have enough privileges:
+
+    ALTER ROLE role_name WITH SUPERUSER;
+
 ## Sources
 
 ### Kanji database
