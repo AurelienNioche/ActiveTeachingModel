@@ -43,9 +43,6 @@ class UserTask(Task):
                  compute_similarity=True,
                  verbose=False, ):
 
-        super().__init__(t_max=self.question_entries[-1].t,
-                         n_possible_replies=N_POSSIBLE_REPLIES)
-
         self.question_entries = \
             [q for q in Question.objects.filter(user_id=user_id).order_by('t')]
 
@@ -84,8 +81,11 @@ class UserTask(Task):
             print(f"Kanji used: {self.kanji}")
             print(f"Corresponding meanings: {self.meaning}\n")
 
+        super().__init__(t_max=self.question_entries[-1].t,
+                         n_possible_replies=N_POSSIBLE_REPLIES)
 
-class UserData:
+
+class UserData(Data):
 
     def __init__(self, user_id, normalize_similarity=False, verbose=False):
 
@@ -96,22 +96,29 @@ class UserData:
         self.n_items = self.tk.n_item
         t_max = self.tk.t_max
 
-        self.questions = np.zeros(t_max, dtype=int)
-        self.replies = np.zeros(t_max, dtype=int)
-        self.possible_replies = np.zeros((t_max, self.tk.n_possible_replies),
+        questions = np.zeros(t_max, dtype=int)
+        replies = np.zeros(t_max, dtype=int)
+        possible_replies = np.zeros((t_max, self.tk.n_possible_replies),
                                          dtype=int)
         self.success = np.zeros(t_max, dtype=int)
 
         for t in range(t_max):
 
-            self.questions[t] = self.tk.kanji.index(
+            questions[t] = self.tk.kanji.index(
                 self.tk.question_entries[t].question)
-            self.replies[t] = self.tk.meaning.index(
+            replies[t] = self.tk.meaning.index(
                 self.tk.question_entries[t].reply)
             for i in range(N_POSSIBLE_REPLIES):
-                self.possible_replies[t, i] = \
+                possible_replies[t, i] = \
                     self.tk.meaning.index(
                         getattr(self.tk.question_entries[t],
                                 f'possible_reply_{i}'))
 
-            self.success[t] = self.questions[t] == self.replies[t]
+            self.success[t] = questions[t] == replies[t]
+
+        super().__init__(
+            t_max=t_max,
+            questions=questions,
+            replies=replies,
+            possible_replies=possible_replies
+        )

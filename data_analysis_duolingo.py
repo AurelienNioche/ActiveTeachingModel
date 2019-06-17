@@ -19,6 +19,7 @@ import pickle
 from fit import fit
 from behavior import data_structure
 from learner.act_r import ActR
+import plot.success
 
 TR = googletrans.Translator()
 
@@ -134,7 +135,26 @@ def count():
         print(s, 'unique', len(np.unique(lexeme_id)), 'trials', len(lexeme_id))
 
 
-def fit_user(u_id='u:iOIr'):
+def n_trial(u_id='u:iOIr'):
+    """
+    :param u_id: User id (string)
+    :return: t_max and number of unique lexeme (tuple)
+    """
+
+    lexeme_id, lexeme_string = \
+        np.asarray(Item.objects.filter(user_id=u_id).order_by('timestamp')
+                   .values_list('lexeme_id', 'lexeme_string')).T
+
+    # h_seen, h_correct, time_stamp = \
+    #     np.asarray(Item.objects.filter(user_id=u_id).order_by('timestamp')
+    #                .values_list('history_seen', 'history_correct',
+    #                             'timestamp')).T
+
+    unq_lex_id, lex_idx = np.unique(lexeme_id, return_inverse=True)
+    return len(lexeme_id), len(unq_lex_id)
+
+
+def fit_user(u_id='u:iOIr', ignore_times=False):
 
     lexeme_id, lexeme_string = \
         np.asarray(Item.objects.filter(user_id=u_id).order_by('timestamp')
@@ -158,12 +178,20 @@ def fit_user(u_id='u:iOIr'):
     n_unq_lex = len(unq_lex_id)
 
     # previous_h_seen = np.zeros(n_unq_lex, dtype=int)
-    previous_h_correct = np.zeros(n_unq_lex, dtype=int)
+    previous_h_correct = np.ones(n_unq_lex, dtype=int) * -1
 
     for i in range(n):
 
+        # Get the idx of the lexeme
         l_idx = lex_idx[i]
-        success = h_correct[l_idx] - previous_h_correct[l_idx]
+
+        if previous_h_correct[l_idx] == -1:
+            previous_h_correct[l_idx] = h_correct[i]
+            if l_idx == 0:
+                print('ignore')
+            continue
+
+        success = bool(h_correct[i] - previous_h_correct[l_idx])
 
         if success:
             replies.append(l_idx)
@@ -174,17 +202,31 @@ def fit_user(u_id='u:iOIr'):
 
         times.append(time_stamp[i])
 
+        if l_idx == 0:
+            print(h_correct[i], h_seen[i])
+
         # For next iteration
-        previous_h_correct[l_idx] = h_correct[l_idx]
+        previous_h_correct[l_idx] = h_correct[i]
         t_max += 1
 
     model = ActR
+
+    times = np.asarray(times)
+    if ignore_times:
+        times = None
 
     tk = data_structure.Task(t_max=t_max)
     data = data_structure.Data(t_max=t_max,
                                questions=questions,
                                replies=replies,
                                times=times)
+
+    # Plot the success curves
+    success = data.questions == data.replies
+    plot.success.curve(successes=success,
+                       fig_name=f'success_curve_u{u_id}.pdf')
+    plot.success.scatter(successes=success,
+                         fig_name=f'success_scatter_u{u_id}.pdf')
 
     f = fit.Fit(tk=tk, model=model, data=data, verbose=True)
 
@@ -194,7 +236,14 @@ def fit_user(u_id='u:iOIr'):
 
 def main():
 
-    fit_user()
+    # a = subjects_selection_trials_n()
+    #
+    # best_length_idx = np.argsort([i for i, j in map(n_trial, a)])
+    #
+    # selected_u = a[best_length_idx[-1]]
+    # print("selected user:", selected_u)
+    # print(n_trial(selected_u))
+    fit_user('u:bcH_', ignore_times=True)
 
     # print(translate('leer', 'es'))
 

@@ -36,6 +36,20 @@ import sys
 from utils import utils
 
 
+def fit_user(model=ActR, user_id=10, verbose=True, fit_param=None,
+             normalize_similarity=True):
+    # data
+    data = behavior.aalto.UserData(
+        user_id=user_id,
+        normalize_similarity=normalize_similarity, verbose=verbose)
+    # Get the fit
+    f = fit.Fit(tk=data.tk, model=model, data=data, fit_param=fit_param,
+                verbose=verbose)
+
+    fit_r = f.evaluate()
+    return fit_r
+
+
 def _get_model_comparison_data(models, fit_param, normalize_similarity=False, verbose=False):
 
     sys.stdout = utils.Tee(f'{LOG_DIR}/fit_{utils.dic2string(fit_param)}.log')
@@ -115,9 +129,14 @@ def model_comparison(models, fit_param=None, normalize_similarity=False, verbose
 
 def main():
 
-    # model_comparison(models=(QLearner, ActR, ActRMeaning, ActRGraphic, ActRPlus), use_p_correct=False)
-    model_comparison(models=(QLearner, ActR, ActRMeaning, ActRGraphic, ActRPlus), fit_param={'use_p_correct': True},
-                     normalize_similarity=True, verbose=True)
+    # model_comparison(models=
+    # (QLearner, ActR, ActRMeaning, ActRGraphic, ActRPlus),
+    # use_p_correct=False)
+    # model_comparison(models=
+    # (QLearner, ActR, ActRMeaning, ActRGraphic, ActRPlus),
+    # fit_param={'use_p_correct': True},
+    #                  normalize_similarity=True, verbose=True)
+    fit_user()
 
 
 if __name__ == "__main__":

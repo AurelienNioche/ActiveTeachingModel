@@ -120,14 +120,6 @@ class ActR(Learner):
             print(f'x={x}, tau = {self.pr.tau}, a = {a}, s = {self.pr.s}')
             raise e
 
-    def _update_time_presentation(self, question, time=None):
-
-        # noinspection PyTypeChecker
-        self.hist[self.t] = question
-        # self.time_presentation[question].append(self.t)
-        self.times[self.t] = time
-        self.t += 1
-
     def p_recall(self, item, time=None):
 
         a = self._activation_function(item)
@@ -186,11 +178,16 @@ class ActR(Learner):
 
     def learn(self, question, time=None):
 
-        self._update_time_presentation(question)
+        # noinspection PyTypeChecker
+        self.hist[self.t] = question
+        # self.time_presentation[question].append(self.t)
+        self.times[self.t] = time
 
         if self.track_p_recall:
             for i in range(self.tk.n_item):
                 self.p[self.t - 1, i] = self.p_recall(i)
+
+        self.t += 1
 
     def unlearn(self):
 
