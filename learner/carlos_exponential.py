@@ -15,7 +15,8 @@ class ExponentialParam:
 class Exponential(Learner):
 
     version = 0.0
-    bounds = ('alpha', 0.000001, 1.0), ('beta', 0.000001, 1.0), ('n_0', 0.0000001, 1)
+    bounds = ('alpha', 0.000001, 1.0), ('beta', 0.000001, 1.0),\
+             ('n_0', 0.0000001, 1)
 
     def __init__(self, param, tk, verbose=True):
         self.verbose = verbose
