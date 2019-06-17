@@ -153,6 +153,7 @@ def fit_user(u_id='u:iOIr'):
 
     questions = []
     replies = []
+    times = []
 
     n_unq_lex = len(unq_lex_id)
 
@@ -171,6 +172,8 @@ def fit_user(u_id='u:iOIr'):
 
         questions.append(l_idx)
 
+        times.append(time_stamp[i])
+
         # For next iteration
         previous_h_correct[l_idx] = h_correct[l_idx]
         t_max += 1
@@ -178,7 +181,10 @@ def fit_user(u_id='u:iOIr'):
     model = ActR
 
     tk = data_structure.Task(t_max=t_max)
-    data = data_structure.Data(t_max=t_max)
+    data = data_structure.Data(t_max=t_max,
+                               questions=questions,
+                               replies=replies,
+                               times=times)
 
     f = fit.Fit(tk=tk, model=model, data=data, verbose=True)
 

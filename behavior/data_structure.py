@@ -3,7 +3,8 @@ import numpy as np
 
 class Data:
 
-    def __init__(self, t_max, n_possible_replies=None):
+    def __init__(self, t_max, questions=None,
+                 replies=None, times=None, n_possible_replies=None):
 
         self.questions = np.zeros(t_max, dtype=int)
         self.replies = np.zeros(t_max, dtype=int)
@@ -13,6 +14,15 @@ class Data:
             self.possible_replies = np.zeros(
                 (t_max, n_possible_replies), dtype=int)
             self.possible_replies = [None for _ in range(t_max)]
+
+        if questions is not None:
+            self.questions[:] = questions
+
+        if replies is not None:
+            self.replies[:] = replies
+
+        if times is not None:
+            self.times[:] = times
 
 
 class Task:
