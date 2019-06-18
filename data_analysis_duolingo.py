@@ -74,7 +74,7 @@ def subjects_selection_trials_n(thr=100):
     return selection
 
 
-def subjects_selection_history(force=True):
+def subjects_selection_history(force=False):
 
     file_path = os.path.join("data", "selection_full_h_all.p")
     if not force and os.path.exists(file_path):
@@ -245,7 +245,7 @@ def fit_user(u_id='u:iOIr', ignore_times=False):
         # if l_idx == 0:
         #     print(h_correct[i], h_seen[i], s_correct[i], s_seen[i],
         #           time_stamp[i], success)
-
+    print('user_id:', u_id)
     print('n iterations:', t_max)
     print('n items:', len(unq_lex_id))
     print('language ui:', lg_ui)
@@ -287,16 +287,16 @@ def fit_user(u_id='u:iOIr', ignore_times=False):
 
 def main():
 
-    subjects_selection_history(True)
+    # subjects_selection_history()
 
     s = load('data/selection_full_h_all.p')
     t_max, n_item = count(s)
-    best_idx = np.argsort(t_max)[-1]
+    best_idx = np.argsort(t_max)[-2]
     print('user_id:', s[best_idx])
     print('t_max:', t_max[best_idx])
     print('n_item:', n_item[best_idx])
 
-    fit_user('u:bkiW')
+    fit_user(s[best_idx])
     # fit_user('u:IY_')
     # subjects_selection_history()
 
