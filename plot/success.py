@@ -43,20 +43,28 @@ def multi_curve(questions, replies, fig_name, font_size=42, line_width=3,
     n_items = len(np.unique(questions))
     t_max = len(questions)
 
-    cumulative_success = np.zeros(n_items)
-    cumulative_seen = np.zeros(n_items)
-    data = np.zeros((n_items, t_max))
+    if max_lines is None:
+        cumulative_success = np.zeros(n_items)
+        cumulative_seen = np.zeros(n_items)
+        data = np.zeros((n_items, t_max))
+
+    else:
+        cumulative_success = np.zeros(max_lines)
+        cumulative_seen = np.zeros(max_lines)
+        data = np.zeros((max_lines, t_max))
 
     for t, (q, r) in enumerate(zip(questions, replies)):
-        cumulative_seen[q] += 1
-        cumulative_success[q] += int(q == r)
-        data[q, t] = cumulative_success[q] / cumulative_seen[q]
+
+        if max_lines is None or q < max_lines:
+            cumulative_seen[q] += 1
+            cumulative_success[q] += int(q == r)
+
+        sup0 = cumulative_seen > 0
+        data[sup0, t] = cumulative_success[sup0] / cumulative_seen[sup0]
 
     if max_lines is not None:
 
         data = data[:max_lines]
-
-    print(data.shape)
 
     fig = plt.figure(figsize=(10, 10))
     ax = fig.add_subplot(111)
@@ -66,6 +74,22 @@ def multi_curve(questions, replies, fig_name, font_size=42, line_width=3,
     ax.set_ylim((0, 1))
     ax.tick_params(axis="both", labelsize=label_size)
     ax.plot(data.T, linewidth=line_width, alpha=0.5)
+
+    plt.tight_layout()
+
+    save_fig(fig_name)
+
+
+def bar(counts, fig_name, font_size=42, label_size=22):
+
+    fig = plt.figure(figsize=(10, 10))
+    ax = fig.add_subplot(111)
+    ax.set_ylabel('N', fontsize=font_size)
+    ax.set_xlabel('Item', fontsize=font_size)
+    # ax.set_yticks((0, 1))
+    # ax.set_ylim((0, 1))
+    ax.tick_params(axis="both", labelsize=label_size)
+    ax.bar(range(len(counts)), counts)
 
     plt.tight_layout()
 

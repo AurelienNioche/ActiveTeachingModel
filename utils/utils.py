@@ -4,7 +4,7 @@ import django.db.utils
 import psycopg2
 
 import numpy as np
-import sys
+import pickle
 
 
 class Atomic:
@@ -83,3 +83,16 @@ class Tee(object):
 def dic2string(dic):
     return str(dic).replace(' ', '_').replace('{', '')\
         .replace('}', '').replace("'", '').replace(':', '').replace(',', '')
+
+
+def dump(obj, file_path):
+    print(f"Dumping to file '{file_path}'...", end=' ', flush=True)
+    pickle.dump(obj, open(file_path, 'wb'))
+    print(f"Done!")
+
+
+def load(file_path):
+    print(f"Loading from file '{file_path}'...", end=' ', flush=True)
+    obj = pickle.load(open(file_path, 'rb'))
+    print("Done!")
+    return obj
