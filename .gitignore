@@ -140,7 +140,8 @@ bkp/model_evaluation/*
 data/user_and_question_tables2.sql
 data/duolingo.sql
 data/duolingo.csv
+data/db.p
 
+% Related to django
 task/migrations/*
 duolingo/migrations/*
-
