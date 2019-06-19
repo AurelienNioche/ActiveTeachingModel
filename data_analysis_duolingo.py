@@ -136,10 +136,6 @@ def subjects_selection_trials_n(thr=100):
 
         u_bool = user_idx == u_idx
 
-        # assert len(np.unique(user_id[u_bool])) == 1
-        u_lex_idx = lex_idx[u_bool]
-        # unq_lex = np.unique(u_lex_idx)
-
         selected = np.sum(u_bool) > thr
 
         if selected:
@@ -193,17 +189,7 @@ def subjects_selection_history(force=False):
 
         comp_hist = np.sum(u_bool*hs_first) == len(unq_lex)
 
-        # comp_hist = True
-        # for u_l in unq_lex:
-        #     # For each idx of lexeme that user saw at least one...
-        #     rel_lex = lex_idx == u_l
-        #     cond = u_bool * hs_first * rel_lex
-        #     if cond.sum() == 0:
-        #         comp_hist = False
-        #         break
-
         if comp_hist:
-            #  n_selected += 1
             selection.append(unq_user_id[u_idx])
 
     pickle.dump(selection, open(file_path, 'wb'))
@@ -253,11 +239,6 @@ def n_trial(u_id='u:iOIr'):
         np.asarray(Item.objects.filter(user_id=u_id).order_by('timestamp')
                    .values_list('lexeme_id', 'lexeme_string')).T
 
-    # h_seen, h_correct, time_stamp = \
-    #     np.asarray(Item.objects.filter(user_id=u_id).order_by('timestamp')
-    #                .values_list('history_seen', 'history_correct',
-    #                             'timestamp')).T
-
     unq_lex_id, lex_idx = np.unique(lexeme_id, return_inverse=True)
     return len(lexeme_id), len(unq_lex_id)
 
@@ -303,11 +284,6 @@ def fit_user(u_id='u:iOIr', ignore_times=False):
         # Get the idx of the lexeme
         l_idx = lex_idx[i]
 
-        # if previous_h_correct[l_idx] == -1:
-        #     previous_h_correct[l_idx] = h_correct[i]
-        #     if l_idx == 0:
-        #         print('ignore')
-        #     continue
         success = np.zeros(s_seen[i], dtype=bool)
         success[:s_correct[i]] = 1
 
@@ -319,9 +295,6 @@ def fit_user(u_id='u:iOIr', ignore_times=False):
             times.append(time_stamp[i])
             t_max += 1
 
-        # if l_idx == 0:
-        #     print(h_correct[i], h_seen[i], s_correct[i], s_seen[i],
-        #           time_stamp[i], success)
     print('user_id:', u_id)
     print('n iterations:', t_max)
     print('n items:', len(unq_lex_id))
