@@ -10,6 +10,7 @@ application = get_wsgi_application()
 from duolingo.models import Item
 
 import datetime
+from time import time
 
 import numpy as np
 from tqdm import tqdm
@@ -31,6 +32,82 @@ TR = googletrans.Translator()
 def translate(word, src='ja', dest='en'):
 
     return TR.translate(word, src=src, dest=dest).text
+
+
+class Db:
+
+    file_path = os.path.join("data", "db.p")
+
+    def __init__(self):
+
+        self.user_id, self.lexeme_id, self.ui_language, \
+            self.learning_language = \
+            np.asarray(Item.objects.all().order_by('timestamp')
+                       .values_list('user_id', 'lexeme_id',
+                                    'ui_language',
+                                    'learning_language')).T
+
+        self.h_seen, self.h_correct, self.s_seen, self.s_correct, \
+            self.time_stamp = \
+            np.asarray(Item.objects.all().order_by('timestamp')
+                       .values_list('history_seen', 'history_correct',
+                                    'session_seen', 'session_correct',
+                                    'timestamp')).T
+
+    @classmethod
+    def load(cls):
+
+        if not os.path.exists(cls.file_path):
+            t = time()
+            print("Loading from db...", end=" ", flush=True)
+            db = Db()
+            print(f"Done! [time elapsed "
+                  f"{datetime.timedelta(seconds=time()-t)}]")
+            dump(db, cls.file_path)
+
+        else:
+            return load(cls.file_path)
+
+
+def general_statistics(force=False):
+
+    file_path = os.path.join("data", "stats.p")
+    if not force and os.path.exists(file_path):
+        return load(file_path)
+
+    d = Db.load()
+
+    unq_user_id, user_idx = np.unique(d.user_id, return_inverse=True)
+    unq_lex_id, lex_idx = np.unique(d.lexeme_id, return_inverse=True)
+
+    print("Period:",
+          datetime.timedelta(seconds=int(d.time_stamp[-1] - d.time_stamp[0])))
+
+    n_users = len(unq_user_id)
+    n_lex = len(unq_lex_id)
+    print("N users:", n_users)
+    print("N lexeme:", n_lex)
+
+    ui_learn = np.stack((d.ui_language, d.learning_language), axis=-1)
+    unq_ui_learn, count_ui_learn = np.unique(ui_learn, return_counts=True,
+                                             axis=0)
+
+    n_it = [np.sum(d.s_seen[user_idx == i]) for i in range(n_users)]
+    print(f"N it/ind: {np.mean(n_it)} (+/-{np.std(n_it)})")
+
+    n_lex_ind = [np.sum(np.unique(lex_idx[user_idx == i])) for i in
+                 range(n_users)]
+    print(f"N lex/ind: {np.mean(n_lex_ind)} (+/-{np.std(n_lex_ind)})")
+
+    print('UI-language & Learnt language:')
+    for u in unq_ui_learn:
+
+        u_id, = np.asarray(Item.objects.filter(ui_language=u[0],
+                                               learning_language=u[1])
+                                       .order_by('user_id')
+                                       .values_list('user_id')).T
+        n = len(np.unique(u_id))
+        print(f'{u} (n={n})')
 
 
 def subjects_selection_trials_n(thr=100):
@@ -259,7 +336,7 @@ def fit_user(u_id='u:iOIr', ignore_times=False):
     if ignore_times:
         times = None
 
-    # times[:] = times/60
+    times = np.asarray(times)
 
     tk = data_structure.Task(t_max=t_max)
     data = data_structure.Data(t_max=t_max,
@@ -280,23 +357,26 @@ def fit_user(u_id='u:iOIr', ignore_times=False):
 
     plot.success.bar(sorted(counts), fig_name=f'counts_u{u_id}.pdf')
 
-    f = fit.Fit(tk=tk, model=model, data=data, verbose=True)
+    f = fit.Fit(tk=tk, model=model, data=data, verbose=True,
+                fit_param={'use_p_correct':True})
 
     fit_r = f.evaluate()
 
 
 def main():
 
+    general_statistics()
+
     # subjects_selection_history()
 
-    s = load('data/selection_full_h_all.p')
-    t_max, n_item = count(s)
-    best_idx = np.argsort(t_max)[-2]
-    print('user_id:', s[best_idx])
-    print('t_max:', t_max[best_idx])
-    print('n_item:', n_item[best_idx])
-
-    fit_user(s[best_idx])
+    # s = load('data/selection_full_h_all.p')
+    # t_max, n_item = count(s)
+    # best_idx = np.argsort(t_max)[-2]
+    # print('user_id:', s[best_idx])
+    # print('t_max:', t_max[best_idx])
+    # print('n_item:', n_item[best_idx])
+    #
+    # fit_user(s[best_idx])
     # fit_user('u:IY_')
     # subjects_selection_history()
 

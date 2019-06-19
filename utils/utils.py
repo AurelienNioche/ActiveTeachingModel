@@ -5,7 +5,9 @@ import psycopg2
 
 import numpy as np
 import pickle
-
+import datetime
+from time import time
+import sys
 
 class Atomic:
 
@@ -55,9 +57,6 @@ class AskUser:
         print("Done!")
 
 
-import sys
-
-
 class Tee(object):
     """"
     exemple of usage: sys.stdout = Tee(f'{LOG_DIR}/log.log')
@@ -86,13 +85,17 @@ def dic2string(dic):
 
 
 def dump(obj, file_path):
+    t = time()
     print(f"Dumping to file '{file_path}'...", end=' ', flush=True)
     pickle.dump(obj, open(file_path, 'wb'))
-    print(f"Done!")
+    print(f"Done! [time elapsed: "
+          f"{datetime.timedelta(seconds=time() - t)}]")
 
 
 def load(file_path):
+    t = time()
     print(f"Loading from file '{file_path}'...", end=' ', flush=True)
     obj = pickle.load(open(file_path, 'rb'))
-    print("Done!")
+    print(f"Done [time elapsed: "
+          f"{datetime.timedelta(seconds=time() - t)}]")
     return obj
