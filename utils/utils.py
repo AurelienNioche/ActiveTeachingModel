@@ -9,6 +9,7 @@ import datetime
 from time import time
 import sys
 
+
 class Atomic:
 
     def __init__(self, f):
@@ -99,3 +100,14 @@ def load(file_path):
     print(f"Done [time elapsed: "
           f"{datetime.timedelta(seconds=time() - t)}]")
     return obj
+
+
+def print_begin(msg):
+    print(msg, end=' ', flush=True)
+    return time()
+
+
+def print_done(t):
+
+    print(f"Done! [time elapsed "
+          f"{datetime.timedelta(seconds=time() - t)}]")
