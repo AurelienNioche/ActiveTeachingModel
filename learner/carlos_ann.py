@@ -28,7 +28,7 @@ class FullyConnectedNetwork(Network):
     def __init__(self):
         self.neuron_layout = np.array([1, 1, 1, 1],
                                       [1, 1, 0, 0])
-        # Matrix defined this way to be graphical
+        # Matrix defined this way to be graphical #
         super().__init__()
 
     def connect(self, neuron_position):
