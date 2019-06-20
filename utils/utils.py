@@ -47,9 +47,9 @@ class AskUser:
         while True:
             r = input("Are you sure you want to operate this change?")
             r.lower()
-            if r == 'n':
+            if r in ('n', 'no'):
                 sys.exit()
-            elif r == 'y':
+            elif r in ('y', 'yes'):
                 break
             else:
                 print("Your response have to be 'y' or 'n'!")

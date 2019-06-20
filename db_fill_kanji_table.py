@@ -1,6 +1,4 @@
 import os
-import django.db.utils
-import psycopg2
 
 # Django specific settings
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ActiveTeachingServer.settings")
@@ -10,7 +8,7 @@ from django.core.wsgi import get_wsgi_application
 application = get_wsgi_application()
 
 # Your application specific imports
-from task.models import Kanji, Parameter
+from task.models import Kanji
 
 from utils.utils import AskUser
 

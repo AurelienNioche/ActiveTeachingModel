@@ -151,4 +151,4 @@ def main(model, max_=20, t_max=300, n_kanji=30, normalize_similarity=True,
 
 if __name__ == "__main__":
 
-    main(Exponential, max_=100, n_kanji=79, t_max=2000)
+    main(ActRMeaning, max_=100, n_kanji=79, t_max=2000)

@@ -10,7 +10,7 @@ application = get_wsgi_application()
 # Your application specific imports
 from task.models import Question, User
 
-from utils import AskUser
+from utils.utils import AskUser
 
 
 @AskUser
