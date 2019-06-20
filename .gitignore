@@ -141,7 +141,9 @@ data/user_and_question_tables2.sql
 data/duolingo.sql
 data/duolingo.csv
 data/db.p
+data/duolingo_user/
 
 % Related to django
 task/migrations/*
 duolingo/migrations/*
+

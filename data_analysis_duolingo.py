@@ -1,6 +1,8 @@
 import os
 
 # Django specific settings
+import plot.duolingo
+
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ActiveTeachingModel.settings")
 # Ensure settings are read
 from django.core.wsgi import get_wsgi_application
@@ -24,7 +26,7 @@ from behavior import data_structure
 from learner.act_r import ActR
 import plot.success
 
-from utils.utils import dump, load
+from utils.utils import dump, load, print_begin, print_done
 
 TR = googletrans.Translator()
 
@@ -34,11 +36,35 @@ def translate(word, src='ja', dest='en'):
     return TR.translate(word, src=src, dest=dest).text
 
 
-class Db:
+class Data:
+
+    file_path = os.path.join("data", "data.p")
+
+    def __init__(self):
+        pass
+
+    @classmethod
+    def load(cls):
+
+        if not os.path.exists(cls.file_path):
+            t = time()
+            print("Loading data from file...", end=" ", flush=True)
+            data = cls()
+            print(f"Done! [time elapsed "
+                  f"{datetime.timedelta(seconds=time()-t)}]")
+            dump(data, cls.file_path)
+
+        else:
+            return load(cls.file_path)
+
+
+class Db(Data):
 
     file_path = os.path.join("data", "db.p")
 
     def __init__(self):
+
+        super().__init__()
 
         self.user_id, self.lexeme_id, self.ui_language, \
             self.learning_language = \
@@ -54,19 +80,88 @@ class Db:
                                     'session_seen', 'session_correct',
                                     'timestamp')).T
 
-    @classmethod
-    def load(cls):
 
-        if not os.path.exists(cls.file_path):
+class UserData:
+
+    def __init__(self, user_id):
+
+        self.user_id = user_id
+
+        lexeme_id, lexeme_string = \
+            np.asarray(Item.objects.filter(user_id=user_id)
+                       .order_by('timestamp')
+                       .values_list('lexeme_id', 'lexeme_string')).T
+
+        h_seen, h_correct, s_seen, s_correct, time_stamp = \
+            np.asarray(Item.objects.filter(user_id=user_id)
+                       .order_by('timestamp')
+                       .values_list('history_seen', 'history_correct',
+                                    'session_seen', 'session_correct',
+                                    'timestamp')).T
+
+        it = \
+            Item.objects.filter(user_id=user_id)[0]
+        self.ui_language = it.ui_language
+        self.learning_language = it.learning_language
+
+        ui_language, learning_language = \
+            np.asarray(Item.objects.filter(user_id=user_id).values_list(
+                'ui_language', 'learning_language'
+            )).T
+
+        assert len(np.unique(ui_language)) == 1, 'ui_language > 1!'
+        assert len(np.unique(learning_language)) == 1, 'learning_language > 1!'
+
+        unq_lex_id, lex_idx = np.unique(
+            lexeme_id, return_inverse=True)
+
+        self.n_item = len(lexeme_id)
+
+        self.t_max = 0
+
+        questions = []
+        replies = []
+        times = []
+
+        for i in range(self.n_item):
+
+            # Get the idx of the lexeme
+            l_idx = lex_idx[i]
+
+            success = np.zeros(s_seen[i], dtype=bool)
+            success[:s_correct[i]] = 1
+
+            to_add = [-1, l_idx]
+
+            for s in success:
+                questions.append(l_idx)
+                replies.append(to_add[int(s)])
+                times.append(time_stamp[i])
+                self.t_max += 1
+
+        self.questions = np.asarray(questions)
+        self.replies = np.asarray(replies)
+        self.times = np.asarray(times)
+
+    @classmethod
+    def load(cls, user_id):
+
+        folder_path = os.path.join("data", "duolingo_user")
+        os.makedirs(folder_path, exist_ok=True)
+
+        file_path = os.path.join(folder_path, f"data_u{user_id}.p")
+
+        if not os.path.exists(file_path):
             t = time()
-            print("Loading from db...", end=" ", flush=True)
-            db = Db()
+            print("Loading data from file...", end=" ", flush=True)
+            data = cls(user_id=user_id)
             print(f"Done! [time elapsed "
                   f"{datetime.timedelta(seconds=time()-t)}]")
-            dump(db, cls.file_path)
+            dump(data, file_path)
+            return data
 
         else:
-            return load(cls.file_path)
+            return load(file_path)
 
 
 def general_statistics(force=False):
@@ -92,11 +187,18 @@ def general_statistics(force=False):
     unq_ui_learn, count_ui_learn = np.unique(ui_learn, return_counts=True,
                                              axis=0)
 
-    n_it = [np.sum(d.s_seen[user_idx == i]) for i in range(n_users)]
-    print(f"N it/ind: {np.mean(n_it)} (+/-{np.std(n_it)})")
+    t = print_begin('Computing the number of iterations / lexemes by user...')
+    n_it = np.zeros(n_users, dtype=int)
+    n_lex_ind = np.zeros(n_users, dtype=int)
+    for i in tqdm(range(n_users)):
 
-    n_lex_ind = [np.sum(np.unique(lex_idx[user_idx == i])) for i in
-                 range(n_users)]
+        bool_u = user_idx == i
+        n_it[i] = np.sum(d.s_seen[bool_u])
+        n_lex_ind[i] = len(np.unique(lex_idx[bool_u]))
+
+    print_done(t)
+
+    print(f"N it/ind: {np.mean(n_it)} (+/-{np.std(n_it)})")
     print(f"N lex/ind: {np.mean(n_lex_ind)} (+/-{np.std(n_lex_ind)})")
 
     print('UI-language & Learnt language:')
@@ -124,7 +226,7 @@ def subjects_selection_trials_n(thr=100):
                    .values_list('user_id', 'lexeme_id')).T
     print("Done!")
     unq_user_id, user_idx = np.unique(user_id, return_inverse=True)
-    unq_lex_id, lex_idx = np.unique(lexeme_id, return_inverse=True)
+    # unq_lex_id, lex_idx = np.unique(lexeme_id, return_inverse=True)
 
     n = len(unq_user_id)
     print('n subjects', n)
@@ -328,16 +430,35 @@ def fit_user(u_id='u:iOIr', ignore_times=False):
     u_q, counts = np.unique(
         questions, return_counts=True)
 
-    plot.success.bar(sorted(counts), fig_name=f'counts_u{u_id}.pdf')
+    plot.duolingo.bar(sorted(counts), fig_name=f'counts_u{u_id}.pdf')
 
     f = fit.Fit(tk=tk, model=model, data=data, verbose=True,
-                fit_param={'use_p_correct':True})
+                fit_param={'use_p_correct': True})
 
     fit_r = f.evaluate()
 
 
+def info_user(user_id):
+
+    u = UserData.load(user_id=user_id)
+
+    print('user_id:', u.user_id)
+    print('n iterations:', u.t_max)
+    print('n items:', u.n_item)
+    print('language ui:', u.ui_language)
+    print('language learned:', u.learning_language)
+    print('Total period:',
+          datetime.timedelta(seconds=int(u.times[-1]-u.times[0])))
+
+    u_q, counts = np.unique(
+        u.questions, return_counts=True)
+
+    plot.duolingo.bar(sorted(counts), fig_name=f'counts_u{user_id}.pdf')
+
+
 def main():
 
+    # info_user('u:IY_')
     general_statistics()
 
     # subjects_selection_history()
