@@ -32,7 +32,8 @@ class Data:
 
 class Task:
 
-    def __init__(self, t_max, n_possible_replies=None):
+    def __init__(self, t_max, n_item=None, n_possible_replies=None):
 
         self.t_max = t_max
+        self.n_item = n_item
         self.n_possible_replies = n_possible_replies

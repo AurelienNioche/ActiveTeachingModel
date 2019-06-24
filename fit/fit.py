@@ -35,7 +35,11 @@ class Fit:
 
     @classmethod
     def _log_likelihood_sum(cls, p_choices):
-        return np.sum(np.log(p_choices))
+
+        try:
+            return np.sum(np.log(p_choices))
+        except FloatingPointError:
+            return - np.inf
 
     def _model_stats(self, p_choices, best_param):
 

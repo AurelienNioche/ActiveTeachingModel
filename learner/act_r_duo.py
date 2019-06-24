@@ -23,7 +23,7 @@ class ActRDuo(ActR):
     bounds = ('d', 0.001, 1.0), \
              ('tau', -1000, 1000), \
              ('s', 0.001, 100), \
-             ('r', 0.0, 1.0)
+             ('r', 0.0, 0.5)  # Maximum is 0.5 (2 available options)
 
     def __init__(self, tk, param=None, **kwargs):
 
@@ -54,17 +54,19 @@ class ActRDuo(ActR):
         for t in range(t_max):
 
             question, reply = data.questions[t], data.replies[t]
-            possible_rep = data.possible_replies[t]
+            # possible_rep = data.possible_replies[t]
             time = data.times[t]
+            first_pr = data.first_presentation[t]
+
+            if first_pr:
+                self.learn(question=question, time=time)
 
             if use_p_correct:
                 p = self._p_correct(question=question, reply=reply,
-                                    possible_replies=possible_rep,
                                     time=time)
 
             else:
                 p = self._p_choice(question=question, reply=reply,
-                                   possible_replies=possible_rep,
                                    time=time)
 
             if p == 0:

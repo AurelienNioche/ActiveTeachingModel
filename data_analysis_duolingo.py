@@ -23,7 +23,9 @@ import pickle
 
 from fit import fit
 from behavior import data_structure
+from behavior.duolingo import UserData
 from learner.act_r import ActR
+from learner.act_r_duo import ActRDuo
 import plot.success
 
 from utils.utils import dump, load, print_begin, print_done
@@ -79,112 +81,6 @@ class Db(Data):
                        .values_list('history_seen', 'history_correct',
                                     'session_seen', 'session_correct',
                                     'timestamp')).T
-
-
-class UserData:
-
-    def __init__(self, user_id):
-
-        self.user_id = user_id
-
-        lexeme_id, lexeme_string = \
-            np.asarray(Item.objects.filter(user_id=user_id)
-                       .order_by('timestamp')
-                       .values_list('lexeme_id', 'lexeme_string')).T
-
-        h_seen, h_correct, s_seen, s_correct, time_stamp = \
-            np.asarray(Item.objects.filter(user_id=user_id)
-                       .order_by('timestamp')
-                       .values_list('history_seen', 'history_correct',
-                                    'session_seen', 'session_correct',
-                                    'timestamp')).T
-
-        ui_language, learning_language = \
-            np.asarray(Item.objects.filter(user_id=user_id).values_list(
-                'ui_language', 'learning_language'
-            )).T
-
-        self.ui_language = None
-        self.learning_language = None
-
-        if len(np.unique(ui_language)) > 1:
-            print('ui_language > 1!')
-        if len(np.unique(learning_language)) > 1:
-            print('learning_language > 1!')
-        else:
-            it = \
-                Item.objects.filter(user_id=user_id)[0]
-
-            self.ui_language = it.ui_language
-            self.learning_language = it.learning_language
-
-        unq_lex_id, lex_idx = np.unique(
-            lexeme_id, return_inverse=True)
-
-        n_entry = len(lexeme_id)
-
-        self.n_item = len(unq_lex_id)
-
-        meaning = []
-        for i in range(self.n_item):
-            lex_str = Item.objects\
-                .filter(lexeme_id=unq_lex_id[i])[0].lexeme_string
-            m = lex_str.split('/')[0]
-            if '<' in m:
-                m = lex_str.split('/')[1].split('<')[0]
-            meaning.append(m)
-
-        self.meaning = np.asarray(meaning)
-
-        self.t_max = 0
-
-        questions = []
-        replies = []
-        times = []
-
-        for i in range(n_entry):
-
-            # Get the idx of the lexeme
-            l_idx = lex_idx[i]
-
-            # success = np.zeros(s_seen[i], dtype=bool)
-            # success[:s_correct[i]] = 1
-
-            possible_replies = [-1, l_idx]
-            #
-            # for s in success:
-            #     questions.append(l_idx)
-            #     replies.append(to_add[int(s)])
-            #     times.append(time_stamp[i])
-
-            questions.append(l_idx)
-            replies.append(possible_replies[int(s_correct[i] == s_seen[i])])
-            times.append(time_stamp[i])
-            self.t_max += 1
-
-        self.questions = np.asarray(questions)
-        self.replies = np.asarray(replies)
-        self.times = np.asarray(times)
-
-    @classmethod
-    def load(cls, user_id, force=False):
-
-        folder_path = os.path.join("data", "duolingo_user")
-        os.makedirs(folder_path, exist_ok=True)
-
-        file_path = os.path.join(folder_path, f"data_u{user_id}.p")
-
-        if force or not os.path.exists(file_path):
-            t = time()
-            print("Loading data from file...", end=" ", flush=True)
-            data = cls(user_id=user_id)
-            print(f"Done! [time elapsed "
-                  f"{datetime.timedelta(seconds=time()-t)}]")
-            dump(data, file_path)
-            return data
-
-        else:
-            return load(file_path)
 
 
 def general_statistics(force=False):
@@ -351,95 +247,26 @@ def n_trial(u_id='u:iOIr'):
     return len(lexeme_id), len(unq_lex_id)
 
 
-def fit_user(u_id='u:iOIr', ignore_times=False):
+def fit_user(u, model=ActRDuo, ignore_times=False):
 
-    lexeme_id, lexeme_string = \
-        np.asarray(Item.objects.filter(user_id=u_id).order_by('timestamp')
-                   .values_list('lexeme_id', 'lexeme_string')).T
-
-    h_seen, h_correct, s_seen, s_correct, time_stamp = \
-        np.asarray(Item.objects.filter(user_id=u_id).order_by('timestamp')
-                   .values_list('history_seen', 'history_correct',
-                                'session_seen', 'session_correct',
-                                'timestamp')).T
-
-    it = \
-        Item.objects.filter(user_id=u_id)[0]
-    lg_ui = it.ui_language
-    lg_learn = it.learning_language
-
-    ui_language, learning_language = \
-        np.asarray(Item.objects.filter(user_id=u_id).values_list(
-            'ui_language', 'learning_language'
-        )).T
-
-    assert len(np.unique(ui_language)) == 1, 'ui_language > 1!'
-    assert len(np.unique(learning_language)) == 1, 'learning_language > 1!'
-
-    unq_lex_id, lex_idx = np.unique(
-        lexeme_id, return_inverse=True)
-
-    n = len(lexeme_id)
-
-    t_max = 0
-
-    questions = []
-    replies = []
-    times = []
-
-    for i in range(n):
-
-        # Get the idx of the lexeme
-        l_idx = lex_idx[i]
-
-        success = np.zeros(s_seen[i], dtype=bool)
-        success[:s_correct[i]] = 1
-
-        to_add = [-1, l_idx]
-
-        for s in success:
-            questions.append(l_idx)
-            replies.append(to_add[int(s)])
-            times.append(time_stamp[i])
-            t_max += 1
-
-    print('user_id:', u_id)
-    print('n iterations:', t_max)
-    print('n items:', len(unq_lex_id))
-    print('language ui:', lg_ui)
-    print('language learned:', lg_learn)
-    print('Total period:',
-          datetime.timedelta(seconds=int(time_stamp[-1]-time_stamp[0])))
-
-    model = ActR
-
-    # times = np.asarray(times)
     if ignore_times:
-        times = None
-
-    times = np.asarray(times)
-
-    tk = data_structure.Task(t_max=t_max)
-    data = data_structure.Data(t_max=t_max,
-                               questions=questions,
-                               replies=replies,
-                               times=times)
+        u.times[:] = None
 
     # Plot the success curves
-    success = data.questions == data.replies
+    success = u.questions == u.replies
     plot.success.curve(successes=success,
-                       fig_name=f'success_curve_u{u_id}.pdf')
-    plot.success.multi_curve(questions=questions, replies=replies,
-                             fig_name=f'success_curve_u{u_id}_multi.pdf',
+                       fig_name=f'success_curve_u{u.user_id}.pdf')
+    plot.success.multi_curve(questions=u.questions, replies=u.replies,
+                             fig_name=f'success_curve_u{u.user_id}_multi.pdf',
                              max_lines=40)
 
     u_q, counts = np.unique(
-        questions, return_counts=True)
+        u.questions, return_counts=True)
 
-    plot.duolingo.bar(sorted(counts), fig_name=f'counts_u{u_id}.pdf')
+    plot.duolingo.bar(sorted(counts), fig_name=f'counts_u{u.user_id}.pdf')
 
-    f = fit.Fit(tk=tk, model=model, data=data, verbose=True,
-                fit_param={'use_p_correct': True})
+    f = fit.Fit(tk=u.tk, model=model, data=u, verbose=True,
+                use_p_correct=True)
 
     fit_r = f.evaluate()
 
@@ -465,11 +292,23 @@ def info_user(u):
 
 def main():
 
+    # it, = np.asarray(Item.objects.all().values_list('history_seen')).T
+    # print(min(it))
+    # print(max(it))
+
     selection = subjects_selection_history()
     for user_id in selection:
-        u = UserData.load(user_id=user_id, force=True)
-        if u.t_max > 100:
+
+        u = UserData.load(user_id, force=True)
+        if u.learning_language is not None and u.t_max > 1000:
             info_user(u)
+            fit_user(u)
+
+    # selection = subjects_selection_history()
+    # for user_id in selection:
+    #     u = UserData.load(user_id=user_id, force=True)
+    #     if u.t_max > 100:
+    #         info_user(u)
 
     # info_user('u:IY_')
     # general_statistics()
