@@ -18,7 +18,9 @@ class ActRParam:
 class ActR(Learner):
 
     version = 2.2
-    bounds = ('d', 0.001, 1.0), ('tau', -1000, 1000), ('s', 0.001, 100)
+    bounds = ('d', 0.001, 1.0), \
+             ('tau', -1000, 1000), \
+             ('s', 0.001, 100)
 
     """
     A chunk is composed of:
@@ -46,11 +48,10 @@ class ActR(Learner):
         if self.tk.n_possible_replies is not None:
             self.p_random = 1/self.tk.n_possible_replies
         else:
-            self.p_random = 0.1
+            self.p_random = 0
 
-        # Time recording of presentations of chunks
+        # History of presentation
         self.hist = np.ones(tk.t_max) * -99
-        # self.time_presentation = [[] for _ in range(self.tk.n_item)]
 
         # Time counter
         self.t = 0

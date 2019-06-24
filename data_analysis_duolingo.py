@@ -99,23 +99,42 @@ class UserData:
                                     'session_seen', 'session_correct',
                                     'timestamp')).T
 
-        it = \
-            Item.objects.filter(user_id=user_id)[0]
-        self.ui_language = it.ui_language
-        self.learning_language = it.learning_language
-
         ui_language, learning_language = \
             np.asarray(Item.objects.filter(user_id=user_id).values_list(
                 'ui_language', 'learning_language'
             )).T
 
-        assert len(np.unique(ui_language)) == 1, 'ui_language > 1!'
-        assert len(np.unique(learning_language)) == 1, 'learning_language > 1!'
+        self.ui_language = None
+        self.learning_language = None
+
+        if len(np.unique(ui_language)) > 1:
+            print('ui_language > 1!')
+        if len(np.unique(learning_language)) > 1:
+            print('learning_language > 1!')
+        else:
+            it = \
+                Item.objects.filter(user_id=user_id)[0]
+
+            self.ui_language = it.ui_language
+            self.learning_language = it.learning_language
 
         unq_lex_id, lex_idx = np.unique(
             lexeme_id, return_inverse=True)
 
-        self.n_item = len(lexeme_id)
+        n_entry = len(lexeme_id)
+
+        self.n_item = len(unq_lex_id)
+
+        meaning = []
+        for i in range(self.n_item):
+            lex_str = Item.objects\
+                .filter(lexeme_id=unq_lex_id[i])[0].lexeme_string
+            m = lex_str.split('/')[0]
+            if '<' in m:
+                m = lex_str.split('/')[1].split('<')[0]
+            meaning.append(m)
+
+        self.meaning = np.asarray(meaning)
 
         self.t_max = 0
 
@@ -123,35 +142,39 @@ class UserData:
         replies = []
         times = []
 
-        for i in range(self.n_item):
+        for i in range(n_entry):
 
             # Get the idx of the lexeme
             l_idx = lex_idx[i]
 
-            success = np.zeros(s_seen[i], dtype=bool)
-            success[:s_correct[i]] = 1
+            # success = np.zeros(s_seen[i], dtype=bool)
+            # success[:s_correct[i]] = 1
 
-            to_add = [-1, l_idx]
+            possible_replies = [-1, l_idx]
+            #
+            # for s in success:
+            #     questions.append(l_idx)
+            #     replies.append(to_add[int(s)])
+            #     times.append(time_stamp[i])
 
-            for s in success:
-                questions.append(l_idx)
-                replies.append(to_add[int(s)])
-                times.append(time_stamp[i])
-                self.t_max += 1
+            questions.append(l_idx)
+            replies.append(possible_replies[int(s_correct[i] == s_seen[i])])
+            times.append(time_stamp[i])
+            self.t_max += 1
 
         self.questions = np.asarray(questions)
         self.replies = np.asarray(replies)
         self.times = np.asarray(times)
 
     @classmethod
-    def load(cls, user_id):
+    def load(cls, user_id, force=False):
 
         folder_path = os.path.join("data", "duolingo_user")
         os.makedirs(folder_path, exist_ok=True)
 
         file_path = os.path.join(folder_path, f"data_u{user_id}.p")
 
-        if not os.path.exists(file_path):
+        if force or not os.path.exists(file_path):
             t = time()
             print("Loading data from file...", end=" ", flush=True)
             data = cls(user_id=user_id)
@@ -258,41 +281,24 @@ def subjects_selection_history(force=False):
         return selection
 
     print("Loading from db...", end=" ", flush=True)
-    user_id, lexeme_id = \
-        np.asarray(Item.objects.all().order_by('timestamp')
-                   .values_list('user_id', 'lexeme_id')).T
+    user_id, = \
+        np.asarray(Item.objects.all()
+                   .values_list('user_id', )).T
     print("Done!")
     unq_user_id, user_idx = np.unique(user_id, return_inverse=True)
-    unq_lex_id, lex_idx = np.unique(lexeme_id, return_inverse=True)
+    # unq_lex_id, lex_idx = np.unique(lexeme_id, return_inverse=True)
 
-    h_seen, h_correct, s_seen, s_correct, time_stamp = \
+    h_seen, = \
         np.asarray(Item.objects.all().order_by('timestamp')
-                   .values_list('history_seen', 'history_correct',
-                                'session_seen', 'session_correct',
-                                'timestamp')).T
+                   .values_list('history_seen', )).T
 
-    assert h_seen.dtype == int
-
-    hs_first = h_seen == s_seen
+    hs_first = h_seen == 1
 
     n = len(unq_user_id)
     print('n subjects', n)
     # idx = np.zeros(n)
 
-    selection = []
-    # n_selected = 0
-    for u_idx in tqdm(range(n)):
-
-        u_bool = user_idx == u_idx
-
-        # assert len(np.unique(user_id[u_bool])) == 1
-        u_lex_idx = lex_idx[u_bool]
-        unq_lex = np.unique(u_lex_idx)
-
-        comp_hist = np.sum(u_bool*hs_first) == len(unq_lex)
-
-        if comp_hist:
-            selection.append(unq_user_id[u_idx])
+    selection = unq_user_id[np.unique(user_idx[hs_first])]
 
     pickle.dump(selection, open(file_path, 'wb'))
     print('n selected', len(selection))
@@ -438,9 +444,7 @@ def fit_user(u_id='u:iOIr', ignore_times=False):
     fit_r = f.evaluate()
 
 
-def info_user(user_id):
-
-    u = UserData.load(user_id=user_id)
+def info_user(u):
 
     print('user_id:', u.user_id)
     print('n iterations:', u.t_max)
@@ -450,18 +454,27 @@ def info_user(user_id):
     print('Total period:',
           datetime.timedelta(seconds=int(u.times[-1]-u.times[0])))
 
-    u_q, counts = np.unique(
-        u.questions, return_counts=True)
-
-    plot.duolingo.bar(sorted(counts), fig_name=f'counts_u{user_id}.pdf')
+    # u_q, counts = np.unique(
+    #     u.questions, return_counts=True)
+    #
+    # plot.duolingo.bar(sorted(counts), fig_name=f'u{user_id}_counts.pdf')
+    # plot.duolingo.scatter(u.questions, u.times,
+    #                       fig_name=f'u{user_id}_time_presentation.pdf',
+    #                       size=0.1)
 
 
 def main():
 
-    # info_user('u:IY_')
-    general_statistics()
+    selection = subjects_selection_history()
+    for user_id in selection:
+        u = UserData.load(user_id=user_id, force=True)
+        if u.t_max > 100:
+            info_user(u)
 
-    # subjects_selection_history()
+    # info_user('u:IY_')
+    # general_statistics()
+
+    # subjects_selection_history(force=True)
 
     # s = load('data/selection_full_h_all.p')
     # t_max, n_item = count(s)

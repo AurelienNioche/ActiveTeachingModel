@@ -3,23 +3,21 @@ import numpy as np
 import scipy.optimize
 from hyperopt import hp, fmin, tpe
 
+from utils import utils
+
 IDX_PARAMETERS = 0
 IDX_MODEL = 1
 IDX_ARGUMENTS = 2
 
-MAX_EVALS = 500  # Only if tpe
+MAX_EVAL = 500  # Only if tpe
 
 
 class Fit:
 
-    default_fit_param = {
-        'use_p_correct': False,
-        'method': 'de'  # de: Differential Evolution
-    }
+    def __init__(self, tk, model, data, verbose=False, method='de', **kwargs):
 
-    def __init__(self, tk, model, data, fit_param=None, verbose=False):
-
-        self.fit_param = self.fit_param_(fit_param)
+        self.kwargs = kwargs
+        self.method = method
 
         self.tk = tk
         self.model = model
@@ -53,7 +51,7 @@ class Fit:
 
             agent = self.model(param=param, tk=self.tk)
             p_choices_ = agent.get_p_choices(data=self.data,
-                                             fit_param=self.fit_param)
+                                             **self.kwargs)
 
             if p_choices_ is None or np.any(np.isnan(p_choices_)):
                 # print("WARNING! Objective function returning 'None'")
@@ -64,13 +62,13 @@ class Fit:
 
             return to_return
 
-        if self.fit_param['method'] == 'tpe':  # Tree of Parzen Estimators
+        if self.method == 'tpe':  # Tree of Parzen Estimators
 
             space = [hp.uniform(*b) for b in self.model.bounds]
             best_param = fmin(fn=objective, space=space, algo=tpe.suggest,
-                              max_evals=MAX_EVALS)
+                              max_evals=MAX_EVAL)
 
-        elif self.fit_param['method'] in \
+        elif self.method in \
                 ('de', 'L-BFGS-B', 'TNC', 'COBYLA', 'SLSQP'):
 
             bounds_scipy = [b[-2:] for b in self.model.bounds]
@@ -78,7 +76,7 @@ class Fit:
             if self.verbose:
                 print("Finding best parameters...", end=' ')
 
-            if self.fit_param['method'] == 'de':
+            if self.method == 'de':
                 res = scipy.optimize.differential_evolution(
                         func=objective, bounds=bounds_scipy)
             else:
@@ -91,15 +89,15 @@ class Fit:
                 print(f"{res.message} [best loss: {res.fun}]")
             if not res.success:
                 raise Exception(f"The fit did not succeed with method "
-                                f"{self.fit_param['method']}.")
+                                f"{self.method}.")
 
         else:
-            raise Exception(f"Method {self.fit_param['method']} is not defined")
+            raise Exception(f"Method {self.method} is not defined")
 
         # Get probabilities with best param
         learner = self.model(param=best_param, tk=self.tk)
         p_choices = learner.get_p_choices(data=self.data,
-                                          fit_param=self.fit_param)
+                                          **self.kwargs)
 
         # Compute bic, etc.
         mean_p, lls, bic = self._model_stats(p_choices=p_choices,
@@ -117,23 +115,15 @@ class Fit:
 
     def _print(self, model_name, best_param, mean_p, lls, bic):
 
-        dsp_upr = "p_correct" if self.fit_param.get("use_p_correct") \
-            else "p_choice"
         dsp_bp = ''.join(f'{k}={round(best_param[k], 3)}, '
                          for k in sorted(best_param.keys()))
 
-        print(f"[{model_name} - '{self.fit_param['method']}' - {dsp_upr}]"
+        dsp_kwargs = f'[{utils.dic2string(self.kwargs)}]' if len(self.kwargs) \
+            else ''
+
+        print(f"[{model_name} - '{self.method}']{dsp_kwargs}"
               f"Best param: " + dsp_bp +
               f"LLS: {round(lls, 2)}, " +
               f'BIC: {round(bic, 2)}, mean(P): {round(mean_p, 3)}\n')
 
         print("\n" + ''.join("_" * 10) + "\n")
-
-    @classmethod
-    def fit_param_(cls, fit_param):
-
-        complete_fit_param = cls.default_fit_param
-        if fit_param is not None:
-            complete_fit_param.update(fit_param)
-
-        return complete_fit_param

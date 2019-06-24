@@ -29,7 +29,7 @@ class Learner:
     def p_recall(self, item, time=None):
         raise NotImplementedError
 
-    def get_p_choices(self, data, fit_param=None):
+    def get_p_choices(self, data, use_p_correct=False):
 
         t_max = len(data.questions)
 
@@ -41,7 +41,7 @@ class Learner:
             possible_rep = data.possible_replies[t]
             time = data.times[t]
 
-            if fit_param.get('use_p_correct'):
+            if use_p_correct:
                 p = self._p_correct(question=question, reply=reply,
                                     possible_replies=possible_rep,
                                     time=time)

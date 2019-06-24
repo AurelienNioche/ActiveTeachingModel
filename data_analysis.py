@@ -36,24 +36,24 @@ import sys
 from utils import utils
 
 
-def fit_user(user_id=7, model=ActR, verbose=True, fit_param=None,
-             normalize_similarity=True):
+def fit_user(user_id=7, model=ActR, verbose=True,
+             normalize_similarity=True, **kwargs):
     # data
     data = behavior.aalto.UserData(
         user_id=user_id,
         normalize_similarity=normalize_similarity, verbose=verbose)
     # Get the fit
-    f = fit.Fit(tk=data.tk, model=model, data=data, fit_param=fit_param,
-                verbose=verbose)
+    f = fit.Fit(tk=data.tk, model=model, data=data,
+                verbose=verbose, **kwargs)
 
     fit_r = f.evaluate()
     return fit_r
 
 
-def _get_model_comparison_data(models, fit_param, normalize_similarity=False,
-                               verbose=False):
+def _get_model_comparison_data(models, normalize_similarity=False,
+                               verbose=False, **kwargs):
 
-    sys.stdout = utils.Tee(f'{LOG_DIR}/fit_{utils.dic2string(fit_param)}.log')
+    sys.stdout = utils.Tee(f'{LOG_DIR}/fit.log')
 
     models = models[::-1]
     model_labels = [m.__name__ for m in models]
@@ -67,7 +67,7 @@ def _get_model_comparison_data(models, fit_param, normalize_similarity=False,
         k: {ml: np.zeros(n_users) for ml in model_labels} for k in measures
     }
 
-    print(f"Fit parameters: {fit_param}'\n")
+    # print(f"Fit parameters: {fit_param}'\n")
     # print(f"Graphic similarity: method={sim_graphic_method}'\n")
 
     for i, u in enumerate(users):
@@ -91,8 +91,8 @@ def _get_model_comparison_data(models, fit_param, normalize_similarity=False,
         for m in models:
 
             # Get the fit
-            f = fit.Fit(tk=tk, model=m, data=u_data, fit_param=fit_param,
-                        verbose=verbose)
+            f = fit.Fit(tk=tk, model=m, data=u_data,
+                        verbose=verbose, **kwargs)
 
             fit_r = f.evaluate()
 
@@ -103,18 +103,18 @@ def _get_model_comparison_data(models, fit_param, normalize_similarity=False,
     return data
 
 
-def model_comparison(models, fit_param=None, normalize_similarity=False,
-                     verbose=False):
-
-    fit_param = fit.Fit.fit_param_(fit_param)
+def model_comparison(models, normalize_similarity=False,
+                     verbose=False, **kwargs):
 
     file_path = f"{BKP_FOLDER}/" \
-        f"model_comparison_{utils.dic2string(fit_param)}" \
+        f"model_comparison_" \
         f"_norm_{normalize_similarity}.p"
     if not os.path.exists(file_path):
         data = _get_model_comparison_data(
-            models=models, fit_param=fit_param,
-            normalize_similarity=normalize_similarity, verbose=verbose)
+            models=models,
+            normalize_similarity=normalize_similarity, verbose=verbose,
+            **kwargs
+        )
         pickle.dump(data, open(file_path, 'wb'))
     else:
         data = pickle.load(open(file_path, 'rb'))
@@ -125,13 +125,13 @@ def model_comparison(models, fit_param=None, normalize_similarity=False,
     # Plot BICs
     plot.model_comparison.scatter_plot(
         data["bic"], colors=colors,
-        f_name=f'model_comparison_{utils.dic2string(fit_param)}.pdf',
+        f_name=f'model_comparison.pdf',
         y_label='BIC', invert_y_axis=True)
 
     # Plot average means
     plot.model_comparison.scatter_plot(
         data["mean_p"], colors=colors,
-        f_name=f'model_probabilities_{utils.dic2string(fit_param)}.pdf',
+        f_name=f'model_probabilities.pdf',
         y_label='p')
 
     print('-' * 10)
