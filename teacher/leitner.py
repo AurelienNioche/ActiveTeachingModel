@@ -3,7 +3,7 @@ import copy
 from teacher.metaclass import GenericTeacher
 
 
-class AvyaTeacher(GenericTeacher):
+class LeitnerTeacher(GenericTeacher):
 
     def __init__(self, n_item=20, t_max=100, grade=1, handle_similarities=True, verbose=False):
 

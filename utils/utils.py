@@ -85,20 +85,28 @@ def dic2string(dic):
         .replace('}', '').replace("'", '').replace(':', '').replace(',', '')
 
 
-def dump(obj, file_path):
-    t = time()
-    print(f"Dumping to file '{file_path}'...", end=' ', flush=True)
+def dump(obj, file_path, verbose=True):
+
+    if verbose:
+        t = time()
+        print(f"Dumping to file '{file_path}'...", end=' ', flush=True)
     pickle.dump(obj, open(file_path, 'wb'))
-    print(f"Done! [time elapsed: "
-          f"{datetime.timedelta(seconds=time() - t)}]")
+    if verbose:
+        # noinspection PyUnboundLocalVariable
+        print(f"Done! [time elapsed: "
+              f"{datetime.timedelta(seconds=time() - t)}]")
 
 
-def load(file_path):
-    t = time()
-    print(f"Loading from file '{file_path}'...", end=' ', flush=True)
+def load(file_path, verbose=True):
+
+    if verbose:
+        t = time()
+        print(f"Loading from file '{file_path}'...", end=' ', flush=True)
     obj = pickle.load(open(file_path, 'rb'))
-    print(f"Done [time elapsed: "
-          f"{datetime.timedelta(seconds=time() - t)}]")
+    if verbose:
+        # noinspection PyUnboundLocalVariable
+        print(f"Done [time elapsed: "
+              f"{datetime.timedelta(seconds=time() - t)}]")
     return obj
 
 

@@ -12,7 +12,7 @@ from behavior.data_structure import Task
 
 class UserData:
 
-    def __init__(self, user_id):
+    def __init__(self, user_id, verbose=False):
 
         self.user_id = user_id
 
@@ -37,9 +37,11 @@ class UserData:
         self.learning_language = None
 
         if len(np.unique(ui_language)) > 1:
-            print('ui_language > 1!')
+            if verbose:
+                print('ui_language > 1!')
         elif len(np.unique(learning_language)) > 1:
-            print('learning_language > 1!')
+            if verbose:
+                print('learning_language > 1!')
         else:
             it = \
                 Item.objects.filter(user_id=user_id)[0]
@@ -86,7 +88,7 @@ class UserData:
                            t_max=n_entry+np.sum(self.first_presentation))
 
     @classmethod
-    def load(cls, user_id, force=False):
+    def load(cls, user_id, force=False, verbose=True):
 
         folder_path = os.path.join("data", "duolingo_user")
         os.makedirs(folder_path, exist_ok=True)
@@ -94,13 +96,15 @@ class UserData:
         file_path = os.path.join(folder_path, f"data_u{user_id}.p")
 
         if force or not os.path.exists(file_path):
-            t = time()
-            print("Loading data from file...", end=" ", flush=True)
-            data = cls(user_id=user_id)
-            print(f"Done! [time elapsed "
-                  f"{datetime.timedelta(seconds=time()-t)}]")
-            dump(data, file_path)
+            if verbose:
+                t = time()
+                print("Loading data from file...", end=" ", flush=True)
+            data = cls(user_id=user_id, verbose=verbose)
+            if verbose:
+                print(f"Done! [time elapsed "
+                      f"{datetime.timedelta(seconds=time()-t)}]")
+            dump(data, file_path, verbose=verbose)
             return data
 
         else:
-            return load(file_path)
+            return load(file_path, verbose=verbose)

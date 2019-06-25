@@ -8,10 +8,11 @@ from teacher.niraj import NirajTeacher
 from teacher.avya import AvyaTeacher
 from teacher.tugce import TugceTeacher
 from teacher.random import RandomTeacher
+from teacher.leitner import LeitnerTeacher
 
 
-def run(student_model, student_param=None, teacher_model=None,  n_item=25, grade=1, t_max=150,
-        track_p_recall=False):
+def run(student_model, teacher_model,
+        student_param=None, n_item=25, grade=1, t_max=150):
 
     """
         :param teacher_model: Can be one of those:
@@ -64,10 +65,10 @@ def run(student_model, student_param=None, teacher_model=None,  n_item=25, grade
             student_param = {"d": 0.5, "tau": 0.01, "s": 0.06, "m": 0.1, "g": 0.1}
 
     assert student_model in (ActR, ActRMeaning, ActRGraphic, ActRPlus, QLearner), "Student model not recognized."
-    assert teacher_model in (NirajTeacher, AvyaTeacher, TugceTeacher, RandomTeacher), "Teacher model not recognized."
+    assert teacher_model in (NirajTeacher, AvyaTeacher, TugceTeacher, RandomTeacher, LeitnerTeacher), "Teacher model not recognized."
 
     teacher = teacher_model(t_max=t_max, n_item=n_item, grade=grade)
-    learner = student_model(param=student_param, tk=teacher.tk, track_p_recall=track_p_recall)
+    learner = student_model(param=student_param, tk=teacher.tk)
 
     print(f"\nSimulating data with a student {student_model.__name__} (parameters={student_param}), "
           f"and a teacher {teacher_model.__name__} "
@@ -81,8 +82,6 @@ def run(student_model, student_param=None, teacher_model=None,  n_item=25, grade
     extension = f'{student_model.__name__}_{teacher_model.__name__}'
     plot.success.curve(successes, fig_name=f"success_curve_{extension}.pdf")
     plot.success.scatter(successes, fig_name=f"success_scatter_{extension}.pdf")
-    if track_p_recall:
-        plot.p_recall.curve(p_recall=learner.p, fig_name=f'p_recall_{extension}.pdf')
 
 
 def main():

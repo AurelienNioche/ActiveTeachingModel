@@ -28,8 +28,7 @@ class ActR(Learner):
     * several slots (here: slot 1: kanji, slot2: meaning)
     """
 
-    def __init__(self, tk, param=None, continuous_time=False,
-                 verbose=False, track_p_recall=False):
+    def __init__(self, tk, param=None, verbose=False):
 
         super().__init__()
 
@@ -58,42 +57,39 @@ class ActR(Learner):
 
         # Options
         self.verbose = verbose
-        self.track_p_recall = track_p_recall
 
         # For continuous time
-        self.continuous_time = continuous_time
         self.times = np.zeros(self.tk.t_max)
-        self.t_c = 0
 
-        if self.track_p_recall:
-            self.p = np.zeros((self.tk.t_max, self.tk.n_item))
-
-    def _activation_function(self, i):
+    def _activation_function(self, i, time=None):
 
         """The activation of a chunk is the sum of its base-level activation"""
 
         # noise = np.random.normal()
-        b = self._base_level_learning_activation(i)  # + noise
+        b = self._base_level_learning_activation(i, time=time)  # + noise
         return b
 
-    def _base_level_learning_activation(self, i):
+    def _base_level_learning_activation(self, i, time=None):
 
         """The base-level activation measures
         how much time has elapsed since the jth use:"""
 
-        pe = self._presentation_effect(i)
+        pe = self._presentation_effect(i, time=time)
         if pe > 0.0001:
             return np.log(pe)
         else:
             return - np.inf
 
-    def _presentation_effect(self, i):
+    def _presentation_effect(self, i, time=None):
 
-        if self.continuous_time:
-            time_presentation = self.times[self.hist == i]
+        if time is not None:
+            linked_to_i = self.hist == i
+            in_past = self.times <= time
+
+            time_presentation = self.times[linked_to_i * in_past]
             if not time_presentation.shape[0]:
                 return 0  # This item has never been seen
-            time_elapsed = self.t_c - time_presentation
+            time_elapsed = time - time_presentation
         else:
             time_presentation = np.asarray(self.hist == i).nonzero()[0]
             if not time_presentation.shape[0]:
@@ -125,7 +121,7 @@ class ActR(Learner):
 
     def p_recall(self, item, time=None):
 
-        a = self._activation_function(item)
+        a = self._activation_function(item, time=time)
         p_retrieve = self._sigmoid_function(a)
         if self.verbose:
             print(f"t={self.t}, a_i: {a:.3f}, p_r: {p_retrieve:.3f}")
@@ -193,9 +189,9 @@ class ActR(Learner):
         # self.time_presentation[question].append(self.t)
         self.times[self.t] = time
 
-        if self.track_p_recall:
-            for i in range(self.tk.n_item):
-                self.p[self.t - 1, i] = self.p_recall(i)
+        # if self.track_p_recall:
+        #     for i in range(self.tk.n_item):
+        #         self.p[self.t - 1, i] = self.p_recall(i)
 
         self.t += 1
 

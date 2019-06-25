@@ -299,7 +299,7 @@ def main():
     selection = subjects_selection_history()
     for user_id in selection:
 
-        u = UserData.load(user_id, force=True)
+        u = UserData.load(user_id, force=True, verbose=False)
         if u.learning_language is not None and u.t_max > 1000:
             info_user(u)
             fit_user(u)
