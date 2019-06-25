@@ -86,6 +86,7 @@ class AvyaTeacher(GenericTeacher):
                         self.update_sets(agent, n_items)
                         return new_question
         #Rule3; find the most useful kanji.
+
         maxind = -1
         maxval = -100
         for i in range(n_items):
