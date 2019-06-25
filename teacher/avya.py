@@ -35,10 +35,10 @@ class AvyaTeacher(GenericTeacher):
     def update_sets(self, agent, n_items):
         for i in range(n_items):
             if agent.p_recall(i)>self.learn_threshhold:
-                self.learned[i]==2
+                self.learned[i]=2
             else:
                 if len(self.questions)>0:
-                    self.learned[self.questions[-1]]==1
+                    self.learned[self.questions[-1]]=1
     def parameters(self,n_items,agent):
         recall = [0] * n_items
         # recall[i] represents probability of recalling kanji[i] at current instant
