@@ -11,7 +11,8 @@ class GenericTeacher:
                  verbose=False):
 
         assert n_item >= N_POSSIBLE_REPLIES, \
-            f"The number of items have to be superior to the number of possible replies " \
+            f"The number of items have to be " \
+            f"superior to the number of possible replies " \
             f"(set to {N_POSSIBLE_REPLIES} in 'task/parameters.py')"
 
         assert grade != 1 or n_item <= 79, \
@@ -25,9 +26,9 @@ class GenericTeacher:
 
         self.verbose = verbose
 
-        self.questions = []
-        self.replies = []
-        self.successes = []
+        self.questions = np.zeros(t_max, dtype=int)
+        self.replies = np.zeros(t_max, dtype=int)
+        self.successes = np.zeros(t_max, dtype=bool)
 
         self.agent = None
 
@@ -52,7 +53,7 @@ class GenericTeacher:
 
         self.agent = agent
 
-        for _ in range(self.tk.t_max):
+        for t in range(self.tk.t_max):
             question, possible_replies = self.ask()
 
             reply = agent.decide(question=question,
@@ -60,9 +61,9 @@ class GenericTeacher:
             agent.learn(question=question)
 
             # For backup
-            self.questions.append(question)
-            self.replies.append(reply)
-            self.successes.append(reply == question)
+            self.questions[t] = question
+            self.replies[t] = reply
+            self.successes[t] = reply == question
             # We assume that the matching is (0,0), (1, 1), (n, n)
 
         return self.questions, self.replies, self.successes

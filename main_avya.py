@@ -1,5 +1,6 @@
 import plot.success
 import plot.p_recall
+import plot.memory_trace
 
 from learner.rl import QLearner
 from learner.act_r import ActR
@@ -11,6 +12,9 @@ from teacher.random import RandomTeacher
 from teacher.leitner import LeitnerTeacher
 
 
+from simulation.memory import p_recall_over_time_after_learning
+
+
 def run(student_model, teacher_model,
         student_param=None, n_item=25, grade=1, t_max=150):
 
@@ -18,10 +22,16 @@ def run(student_model, teacher_model,
         :param teacher_model: Can be one of those:
             * NirajTeacher
             * RandomTeacher
+            * AvyaTeacher
+            * TugceTeacher
+            * RandomTeacher
+            * LeitnerTeacher
         :param grade: Level of difficulty of the kanji selected (1: easiest)
-        :param n_item: Positive integer (above the number of possible answers displayed)
+        :param n_item: Positive integer
+        (above the number of possible answers displayed)
 
-        :param t_max: Positive integer (zero excluded). If grade=1, should be between 6 and 79.
+        :param t_max: Positive integer (zero excluded).
+        If grade=1, should be between 6 and 79.
 
         :param student_model: Class to use for creating the learner. Can be:
             * ActR
@@ -29,7 +39,8 @@ def run(student_model, teacher_model,
             * ActRGraphic
             * ActRPlus
 
-        :param student_param: dictionary containing the parameters when creating the instance of the learner.
+        :param student_param: dictionary containing the parameters
+        when creating the instance of the learner.
 
             For Act-R models:
             * d: decay rate
@@ -41,8 +52,6 @@ def run(student_model, teacher_model,
             For RL models:
             * alpha: learning rate
             * tau: exploration-exploitation ratio (softmax temperature)
-
-        :param track_p_recall: If true, can represent the evolution of the probabilities of recall for each item
 
         :return: None
         """
@@ -56,32 +65,56 @@ def run(student_model, teacher_model,
             student_param = {"d": 0.5, "tau": 0.01, "s": 0.06}
 
         elif student_model == ActRMeaning:
-            student_param = {"d": 0.5, "tau": 0.01, "s": 0.06, "m": 0.1}
+            student_param = {"d": 0.5, "tau": 0.01, "s": 0.06,
+                             "m": 0.1}
 
         elif student_model == ActRGraphic:
-            student_param = {"d": 0.5, "tau": 0.01, "s": 0.06, "g": 0.1}
+            student_param = {"d": 0.5, "tau": 0.01, "s": 0.06,
+                             "g": 0.1}
 
         elif student_model == ActRPlus:
-            student_param = {"d": 0.5, "tau": 0.01, "s": 0.06, "m": 0.1, "g": 0.1}
+            student_param = {"d": 0.5, "tau": 0.01, "s": 0.06,
+                             "m": 0.1,
+                             "g": 0.1}
 
-    assert student_model in (ActR, ActRMeaning, ActRGraphic, ActRPlus, QLearner), "Student model not recognized."
-    assert teacher_model in (NirajTeacher, AvyaTeacher, TugceTeacher, RandomTeacher, LeitnerTeacher), "Teacher model not recognized."
+    assert student_model in \
+        (ActR, ActRMeaning, ActRGraphic, ActRPlus, QLearner), \
+        "Student model not recognized."
+    assert teacher_model in \
+        (NirajTeacher, AvyaTeacher, TugceTeacher,
+         RandomTeacher, LeitnerTeacher), \
+        "Teacher model not recognized."
 
     teacher = teacher_model(t_max=t_max, n_item=n_item, grade=grade)
     learner = student_model(param=student_param, tk=teacher.tk)
 
-    print(f"\nSimulating data with a student {student_model.__name__} (parameters={student_param}), "
+    print(f"\nSimulating data with a student {student_model.__name__} "
+          f"(parameters={student_param}), "
           f"and a teacher {teacher_model.__name__} "
-          f"using {n_item} kanji of grade {grade} for {t_max} time steps...", end=" ", flush=True)
+          f"using {n_item} kanji of grade {grade} for {t_max} time steps...",
+          end=" ", flush=True)
 
     questions, replies, successes = teacher.teach(agent=learner)
 
     print("Done.\n")
 
-    # Figures
+    # Figures for success
     extension = f'{student_model.__name__}_{teacher_model.__name__}'
-    plot.success.curve(successes, fig_name=f"success_curve_{extension}.pdf")
-    plot.success.scatter(successes, fig_name=f"success_scatter_{extension}.pdf")
+    plot.success.curve(successes,
+                       fig_name=f"success_curve_{extension}.pdf")
+    plot.success.scatter(successes,
+                         fig_name=f"success_scatter_{extension}.pdf")
+
+    # Figure combining probability of recall and actual successes
+    p_recall = p_recall_over_time_after_learning(
+        agent=learner,
+        t_max=t_max,
+        n_item=n_item)
+
+    plot.memory_trace.plot(p_recall_value=p_recall,
+                           success_value=successes,
+                           questions=questions,
+                           fig_name=f"memory_trace_{extension}.pdf")
 
 
 def main():

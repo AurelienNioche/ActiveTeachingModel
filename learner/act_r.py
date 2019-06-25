@@ -61,37 +61,60 @@ class ActR(Learner):
         # For continuous time
         self.times = np.zeros(self.tk.t_max)
 
-    def _activation_function(self, i, time=None):
+    def _activation_function(self, i, time=None,
+                             time_index=None):
 
         """The activation of a chunk is the sum of its base-level activation"""
 
         # noise = np.random.normal()
-        b = self._base_level_learning_activation(i, time=time)  # + noise
+        b = self._base_level_learning_activation(i,
+                                                 time=time,
+                                                 time_index=time_index)
+        # + noise
         return b
 
-    def _base_level_learning_activation(self, i, time=None):
+    def _base_level_learning_activation(self, i, time=None,
+                                        time_index=None):
 
         """The base-level activation measures
         how much time has elapsed since the jth use:"""
 
-        pe = self._presentation_effect(i, time=time)
+        pe = self._presentation_effect(i,
+                                       time=time,
+                                       time_index=time_index)
         if pe > 0.0001:
             return np.log(pe)
         else:
             return - np.inf
 
-    def _presentation_effect(self, i, time=None):
+    def _presentation_effect(self, i, time=None,
+                             time_index=None):
+
+        i_presented = self.hist == i
 
         if time is not None:
-            linked_to_i = self.hist == i
+
             in_past = self.times <= time
 
-            time_presentation = self.times[linked_to_i * in_past]
+            time_presentation = self.times[i_presented * in_past]
             if not time_presentation.shape[0]:
                 return 0  # This item has never been seen
-            time_elapsed = time - time_presentation
+            time_elapsed = np.asarray(time - time_presentation, dtype=float)
+            time_elapsed[time_elapsed == 0] = 0.0001  # To avoid div by 0
+
+        elif time_index is not None:
+
+            time_presentation = \
+                i_presented[:time_index+1].nonzero()[0]
+
+            if not time_presentation.shape[0]:
+                return 0  # This item has never been seen
+            time_elapsed = \
+                np.asarray(time_index - time_presentation, dtype=float)
+            time_elapsed[time_elapsed == 0] = 0.0001  # To avoid div by 0
+
         else:
-            time_presentation = np.asarray(self.hist == i).nonzero()[0]
+            time_presentation = i_presented[:].nonzero()[0]
             if not time_presentation.shape[0]:
                 return 0  # This item has never been seen
             time_elapsed = self.t - time_presentation
@@ -119,19 +142,24 @@ class ActR(Learner):
             print(f'x={x}, tau = {self.pr.tau}, a = {a}, s = {self.pr.s}')
             raise e
 
-    def p_recall(self, item, time=None):
+    def p_recall(self, item, time=None, time_index=None):
 
-        a = self._activation_function(item, time=time)
+        a = self._activation_function(item,
+                                      time=time,
+                                      time_index=time_index)
         p_retrieve = self._sigmoid_function(a)
         if self.verbose:
             print(f"t={self.t}, a_i: {a:.3f}, p_r: {p_retrieve:.3f}")
         return p_retrieve
 
-    def _p_choice(self, question, reply, possible_replies=None, time=None):
+    def _p_choice(self, question, reply, possible_replies=None,
+                  time=None, time_index=None):
 
         success = question == reply
 
-        p_recall = self.p_recall(question, time=time)
+        p_recall = self.p_recall(question,
+                                 time=time,
+                                 time_index=time_index)
 
         # If number of possible replies is defined
         if self.tk.n_possible_replies is not None:
@@ -156,10 +184,12 @@ class ActR(Learner):
 
         return p_choice
 
-    def _p_correct(self, question, reply, possible_replies=None, time=None):
+    def _p_correct(self, question, reply, possible_replies=None,
+                   time=None, time_index=None):
 
         p_correct = \
-            self._p_choice(question=question, reply=question, time=time)
+            self._p_choice(question=question, reply=question,
+                           time=time, time_index=time_index)
 
         correct = question == reply
         if correct:
@@ -168,9 +198,12 @@ class ActR(Learner):
         else:
             return 1-p_correct
 
-    def decide(self, question, possible_replies, time=None):
+    def decide(self, question, possible_replies, time=None,
+               time_index=None):
 
-        p_r = self.p_recall(question, time=time)
+        p_r = self.p_recall(question,
+                            time=time,
+                            time_index=time_index)
         r = np.random.random()
 
         if p_r > r:
@@ -182,20 +215,19 @@ class ActR(Learner):
             print(f't={self.t}: question {question}, reply {reply}')
         return reply
 
-    def learn(self, question, time=None):
+    def learn(self, question, time=None, time_index=None):
 
-        # noinspection PyTypeChecker
-        self.hist[self.t] = question
-        # self.time_presentation[question].append(self.t)
-        self.times[self.t] = time
+        if time_index is None:
 
-        # if self.track_p_recall:
-        #     for i in range(self.tk.n_item):
-        #         self.p[self.t - 1, i] = self.p_recall(i)
+            self.hist[self.t] = question
+            self.times[self.t] = time
+            self.t += 1
 
-        self.t += 1
+        else:
+            self.hist[time_index] = question
+            self.times[time_index] = time
 
-    def unlearn(self):
+    def unlearn(self, time_index=None):
 
         # try:
         #     last_question = self.questions.pop()
@@ -203,10 +235,15 @@ class ActR(Learner):
         #     raise AssertionError("I can not unlearn something
         #     that has not been learned!")
 
-        self.t -= 1
+        if time_index is None:
+            self.t -= 1
 
-        self.hist[self.t] = -99
-        self.times[self.t] = -1
+            self.hist[self.t] = -99
+            self.times[self.t] = -1
+
+        else:
+            self.hist[time_index] = -99
+            self.times[time_index] = -1
 
 
 # class ActROriginal(ActR):

@@ -45,18 +45,23 @@ class ActRMeaning(ActR):
 
         super().__init__(tk=tk, **kwargs)
 
-    def p_recall(self, i, time=None):
+    def p_recall(self, item, time=None, time_index=None):
 
         # For item i
-        pr_effect_i = self._presentation_effect(i)
+        pr_effect_i = self._presentation_effect(item,
+                                                time=time,
+                                                time_index=time_index)
         if not pr_effect_i:
             return 0
 
         # For connected items
-        list_j = self.items[self.items != i]
+        list_j = self.items[self.items != item]
         pr_effect_j = np.array(
-            [self._presentation_effect(j) for j in list_j])
-        contrib = (self.c_x[i, list_j] * pr_effect_j).sum() * self.x
+            [self._presentation_effect(j,
+                                       time=time,
+                                       time_index=time_index
+                                       ) for j in list_j])
+        contrib = (self.c_x[item, list_j] * pr_effect_j).sum() * self.x
 
         _sum = pr_effect_i + contrib
         if _sum <= 0:
@@ -146,22 +151,27 @@ class ActRPlus(ActRMeaning):
 
         self.items = np.arange(self.tk.n_item)
 
-    def p_recall(self, i, time=None):
+    def p_recall(self, item, time=None, time_index=None):
 
         # For item i
-        pr_effect_i = self._presentation_effect(i)
+        pr_effect_i = self._presentation_effect(i,
+                                                time=time,
+                                                time_index=time_index)
         if not pr_effect_i:
             return 0
 
         # For connected items
-        list_j = self.items[self.items != i]
+        list_j = self.items[self.items != item]
         pr_effect_j = np.array(
-            [self._presentation_effect(j) for j in list_j])
+            [self._presentation_effect(j,
+                                       time=time,
+                                       time_index=time_index
+                                       ) for j in list_j])
 
         semantic_contrib = \
-            (self.tk.c_semantic[i, list_j] * pr_effect_j).sum() * self.pr.m
+            (self.tk.c_semantic[item, list_j] * pr_effect_j).sum() * self.pr.m
         graphic_contrib = \
-            (self.tk.c_graphic[i, list_j] * pr_effect_j).sum() * self.pr.g
+            (self.tk.c_graphic[item, list_j] * pr_effect_j).sum() * self.pr.g
 
         _sum = pr_effect_i + semantic_contrib + graphic_contrib
         if _sum <= 0:
