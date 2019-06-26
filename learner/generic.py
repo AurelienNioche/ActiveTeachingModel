@@ -38,8 +38,18 @@ class Learner:
         for t in range(t_max):
 
             question, reply = data.questions[t], data.replies[t]
-            possible_rep = data.possible_replies[t]
             time = data.times[t]
+
+            if hasattr(data, 'possible_replies'):
+                possible_rep = data.possible_replies[t]
+            else:
+                possible_rep = None
+                use_p_correct = True
+
+            if hasattr(data, 'first_presentation'):
+                first_pr = data.first_presentation[t]
+                if first_pr:
+                    self.learn(question=question, time=time)
 
             if use_p_correct:
                 p = self._p_correct(question=question, reply=reply,

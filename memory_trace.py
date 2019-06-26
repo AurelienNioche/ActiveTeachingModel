@@ -12,15 +12,12 @@ import datetime
 import numpy as np
 
 
-def main():
+def main(n_iteration=100, n_item=9):
 
     total_time = datetime.timedelta(days=10)
     sec = int(total_time.total_seconds())
 
-    time_norm = 100/sec
-
-    n_iteration = 100
-    n_item = 9
+    time_norm = n_iteration/sec
 
     time = np.random.randint(low=0, high=sec, size=n_iteration)
     time.sort()
@@ -59,10 +56,7 @@ def main():
                            questions=questions)
 
 
-def main_discrete():
-
-    n_iteration = 100
-    n_item = 9
+def main_discrete(n_iteration=100, n_item=9):
 
     questions = np.random.randint(low=0, high=n_item, size=n_iteration)
 
@@ -93,4 +87,4 @@ def main_discrete():
 
 
 if __name__ == "__main__":
-    main_discrete()
+    main()

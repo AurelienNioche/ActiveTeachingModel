@@ -22,11 +22,13 @@ import googletrans
 import pickle
 
 from fit import fit
-from behavior import data_structure
+from behavior.data_structure import Task
 from behavior.duolingo import UserData
 from learner.act_r import ActR
 from learner.act_r_duo import ActRDuo
 import plot.success
+import plot.memory_trace
+from simulation.memory import p_recall_over_time_after_learning
 
 from utils.utils import dump, load, print_begin, print_done
 
@@ -247,7 +249,7 @@ def n_trial(u_id='u:iOIr'):
     return len(lexeme_id), len(unq_lex_id)
 
 
-def fit_user(u, model=ActRDuo, ignore_times=False):
+def fit_user(u, model, ignore_times=False):
 
     if ignore_times:
         u.times[:] = None
@@ -255,20 +257,20 @@ def fit_user(u, model=ActRDuo, ignore_times=False):
     # Plot the success curves
     success = u.questions == u.replies
     plot.success.curve(successes=success,
-                       fig_name=f'success_curve_u{u.user_id}.pdf')
-    plot.success.multi_curve(questions=u.questions, replies=u.replies,
-                             fig_name=f'success_curve_u{u.user_id}_multi.pdf',
-                             max_lines=40)
+                       fig_name=f'u_{u.user_id}_success_curve.pdf')
+    # plot.success.multi_curve(questions=u.questions, replies=u.replies,
+    #                          fig_name=f'u_{u.user_id}_success_curve_multi.pdf',
+    #                          max_lines=40)
 
     u_q, counts = np.unique(
         u.questions, return_counts=True)
 
-    plot.duolingo.bar(sorted(counts), fig_name=f'counts_u{u.user_id}.pdf')
+    plot.duolingo.bar(sorted(counts), fig_name=f'u_{u.user_id}_counts.pdf')
 
     f = fit.Fit(tk=u.tk, model=model, data=u, verbose=True,
                 use_p_correct=True)
 
-    fit_r = f.evaluate()
+    return f.evaluate()
 
 
 def info_user(u):
@@ -290,7 +292,7 @@ def info_user(u):
     #                       size=0.1)
 
 
-def main():
+def main(model=ActR):
 
     # it, = np.asarray(Item.objects.all().values_list('history_seen')).T
     # print(min(it))
@@ -302,7 +304,47 @@ def main():
         u = UserData.load(user_id, force=True, verbose=False)
         if u.learning_language is not None and u.t_max > 1000:
             info_user(u)
-            fit_user(u)
+            min_u = min(u.times)
+            max_u = max(u.times)
+            sec = max_u - min_u
+
+            time_norm = 100 / sec
+
+            raw_times = np.zeros(u.t_max)
+            raw_times[:] = u.times
+            u.times[:] = u.times * time_norm
+
+            fit_r = fit_user(u, model=model)
+
+            agent = model(
+                tk=Task(t_max=u.t_max, n_item=u.n_item),
+                # param={'d': 0.5, 'tau': 0.01, 's': 0.3, 'r': 0.001})
+                param=fit_r["best_param"])
+
+            for i in range(u.t_max):
+
+                item, t = u.questions[i], u.times[i]
+                agent.learn(question=item, time=t)
+
+            time_sampling = \
+                np.linspace(start=min_u,
+                            stop=max_u, num=100)
+
+            p_recall = p_recall_over_time_after_learning(
+                agent=agent,
+                t_max=u.t_max,
+                n_item=u.n_item,
+                time_norm=time_norm,
+                time_sampling=time_sampling)
+
+            plot.memory_trace.plot(
+                p_recall_value=p_recall,
+                p_recall_time=time_sampling,
+                success_time=raw_times,
+                success_value=u.successes,
+                questions=u.questions,
+                fig_name=f'u_{u.user_id}/memory_trace.pdf'
+            )
 
     # selection = subjects_selection_history()
     # for user_id in selection:
