@@ -8,18 +8,27 @@ def main():
     Example one layer neural network with 4 fully connected and recurrent
     units and two output neurons
     """
+
     neuron0 = Neuron(neuron_id=0, input_neurons=[0])
     neuron1 = Neuron(neuron_id=1, input_neurons=[1])
     neuron2 = Neuron(neuron_id=2, input_neurons=[2])
     neuron3 = Neuron(neuron_id=3, input_neurons=[3])
     neuron4 = Neuron(neuron_id=4, input_neurons=[0, 1, 2, 3, 4], role="output")
     neuron5 = Neuron(neuron_id=5, input_neurons=[0, 1, 2, 3, 5], role="output")
+    network = Network
 
 
 class Network:
     def __init__(self):
         self.connectivity_matrix = None
         self.n_neurons = 0
+
+    @staticmethod
+    def instance_input_neurons(n=15, verbose=False):
+        for i in range(n):
+            exec("global neuron{} = Neuron()".format(i))
+            if verbose:
+                print(i)
 
     def predict(self):
         raise NotImplementedError
@@ -74,6 +83,8 @@ class Neuron:
         # Gain function
         self.theta = theta
         self.gamma = gamma  # always < 1; gain function is sublinear
+
+        self.initialize_attributes()
 
     def initialize_attributes(self):
         self.input_currents = np.zeros(self.input_neurons.size)
