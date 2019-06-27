@@ -1,15 +1,16 @@
 import matplotlib.pyplot as plt
 import os
 
-dir_path = 'fig'
+FIG_FOLDER = 'fig'
 
 
 def save_fig(fig_name):
 
-    os.makedirs(dir_path, exist_ok=True)
+    file_name = os.path.join(FIG_FOLDER, fig_name)
+    dir_path = os.path.dirname(file_name)
 
-    file_name = f'{dir_path}/{fig_name}'
-    plt.savefig(fname=f'{dir_path}/{fig_name}')
+    os.makedirs(dir_path, exist_ok=True)
+    plt.savefig(fname=file_name)
 
     print(f'Figure "{file_name}" created.')
     plt.close()

@@ -69,18 +69,16 @@ class UserData:
 
             self.questions = np.zeros(n_entry, dtype=int)
             self.replies = np.zeros(n_entry, dtype=int)
-            self.times = np.zeros(n_entry, dtype=int)
+            self.successes = np.zeros(n_entry, dtype=bool)
+            self.times = np.zeros(n_entry, dtype=float)
             self.first_presentation = np.zeros(n_entry, dtype=bool)
 
             self.questions[:] = lex_idx
 
             self.replies[:] = -1
-            session_correct = s_seen == s_correct
-            self.replies[session_correct] = self.questions[session_correct]
-
-            self.times[:] = time_stamp
-
-            self.first_presentation[:] = h_seen == 1
+            self.successes[:] = s_seen == s_correct
+            self.replies[self.successes] = self.questions[self.successes]
+            self.times[:] = time_stamp[:]
 
             self.t_max = n_entry
 

@@ -26,27 +26,41 @@ def plot(p_recall_value,
     if p_recall_time is None:
         p_recall_time = np.arange(n_iteration)
 
-    fig, axes = plt.subplots(nrows=n_item, figsize=(5, 0.9*n_item))
+    array_item = np.arange(n_item)
+    item_groups = np.array_split(array_item, 100)
 
-    for i in range(n_item):
+    assert 'pdf' in fig_name
+    root = fig_name.split('.pdf')[0]
+    print(root)
 
-        color = 'black'  # f'C{i}'
-        ax = axes[i]
-        ax.set_ylabel('Recall')
-        ax.set_yticks((0, 1))
-        ax.set_ylim((-0.1, 1.1))
+    for idx_fig, item_gp in enumerate(item_groups):
 
-        ax.scatter(x=success_time[questions == i],
-                   y=success_value[questions == i],
-                   alpha=0.2,
-                   color=color)
+        n_item = len(item_gp)
 
-        ax.plot(p_recall_time, p_recall_value[i], alpha=0.2,
-                color=color)
-        if i != n_item-1:
-            ax.set_xticks([])
+        fig, axes = plt.subplots(nrows=n_item, figsize=(5, 0.9*n_item))
 
-    axes[-1].set_xlabel('Time')
+        for ax_idx, item in enumerate(item_gp):
 
-    plt.tight_layout()
-    save_fig(fig_name)
+            color = 'black'  # f'C{i}'
+            ax = axes[ax_idx]
+            ax.set_ylabel('Recall')
+            ax.set_yticks((0, 1))
+            ax.set_ylim((-0.1, 1.1))
+
+            ax.scatter(x=success_time[questions == item],
+                       y=success_value[questions == item],
+                       alpha=0.2,
+                       color=color)
+
+            ax.plot(p_recall_time, p_recall_value[item], alpha=0.2,
+                    color=color)
+            if ax_idx != n_item-1:
+                ax.set_xticks([])
+
+        axes[-1].set_xlabel('Time')
+
+        plt.tight_layout()
+
+        fig_name_idx = root + f'_{idx_fig}.pdf'
+        print(fig_name_idx)
+        save_fig(fig_name_idx)

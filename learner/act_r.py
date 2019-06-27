@@ -94,7 +94,13 @@ class ActR(Learner):
 
         if time is not None:
 
-            in_past = self.times <= time
+            try:
+
+                in_past = self.times <= time
+            except FloatingPointError as e:
+                print('time', time)
+                print('times', self.times)
+                raise e
 
             time_presentation = self.times[i_presented * in_past]
             if not time_presentation.shape[0]:
@@ -217,15 +223,13 @@ class ActR(Learner):
 
     def learn(self, question, time=None, time_index=None):
 
-        if time_index is None:
-
+        if time_index is not None:
+            self.hist[time_index] = question
+            self.times[time_index] = time
+        else:
             self.hist[self.t] = question
             self.times[self.t] = time
             self.t += 1
-
-        else:
-            self.hist[time_index] = question
-            self.times[time_index] = time
 
     def unlearn(self, time_index=None):
 
