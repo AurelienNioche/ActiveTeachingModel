@@ -31,7 +31,6 @@ def plot(p_recall_value,
 
     assert 'pdf' in fig_name
     root = fig_name.split('.pdf')[0]
-    print(root)
 
     for idx_fig, item_gp in enumerate(item_groups):
 
@@ -62,5 +61,4 @@ def plot(p_recall_value,
         plt.tight_layout()
 
         fig_name_idx = root + f'_{idx_fig}.pdf'
-        print(fig_name_idx)
         save_fig(fig_name_idx)
