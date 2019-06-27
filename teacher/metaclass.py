@@ -26,9 +26,9 @@ class GenericTeacher:
 
         self.verbose = verbose
 
-        self.questions = np.zeros(t_max, dtype=int)
-        self.replies = np.zeros(t_max, dtype=int)
-        self.successes = np.zeros(t_max, dtype=bool)
+        self.questions = np.ones(t_max, dtype=int) * -1
+        self.replies = np.ones(t_max, dtype=int) * -1
+        self.successes = np.ones(t_max, dtype=bool)
 
         self.agent = None
 
