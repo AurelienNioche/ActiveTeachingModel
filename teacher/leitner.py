@@ -12,6 +12,7 @@ class LeitnerTeacher(GenericTeacher):
         self.learned = [0]*n_item
         self.learn_threshhold=0.95
         self.forgot_threshhold = 0.85
+        sel
 
 
     def ask(self):
@@ -39,6 +40,7 @@ class LeitnerTeacher(GenericTeacher):
             else:
                 if len(self.questions)>0:
                     self.learned[self.questions[-1]]=1
+
     def parameters(self,n_items,agent):
         recall = [0] * n_items
         # recall[i] represents probability of recalling kanji[i] at current instant
