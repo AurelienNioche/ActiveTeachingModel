@@ -55,6 +55,9 @@ def main(n_iteration=100, n_item=9):
                            success_value=success,
                            questions=questions)
 
+    plot.memory_trace.summarize(p_recall_value=p_recall,
+                                p_recall_time=time_sampling)
+
 
 def main_discrete(n_iteration=100, n_item=9):
 
@@ -84,6 +87,8 @@ def main_discrete(n_iteration=100, n_item=9):
     plot.memory_trace.plot(p_recall_value=p_recall,
                            success_value=success,
                            questions=questions)
+
+    plot.memory_trace.summarize(p_recall_value=p_recall)
 
 
 if __name__ == "__main__":
