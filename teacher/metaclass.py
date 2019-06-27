@@ -42,6 +42,7 @@ class GenericTeacher:
         # Select randomly possible replies, including the correct one
         all_replies = list(range(self.tk.n_item))
         all_replies.remove(question)
+
         possible_replies =\
             [question, ] + list(np.random.choice(
                 all_replies, size=N_POSSIBLE_REPLIES-1, replace=False))

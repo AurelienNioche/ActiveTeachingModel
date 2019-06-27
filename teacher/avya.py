@@ -24,6 +24,7 @@ class AvyaTeacher(GenericTeacher):
             agent=copy.deepcopy(self.agent),
             n_items=self.tk.n_item
         )
+
         #print(question)
         possible_replies = self.get_possible_replies(question)
 
