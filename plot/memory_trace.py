@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import scipy.stats
 
 from plot.generic import save_fig
 
@@ -27,7 +28,12 @@ def plot(p_recall_value,
         p_recall_time = np.arange(n_iteration)
 
     array_item = np.arange(n_item)
-    item_groups = np.array_split(array_item, 100)
+
+    max_n_item_per_figure = 100
+    n_fig = n_item // max_n_item_per_figure +  \
+        int(n_item % max_n_item_per_figure != 0)
+
+    item_groups = np.array_split(array_item, n_fig)
 
     assert 'pdf' in fig_name
     root = fig_name.split('.pdf')[0]
@@ -35,7 +41,6 @@ def plot(p_recall_value,
     for idx_fig, item_gp in enumerate(item_groups):
 
         n_item = len(item_gp)
-
         fig, axes = plt.subplots(nrows=n_item, figsize=(5, 0.9*n_item))
 
         for ax_idx, item in enumerate(item_gp):
@@ -62,3 +67,37 @@ def plot(p_recall_value,
 
         fig_name_idx = root + f'_{idx_fig}.pdf'
         save_fig(fig_name_idx)
+
+
+def summarize(p_recall_value, fig_name='memory_trace_summarize.pdf',
+              p_recall_time=None):
+
+    if p_recall_time is None:
+        p_recall_time = np.arange(p_recall_value.shape[1])
+
+    fig = plt.figure(figsize=(15, 12))
+    ax = fig.subplots()
+
+    mean = np.mean(p_recall_value, axis=0)
+    sem = scipy.stats.sem(p_recall_value, axis=0)
+
+    min_ = np.min(p_recall_value, axis=0)
+    max_ = np.max(p_recall_value, axis=0)
+
+    ax.plot(p_recall_time, mean, lw=1.5)
+    ax.fill_between(
+        p_recall_time,
+        y1=mean - sem,
+        y2=mean + sem,
+        alpha=0.2
+    )
+
+    ax.plot(p_recall_time, min_, linestyle=':', color='C0')
+    ax.plot(p_recall_time, max_, linestyle=':', color='C0')
+
+    ax.set_xlabel('Time')
+    ax.set_ylabel('Prob. of recall')
+
+    ax.set_ylim((-0.01, 1.01))
+
+    save_fig(fig_name=fig_name)

@@ -26,9 +26,9 @@ class GenericTeacher:
 
         self.verbose = verbose
 
-        self.questions = np.zeros(t_max, dtype=int)
-        self.replies = np.zeros(t_max, dtype=int)
-        self.successes = np.zeros(t_max, dtype=bool)
+        self.questions = np.ones(t_max, dtype=int) * -1
+        self.replies = np.ones(t_max, dtype=int) * -1
+        self.successes = np.ones(t_max, dtype=bool)
 
         self.agent = None
 
@@ -42,6 +42,7 @@ class GenericTeacher:
         # Select randomly possible replies, including the correct one
         all_replies = list(range(self.tk.n_item))
         all_replies.remove(question)
+
         possible_replies =\
             [question, ] + list(np.random.choice(
                 all_replies, size=N_POSSIBLE_REPLIES-1, replace=False))
