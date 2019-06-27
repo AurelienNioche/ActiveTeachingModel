@@ -3,6 +3,7 @@ import random
 from teacher.metaclass import GenericTeacher
 
 import solver.avya
+
 class AvyaTeacher(GenericTeacher):
 
     def __init__(self, n_item=20, t_max=200, grade=1, handle_similarities=True, verbose=False):
@@ -23,7 +24,7 @@ class AvyaTeacher(GenericTeacher):
             agent=copy.deepcopy(self.agent),
             n_items=self.tk.n_item
         )
-
+        #print(question)
         possible_replies = self.get_possible_replies(question)
 
         if self.verbose:
@@ -32,6 +33,7 @@ class AvyaTeacher(GenericTeacher):
                   f"possible replies: {self.tk.meaning[possible_replies]};")
 
         return question, possible_replies
+
     # a learnt character is represented by 2 in learned, a being learnt character by 1, and an unseen character as 0 updation is required after every iteration.
     def update_sets(self, agent, n_items):
         for i in range(n_items):
@@ -90,7 +92,7 @@ class AvyaTeacher(GenericTeacher):
                             new_question = i
                             self.update_sets(agent, n_items)
                             self.count+=1
-                            print("check1")
+                            #print("check1")
                             return new_question
             # Rule2: Bring an almost learnt Kanji to learnt set.
             for i in range(n_items):
@@ -101,7 +103,7 @@ class AvyaTeacher(GenericTeacher):
                             new_question = i
                             self.update_sets(agent, n_items)
                             self.count += 1
-                            print("check2")
+                            #print("check2")
                             return new_question
 
         # Rule3; find the most useful kanji.
@@ -118,8 +120,6 @@ class AvyaTeacher(GenericTeacher):
         self.update_sets(agent, n_items)
         #print(questions)
         #new_question = random.randint(0, n_items - 1)
-        print("check3")
+        #print("check3")
         self.count += 1
         return new_question
-
-
