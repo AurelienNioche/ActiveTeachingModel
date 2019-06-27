@@ -2,7 +2,6 @@ import copy
 import random
 from teacher.metaclass import GenericTeacher
 
-import solver.avya
 
 class AvyaTeacher(GenericTeacher):
 
@@ -15,7 +14,6 @@ class AvyaTeacher(GenericTeacher):
         self.forgot_threshhold = 0.85
         self.count = 0
 
-
     def ask(self):
 
         question = self.get_next_node(
@@ -24,8 +22,6 @@ class AvyaTeacher(GenericTeacher):
             agent=copy.deepcopy(self.agent),
             n_items=self.tk.n_item
         )
-
-        #print(question)
         possible_replies = self.get_possible_replies(question)
 
         if self.verbose:
@@ -35,18 +31,18 @@ class AvyaTeacher(GenericTeacher):
 
         return question, possible_replies
 
-    # a learnt character is represented by 2 in learned, a being learnt character by 1, and an unseen character as 0 updation is required after every iteration.
+    # Learnt character set is represented by 2,Being learnt character set by 1, Unseen character set as 0
     def update_sets(self, agent, n_items):
-        for i in range(n_items):
-            if agent.p_recall(i)>self.learn_threshhold:
-                self.learned[i]=2
+        for k in range(n_items):
+            if agent.p_recall(k) > self.learn_threshhold:
+                self.learned[k] = 2
 
         if self.count>0:
-            if self.learned[self.questions[self.count-1]]==0:
-                self.learned[self.questions[self.count - 1]] =1
+            if self.learned[self.questions[self.count-1]] == 0:
+                self.learned[self.questions[self.count - 1]] = 1
 
-    #calculate usefulness and relative parameters.
-    def parameters(self,n_items,agent):
+    # calculate usefulness and relative parameters.
+    def parameters(self, n_items, agent):
         recall = [0] * n_items
         # recall[i] represents probability of recalling kanji[i] at current instant
         usefulness = [0] * n_items
@@ -54,17 +50,13 @@ class AvyaTeacher(GenericTeacher):
         relative = [[0] * n_items] * n_items  # relative amount by which knowing j helps i
         for item in range(n_items):
             recall[item] = agent.p_recall(item)
-            #print(agent.p_recall(item))
             for item2 in range(n_items):
                 if item2 != item:
                     agent.learn(item2)
                     recall_next[item][item2] = agent.p_recall(item)
-                    #print(agent.p_recall(item))
                     relative[item][item2] = recall_next[item][item2] - recall[item]
-                    #print(recall_next[item][item2],recall[item])
                     agent.unlearn()
                 usefulness[item2] += relative[item][item2]
-        #print(relative)
         return relative,usefulness
 
     def get_next_node(self, questions, successes, agent, n_items):
@@ -80,47 +72,38 @@ class AvyaTeacher(GenericTeacher):
             :return: integer (index of the question to ask)
         """
 
-        #print(questions)
         relative, usefulness = self.parameters(n_items, agent)
-        #print(usefulness)
         if self.count > 0:
             # Rule1: dont let a learnt kanji slip out of threshhold
             for i in range(n_items):
                 if self.learned[i] == 2:
                     if agent.p_recall(i) < self.learn_threshhold:
                         if questions[self.count-1] != i:
-                            #print(questions[self.count-1],i)
                             new_question = i
                             self.update_sets(agent, n_items)
                             self.count+=1
-                            #print("check1")
                             return new_question
             # Rule2: Bring an almost learnt Kanji to learnt set.
             for i in range(n_items):
                 if self.learned[i] == 1:
                     if agent.p_recall(i) > self.forgot_threshhold:
                         if questions[self.count-1] != i:
-                            #print(questions[self.count-1],i)
                             new_question = i
                             self.update_sets(agent, n_items)
                             self.count += 1
-                            #print("check2")
                             return new_question
 
-        # Rule3; find the most useful kanji.
+        # Rule3: find the most useful kanji.
         maxind = -1
-        maxval = -100
-        for i in range(n_items):
-            #print(usefulness[i])
+        maxval = -10000
+        for i in range(0,n_items):
             if self.learned[i] < 2:
-                if questions[self.count - 1] != i:
-                    if usefulness[i] > maxval:
+                if usefulness[i] > maxval:
+                    if questions[self.count - 1] != i:
                         maxval = usefulness[i]
                         maxind = i
+
         new_question = maxind
         self.update_sets(agent, n_items)
-        #print(questions)
-        #new_question = random.randint(0, n_items - 1)
-        #print("check3")
         self.count += 1
         return new_question

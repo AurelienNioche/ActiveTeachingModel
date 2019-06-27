@@ -16,7 +16,7 @@ from simulation.memory import p_recall_over_time_after_learning
 
 
 def run(student_model, teacher_model,
-        student_param=None, n_item=10, grade=1, t_max=150):
+        student_param=None, n_item=25, grade=1, t_max=250):
 
     """
         :param teacher_model: Can be one of those:
