@@ -40,7 +40,7 @@ class Network:
 class Neuron:
     """
     The dynamics of neuron i is represented by the equation:
-    τc˙i(t)=−ci(t)+∑j=1NJij ⋅ rj(t)+ξi(t)    (1)
+    τc˙i(t)=−ci(t)+∑j=1NJij ⋅ rj(t)+ξi(t)   (1)
     ri=g(ci)     (2)
 
     [[t * c(t+1) = -c_{i}(t) + \sum_{j = 1}^{N}{J_{i, j}} * r_{j}{t}
