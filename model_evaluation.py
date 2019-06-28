@@ -5,7 +5,6 @@ import scipy.stats
 
 import matplotlib.pyplot as plt
 import numpy as np
-import scipy.stats
 from tqdm import tqdm
 
 from fit import fit

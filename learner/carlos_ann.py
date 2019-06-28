@@ -1,6 +1,8 @@
 import numpy as np
+import model_simulation_carlos
 
 np.random.seed(123)
+model_script = model_simulation_carlos
 
 
 def main():
@@ -20,13 +22,16 @@ def main():
 
 class Network:
     def __init__(self):
-        self.connectivity_matrix = None
         self.n_neurons = 0
+        try:
+            self.n_input_neurons = model_script.n_item
+        except AttributeError:
+            print("No automatic input neurons instantiation used")
 
-    @staticmethod
-    def instance_input_neurons(n=15, verbose=False):
-        for i in range(n):
-            exec("global neuron{} = Neuron()".format(i))
+    def instance_input_neurons(self, verbose=False):
+        bits_needed = len(bin(self.n_input_neurons)) - 2
+        for i in range(bits_needed):  # Instance n Neurons
+            exec("global neuron{0}\nneuron{0} = Neuron()".format(i))
             if verbose:
                 print(i)
 
@@ -62,6 +67,7 @@ class Neuron:
         self.weights = None
         self.gain = np.empty(0)
 
+        # Update network number of neurons
         self.network = network
         network.n_neurons += 1
 

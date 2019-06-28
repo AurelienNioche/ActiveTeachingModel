@@ -6,8 +6,10 @@ from teacher.random import RandomTeacher
 import plot.p_recall
 import plot.success
 
+n_item = 30
 
-def run(model, parameters, t_max=3000, n_item=30):
+
+def run(model, parameters, t_max=3000, n_item=n_item):
 
     teacher = RandomTeacher(t_max=t_max, n_item=n_item,
                             handle_similarities=True,

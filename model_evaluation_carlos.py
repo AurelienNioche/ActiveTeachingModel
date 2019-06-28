@@ -1,7 +1,6 @@
 import multiprocessing
 import os
 import pickle
-import scipy.stats
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -13,7 +12,6 @@ from learner.carlos_exponential import Exponential
 from simulation.data import SimulatedData
 from simulation.task import Task
 from utils import utils
-
 
 DATA_FOLDER = os.path.join("bkp", "model_evaluation")
 FIG_FOLDER = "fig"
