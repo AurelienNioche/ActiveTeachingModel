@@ -19,7 +19,7 @@ class NetworkTeacher(RandomTeacher):
         for i in range(1, 32):
             question = np.random.randint(self.tk.n_item)
 
-           # possible_replies = self.get_possible_replies(question)
+        # possible_replies = self.get_possible_replies(question)
 
         print(self.questions)
 
@@ -28,7 +28,7 @@ class NetworkTeacher(RandomTeacher):
         #           f"correct answer: {self.tk.meaning[question]}; "
         #           f"possible replies: {self.tk.meaning[possible_replies]};")
 
-        return question#, possible_replies
+        return question  # , possible_replies
 
 
 teacher = NetworkTeacher()

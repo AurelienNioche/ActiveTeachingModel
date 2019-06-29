@@ -16,8 +16,7 @@ def run(model, parameters, t_max=3000, n_item=n_item):
                             normalize_similarity=True,
                             verbose=False, seed=10)
 
-    agent = model(param=parameters,
-                        tk=teacher.tk)
+    agent = model(param=parameters, tk=teacher.tk)
     # questions, replies, successes = teacher.teach(agent=agent)
     questions, replies, successes = teacher.teach(agent=agent)
     # plot.p_recall.curve(agent.p)
@@ -28,8 +27,10 @@ def run(model, parameters, t_max=3000, n_item=n_item):
 
     # Figures
     extension = f'{model.__name__}_{RandomTeacher.__name__}'
-    plot.success.curve(successes, fig_name=f"success_curve_{extension}.pdf")
-    plot.success.scatter(successes, fig_name=f"success_scatter_{extension}.pdf")
+    plot.success.curve(successes,
+                       fig_name=f"success_curve_{extension}.pdf")
+    plot.success.scatter(successes,
+                         fig_name=f"success_scatter_{extension}.pdf")
 
 
 def main():

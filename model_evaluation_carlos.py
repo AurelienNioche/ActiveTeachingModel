@@ -104,7 +104,8 @@ def main(model, max_=20, t_max=300, n_kanji=30, normalize_similarity=True,
 
     fit_param = fit.Fit.fit_param_(fit_param)
 
-    extension = f'_{model.__name__}{model.version}_n{max_}_t{t_max}_k{n_kanji}' \
+    extension =\
+        f'_{model.__name__}{model.version}_n{max_}_t{t_max}_k{n_kanji}' \
         f'{utils.dic2string(fit_param)}'
 
     file_path = os.path.join(DATA_FOLDER, f"parameter_recovery_{extension}.p")
