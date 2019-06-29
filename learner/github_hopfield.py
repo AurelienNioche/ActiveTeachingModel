@@ -4,13 +4,16 @@ Created on Sun Jul 29 08:40:49 2018
 @author: user
 """
 
+import matplotlib.cm as cm
 import numpy as np
 from matplotlib import pyplot as plt
-import matplotlib.cm as cm
 from tqdm import tqdm
 
 
 class HopfieldNetwork(object):
+    def __init__(self):
+        self.num_neuron = None
+
     def train_weights(self, train_data):
         print("Start to train weights...")
         num_data = len(train_data)
@@ -19,7 +22,7 @@ class HopfieldNetwork(object):
         # initialize weights
         W = np.zeros((self.num_neuron, self.num_neuron))
         rho = np.sum([np.sum(t) for t in train_data]) / (
-                    num_data * self.num_neuron)
+                num_data * self.num_neuron)
 
         # Hebb rule
         for i in tqdm(range(num_data)):
@@ -49,7 +52,7 @@ class HopfieldNetwork(object):
         return predicted
 
     def _run(self, init_s):
-        if self.asyn == False:
+        if not self.asyn:
             """
             Synchronous update
             """

@@ -1,8 +1,8 @@
 import numpy as np
-import model_simulation_carlos
+
+from model_simulation_carlos import n_item
 
 np.random.seed(123)
-model_script = model_simulation_carlos
 
 
 def main():
@@ -17,14 +17,14 @@ def main():
     neuron3 = Neuron(neuron_id=3, input_neurons=[3])
     neuron4 = Neuron(neuron_id=4, input_neurons=[0, 1, 2, 3, 4], role="output")
     neuron5 = Neuron(neuron_id=5, input_neurons=[0, 1, 2, 3, 5], role="output")
-    network = Network
+    network = Network()
 
 
 class Network:
     def __init__(self):
         self.n_neurons = 0
         try:
-            self.n_input_neurons = model_script.n_item
+            self.n_input_neurons = n_item
         except AttributeError:
             print("No automatic input neurons instantiation used")
 
@@ -59,6 +59,7 @@ class Neuron:
     of equation 2 in the paper and that is solved using by saying that
     the g function...
     """
+    pass
 
     def __init__(self, neuron_id, tau, theta, gamma, network="network", input_neurons=None,
                  role="hidden", current=0):
@@ -83,12 +84,12 @@ class Neuron:
             print("Neuron instanced as role='input'")
 
         self.current = current
-        self.tau = tau
+        self.tau = tau  # ref: 0.01. Decay time
         self.input_neurons = input_neurons
 
         # Gain function
-        self.theta = theta
-        self.gamma = gamma  # always < 1; gain function is sublinear
+        self.theta = theta  # ref: 0. Gain function threshold
+        self.gamma = gamma  # ref: 0.4. Always < 1; gain function is sublinear
 
         self.initialize_attributes()
 
