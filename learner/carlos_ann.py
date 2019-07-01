@@ -59,7 +59,7 @@ class Neuron:
     of equation 2 in the paper and that is solved using by saying that
     the g function...
     """
-    pass  # REMOVE XXX
+    pass  # REMOVE XXX #
     network = Network()
 
     def __init__(self, neuron_id, tau, theta, gamma, input_neurons=None,
