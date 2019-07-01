@@ -1,18 +1,15 @@
-import plot.success
-import plot.p_recall
 import plot.memory_trace
-
-from learner.rl import QLearner
+import plot.p_recall
+import plot.success
 from learner.act_r import ActR
 from learner.act_r_custom import ActRMeaning, ActRGraphic, ActRPlus
-from teacher.niraj import NirajTeacher
-from teacher.avya import AvyaTeacher
-from teacher.tugce import TugceTeacher
-from teacher.random import RandomTeacher
-from teacher.leitner import LeitnerTeacher
-
-
+from learner.rl import QLearner
 from simulation.memory import p_recall_over_time_after_learning
+from teacher.avya import AvyaTeacher
+from teacher.leitner import LeitnerTeacher
+from teacher.niraj import NirajTeacher
+from teacher.random import RandomTeacher
+from teacher.tugce import TugceTeacher
 
 
 def run(student_model, teacher_model,

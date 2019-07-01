@@ -59,9 +59,10 @@ class Neuron:
     of equation 2 in the paper and that is solved using by saying that
     the g function...
     """
-    pass
+    pass  # REMOVE XXX
+    network = Network()
 
-    def __init__(self, neuron_id, tau, theta, gamma, network="network", input_neurons=None,
+    def __init__(self, neuron_id, tau, theta, gamma, input_neurons=None,
                  role="hidden", current=0):
         self.neuron_id = neuron_id
         self.input_currents = None
@@ -69,16 +70,17 @@ class Neuron:
         self.gain = np.empty(0)
 
         # Update network number of neurons
-        self.network = network
-        network.n_neurons += 1
+        # self.network = network
+        self.network.n_neurons += 1
 
         self.input_neurons = input_neurons
 
         # Neuron role
         roles = ["input", "hidden", "output"]
         self.role = role
-        if self.role not in roles:
-            raise AssertionError("Neuron does not have a valid role")
+        # if self.role not in roles:
+        #     raise AssertionError("Neuron does not have a valid role")
+        assert self.role in roles, "Neuron does not have a valid role"
         if self.input_neurons is None:
             self.role = roles[0]
             print("Neuron instanced as role='input'")
@@ -98,8 +100,7 @@ class Neuron:
         self.weights = np.random.rand(1, self.input_neurons.size)
 
     def compute_gain(self):
-        if self.role == "input":
-            raise AssertionError("Input neurons lack the gain function")
+        assert self.role == "input", "Input neurons lack the gain function"
         for i in self.input_currents:
             if i + self.theta > 0:
                 new_gain = (i + self.theta) ** self.gamma
