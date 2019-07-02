@@ -21,21 +21,33 @@ def main():
 
 
 class Network:
-    def __init__(self):
-        self.n_neurons = 0
+    def __init__(self, n_output, n_hidden=0):
 
-        # Input layer
-        try:
-            self.n_input_neurons = n_item
-        except AttributeError:
-            print("No automatic input neurons instantiation used")
+        self.n_input = n_item
+
+        # self.n_neurons = self.n_input + n_hidden + n_output
+
+        # # Input layer
+        # try:
+        #     self.n_input_neurons = n_item
+        # except AttributeError:
+        #     print("No automatic input neurons instantiation used")
+        self.neurons = []
+
         self.create_input_neurons()
 
     def create_input_neurons(self, verbose=True):
-        bits_needed = len(bin(self.n_input_neurons)) - 2
+
+        bits_needed = len(bin(self.n_input)) - 2
         print(bits_needed)
-        for i in range(0, bits_needed):  # Instance n Neurons
-            exec("global neuron{0}\nneuron{0} = Neuron()".format(i))
+        for i in range(bits_needed):  # Instance n Neurons
+
+            self.neurons.append(
+                Neuron(neuron_id=i, input_neurons=[i])
+            )
+            # exec("global neuron{0}\nneuron{0} = Neuron()".format(i))
+            # setattr(Network, f'neuron{i}')
+
             if verbose:
                 print("helpi")
 
@@ -49,7 +61,7 @@ class Network:
         pass
 
 
-class Neuron(Network):
+class Neuron:
     """
     The dynamics of neuron i is represented by the equation:
     τc˙i(t)=−ci(t)+∑j=1NJij ⋅ rj(t)+ξi(t)   (1)
@@ -67,10 +79,11 @@ class Neuron(Network):
     the g function...
     """
 
-    def __init__(self, neuron_id=0, tau=0, theta=0, gamma=0, input_neurons=None,
+    def __init__(self, neuron_id=0, tau=0, theta=0, gamma=0,
+                 input_neurons=None,
                  role="hidden", current=0):
+
         # TODO "=0" in the arguments is only for debugging!
-        #super().__init__()
 
         self.neuron_id = neuron_id
         self.input_currents = None
@@ -79,7 +92,6 @@ class Neuron(Network):
 
         # Update network number of neurons
         # self.network = network
-        super().n_neurons += 1
 
         self.input_neurons = input_neurons
 
