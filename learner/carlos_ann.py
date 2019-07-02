@@ -11,38 +11,45 @@ def main():
     units and two output neurons
     """
 
-    neuron0 = Neuron(neuron_id=0, input_neurons=[0])
-    neuron1 = Neuron(neuron_id=1, input_neurons=[1])
-    neuron2 = Neuron(neuron_id=2, input_neurons=[2])
-    neuron3 = Neuron(neuron_id=3, input_neurons=[3])
-    neuron4 = Neuron(neuron_id=4, input_neurons=[0, 1, 2, 3, 4], role="output")
-    neuron5 = Neuron(neuron_id=5, input_neurons=[0, 1, 2, 3, 5], role="output")
+    # neuron0 = Neuron(neuron_id=0, input_neurons=[0])
+    # neuron1 = Neuron(neuron_id=1, input_neurons=[1])
+    # neuron2 = Neuron(neuron_id=2, input_neurons=[2])
+    # neuron3 = Neuron(neuron_id=3, input_neurons=[3])
+    # neuron4 = Neuron(neuron_id=4, input_neurons=[0, 1, 2, 3, 4], role="output")
+    # neuron5 = Neuron(neuron_id=5, input_neurons=[0, 1, 2, 3, 5], role="output")
     network = Network()
 
 
 class Network:
     def __init__(self):
         self.n_neurons = 0
+
+        # Input layer
         try:
             self.n_input_neurons = n_item
         except AttributeError:
             print("No automatic input neurons instantiation used")
+        self.create_input_neurons()
 
-    def instance_input_neurons(self, verbose=False):
+    def create_input_neurons(self, verbose=True):
         bits_needed = len(bin(self.n_input_neurons)) - 2
-        for i in range(bits_needed):  # Instance n Neurons
+        print(bits_needed)
+        for i in range(0, bits_needed):  # Instance n Neurons
             exec("global neuron{0}\nneuron{0} = Neuron()".format(i))
             if verbose:
-                print(i)
+                print("helpi")
+
+    def create_neuron(self):
+        pass
 
     def predict(self):
-        raise NotImplementedError
+        pass
 
     def train(self):
-        raise NotImplementedError
+        pass
 
 
-class Neuron:
+class Neuron(Network):
     """
     The dynamics of neuron i is represented by the equation:
     τc˙i(t)=−ci(t)+∑j=1NJij ⋅ rj(t)+ξi(t)   (1)
@@ -59,11 +66,12 @@ class Neuron:
     of equation 2 in the paper and that is solved using by saying that
     the g function...
     """
-    pass  # REMOVE XXX #
-    network = Network()
 
-    def __init__(self, neuron_id, tau, theta, gamma, input_neurons=None,
+    def __init__(self, neuron_id=0, tau=0, theta=0, gamma=0, input_neurons=None,
                  role="hidden", current=0):
+        # TODO "=0" in the arguments is only for debugging!
+        #super().__init__()
+
         self.neuron_id = neuron_id
         self.input_currents = None
         self.weights = None
@@ -71,7 +79,7 @@ class Neuron:
 
         # Update network number of neurons
         # self.network = network
-        self.network.n_neurons += 1
+        super().n_neurons += 1
 
         self.input_neurons = input_neurons
 
