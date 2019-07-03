@@ -50,13 +50,13 @@ class Network:
         :param verbose: prints loop iteration number
         """
         for i in range(self.input_bits_needed):  # Instance n Neurons
-            self.neurons['input'].append(
-                Neuron(neuron_id=self.neuron_id, role="input")
-            )  # Each neuron will be instanced inside a list, call them as a[n]
+            # self.neurons['input'].append(
+            #     Neuron(neuron_id=self.neuron_id, role="input")
+            # )
+            self._create_neuron(role='input')
+            # Each neuron will be instanced inside a list, call them as a[n]
             if verbose:
                 print(i)
-
-            self.neuron_id += 1
 
     # def create_output_neurons(self, input_neurons):
     #     for i in range(0, self.n_output):
@@ -74,17 +74,17 @@ class Network:
             print(hidden_neuron_inputs)
         for j in range(0, n_hidden):
             hidden_neuron_inputs.append(self.neuron_id + 1)
-            self.create_neuron(input_neurons=hidden_neuron_inputs,
-                               role="hidden")
+            self._create_neuron(input_neurons=hidden_neuron_inputs,
+                                role="hidden")
 
         # Output layer
         output_neuron_inputs = []
         for k in self.neurons['hidden']:
             output_neuron_inputs.append(k)
-        self.create_neuron(input_neurons=hidden_neuron_inputs,
-                           role="output")
+        self._create_neuron(input_neurons=hidden_neuron_inputs,
+                            role="output")
 
-    def create_neuron(self, input_neurons=None, role="hidden"):
+    def _create_neuron(self, input_neurons=None, role="hidden"):
                       # neuron_id=0):
 
         self.neurons[role].append(
