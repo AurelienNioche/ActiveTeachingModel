@@ -8,30 +8,69 @@ neuron_id = 0
 
 
 def main():
-    # neuron0 = Neuron(neuron_id=0, input_neurons=[0])
-    # neuron1 = Neuron(neuron_id=1, input_neurons=[1])
-    # neuron2 = Neuron(neuron_id=2, input_neurons=[2])
-    # neuron3 = Neuron(neuron_id=3, input_neurons=[3])
-    # neuron4 = Neuron(neuron_id=4, input_neurons=[0, 1, 2, 3, 4], role="output")
-    # neuron5 = Neuron(neuron_id=5, input_neurons=[0, 1, 2, 3, 5], role="output")
+    """
+    This example creates a fully connected recurrent network
+    :return:
+    """
     network = Network()
+
+    # Input layer
+    network.create_input_neurons()
+
+    # Hidden layer
+    hidden_neuron_inputs = []
+    for i in network.neurons_input:
+        hidden_neuron_inputs.append(i)
+    print(hidden_neuron_inputs)
+    for j in range(0, 10):
+        hidden_neuron_inputs.append(neuron_id + 1)
+        network.create_neuron(input_neurons=hidden_neuron_inputs,
+                              role="hidden")
+
+    # Output layer
+    output_neuron_inputs = []
+    for k in network.neurons_hidden:
+        output_neuron_inputs.append(k)
+    network.create_neuron(input_neurons=hidden_neuron_inputs, role="output")
+
+    network.show_neurons()
 
 
 class Network:
-    def __init__(self, n_output=1, verbose=True):
+    def __init__(self):
 
         try:  # Try so it can be used even without the "model_simulation" file
             self.n_items = n_item
         except AttributeError:
             print("No automatic input neurons instantiation used")
+        self.input_bits_needed = len(bin(self.n_items)) - 2
+
         self.neurons_input = []
         self.neurons_hidden = []
         self.neurons_output = []
 
-        self.create_input_neurons()
-
-        if verbose:
-            self.show_neurons()
+        # # # # Modify to create a specific network architecture
+        # # # This example will create a fully connected network
+        # # Input layer
+        # self.create_input_neurons()
+        # # Hidden layer
+        # hidden_neuron_inputs = []
+        # for i in self.neurons_input:
+        #     hidden_neuron_inputs.append(i)
+        # print(hidden_neuron_inputs)
+        # for j in range(0, 10):
+        #     hidden_neuron_inputs.append(neuron_id + 1)
+        #     self.create_neuron(input_neurons=hidden_neuron_inputs)
+        # # Output layer
+        # output_neuron_inputs = []
+        # for k in self.neurons_hidden:
+        #     output_neuron_inputs.append(k)
+        # hidden_neuron_inputs.append(neuron_id + 1)
+        # self.create_neuron(input_neurons=hidden_neuron_inputs, role="output")
+        # # # #
+        #
+        # if verbose:
+        #     self.show_neurons()
 
     def create_input_neurons(self, verbose=False):
         """
@@ -40,23 +79,35 @@ class Network:
 
         :param verbose: prints loop iteration number
         """
-        bits_needed = len(bin(self.n_items)) - 2
-        for i in range(bits_needed):  # Instance n Neurons
+        for i in range(self.input_bits_needed):  # Instance n Neurons
             self.neurons_input.append(
                 Neuron(role="input")
             )  # Each neuron will be instanced inside a list, call them as a[n]
             if verbose:
                 print(i)
 
-    def create_output_neurons(self, input_neurons):
-        for i in range(0, self.n_output):
-            self.neurons_output.append(
-                Neuron(input_neurons, role="output")
-            )
+    # def create_output_neurons(self, input_neurons):
+    #     for i in range(0, self.n_output):
+    #         self.neurons_output.append(
+    #             Neuron(input_neurons, role="output")
+    #         )
 
-    @staticmethod
-    def create_neuron(input_neurons):
-        Neuron(input_neurons)
+    def create_neuron(self, input_neurons=None, role="hidden"):
+        if role == "input":
+            self.neurons_input.append(
+                Neuron(role)
+            )
+        elif role == "hidden" and input_neurons is not None:
+            self.neurons_hidden.append(
+                Neuron(input_neurons, role="hidden")
+            )
+        elif role == "output" and input_neurons is not None:
+            self.neurons_output.append(
+                Neuron(input_neurons, role)
+            )
+        else:
+            raise AssertionError("No input neurons given as the argument to "
+                                 "instance a non input layer neuron")
 
     def show_neurons(self):
         print("Number of input neurons: ", len(self.neurons_input))
@@ -89,7 +140,7 @@ class Neuron:
     the g function...
     }
 
-    :param input_neurons: list of neuron_d connected to this neuron
+    :param input_neurons: list of neuron_id connected to this neuron
     :param tau: decay time
     :param theta: gain function threshold
     :param gamma: always < 1; gain function is sublinear
@@ -107,6 +158,11 @@ class Neuron:
         neuron_id += 1
 
         self.input_neurons = input_neurons
+        if self.input_neurons is not None:
+            if self.neuron_id in self.input_neurons:
+                self.recurrent = True
+            else:
+                self.recurrent = False
 
         self.input_currents = None
         self.weights = None
@@ -116,9 +172,9 @@ class Neuron:
         roles = ["input", "hidden", "output"]
         self.role = role
         assert self.role in roles, "Neuron does not have a valid role"
-        if self.input_neurons is None and role is not "input":
-            self.role = roles[0]
-            print("Neuron instanced as role='input'")
+        # if self.input_neurons is None and self.role is not "input":
+        #     self.role = roles[0]
+        #     print("Neuron instanced as role='input'")
 
         self.current = current
         self.tau = tau
@@ -129,6 +185,8 @@ class Neuron:
         self.gamma = gamma
 
         self.initialize_attributes()
+
+        self.print_attributes()
 
     def initialize_attributes(self):
         if self.role is not "input":
@@ -148,6 +206,11 @@ class Neuron:
         self.current =\
             self.current * (-self.current + self.input_currents * self.weights
                             * self.gain + np.random.rand() / self.tau)
+
+    def print_attributes(self):
+        print(
+            ', '.join("%s: %s\n" % item for item in vars(self).items())
+        )
 
 
 if __name__ == "__main__":
