@@ -49,29 +49,6 @@ class Network:
         self.neurons_hidden = []
         self.neurons_output = []
 
-        # # # # Modify to create a specific network architecture
-        # # # This example will create a fully connected network
-        # # Input layer
-        # self.create_input_neurons()
-        # # Hidden layer
-        # hidden_neuron_inputs = []
-        # for i in self.neurons_input:
-        #     hidden_neuron_inputs.append(i)
-        # print(hidden_neuron_inputs)
-        # for j in range(0, 10):
-        #     hidden_neuron_inputs.append(neuron_id + 1)
-        #     self.create_neuron(input_neurons=hidden_neuron_inputs)
-        # # Output layer
-        # output_neuron_inputs = []
-        # for k in self.neurons_hidden:
-        #     output_neuron_inputs.append(k)
-        # hidden_neuron_inputs.append(neuron_id + 1)
-        # self.create_neuron(input_neurons=hidden_neuron_inputs, role="output")
-        # # # #
-        #
-        # if verbose:
-        #     self.show_neurons()
-
     def create_input_neurons(self, verbose=False):
         """
         Instances n input neurons where n is the amount of neurons to represent
