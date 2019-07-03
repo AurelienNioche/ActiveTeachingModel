@@ -4,8 +4,6 @@ from model_simulation_carlos import n_item
 
 np.random.seed(123)
 
-neuron_id = 0
-
 
 def main():
     """
@@ -18,25 +16,16 @@ def main():
     network.create_input_neurons()
 
     # Hidden layer
-    hidden_neuron_inputs = []
-    for i in network.neurons_input:
-        hidden_neuron_inputs.append(i)
-    print(hidden_neuron_inputs)
-    for j in range(0, 10):
-        hidden_neuron_inputs.append(neuron_id + 1)
-        network.create_neuron(input_neurons=hidden_neuron_inputs,
-                              role="hidden")
+    network.create_hidden_neurons(n_hidden=46)
 
-    # Output layer
-    output_neuron_inputs = []
-    for k in network.neurons_hidden:
-        output_neuron_inputs.append(k)
-    network.create_neuron(input_neurons=hidden_neuron_inputs, role="output")
-
+    # Show
     network.show_neurons()
 
 
 class Network:
+
+    roles = 'input', 'hidden', 'output'
+
     def __init__(self):
 
         try:  # Try so it can be used even without the "model_simulation" file
@@ -45,9 +34,13 @@ class Network:
             print("No automatic input neurons instantiation used")
         self.input_bits_needed = len(bin(self.n_items)) - 2
 
-        self.neurons_input = []
-        self.neurons_hidden = []
-        self.neurons_output = []
+        self.neurons = {role: [] for role in self.roles}
+
+        # self.neurons_input = []
+        # self.neurons_hidden = []
+        # self.neurons_output = []
+
+        self.neuron_id = 0
 
     def create_input_neurons(self, verbose=False):
         """
@@ -57,11 +50,13 @@ class Network:
         :param verbose: prints loop iteration number
         """
         for i in range(self.input_bits_needed):  # Instance n Neurons
-            self.neurons_input.append(
-                Neuron(role="input")
+            self.neurons['input'].append(
+                Neuron(neuron_id=self.neuron_id, role="input")
             )  # Each neuron will be instanced inside a list, call them as a[n]
             if verbose:
                 print(i)
+
+            self.neuron_id += 1
 
     # def create_output_neurons(self, input_neurons):
     #     for i in range(0, self.n_output):
@@ -69,27 +64,58 @@ class Network:
     #             Neuron(input_neurons, role="output")
     #         )
 
+    def create_hidden_neurons(self, n_hidden=10, verbose=False):
+
+        hidden_neuron_inputs = []
+
+        for i in self.neurons['input']:
+            hidden_neuron_inputs.append(i)
+        if verbose:
+            print(hidden_neuron_inputs)
+        for j in range(0, n_hidden):
+            hidden_neuron_inputs.append(self.neuron_id + 1)
+            self.create_neuron(input_neurons=hidden_neuron_inputs,
+                               role="hidden")
+
+        # Output layer
+        output_neuron_inputs = []
+        for k in self.neurons['hidden']:
+            output_neuron_inputs.append(k)
+        self.create_neuron(input_neurons=hidden_neuron_inputs,
+                           role="output")
+
     def create_neuron(self, input_neurons=None, role="hidden"):
-        if role == "input":
-            self.neurons_input.append(
-                Neuron(role)
-            )
-        elif role == "hidden" and input_neurons is not None:
-            self.neurons_hidden.append(
-                Neuron(input_neurons, role="hidden")
-            )
-        elif role == "output" and input_neurons is not None:
-            self.neurons_output.append(
-                Neuron(input_neurons, role)
-            )
-        else:
-            raise AssertionError("No input neurons given as the argument to "
-                                 "instance a non input layer neuron")
+                      # neuron_id=0):
+
+        self.neurons[role].append(
+            Neuron(neuron_id=self.neuron_id,
+                   role=role, input_neurons=input_neurons)
+        )
+
+        # if role == "input":
+        #     self.neurons_input.append(
+        #         Neuron(neuron_id=self.neuron_id, role=role)
+        #     )
+        # elif role == "hidden" and input_neurons is not None:
+        #     self.neurons_hidden.append(
+        #         Neuron(neuron_id=self.neuron_id,
+        #                input_neurons=input_neurons, role="hidden")
+        #     )
+        # elif role == "output" and input_neurons is not None:
+        #     self.neurons_output.append(
+        #         Neuron(neuron_id=self.neuron_id,
+        #                input_neurons=input_neurons, role=role)
+        #     )
+        # else:
+        #     raise ValueError(
+        #         "No input neurons given as the argument to "
+        #         "instance a non input layer neuron")
+
+        self.neuron_id += 1
 
     def show_neurons(self):
-        print("Number of input neurons: ", len(self.neurons_input))
-        print("Number of hidden neurons: ", len(self.neurons_hidden))
-        print("Number of output neurons: ", len(self.neurons_output))
+        for role in self.roles:
+            print(f"Number of {role} neurons: ", len(self.neurons[role]))
 
     def predict(self):
         pass
@@ -125,14 +151,10 @@ class Neuron:
     Note: default argument values are the reference values in the article
     """
 
-    def __init__(self, tau=0.01, theta=0, gamma=0.4,
-                 input_neurons=None,
-                 role="hidden", current=0):
+    def __init__(self, neuron_id, role, tau=0.01, theta=0, gamma=0.4,
+                 input_neurons=None, current=0):
 
-        # Neuron index management
-        global neuron_id
         self.neuron_id = neuron_id
-        neuron_id += 1
 
         self.input_neurons = input_neurons
         if self.input_neurons is not None:
@@ -167,8 +189,8 @@ class Neuron:
 
     def initialize_attributes(self):
         if self.role is not "input":
-            self.input_currents = np.zeros(self.input_neurons.size)
-            self.weights = np.random.rand(1, self.input_neurons.size)
+            self.input_currents = np.zeros(len(self.input_neurons))
+            self.weights = np.random.rand(1, len(self.input_neurons))
 
     def compute_gain(self):
         assert self.role == "input", "Input neurons lack the gain function"
