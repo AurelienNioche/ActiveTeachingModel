@@ -1,34 +1,19 @@
 import numpy as np
 
-from model_simulation_carlos import n_item
-
-np.random.seed(123)
-
-
-def main():
-    """
-    This example creates a fully connected recurrent network
-    """
-    network = Network()
-
-    # Input neurons
-    network.create_input_neurons()
-
-    # Hidden neurons
-    network.create_hidden_neurons(n_hidden=10)
-
-    # Show
-    network.show_neurons()
+from behavior.data_structure import Task
+from learner.generic import Learner
 
 
-class Network:
+class Network(Learner):
 
     roles = 'input', 'hidden', 'output'
 
-    def __init__(self):
+    def __init__(self, tk):
+
+        super().__init__()
 
         try:  # Try so it can be used even without the "model_simulation" file
-            self.n_items = n_item
+            self.n_items = tk.n_item
         except AttributeError:
             print("No automatic input neurons instantiation used")
         self.input_bits_needed = len(bin(self.n_items)) - 2
@@ -121,6 +106,24 @@ class Network:
     def update(self, epochs):
         pass
 
+    def decide(self, question, possible_replies, time=None):
+        raise NotImplementedError
+
+    def learn(self, question, time=None):
+        raise NotImplementedError
+
+    def unlearn(self):
+        raise NotImplementedError
+
+    def _p_choice(self, question, reply, possible_replies, time=None):
+        raise NotImplementedError
+
+    def _p_correct(self, question, reply, possible_replies, time=None):
+        raise NotImplementedError
+
+    def p_recall(self, item, time=None):
+        raise NotImplementedError
+
 
 class Neuron:
     """
@@ -185,13 +188,19 @@ class Neuron:
 
     @staticmethod
     def _random_small_value():
-        number = abs(np.random.rand())
+        number = abs(np.random.normal(loc=0.5, scale=0.25))
+        number = max(min(1, number), 0)
         return number
 
     def _initialize_attributes(self):
         if self.role is not "input":
-            self.input_currents = np.zeros(len(self.input_neurons))\
-                                  + self._random_small_value()
+            self.input_currents = \
+                np.array([self._random_small_value()
+                          for _ in range(len(self.input_neurons))])
+            # self.input_currents = np.random.normal(loc=0.5, scale=0.25,
+            # size=len(self.input_neurons))
+            # self.input_currents[self.input_currents>1] = 1
+            # self.input_currents[self.input_currents<0] = 0
             self.weights = np.random.rand(1, len(self.input_neurons))
             self.current = self._random_small_value()
 
@@ -222,6 +231,25 @@ class Neuron:
         print(
             ', '.join("%s: %s\n" % item for item in vars(self).items())
         )
+
+
+def main():
+    """
+    This example creates a fully connected recurrent network
+    """
+
+    np.random.seed(123)
+
+    network = Network(tk=Task(t_max=100, n_item=30))
+
+    # Input neurons
+    network.create_input_neurons()
+
+    # Hidden neurons
+    network.create_hidden_neurons(n_hidden=10)
+
+    # Show
+    network.show_neurons()
 
 
 if __name__ == "__main__":

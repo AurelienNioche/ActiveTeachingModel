@@ -1,4 +1,4 @@
-import plot.p_recall
+# import plot.p_recall
 from learner.act_r_custom import ActRMeaning
 from teacher.random import RandomTeacher
 
@@ -14,7 +14,7 @@ def main(t_max=300, n_item=30):
                         tk=teacher.tk, track_p_recall=True)
     # questions, replies, successes = teacher.teach(agent=agent)
     teacher.teach(agent=agent)
-    plot.p_recall.curve(agent.p)
+    # plot.p_recall.curve(agent.p)
 
 
 if __name__ == "__main__":

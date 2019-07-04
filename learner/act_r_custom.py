@@ -154,7 +154,7 @@ class ActRPlus(ActRMeaning):
     def p_recall(self, item, time=None, time_index=None):
 
         # For item i
-        pr_effect_i = self._presentation_effect(i,
+        pr_effect_i = self._presentation_effect(item,
                                                 time=time,
                                                 time_index=time_index)
         if not pr_effect_i:
