@@ -8,7 +8,6 @@ np.random.seed(123)
 def main():
     """
     This example creates a fully connected recurrent network
-    :return:
     """
     network = Network()
 
@@ -119,30 +118,18 @@ class Network:
     def train(self):
         pass
 
+    def update(self, epochs):
+        pass
+
 
 class Neuron:
     """
-    TODO cleanup docstring{
-    The dynamics of neuron i is represented by the equation:
-    τc˙i(t)=−ci(t)+∑j=1NJij ⋅ rj(t)+ξi(t)   (1)
-    ri=g(ci)     (2)
-
-    [[t * c(t+1) = -c_{i}(t) + \sum_{j = 1}^{N}{J_{i, j}} * r_{j}{t}
-    + E_{i}(t)]]
-    where c, r are respectively the synaptic currents and the firing rates,
-    J the connectivity matrix, each ξi is an independent random variable having
-    a gaussian distribution with mean zero and variance ξ0 and τ is a constant
-
-    c(t) = c(t-1) * (THE_REST) because if you compute the derivative it gives
-    you the original equation from the paper. After that you have the problem
-    of equation 2 in the paper and that is solved using by saying that
-    the g function...
-    }
+    Modified from Recanatesi (2015) equations 1 to 4.
 
     :param input_neurons: list of neuron_id connected to this neuron
     :param tau: decay time
     :param theta: gain function threshold
-    :param gamma: gain func exponent. Always < 1; gain function is sub-linear
+    :param gamma: gain func exponent. Always sub-linear, then value < 1
     :param kappa: excitation parameter
     :param phi: inhibition parameter in range(0.70, 1.06)
 
@@ -165,7 +152,8 @@ class Neuron:
 
         self.input_currents = None
         self.weights = None
-        self.gain = np.empty(0)
+        self.weights_hebbian = None
+        self.gain = None
 
         # Neuron role
         roles = ["input", "hidden", "output"]
@@ -189,38 +177,43 @@ class Neuron:
         self.phi = phi
 
         self._initialize_attributes()
-
+        self.compute_gain()
+        for i in range(0, 1):
+            if self.role is not "input":
+                self._update_current()
         self.print_attributes()
+
+    @staticmethod
+    def _random_small_value():
+        number = abs(np.random.rand())
+        return number
 
     def _initialize_attributes(self):
         if self.role is not "input":
-            self.input_currents = np.zeros(len(self.input_neurons))
+            self.input_currents = np.zeros(len(self.input_neurons))\
+                                  + self._random_small_value()
             self.weights = np.random.rand(1, len(self.input_neurons))
+            self.current = self._random_small_value()
 
     def compute_gain(self):
-        assert self.role == "input", "Input neurons lack the gain function"
-        for i in self.input_currents:
-            if i + self.theta > 0:
-                new_gain = (i + self.theta) ** self.gamma
-                self.gain = np.concatenate(self.gain, new_gain)
-            else:
-                self.gain = np.concatenate(self.gain, 0)
+        # assert self.role == "input", "Input neurons lack the gain function"
+        # for i in self.input_currents:
+        #     if i + self.theta > 0:
+        #         new_gain = (i + self.theta) ** self.gamma
+        #         self.gain = np.concatenate(self.gain, new_gain)
+        #     else:
+        #         self.gain = np.concatenate(self.gain, 0)
+        if self.current + self.theta > 0:
+            self.gain = (self.current + self.theta) ** self.gamma
+        else:
+            self.gain = 0
 
-    def activation(self):
-        """
-        The following is a formulaic description of Hebbian learning (note
-        that many other descriptions are possible):
-        w i j = x i x j
-        where w i j  is the weight of the connection from neuron j to neuron i
-        and x i the input for neuron i.
-        Note that this is pattern learning (weights updated after every
-        training example).
-
-        :return:
-        """
+    def _update_current(self):
+        self.weights_hebbian = np.dot(self.current, self.input_currents)
         self.current =\
-            self.current * (-self.current + self.input_currents * self.weights
-                            * self.gain + np.random.rand() / self.tau)
+            self.current * ((-self.current + sum(self.weights_hebbian)
+                            * self.gain
+                            + self._random_small_value()) / self.tau)
 
     def print_attributes(self):
         """
