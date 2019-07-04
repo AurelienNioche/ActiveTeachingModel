@@ -208,8 +208,8 @@ class Neuron:
 
     def activation(self):
         """
-        The following is a formulaic description of Hebbian learning: (note
-        that many other descriptions are possible)
+        The following is a formulaic description of Hebbian learning (note
+        that many other descriptions are possible):
         w i j = x i x j
         where w i j  is the weight of the connection from neuron j to neuron i
         and x i the input for neuron i.
