@@ -12,11 +12,11 @@ def main():
     """
     network = Network()
 
-    # Input layer
+    # Input neurons
     network.create_input_neurons()
 
-    # Hidden layer
-    network.create_hidden_neurons(n_hidden=46)
+    # Hidden neurons
+    network.create_hidden_neurons(n_hidden=10)
 
     # Show
     network.show_neurons()
@@ -35,10 +35,6 @@ class Network:
         self.input_bits_needed = len(bin(self.n_items)) - 2
 
         self.neurons = {role: [] for role in self.roles}
-
-        # self.neurons_input = []
-        # self.neurons_hidden = []
-        # self.neurons_output = []
 
         self.neuron_id = 0
 
@@ -146,12 +142,16 @@ class Neuron:
     :param input_neurons: list of neuron_id connected to this neuron
     :param tau: decay time
     :param theta: gain function threshold
-    :param gamma: always < 1; gain function is sublinear
+    :param gamma: gain func exponent. Always < 1; gain function is sub-linear
+    :param kappa: excitation parameter
+    :param phi: inhibition parameter in range(0.70, 1.06)
 
-    Note: default argument values are the reference values in the article
+    Note: default argument values are the reference values in the article but
+    for phi; only phi_min and phi_max are given in Recanatesi (2015).
     """
 
     def __init__(self, neuron_id, role, tau=0.01, theta=0, gamma=0.4,
+                 kappa=13000, phi=1,
                  input_neurons=None, current=0):
 
         self.neuron_id = neuron_id
@@ -175,6 +175,7 @@ class Neuron:
         #     self.role = roles[0]
         #     print("Neuron instanced as role='input'")
 
+        # Neuron dynamics
         self.current = current
         self.tau = tau
         self.input_neurons = input_neurons
@@ -183,11 +184,15 @@ class Neuron:
         self.theta = theta
         self.gamma = gamma
 
-        self.initialize_attributes()
+        # Hebbian rule
+        self.kappa = kappa
+        self.phi = phi
+
+        self._initialize_attributes()
 
         self.print_attributes()
 
-    def initialize_attributes(self):
+    def _initialize_attributes(self):
         if self.role is not "input":
             self.input_currents = np.zeros(len(self.input_neurons))
             self.weights = np.random.rand(1, len(self.input_neurons))
@@ -202,11 +207,25 @@ class Neuron:
                 self.gain = np.concatenate(self.gain, 0)
 
     def activation(self):
+        """
+        The following is a formulaic description of Hebbian learning: (note
+        that many other descriptions are possible)
+        w i j = x i x j
+        where w i j  is the weight of the connection from neuron j to neuron i
+        and x i the input for neuron i.
+        Note that this is pattern learning (weights updated after every
+        training example).
+
+        :return:
+        """
         self.current =\
             self.current * (-self.current + self.input_currents * self.weights
                             * self.gain + np.random.rand() / self.tau)
 
     def print_attributes(self):
+        """
+        :returns: multi-line string of instance attributes
+        """
         print(
             ', '.join("%s: %s\n" % item for item in vars(self).items())
         )
