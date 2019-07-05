@@ -127,7 +127,7 @@ class AvyaTeacher(GenericTeacher):
 
         new_question = max_ind
         self.update_sets(agent, n_items)
-        if self.count>1:
+        if self.count>0:
             self.matseen[:, self.count] = self.matseen[:,self.count-1]
         self.matseen[new_question,self.count]=1
         self.count += 1
