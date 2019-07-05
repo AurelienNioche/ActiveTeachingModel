@@ -14,6 +14,7 @@ class ActRMeaningParam:
         # Noise in the activation levels
         self.s = s
 
+        # Helping from items with close meaning
         self.m = m
 
 
