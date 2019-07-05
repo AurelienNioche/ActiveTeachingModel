@@ -30,6 +30,8 @@ class GenericTeacher:
         self.replies = np.ones(t_max, dtype=int) * -1
         self.successes = np.ones(t_max, dtype=bool)
 
+        self.seen = np.zeros((n_item, t_max), dtype=bool)
+
         self.agent = None
 
     def ask(self):
@@ -60,6 +62,11 @@ class GenericTeacher:
             reply = agent.decide(question=question,
                                  possible_replies=possible_replies)
             agent.learn(question=question)
+
+            # Update the count of item seen
+            if t > 0:
+                self.seen[:, t] = self.seen[:, t - 1]
+            self.seen[question, t] = True
 
             # For backup
             self.questions[t] = question

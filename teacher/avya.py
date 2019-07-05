@@ -13,20 +13,15 @@ class AvyaTeacher(GenericTeacher):
         super().__init__(n_item=n_item, t_max=t_max, grade=grade,
                          handle_similarities=handle_similarities,
                          verbose=verbose)
-        self.learned = np.zeros(n_item)#[0]*n_item
+        self.learned = np.zeros(n_item)
         self.learn_threshold = 0.95
         self.forgot_threshold = 0.85
         self.count = 0
-
-        self.matseen=np.zeros((n_item,t_max))
-
-
 
     def ask(self):
 
         question = self.get_next_node(
             questions=self.questions,
-            successes=self.successes,
             agent=copy.deepcopy(self.agent),
             n_items=self.tk.n_item
         )
@@ -46,12 +41,9 @@ class AvyaTeacher(GenericTeacher):
             if agent.p_recall(k) > self.learn_threshold:
                 self.learned[k] = 2
 
-
-        if self.count>0:
+        if self.count > 0:
             if self.learned[self.questions[self.count-1]] == 0:
                 self.learned[self.questions[self.count - 1]] = 1
-
-
 
     # calculate usefulness and relative parameters.
     def parameters(self, n_items, agent):
@@ -73,14 +65,12 @@ class AvyaTeacher(GenericTeacher):
                                             - recall[item]
                     agent.unlearn()
                 usefulness[item2] += relative[item][item2]
-        return relative,usefulness
+        return relative, usefulness
 
-    def get_next_node(self, questions, successes, agent, n_items):
+    def get_next_node(self, questions, agent, n_items):
         """
         :param questions: list of integers (index of questions).
             Empty at first iteration.
-        :param successes: list of booleans (True: success, False: failure)
-            for every question.
         :param agent: agent object (RL, ACT-R, ...) that implements at
             least the following methods:
             * p_recall(item): takes index of a question and gives the
@@ -103,10 +93,6 @@ class AvyaTeacher(GenericTeacher):
                         if questions[self.count-1] != i:
                             new_question = i
                             self.update_sets(agent, n_items)
-                            if self.count > 0:
-                                self.matseen[:, self.count] = self.matseen[:,
-                                                              self.count - 1]
-                            self.matseen[new_question, self.count] = 1
                             self.count += 1
                             return new_question
             # Rule2: Bring an almost learnt Kanji to learnt set.
@@ -116,18 +102,13 @@ class AvyaTeacher(GenericTeacher):
                         if questions[self.count-1] != i:
                             new_question = i
                             self.update_sets(agent, n_items)
-
-                            if self.count > 0:
-                                self.matseen[:, self.count] = self.matseen[:,
-                                                              self.count - 1]
-                            self.matseen[new_question, self.count] = 1
                             self.count += 1
                             return new_question
 
         # Rule3: find the most useful kanji.
         max_ind = -1
         max_val = -10000
-        for i in range(0,n_items):
+        for i in range(0, n_items):
             if self.learned[i] < 2:
                 if usefulness[i] > max_val:
                     if questions[self.count - 1] != i:
@@ -136,9 +117,7 @@ class AvyaTeacher(GenericTeacher):
 
         new_question = max_ind
         self.update_sets(agent, n_items)
-        if self.count>0:
-            self.matseen[:, self.count] = self.matseen[:,self.count-1]
-        self.matseen[new_question,self.count]=1
-        #print(self.matseen)
+
+        # Update the iteration index
         self.count += 1
         return new_question

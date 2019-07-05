@@ -98,10 +98,12 @@ def run(student_model, teacher_model,
 
     # Figures for success
     extension = f'{student_model.__name__}_{teacher_model.__name__}'
-    plot.success.curve(successes,
-                       fig_name=f"success_curve_{extension}.pdf")
-    plot.success.scatter(successes,
-                         fig_name=f"success_scatter_{extension}.pdf")
+    plot.success.curve(
+        successes,
+        fig_name=f"success_curve_{extension}.pdf")
+    plot.success.scatter(
+        successes,
+        fig_name=f"success_scatter_{extension}.pdf")
 
     # Figure combining probability of recall and actual successes
     p_recall = p_recall_over_time_after_learning(
@@ -109,23 +111,26 @@ def run(student_model, teacher_model,
         t_max=t_max,
         n_item=n_item)
 
-    plot.memory_trace.plot(p_recall_value=p_recall,
-                           success_value=successes,
-                           questions=questions,
-                           fig_name=f"memory_trace_{extension}.pdf")
+    plot.memory_trace.plot(
+        p_recall_value=p_recall,
+        success_value=successes,
+        questions=questions,
+        fig_name=f"memory_trace_{extension}.pdf")
 
-    plot.memory_trace.summarize(p_recall_value=p_recall, fig_name=f"memory_trace_summarize_{extension}.pdf")
+    plot.memory_trace.summarize(
+        p_recall_value=p_recall,
+        fig_name=f"memory_trace_summarize_{extension}.pdf")
 
-    if teacher_model == AvyaTeacher:
-        plot.n_seen.curve(seen=teacher.matseen,
-                          fig_name=f"n_seen_{extension}.pdf")
+    plot.n_seen.curve(
+        seen=teacher.seen,
+        n_item=n_item,
+        fig_name=f"n_seen_{extension}.pdf")
 
 
 def main():
 
     for teacher_model in (AvyaTeacher, RandomTeacher):
-        run(student_model=ActRMeaning, teacher_model=teacher_model,
-            )
+        run(student_model=ActRMeaning, teacher_model=teacher_model)
 
 
 if __name__ == "__main__":
