@@ -113,6 +113,8 @@ def run(student_model, teacher_model,
                            questions=questions,
                            fig_name=f"memory_trace_{extension}.pdf")
 
+    plot.memory_trace.summarize(p_recall_value=p_recall, fig_name=f"memory_trace_summarize_{extension}.pdf")
+
 
 def main():
 

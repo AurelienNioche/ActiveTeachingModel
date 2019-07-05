@@ -2,6 +2,7 @@ import copy
 
 # import random
 from teacher.metaclass import GenericTeacher
+import numpy as np
 
 
 class AvyaTeacher(GenericTeacher):
@@ -12,8 +13,8 @@ class AvyaTeacher(GenericTeacher):
         super().__init__(n_item=n_item, t_max=t_max, grade=grade,
                          handle_similarities=handle_similarities,
                          verbose=verbose)
-        self.learned = [0]*n_item
-        self.learn_threshold=0.95
+        self.learned = np.zeros(n_item)#[0]*n_item
+        self.learn_threshold = 0.95
         self.forgot_threshold = 0.85
         self.count = 0
 
