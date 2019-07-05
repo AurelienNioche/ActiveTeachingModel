@@ -103,6 +103,10 @@ class AvyaTeacher(GenericTeacher):
                         if questions[self.count-1] != i:
                             new_question = i
                             self.update_sets(agent, n_items)
+                            if self.count > 0:
+                                self.matseen[:, self.count] = self.matseen[:,
+                                                              self.count - 1]
+                            self.matseen[new_question, self.count] = 1
                             self.count += 1
                             return new_question
             # Rule2: Bring an almost learnt Kanji to learnt set.
@@ -112,6 +116,11 @@ class AvyaTeacher(GenericTeacher):
                         if questions[self.count-1] != i:
                             new_question = i
                             self.update_sets(agent, n_items)
+
+                            if self.count > 0:
+                                self.matseen[:, self.count] = self.matseen[:,
+                                                              self.count - 1]
+                            self.matseen[new_question, self.count] = 1
                             self.count += 1
                             return new_question
 
@@ -130,5 +139,6 @@ class AvyaTeacher(GenericTeacher):
         if self.count>0:
             self.matseen[:, self.count] = self.matseen[:,self.count-1]
         self.matseen[new_question,self.count]=1
+        #print(self.matseen)
         self.count += 1
         return new_question
