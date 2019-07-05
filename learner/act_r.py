@@ -24,8 +24,8 @@ class ActR(Learner):
 
     """
     A chunk is composed of:
-    * a type (here: means)
-    * several slots (here: slot 1: kanji, slot2: meaning)
+        * a type (here: means)
+        * several slots (here: slot 1: kanji, slot2: meaning)
     """
 
     def __init__(self, tk, param=None, verbose=False):
@@ -75,9 +75,10 @@ class ActR(Learner):
 
     def _base_level_learning_activation(self, i, time=None,
                                         time_index=None):
-
-        """The base-level activation measures
-        how much time has elapsed since the jth use:"""
+        """
+        The base-level activation measures
+        how much time has elapsed since the j^th use:
+        """
 
         pe = self._presentation_effect(i,
                                        time=time,
@@ -131,7 +132,8 @@ class ActR(Learner):
     def _sigmoid_function(self, a):
 
         """The probability of a chunk being above
-        some retrieval threshold τ is"""
+        some retrieval threshold τ is
+        """
 
         x = (self.pr.tau - a) / (self.pr.s*np.square(2))
 
