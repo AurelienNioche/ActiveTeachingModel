@@ -18,6 +18,10 @@ class AvyaTeacher(GenericTeacher):
         self.forgot_threshold = 0.85
         self.count = 0
 
+        self.matseen=np.zeros((n_item,t_max))
+
+
+
     def ask(self):
 
         question = self.get_next_node(
@@ -42,9 +46,12 @@ class AvyaTeacher(GenericTeacher):
             if agent.p_recall(k) > self.learn_threshold:
                 self.learned[k] = 2
 
+
         if self.count>0:
             if self.learned[self.questions[self.count-1]] == 0:
                 self.learned[self.questions[self.count - 1]] = 1
+
+
 
     # calculate usefulness and relative parameters.
     def parameters(self, n_items, agent):
@@ -120,5 +127,8 @@ class AvyaTeacher(GenericTeacher):
 
         new_question = max_ind
         self.update_sets(agent, n_items)
+        if self.count>1:
+            self.matseen[:, self.count] = self.matseen[:,self.count-1]
+        self.matseen[new_question,self.count]=1
         self.count += 1
         return new_question
