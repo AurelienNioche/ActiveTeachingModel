@@ -115,6 +115,8 @@ class AvyaTeacher(GenericTeacher):
                         max_val = usefulness[i]
                         max_ind = i
 
+        assert max_ind != -1, "Some logic error here!"
+
         new_question = max_ind
         self.update_sets(agent, n_items)
 
