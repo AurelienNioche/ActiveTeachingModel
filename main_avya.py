@@ -1,6 +1,7 @@
 import plot.memory_trace
 import plot.p_recall
 import plot.success
+import plot.n_seen
 from learner.act_r import ActR
 from learner.act_r_custom import ActRMeaning, ActRGraphic, ActRPlus
 from learner.rl import QLearner
@@ -114,6 +115,10 @@ def run(student_model, teacher_model,
                            fig_name=f"memory_trace_{extension}.pdf")
 
     plot.memory_trace.summarize(p_recall_value=p_recall, fig_name=f"memory_trace_summarize_{extension}.pdf")
+
+    if teacher_model == AvyaTeacher:
+        plot.n_seen.curve(seen=teacher.matseen,
+                          fig_name=f"n_seen_{extension}.pdf")
 
 
 def main():
