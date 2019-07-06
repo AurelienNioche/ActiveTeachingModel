@@ -114,8 +114,10 @@ class AvyaTeacher(GenericTeacher):
                     if questions[self.count - 1] != i:
                         max_val = usefulness[i]
                         max_ind = i
-
-        assert max_ind != -1, "Some logic error here!"
+        if max_ind==-1:
+            print("all kanjis learnt")
+            #return exit value
+            max_ind = 0
 
         new_question = max_ind
         self.update_sets(agent, n_items)

@@ -116,15 +116,15 @@ def run(student_model, teacher_model,
 
     plot.memory_trace.summarize(p_recall_value=p_recall, fig_name=f"memory_trace_summarize_{extension}.pdf")
 
-    if teacher_model == AvyaTeacher:
-        plot.n_seen.curve(seen=teacher.matseen,
+
+    plot.n_seen.curve(seen=teacher.seen,
                           fig_name=f"n_seen_{extension}.pdf")
 
 
 def main():
 
     for teacher_model in (AvyaTeacher, RandomTeacher):
-        run(student_model=ActRMeaning, teacher_model=teacher_model,t_max=550
+        run(student_model=ActRMeaning, teacher_model=teacher_model,t_max=490
             )
 
 
