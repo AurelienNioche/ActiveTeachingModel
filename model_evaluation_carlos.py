@@ -8,10 +8,14 @@ import scipy.stats
 from tqdm import tqdm
 
 from fit import fit
-from learner.carlos_exponential import Exponential
+# from learner.rl import QLearner
+from learner.act_r import ActR
 from simulation.data import SimulatedData
 from simulation.task import Task
-from utils import utils
+
+from learner.act_r_custom import ActRMeaning, ActRGraphic, ActRPlus
+# from utils import utils
+
 
 DATA_FOLDER = os.path.join("bkp", "model_evaluation")
 FIG_FOLDER = "fig"
@@ -24,7 +28,7 @@ class SimulationAndFit:
 
     def __init__(self, model, t_max=300, n_kanji=30, grade=1,
                  normalize_similarity=False,
-                 verbose=False, fit_param=None):
+                 verbose=False, **kwargs):
 
         self.model = model
 
@@ -34,7 +38,7 @@ class SimulationAndFit:
 
         self.verbose = verbose
 
-        self.fit_param = fit_param
+        self.kwargs = kwargs
 
     def __call__(self, seed):
 
@@ -48,7 +52,7 @@ class SimulationAndFit:
         data = SimulatedData(model=self.model, param=param, tk=self.tk,
                              verbose=self.verbose)
         f = fit.Fit(model=self.model, tk=self.tk, data=data,
-                    fit_param=self.fit_param)
+                    **self.kwargs)
         fit_r = f.evaluate()
         return \
             {
@@ -100,13 +104,9 @@ def create_fig(data, extension=''):
 
 
 def main(model, max_=20, t_max=300, n_kanji=30, normalize_similarity=True,
-         fit_param=None):
+         **kwargs):
 
-    fit_param = fit.Fit.fit_param_(fit_param)
-
-    extension =\
-        f'_{model.__name__}{model.version}_n{max_}_t{t_max}_k{n_kanji}' \
-        f'{utils.dic2string(fit_param)}'
+    extension = f'_{model.__name__}{model.version}_n{max_}_t{t_max}_k{n_kanji}'
 
     file_path = os.path.join(DATA_FOLDER, f"parameter_recovery_{extension}.p")
 
@@ -118,7 +118,7 @@ def main(model, max_=20, t_max=300, n_kanji=30, normalize_similarity=True,
         results = list(tqdm(pool.imap_unordered(
             SimulationAndFit(model=model, t_max=t_max, n_kanji=n_kanji,
                              normalize_similarity=normalize_similarity,
-                             fit_param=fit_param), seeds
+                             **kwargs), seeds
         ), total=max_))
 
         r_keys = list(results[0].keys())
@@ -147,7 +147,4 @@ def main(model, max_=20, t_max=300, n_kanji=30, normalize_similarity=True,
 
 if __name__ == "__main__":
 
-    main(Exponential, max_=100, n_kanji=29, t_max=300, fit_param={
-        'use_p_correct': True,
-        'method': 'de'  # fi
-    })
+    main(ActRMeaning, max_=100, n_kanji=30, t_max=2000)

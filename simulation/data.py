@@ -32,3 +32,5 @@ class SimulatedData:
 
             self.replies[t] = r
             self.success[t] = q == r
+
+        self.times = [None for _ in range(t_max)]
