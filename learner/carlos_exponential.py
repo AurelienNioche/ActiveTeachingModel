@@ -13,12 +13,18 @@ class ExponentialParam:
 
 
 class Exponential(Learner):
+    """
+    :param param: parameters as in class ExponentialParam
+    :param tk: task
+    :param time_mode: "discrete" OR continuous
+    :param verbose: boolean; print time step, question and reply
+    """
 
     version = 0.0
     bounds = ('alpha', 0.000001, 1.0), ('beta', 0.000001, 1.0),\
              ('n_0', 0.0000001, 1)
 
-    def __init__(self, param, tk, verbose=True):
+    def __init__(self, param, tk, time_mode="continuous", verbose=True):
         self.verbose = verbose
         self.tk = tk
 
@@ -35,6 +41,8 @@ class Exponential(Learner):
         self.hist = np.zeros(self.tk.t_max, dtype=int)
         self.success = np.zeros(self.tk.t_max, dtype=bool)
         self.t = 0
+        self.time_mode = time_mode
+        self.times = np.zeros(self.tk.t_max)
         self.last_reply = None
         self.last_forgetting_rate = self.pr.n_0
         self.p_random = 1/self.tk.n_possible_replies
@@ -115,3 +123,9 @@ class Exponential(Learner):
         else:
             p_failure = (1-p_correct) / (self.tk.n_possible_replies - 1)
             return p_failure
+
+    def unlearn(self):
+        pass
+
+    def _p_correct(self, question, reply, possible_replies, time=None):
+        pass

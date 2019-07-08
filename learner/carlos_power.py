@@ -6,14 +6,22 @@ from learner.generic import Learner
 
 
 class PowerParam:
-    def __init__(self, alpha, beta, n_0, w):
+    """
+    :param alpha: learning rate
+    :param beta: forgetting rate
+    """
+    def __init__(self, alpha, beta, n_0, omega):
         self.alpha = alpha
         self.beta = beta
         self.n_0 = n_0
-        self.w = w
+        self.omega = omega
 
 
 class Power(Learner):
+
+    version = 0.0
+    bounds = ('alpha', 0.001, 1.0), ('beta', 0.001, 1.0),\
+             ('n_0', 0.001, 1), ('w', 0.001, 1)
 
     def __init__(self, param, tk, verbose=True):
         self.verbose = verbose
@@ -88,10 +96,17 @@ class Power(Learner):
         else:
             forgetting_rate = self.pr.n_0
 
+        if self.t == 0:
+            self.t = 0.0001
+
         self.last_forgetting_rate = forgetting_rate
 
-        p_r = (1 + self.pr.w * (self.t - t_last_review))\
-            ** - self.last_forgetting_rate
+        # if -self.last_forgetting_rate < 0:
+        #     self.last_forgetting_rate = 0
+         # raise ValueError("The exponent cannot be < 0")
+
+        p_r = (1 + self.pr.omega * (self.t - t_last_review))\
+            ** (- self.last_forgetting_rate)
 
         return p_r
 
@@ -99,3 +114,12 @@ class Power(Learner):
         self.hist[self.t] = question
         self.success[self.t] = self.last_reply == question
         self.t += 1
+
+    def unlearn(self):
+        pass
+
+    def _p_choice(self, question, reply, possible_replies, time=None):
+        pass
+
+    def _p_correct(self, question, reply, possible_replies, time=None):
+        pass

@@ -4,14 +4,17 @@ from learner.generic import Learner
 
 
 class ActRParam:
+    """
+    :param d: decay rate of the forgetting curve. Range 0.001 to 1.0
+    :param tau: retrieval threshold. Range not determined
+    :param s: noise in the activation levels. Range s > 0
+
+    """
 
     def __init__(self, d, tau, s):
 
-        # Decay parameter
         self.d = d
-        # Retrieval threshold
         self.tau = tau
-        # Noise in the activation levels
         self.s = s
 
 

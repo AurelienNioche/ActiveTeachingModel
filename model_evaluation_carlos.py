@@ -1,20 +1,21 @@
 import multiprocessing
 import os
 import pickle
+import scipy.stats
 
 import matplotlib.pyplot as plt
 import numpy as np
-import scipy.stats
 from tqdm import tqdm
 
 from fit import fit
-# from learner.rl import QLearner
+from learner.rl import QLearner
 from learner.act_r import ActR
+from learner.act_r_custom import ActRMeaning, ActRGraphic, ActRPlus
+from learner.carlos_exponential import Exponential
+from learner.carlos_power import Power
+
 from simulation.data import SimulatedData
 from simulation.task import Task
-
-from learner.act_r_custom import ActRMeaning, ActRGraphic, ActRPlus
-# from utils import utils
 
 
 DATA_FOLDER = os.path.join("bkp", "model_evaluation")
@@ -146,5 +147,12 @@ def main(model, max_=20, t_max=300, n_kanji=30, normalize_similarity=True,
 
 
 if __name__ == "__main__":
-
-    main(ActRMeaning, max_=100, n_kanji=30, t_max=2000)
+    """
+    n_kanji in range(6, 80)
+    """
+    t = [100, 500, 1000]
+    k = [6, 40, 79]
+    for i in range(0, 3):
+        for j in range(0, 3):
+            main(ActR, max_=20, n_kanji=k[i], t_max=t[j])
+    # main(Power, max_=10, n_kanji=6, t_max=100)
