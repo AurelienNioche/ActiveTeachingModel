@@ -14,7 +14,6 @@ from learner.act_r_custom import ActRMeaning, ActRGraphic, ActRPlus
 
 from simulation.data import SimulatedData
 from simulation.task import Task
-from utils import utils
 
 
 DATA_FOLDER = os.path.join("bkp", "model_evaluation")
@@ -147,4 +146,4 @@ def main(model, max_=20, t_max=300, n_kanji=30, normalize_similarity=True,
 
 if __name__ == "__main__":
 
-    main(ActRMeaning, max_=100, n_kanji=79, t_max=2000)
+    main(ActRMeaning, max_=20, n_kanji=30, t_max=200)
