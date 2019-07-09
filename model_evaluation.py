@@ -103,13 +103,14 @@ def create_fig(data, extension=''):
 
 
 def main(model, max_=20, t_max=300, n_kanji=30, normalize_similarity=True,
+         force=False,
          **kwargs):
 
     extension = f'_{model.__name__}{model.version}_n{max_}_t{t_max}_k{n_kanji}'
 
     file_path = os.path.join(DATA_FOLDER, f"parameter_recovery_{extension}.p")
 
-    if not os.path.exists(file_path):
+    if not os.path.exists(file_path) or force:
 
         seeds = range(max_)
 
@@ -146,4 +147,4 @@ def main(model, max_=20, t_max=300, n_kanji=30, normalize_similarity=True,
 
 if __name__ == "__main__":
 
-    main(ActRMeaning, max_=100, n_kanji=79, t_max=1000)
+    main(ActR, max_=100, n_kanji=79, t_max=1000, force=True)

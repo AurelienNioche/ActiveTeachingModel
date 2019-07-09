@@ -22,8 +22,8 @@ class ActR(Learner):
 
     version = 2.2
     bounds = ('d', 0.001, 1.0), \
-             ('tau', -100, 100), \
-             ('s', 0.001, 100)
+             ('tau', -1, 1), \
+             ('s', 0.001, 1)
 
     """
     A chunk is composed of:
