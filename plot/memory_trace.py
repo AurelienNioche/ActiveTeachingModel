@@ -70,7 +70,7 @@ def plot(p_recall_value,
 
 
 def summarize(p_recall_value, fig_name='memory_trace_summarize.pdf',
-              p_recall_time=None):
+              p_recall_time=None,font_size=42):
 
     if p_recall_time is None:
         p_recall_time = np.arange(p_recall_value.shape[1])
@@ -95,8 +95,8 @@ def summarize(p_recall_value, fig_name='memory_trace_summarize.pdf',
     ax.plot(p_recall_time, min_, linestyle=':', color='C0')
     ax.plot(p_recall_time, max_, linestyle=':', color='C0')
 
-    ax.set_xlabel('Time')
-    ax.set_ylabel('Prob. of recall')
+    ax.set_xlabel('Time',fontsize=font_size)
+    ax.set_ylabel('Prob. of recall',fontsize=font_size)
 
     ax.set_ylim((-0.01, 1.01))
 

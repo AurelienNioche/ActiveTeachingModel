@@ -17,6 +17,7 @@ class AvyaTeacher(GenericTeacher):
         self.learn_threshold = 0.95
         self.forgot_threshold = 0.85
         self.count = 0
+        self.mat = np.zeros((n_item, t_max))
 
     def ask(self):
 
@@ -93,6 +94,8 @@ class AvyaTeacher(GenericTeacher):
                         if questions[self.count-1] != i:
                             new_question = i
                             self.update_sets(agent, n_items)
+                            for i in range(n_items):
+                                self.mat[i][self.count] = self.learned[i]
                             self.count += 1
                             return new_question
             # Rule2: Bring an almost learnt Kanji to learnt set.
@@ -102,6 +105,8 @@ class AvyaTeacher(GenericTeacher):
                         if questions[self.count-1] != i:
                             new_question = i
                             self.update_sets(agent, n_items)
+                            for i in range(n_items):
+                                self.mat[i][self.count] = self.learned[i]
                             self.count += 1
                             return new_question
 
@@ -121,7 +126,11 @@ class AvyaTeacher(GenericTeacher):
 
         new_question = max_ind
         self.update_sets(agent, n_items)
+        for i in range(n_items):
+            self.mat[i][self.count] = self.learned[i]
+
 
         # Update the iteration index
         self.count += 1
+
         return new_question

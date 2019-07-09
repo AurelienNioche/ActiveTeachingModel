@@ -2,6 +2,7 @@ import plot.memory_trace
 import plot.p_recall
 import plot.success
 import plot.n_seen
+import plot.n_learnt
 from learner.act_r import ActR
 from learner.act_r_custom import ActRMeaning, ActRGraphic, ActRPlus
 from learner.rl import QLearner
@@ -119,7 +120,8 @@ def run(student_model, teacher_model,
 
     plot.n_seen.curve(seen=teacher.seen,
                           fig_name=f"n_seen_{extension}.pdf")
-
+    plot.n_learnt.curve(seen=teacher.mat,
+                        fig_name=f"n_learnt_{extension}.pdf")
 
 def main():
 
