@@ -8,7 +8,7 @@ class Network(Learner):
 
     roles = 'input', 'hidden', 'output'
 
-    def __init__(self, tk):
+    def __init__(self, tk, n_epoch=1):
 
         super().__init__()
 
@@ -21,6 +21,8 @@ class Network(Learner):
         self.neurons = {role: [] for role in self.roles}
 
         self.neuron_id = 0
+
+        # self.train(n_epoch)
 
     def create_input_neurons(self, verbose=False):
         """
@@ -97,32 +99,42 @@ class Network(Learner):
         for role in self.roles:
             print(f"Number of {role} neurons: ", len(self.neurons[role]))
 
-    def predict(self):
-        pass
+    def train(self, n_epochs):
+        """
+        :param n_epochs: int in range(0, +inf). Number of epochs
+        :return: None
+        """
+        if n_epochs < 0 and n_epochs is not int:
+            raise ValueError("n_epochs not int or not in range(0, +inf)")
+        for j in range(0, n_epochs):
+            for _ in self.neurons["hidden"]:
+                print("sneaky hidden")
+            for _ in self.neurons["output"]:
+                print("im output")
 
-    def train(self):
+    def predict(self):
         pass
 
     def update(self, epochs):
         pass
 
     def decide(self, question, possible_replies, time=None):
-        raise NotImplementedError
+        pass
 
     def learn(self, question, time=None):
-        raise NotImplementedError
+        pass
 
     def unlearn(self):
-        raise NotImplementedError
+        pass
 
     def _p_choice(self, question, reply, possible_replies, time=None):
-        raise NotImplementedError
+        pass
 
     def _p_correct(self, question, reply, possible_replies, time=None):
-        raise NotImplementedError
+        pass
 
     def p_recall(self, item, time=None):
-        raise NotImplementedError
+        pass
 
 
 class Neuron:
@@ -250,6 +262,9 @@ def main():
 
     # Show
     network.show_neurons()
+
+    network.train(2)
+    print(network.neurons[1])
 
 
 if __name__ == "__main__":

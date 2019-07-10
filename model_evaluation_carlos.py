@@ -150,9 +150,10 @@ if __name__ == "__main__":
     """
     n_kanji in range(6, 80)
     """
-    t = [100, 500, 1000]
-    k = [6, 40, 79]
-    for i in range(0, 3):
-        for j in range(0, 3):
-            main(ActR, max_=20, n_kanji=k[i], t_max=t[j])
-    # main(Power, max_=10, n_kanji=6, t_max=100)
+    # t = [100, 500, 1000]
+    # k = [6, 40, 79]
+    # for i in range(0, 3):
+    #     for j in range(0, 3):
+    #         main(ActR, max_=20, n_kanji=k[i], t_max=t[j])
+    # main(ActR, max_=100, n_kanji=79, t_max=1000)
+    simulation_
