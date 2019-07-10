@@ -1,4 +1,5 @@
 import numpy as np
+from tqdm import tqdm
 
 from behavior.data_structure import Task
 from learner.generic import Learner
@@ -108,11 +109,13 @@ class Network(Learner):
         if n_epochs < 0:
             raise ValueError("n_epochs not int or not in range(0, +inf)")
 
-        for _ in range(0, n_epochs):
-            for i in self.neurons["hidden"]:
-                    self.neurons["hidden"][i].compute_gain()
-            for j in self.neurons["output"]:
-                    self.neurons["output"][j].compute_gain()
+        for _ in tqdm(range(0, n_epochs)):
+            for neuron in self.neurons["hidden"]:
+                    neuron.compute_gain()
+                    neuron.update_current()
+            for neuron in self.neurons["output"]:
+                    neuron.compute_gain()
+                    neuron.update_current()
 
     def predict(self):
         pass
@@ -194,10 +197,11 @@ class Neuron:
         self.phi = phi
 
         self._initialize_attributes()
-        self.compute_gain()
+
         for i in range(0, 1):
             if self.role is not "input":
-                self._update_current()
+                self.compute_gain()
+                self.update_current()
         self.print_attributes()
 
     @staticmethod
@@ -207,7 +211,9 @@ class Neuron:
         return number
 
     def _initialize_attributes(self):
-        if self.role is not "input":
+        if self.role is "input":
+            self.current = np.random.randint(0, 2)
+        else:
             self.input_currents = \
                 np.array([self._random_small_value()
                           for _ in range(len(self.input_neurons))])
@@ -231,12 +237,18 @@ class Neuron:
         else:
             self.gain = 0
 
-    def _update_current(self):
+    def update_current(self):
+        assert self.role is not "input"
         self.weights_hebbian = np.dot(self.current, self.input_currents)
         self.current =\
             self.current * ((-self.current + sum(self.weights_hebbian)
                             * self.gain
-                            + self._random_small_value()) / self.tau)
+                            + self._random_small_value()))
+        if self.current < 0.55555:
+            self.current = 0
+        else:
+            self.current = 1
+        # / self.tau)
 
     def print_attributes(self):
         """
@@ -252,7 +264,7 @@ def main():
     This example creates a fully connected recurrent network
     """
 
-    np.random.seed(123)
+    np.random.seed(1234)
 
     network = Network(tk=Task(t_max=100, n_item=30))
 
@@ -265,12 +277,13 @@ def main():
     # Show
     network.show_neurons()
 
-    spam = network.neurons["output"][0].weights
-    network.train(1)
-    eggs = network.neurons["output"][0].weights
+    spam = network.neurons["output"][0].weights_hebbian
+    network.train(200000)
+    eggs = network.neurons["output"][0].weights_hebbian
     print("spam ", spam, "\neggs", eggs)
+    for i in network.neurons["input"]:
+        print(i.current)
 
 
 if __name__ == "__main__":
     main()
-#
