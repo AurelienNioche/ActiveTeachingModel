@@ -104,13 +104,15 @@ class Network(Learner):
         :param n_epochs: int in range(0, +inf). Number of epochs
         :return: None
         """
-        if n_epochs < 0 and n_epochs is not int:
+
+        if n_epochs < 0:
             raise ValueError("n_epochs not int or not in range(0, +inf)")
-        for j in range(0, n_epochs):
-            for _ in self.neurons["hidden"]:
-                print("sneaky hidden")
-            for _ in self.neurons["output"]:
-                print("im output")
+
+        for _ in range(0, n_epochs):
+            for i in self.neurons["hidden"]:
+                    self.neurons["hidden"][i].compute_gain()
+            for j in self.neurons["output"]:
+                    self.neurons["output"][j].compute_gain()
 
     def predict(self):
         pass
@@ -241,7 +243,7 @@ class Neuron:
         :returns: multi-line string of instance attributes
         """
         print(
-            ', '.join("%s: %s\n" % item for item in vars(self).items())
+            '* '.join("%s: %s\n" % item for item in vars(self).items())
         )
 
 
@@ -263,8 +265,10 @@ def main():
     # Show
     network.show_neurons()
 
-    network.train(2)
-    print(network.neurons[1])
+    spam = network.neurons["output"][0].weights
+    network.train(1)
+    eggs = network.neurons["output"][0].weights
+    print("spam ", spam, "\neggs", eggs)
 
 
 if __name__ == "__main__":
