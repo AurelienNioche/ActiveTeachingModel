@@ -4,6 +4,8 @@ from tqdm import tqdm
 from behavior.data_structure import Task
 from learner.generic import Learner
 
+np.seterr(all='raise')
+
 
 class Network(Learner):
 
@@ -111,11 +113,11 @@ class Network(Learner):
 
         for _ in tqdm(range(0, n_epochs)):
             for neuron in self.neurons["hidden"]:
-                    neuron.compute_gain()
-                    neuron.update_current()
+                neuron.compute_gain()
+                neuron.update_current()
             for neuron in self.neurons["output"]:
-                    neuron.compute_gain()
-                    neuron.update_current()
+                neuron.compute_gain()
+                neuron.update_current()
 
     def predict(self):
         pass
@@ -165,10 +167,13 @@ class Neuron:
 
         self.input_neurons = input_neurons
         if self.input_neurons is not None:
-            if self.neuron_id in self.input_neurons:
-                self.recurrent = True
-            else:
-                self.recurrent = False
+
+            # I simplified ============================
+            # if self.neuron_id in self.input_neurons:
+            #     self.recurrent = True
+            # else:
+            #     self.recurrent = False
+            self.recurrent = self.neuron_id in self.input_neurons
 
         self.input_currents = None
         self.weights = None
@@ -240,15 +245,37 @@ class Neuron:
     def update_current(self):
         assert self.role is not "input"
         self.weights_hebbian = np.dot(self.current, self.input_currents)
-        self.current =\
-            self.current * ((-self.current + sum(self.weights_hebbian)
-                            * self.gain
-                            + self._random_small_value()))
+
+        r = self._random_small_value()
+
+        try:
+            sum_gain = np.sum(self.weights_hebbian) * self.gain
+
+            # I rewrote
+            # self.current *= \
+            #     ((-self.current + sum(self.weights_hebbian)
+            #       * self.gain
+            #       + self._random_small_value()))
+            self.current *= \
+                (-self.current + sum_gain + r)
+
+        except FloatingPointError as e:
+            print('gain:', self.gain)
+            print()
+            print('weigths_hebbian', self.weights_hebbian)
+            # If you want to continue the execution, comment this line...
+            raise e
+
+            # ... and uncomment this one
+            # self.current = np.inf
+
         if self.role == "hidden":
-            if self.current < 0.51:
-                self.current = 0
-            else:
-                self.current = 1
+            self.current = int(self.current > 0.5)
+            # I simplified ===============
+            # if self.current < 0.51:
+            #     self.current = 0
+            # else:
+            #     self.current = 1
             # / self.tau)
 
     def print_attributes(self):
