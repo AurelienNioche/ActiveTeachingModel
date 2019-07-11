@@ -244,11 +244,12 @@ class Neuron:
             self.current * ((-self.current + sum(self.weights_hebbian)
                             * self.gain
                             + self._random_small_value()))
-        if self.current < 0.55555:
-            self.current = 0
-        else:
-            self.current = 1
-        # / self.tau)
+        if self.role == "hidden":
+            if self.current < 0.51:
+                self.current = 0
+            else:
+                self.current = 1
+            # / self.tau)
 
     def print_attributes(self):
         """
@@ -272,15 +273,16 @@ def main():
     network.create_input_neurons()
 
     # Hidden neurons
-    network.create_hidden_neurons(n_hidden=10)
+    network.create_hidden_neurons(n_hidden=40)
 
     # Show
     network.show_neurons()
 
     spam = network.neurons["output"][0].weights_hebbian
-    network.train(200000)
+    network.train(20000)
     eggs = network.neurons["output"][0].weights_hebbian
-    print("spam ", spam, "\neggs", eggs)
+    pepe = network.neurons["output"][0].current
+    print("\nspam ", spam, "\neggs", eggs, "\npepe", pepe)
     for i in network.neurons["input"]:
         print(i.current)
 
