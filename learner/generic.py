@@ -12,6 +12,7 @@ class Learner:
         pass
 
     def decide(self, question, possible_replies, time=None):
+        """Expected return from specific learner: reply"""
         raise NotImplementedError
 
     def learn(self, question, time=None):
@@ -27,6 +28,7 @@ class Learner:
         raise NotImplementedError
 
     def p_recall(self, item, time=None):
+        """Expected return from specific learner: p_r"""
         raise NotImplementedError
 
     def get_p_choices(self, data, use_p_correct=False):

@@ -4,6 +4,8 @@ from tqdm import tqdm
 from behavior.data_structure import Task
 from learner.generic import Learner
 
+np.seterr(all='raise')
+
 
 class Network(Learner):
 
@@ -29,7 +31,6 @@ class Network(Learner):
         """
         Instances n input neurons where n is the amount of neurons to represent
         the total number of question indices in binary form.
-
         :param verbose: prints loop iteration number
         """
         for i in range(self.input_bits_needed):  # Instance n Neurons
@@ -75,25 +76,6 @@ class Network(Learner):
                    role=role, input_neurons=input_neurons)
         )
 
-        # if role == "input":
-        #     self.neurons_input.append(
-        #         Neuron(neuron_id=self.neuron_id, role=role)
-        #     )
-        # elif role == "hidden" and input_neurons is not None:
-        #     self.neurons_hidden.append(
-        #         Neuron(neuron_id=self.neuron_id,
-        #                input_neurons=input_neurons, role="hidden")
-        #     )
-        # elif role == "output" and input_neurons is not None:
-        #     self.neurons_output.append(
-        #         Neuron(neuron_id=self.neuron_id,
-        #                input_neurons=input_neurons, role=role)
-        #     )
-        # else:
-        #     raise ValueError(
-        #         "No input neurons given as the argument to "
-        #         "instance a non input layer neuron")
-
         self.neuron_id += 1
 
     def show_neurons(self):
@@ -111,48 +93,60 @@ class Network(Learner):
 
         for _ in tqdm(range(0, n_epochs)):
             for neuron in self.neurons["hidden"]:
-                    neuron.compute_gain()
-                    neuron.update_current()
+                neuron.compute_gain()
+                neuron.update_current()
             for neuron in self.neurons["output"]:
-                    neuron.compute_gain()
-                    neuron.update_current()
+                neuron.compute_gain()
+                neuron.update_current()
 
-    def predict(self):
-        pass
-
-    def update(self, epochs):
+    def p_recall(self, item, time=None):
+        """
+        The network does not recall, memory is already imprinted as part of
+        the dynamic state; it just gives P(r) when asked
+        """
         pass
 
     def decide(self, question, possible_replies, time=None):
+        """If the network returns P(r), this does not apply"""
         pass
 
     def learn(self, question, time=None):
+        """
+        TODO implement a way to simulate traditional backpropagation to
+        improve upon wrong output
+        """
         pass
 
     def unlearn(self):
         pass
 
-    def _p_choice(self, question, reply, possible_replies, time=None):
-        pass
+    def _p_choice(self, question, reply, possible_replies=None, time=None):
+
+        p_retrieve = self.neurons["output"][0].current
+        p_correct = self.p_random + p_retrieve * (1 - self.p_random)
+
+        success = question == reply
+
+        if success:
+            return p_correct
+
+        else:
+            p_failure = (1-p_correct) / (self.tk.n_possible_replies - 1)
+            return p_failure
 
     def _p_correct(self, question, reply, possible_replies, time=None):
-        pass
-
-    def p_recall(self, item, time=None):
         pass
 
 
 class Neuron:
     """
     Modified from Recanatesi (2015) equations 1 to 4.
-
     :param input_neurons: list of neuron_id connected to this neuron
     :param tau: decay time
     :param theta: gain function threshold
     :param gamma: gain func exponent. Always sub-linear, then value < 1
     :param kappa: excitation parameter
     :param phi: inhibition parameter in range(0.70, 1.06)
-
     Note: default argument values are the reference values in the article but
     for phi; only phi_min and phi_max are given in Recanatesi (2015).
     """
@@ -165,10 +159,13 @@ class Neuron:
 
         self.input_neurons = input_neurons
         if self.input_neurons is not None:
-            if self.neuron_id in self.input_neurons:
-                self.recurrent = True
-            else:
-                self.recurrent = False
+
+            # I simplified ============================
+            # if self.neuron_id in self.input_neurons:
+            #     self.recurrent = True
+            # else:
+            #     self.recurrent = False
+            self.recurrent = self.neuron_id in self.input_neurons
 
         self.input_currents = None
         self.weights = None
@@ -240,15 +237,33 @@ class Neuron:
     def update_current(self):
         assert self.role is not "input"
         self.weights_hebbian = np.dot(self.current, self.input_currents)
-        self.current =\
-            self.current * ((-self.current + sum(self.weights_hebbian)
-                            * self.gain
-                            + self._random_small_value()))
-        if self.role == "hidden":
-            if self.current < 0.5:
-                self.current = 0
-            else:
-                self.current = 1
+
+        r = self._random_small_value()
+
+        try:
+            sum_gain = np.sum(self.weights_hebbian) * self.gain
+
+            # I rewrote
+            # self.current *= \
+            #     ((-self.current + sum(self.weights_hebbian)
+            #       * self.gain
+            #       + self._random_small_value()))
+            self.current *= \
+                (-self.current + sum_gain + r)
+
+        except FloatingPointError as e:
+            print('gain:', self.gain)
+            print()
+            print('weights_hebbian', self.weights_hebbian)
+            # If you want to continue the execution, comment this line...
+            raise e
+
+            # ... and uncomment this one
+            # self.current = np.inf
+
+        # if self.role == "hidden":
+        self.current = int(self.current > 0.5)
+            # TODO find a way to implement output = P(r) w/o breaking script
             # / self.tau)
 
     def print_attributes(self):
@@ -279,7 +294,7 @@ def main():
     network.show_neurons()
 
     spam = network.neurons["output"][0].weights_hebbian
-    network.train(20000)
+    network.train(2)
     eggs = network.neurons["output"][0].weights_hebbian
     pepe = network.neurons["output"][0].current
     print("\nspam ", spam, "\neggs", eggs, "\npepe", pepe)
