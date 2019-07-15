@@ -8,7 +8,7 @@ np.seterr(all='raise')
 
 
 class NetworkParam:
-    def __init__(self, n_epoch=1):
+    def __init__(self, n_epoch=3):
         self.n_epoch = n_epoch
 
 

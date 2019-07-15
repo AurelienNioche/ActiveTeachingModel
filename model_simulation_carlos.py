@@ -15,7 +15,7 @@ def run(model, parameters, t_max=3000, n_item=30):
     teacher = RandomTeacher(t_max=t_max, n_item=n_item,
                             handle_similarities=True,
                             normalize_similarity=True,
-                            verbose=False, seed=10)
+                            verbose=True, seed=10)
 
     agent = model(param=parameters, tk=teacher.tk)
     # questions, replies, successes = teacher.teach(agent=agent)

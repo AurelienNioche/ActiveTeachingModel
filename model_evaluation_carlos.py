@@ -11,8 +11,6 @@ from fit import fit
 from learner.rl import QLearner
 from learner.act_r import ActR
 from learner.act_r_custom import ActRMeaning, ActRGraphic, ActRPlus
-from learner.carlos_exponential import Exponential
-from learner.carlos_power import Power
 
 from simulation.data import SimulatedData
 from simulation.task import Task
@@ -105,13 +103,14 @@ def create_fig(data, extension=''):
 
 
 def main(model, max_=20, t_max=300, n_kanji=30, normalize_similarity=True,
+         force=False,
          **kwargs):
 
     extension = f'_{model.__name__}{model.version}_n{max_}_t{t_max}_k{n_kanji}'
 
     file_path = os.path.join(DATA_FOLDER, f"parameter_recovery_{extension}.p")
 
-    if not os.path.exists(file_path):
+    if not os.path.exists(file_path) or force:
 
         seeds = range(max_)
 
@@ -147,13 +146,5 @@ def main(model, max_=20, t_max=300, n_kanji=30, normalize_similarity=True,
 
 
 if __name__ == "__main__":
-    """
-    n_kanji in range(6, 80)
-    """
-    # t = [100, 500, 1000]
-    # k = [6, 40, 79]
-    # for i in range(0, 3):
-    #     for j in range(0, 3):
-    #         main(ActR, max_=20, n_kanji=k[i], t_max=t[j])
-    # main(ActR, max_=100, n_kanji=79, t_max=1000)
-    simulation_
+
+    main(ActR, max_=100, n_kanji=79, t_max=100, force=True)

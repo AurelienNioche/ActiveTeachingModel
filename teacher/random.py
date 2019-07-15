@@ -38,7 +38,7 @@ class RandomTeacher(GenericTeacher):
         for i in range(n_items):
             if agent.p_recall(i) > 0.95:
                 self.mat[i, self.count] = 2
-            elif agent.p_recall(i)>0:
+            elif agent.p_recall(i) > 0:
                 self.mat[i, self.count] = 1
         self.count += 1
         return question
