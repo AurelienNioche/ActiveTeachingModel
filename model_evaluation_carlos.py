@@ -11,6 +11,7 @@ from fit import fit
 from learner.rl import QLearner
 from learner.act_r import ActR
 from learner.act_r_custom import ActRMeaning, ActRGraphic, ActRPlus
+from learner.carlos_exponential import Exponential
 
 from simulation.data import SimulatedData
 from simulation.task import Task
@@ -147,4 +148,5 @@ def main(model, max_=20, t_max=300, n_kanji=30, normalize_similarity=True,
 
 if __name__ == "__main__":
 
-    main(ActR, max_=100, n_kanji=79, t_max=100, force=True)
+    # main(ActR, max_=100, n_kanji=79, t_max=100, force=True)
+    main(Exponential, max_=100, n_kanji=79, t_max=1000, force=True)
