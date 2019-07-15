@@ -53,14 +53,14 @@ class AskUser:
             elif r in ('y', 'yes'):
                 break
             else:
-                print("Your response have to be 'y' or 'n'!")
+                print("Your response has to be 'y' or 'n'!")
         self.f(**kwargs)
         print("Done!")
 
 
 class Tee(object):
     """"
-    exemple of usage: sys.stdout = Tee(f'{LOG_DIR}/log.log')
+    example of usage: sys.stdout = Tee(f'{LOG_DIR}/log.log')
     """
 
     def __init__(self, f):

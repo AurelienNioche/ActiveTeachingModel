@@ -7,13 +7,28 @@ from learner.generic import Learner
 np.seterr(all='raise')
 
 
+class NetworkParam:
+    def __init__(self, n_epoch=1):
+        self.n_epoch = n_epoch
+
+
 class Network(Learner):
 
     roles = 'input', 'hidden', 'output'
 
-    def __init__(self, tk, n_epoch=1):
+    def __init__(self, param, tk):
 
         super().__init__()
+
+        if param is None:
+            pass
+        elif type(param) == dict:
+            self.pr = NetworkParam(**param)
+        elif type(param) in (tuple, list, np.ndarray):
+            self.pr = NetworkParam(*param)
+        else:
+            raise Exception(
+                f"Type {type(param)} is not handled for parameters")
 
         try:  # Try so it can be used even without the "model_simulation" file
             self.n_items = tk.n_item
@@ -112,8 +127,8 @@ class Network(Learner):
 
     def learn(self, question, time=None):
         """
-        TODO implement a way to simulate traditional backpropagation to
-        improve upon wrong output
+        TODO remember to discuss cont time vs discrete in the case of unsupervi
+        sed vs supervised, hebbian or not. Also just implement paper's
         """
         pass
 
@@ -294,10 +309,9 @@ def main():
     network.show_neurons()
 
     spam = network.neurons["output"][0].weights_hebbian
-    network.train(2)
+    network.train(6)
     eggs = network.neurons["output"][0].weights_hebbian
-    pepe = network.neurons["output"][0].current
-    print("\nspam ", spam, "\neggs", eggs, "\npepe", pepe)
+    print("\nspam ", spam, "\neggs", eggs)
     for i in network.neurons["input"]:
         print(i.current)
 

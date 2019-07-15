@@ -15,7 +15,7 @@ class RandomTeacher(GenericTeacher):
                          handle_similarities=handle_similarities,
                          verbose=verbose)
         self.mat = np.zeros((n_item, t_max))
-        self.count=0
+        self.count = 0
 
     def ask(self):
         question = self.get_next_node(
@@ -42,4 +42,3 @@ class RandomTeacher(GenericTeacher):
                 self.mat[i, self.count] = 1
         self.count += 1
         return question
-
