@@ -25,7 +25,7 @@ from fit import fit
 from behavior.data_structure import Task
 from behavior.duolingo import UserData
 from learner.act_r import ActR
-from learner.act_r_duo import ActRDuo
+# from learner.act_r_duo import ActRDuo
 import plot.success
 import plot.memory_trace
 from simulation.memory import p_recall_over_time_after_learning
