@@ -2,21 +2,42 @@ import numpy as np
 from tqdm import tqdm
 
 
-class SimulatedData:
+class Data:
+
+    def __init__(self, n_items, questions, replies, times=None,
+                 possible_replies=None):
+
+        self.n_items = n_items
+
+        self.questions = questions
+        self.replies = replies
+
+        self.success = self.questions[:] == self.replies[:]
+
+        t_max = len(self.questions)
+        if times is None:
+            self.times = [None for _ in range(t_max)]
+        else:
+            self.times = times
+
+        if possible_replies is not None:
+            self.possible_replies = possible_replies
+
+
+class SimulatedData(Data):
 
     def __init__(self, model, param, tk, verbose=False):
 
-        self.n_item = tk.n_item
+        n_item = tk.n_item
         t_max = tk.t_max
 
         agent = model(param=param, tk=tk, verbose=verbose)
 
-        self.questions = np.asarray([list(tk.kanji).index(q) for q in
-                                     tk.question_list], dtype=int)
-        self.replies = np.zeros(t_max, dtype=int)
-        self.success = np.zeros(t_max, dtype=int)
-        self.possible_replies = np.zeros((t_max, tk.n_possible_replies),
-                                         dtype=int)
+        questions = np.asarray([list(tk.kanji).index(q) for q in
+                                tk.question_list], dtype=int)
+        replies = np.zeros(t_max, dtype=int)
+        possible_replies = np.zeros((t_max, tk.n_possible_replies),
+                                    dtype=int)
 
         if verbose:
             print(f"Generating data with model {model.__name__}...")
@@ -25,16 +46,24 @@ class SimulatedData:
             gen = range(t_max)
 
         for t in gen:
-            q = self.questions[t]
+            q = questions[t]
             for i in range(tk.n_possible_replies):
-                self.possible_replies[t, i] =\
+                possible_replies[t, i] =\
                     list(tk.meaning).index(tk.possible_replies_list[t][i])
 
             r = agent.decide(question=q,
-                             possible_replies=self.possible_replies[t])
+                             possible_replies=possible_replies[t])
             agent.learn(question=q)
 
-            self.replies[t] = r
-            self.success[t] = q == r
+            replies[t] = r
 
-        self.times = [None for _ in range(t_max)]
+        times = [None for _ in range(t_max)]
+
+        super().__init__(
+            n_items=n_item,
+            questions=questions,
+            replies=replies,
+            times=times,
+            possible_replies=possible_replies
+
+        )
