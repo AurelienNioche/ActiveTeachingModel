@@ -104,8 +104,7 @@ def create_fig(data, extension=''):
 
 
 def main(model, max_=20, t_max=300, n_kanji=30, normalize_similarity=True,
-         force=False,
-         **kwargs):
+         force=False, **kwargs):
 
     extension = f'_{model.__name__}{model.version}_n{max_}_t{t_max}_k{n_kanji}'
 

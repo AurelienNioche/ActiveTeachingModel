@@ -1,148 +1,180 @@
-import multiprocessing
 import os
-import pickle
-import scipy.stats
 
-import matplotlib.pyplot as plt
 import numpy as np
-from tqdm import tqdm
+import scipy.optimize
+from hyperopt import hp, fmin, tpe
 
-from fit import fit
-from learner.rl import QLearner
 from learner.act_r import ActR
-from learner.act_r_custom import ActRMeaning, ActRGraphic, ActRPlus
-
 from simulation.data import SimulatedData
 from simulation.task import Task
+from utils import utils
 
+IDX_PARAMETERS = 0
+IDX_MODEL = 1
+IDX_ARGUMENTS = 2
 
+MAX_EVAL = 500  # Only if tpe
 DATA_FOLDER = os.path.join("bkp", "model_evaluation")
-FIG_FOLDER = "fig"
-
-os.makedirs(DATA_FOLDER, exist_ok=True)
-os.makedirs(FIG_FOLDER, exist_ok=True)
 
 
-class SimulationAndFit:
+class Fit:
 
-    def __init__(self, model, t_max=300, n_kanji=30, grade=1,
-                 normalize_similarity=False,
-                 verbose=False, **kwargs):
+    def __init__(self, tk, model, data, verbose=False, method='de', **kwargs):
 
+        self.kwargs = kwargs
+        self.method = method
+
+        self.tk = tk
         self.model = model
-
-        self.tk = Task(t_max=t_max, n_kanji=n_kanji, grade=grade,
-                       normalize_similarity=normalize_similarity,
-                       verbose=verbose)
+        self.data = data
 
         self.verbose = verbose
 
-        self.kwargs = kwargs
+    def _bic(self, lls, k):
+        """
+        :param lls: log-likelihood sum
+        :param k: number of parameters
+        :return: BIC
+        """
+        return -2 * lls + np.log(self.tk.t_max) * k
 
-    def __call__(self, seed):
+    @classmethod
+    def _log_likelihood_sum(cls, p_choices):
 
-        np.random.seed(seed)
+        try:
+            return np.sum(np.log(p_choices))
+        except FloatingPointError:
+            return - np.inf
 
-        param = {}
+    def _model_stats(self, p_choices, best_param):
 
-        for bound in self.model.bounds:
-            param[bound[0]] = np.random.uniform(bound[1], bound[2])
+        mean_p = np.mean(p_choices)
+        lls = self._log_likelihood_sum(p_choices)
+        bic = self._bic(lls=lls, k=len(best_param))
 
-        data = SimulatedData(model=self.model, param=param, tk=self.tk,
-                             verbose=self.verbose)
-        f = fit.Fit(model=self.model, tk=self.tk, data=data,
-                    **self.kwargs)
-        fit_r = f.evaluate()
+        return mean_p, lls, bic
+
+    def evaluate(self):
+
+        def objective(param):
+
+            agent = self.model(param=param, tk=self.tk)
+            p_choices_ = agent.get_p_choices(data=self.data,
+                                             **self.kwargs)
+
+            if p_choices_ is None or np.any(np.isnan(p_choices_)):
+                # print("WARNING! Objective function returning 'None'")
+                to_return = np.inf
+
+            else:
+                to_return = - self._log_likelihood_sum(p_choices_)
+
+            return to_return
+
+        if self.method == 'tpe':  # Tree of Parzen Estimators
+
+            space = [hp.uniform(*b) for b in self.model.bounds]
+            best_param = fmin(fn=objective, space=space, algo=tpe.suggest,
+                              max_evals=MAX_EVAL)
+
+        elif self.method in \
+                ('de', 'L-BFGS-B', 'TNC', 'COBYLA', 'SLSQP'):
+
+            bounds_scipy = [b[-2:] for b in self.model.bounds]
+
+            if self.verbose:
+                print("Finding best parameters...", end=' ')
+
+            if self.method == 'de':
+                res = scipy.optimize.differential_evolution(
+                        func=objective, bounds=bounds_scipy)
+            else:
+                x0 = np.zeros(len(self.model.bounds)) * 0.5
+                res = scipy.optimize.minimize(fun=objective,
+                                              bounds=bounds_scipy, x0=x0)
+
+            best_param = {b[0]: v for b, v in zip(self.model.bounds, res.x)}
+            if self.verbose:
+                print(f"{res.message} [best loss: {res.fun}]")
+            if not res.success:
+                raise Exception(f"The fit did not succeed with method "
+                                f"{self.method}.")
+
+        else:
+            raise Exception(f"Method {self.method} is not defined")
+
+        # Get probabilities with best param
+        learner = self.model(param=best_param, tk=self.tk)
+        p_choices = learner.get_p_choices(data=self.data,
+                                          **self.kwargs)
+
+        # Compute bic, etc.
+        mean_p, lls, bic = self._model_stats(p_choices=p_choices,
+                                             best_param=best_param)
+
+        if self.verbose:
+            self._print(self.model.__name__, best_param, mean_p, lls, bic)
         return \
             {
-                "initial": param,
-                "recovered": fit_r["best_param"],
+                "best_param": best_param,
+                "mean_p": mean_p,
+                "lls": lls,
+                "bic": bic
             }
 
+    def _print(self, model_name, best_param, mean_p, lls, bic):
 
-def create_fig(data, extension=''):
+        dsp_bp = ''.join(f'{k}={round(best_param[k], 3)}, '
+                         for k in sorted(best_param.keys()))
 
-    # Create fig
-    fig, axes = plt.subplots(nrows=len(data.keys()), figsize=(5, 10))
+        dsp_kwargs = f'[{utils.dic2string(self.kwargs)}]' if len(self.kwargs) \
+            else ''
 
-    i = 0
-    for title, dic in sorted(data.items()):
+        print(f"[{model_name} - '{self.method}']{dsp_kwargs}"
+              f"Best param: " + dsp_bp +
+              f"LLS: {round(lls, 2)}, " +
+              f'BIC: {round(bic, 2)}, mean(P): {round(mean_p, 3)}\n')
 
-        ax = axes[i]
-
-        x, y = dic["initial"], dic["recovered"]
-
-        ax.scatter(x, y, alpha=0.5)
-
-        cor, p = scipy.stats.pearsonr(x, y)
-
-        print(f'Pearson corr {title}: $r_pearson={cor:.2f}$, $p={p:.3f}$')
-
-        ax.set_title(title)
-
-        max_ = max(x+y)
-        min_ = min(x+y)
-
-        ax.set_xlim(min_, max_)
-        ax.set_ylim(min_, max_)
-
-        ticks_positions = [round(i, 2) for i in np.linspace(min_, max_, 3)]
-
-        ax.set_xticks(ticks_positions)
-        ax.set_yticks(ticks_positions)
-
-        ax.set_aspect(1)
-        i += 1
-
-    plt.tight_layout()
-    f_name = f"parameter_recovery{extension}.pdf"
-    fig_path = os.path.join(FIG_FOLDER, f_name)
-    plt.savefig(fig_path)
-    print(f"Figure '{fig_path}' created.\n")
-    plt.tight_layout()
+        print("\n" + ''.join("_" * 10) + "\n")
 
 
-def main(model, max_=20, t_max=300, n_kanji=30, normalize_similarity=True,
-         force=False,
-         **kwargs):
+def main():
+    t_max = 300
+    n_kanji = 79
+    grade = 1
+    normalize_similarity = False
+    verbose = False
+    model = ActR
+    tk = Task(t_max=t_max, n_kanji=n_kanji, grade=grade,
+              normalize_similarity=normalize_similarity,
+              verbose=verbose)
 
-    extension = f'_{model.__name__}{model.version}_n{max_}_t{t_max}_k{n_kanji}'
+    np.random.seed(123)
 
-    file_path = os.path.join(DATA_FOLDER, f"parameter_recovery_{extension}.p")
+    param = {}
 
-    if not os.path.exists(file_path) or force:
+    for bound in model.bounds:
+        param[bound[0]] = np.random.uniform(bound[1], bound[2])
 
-        seeds = range(max_)
+    data = SimulatedData(model=ActR, param=param, tk=tk,
+                         verbose=True)
 
-        pool = multiprocessing.Pool()
-        results = list(tqdm(pool.imap_unordered(
-            SimulationAndFit(model=model, t_max=t_max, n_kanji=n_kanji,
-                             normalize_similarity=normalize_similarity,
-                             **kwargs), seeds
-        ), total=max_))
+    f = Fit(model=ActR, tk=tk, data=data)
+    fit_r = f.evaluate()
 
-        r_keys = list(results[0].keys())
-        param_names = results[0][r_keys[0]].keys()
-
-        data = {
-            pn:
-                {
-                    k: [] for k in r_keys
-                }
-            for pn in param_names
-        }
-
-        for r in results:
-            for k in r_keys:
-                for pn in param_names:
-                    data[pn][k].append(r[k][pn])
-
-        pickle.dump(data, open(file_path, 'wb'))
-
-    else:
-        data = pickle.load(open(file_path, 'rb'))
+# Suppose you have an array 'data' with each line being the values for
+# a specific agent, and each column, values for a fit including data until
+# specific time step.
+#
+# mean = np.mean(data, axis=0)
+# sem = scipy.stats.sem(data, axis=0)
+# ax.plot(mean, lw=1.5)
+# ax.fill_between(
+#     range(len(mean)),
+#     y1=mean - sem,
+#     y2=mean + sem,
+#     alpha=0.2)
 
 
 if __name__ == "__main__":
-
-    main(ActR, max_=100, n_kanji=79, t_max=100, force=True)
+    main()
