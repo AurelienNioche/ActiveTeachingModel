@@ -14,7 +14,7 @@ def main(t_max=300, n_item=30):
     # agent = ActRMeaning(param={"d": 0.5, "tau": 0.01, "s": 0.06, "m": 0.02},
     #                    tk=teacher.tk, track_p_recall=True)
     agent = Exponential(param={"alpha": 0.5, "beta": 0.01, "n_0": 0.06},
-                        tk=teacher.tk, track_p_recall=True)
+                        tk=teacher.tk)
     # questions, replies, successes = teacher.teach(agent=agent)
     teacher.teach(agent=agent)
     # plot.p_recall.curve(agent.p)

@@ -101,10 +101,6 @@ def create_fig(data, extension=''):
     print(f"Figure '{fig_path}' created.\n")
     plt.tight_layout()
 
-    cor_list = []
-    cor_list.append(cor)
-    return cor_list
-
 
 def main(model, max_=20, t_max=300, n_kanji=30, normalize_similarity=True,
          force=False,
@@ -146,16 +142,7 @@ def main(model, max_=20, t_max=300, n_kanji=30, normalize_similarity=True,
     else:
         data = pickle.load(open(file_path, 'rb'))
 
-    cor_listt = create_fig(data=data, extension=extension)
-
-    return cor_listt
-
 
 if __name__ == "__main__":
 
-    cor_listtt = main(ActR, max_=100, n_kanji=79, t_max=100, force=True)
-    i = 110
-
-    while cor_listtt[-1] < 0.9:
-        cor_listtt = main(ActR, max_=100, n_kanji=79, t_max=i, force=True)
-        i += 100
+    main(ActR, max_=100, n_kanji=79, t_max=100, force=True)
