@@ -15,6 +15,7 @@ class Data:
         self.success = self.questions[:] == self.replies[:]
 
         t_max = len(self.questions)
+
         if times is None:
             self.times = [None for _ in range(t_max)]
         else:
