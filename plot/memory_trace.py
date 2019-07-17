@@ -159,5 +159,5 @@ def summarize_over_seen(
 
     ax.set_ylim((-0.01, 1.01))
 
-    if ax is not None:
+    if ax is None:
         save_fig(fig_name=fig_name)

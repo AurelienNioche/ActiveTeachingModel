@@ -166,7 +166,7 @@ def main():
 
         i += 1
 
-    save_fig('teacher_comparison')
+    save_fig('teacher_comparison.pdf')
 
 
 if __name__ == "__main__":
