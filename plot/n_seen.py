@@ -16,8 +16,8 @@ def curve(seen, n_item=None, fig_name='seen.pdf',
     ax.set_ylabel('N seen', fontsize=font_size)
     ax.set_xlabel('Time', fontsize=font_size)
 
-    ax.tick_params(axis="both", labelsize=label_size)
-    ax.plot(y, color="black", linewidth=line_width)
+    ax.tick_params(axis='both', labelsize=label_size)
+    ax.plot(y, color='black', linewidth=line_width)
 
     ax.yaxis.set_major_locator(MaxNLocator(integer=True))
 

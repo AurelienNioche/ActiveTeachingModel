@@ -1,5 +1,4 @@
 import plot.memory_trace
-import plot.p_recall
 import plot.success
 import plot.n_seen
 import plot.n_learnt
@@ -8,11 +7,9 @@ from learner.act_r_custom import ActRMeaning, ActRGraphic, ActRPlus
 from learner.rl import QLearner
 from simulation.memory import p_recall_over_time_after_learning
 from teacher.avya import AvyaTeacher
-from teacher.avya_leitner import AvyaLeitTeacher
+# from teacher.avya_leitner import AvyaLeitTeacher
 from teacher.leitner import LeitnerTeacher
-from teacher.niraj import NirajTeacher
 from teacher.random import RandomTeacher
-from teacher.tugce import TugceTeacher
 
 
 def run(student_model, teacher_model,
@@ -81,7 +78,7 @@ def run(student_model, teacher_model,
         (ActR, ActRMeaning, ActRGraphic, ActRPlus, QLearner), \
         "Student model not recognized."
     assert teacher_model in \
-        (NirajTeacher, AvyaTeacher, TugceTeacher,
+        (AvyaTeacher,
          RandomTeacher, LeitnerTeacher), \
         "Teacher model not recognized."
 
@@ -116,19 +113,29 @@ def run(student_model, teacher_model,
                            questions=questions,
                            fig_name=f"memory_trace_{extension}.pdf")
 
-    plot.memory_trace.summarize(p_recall_value=p_recall, fig_name=f"memory_trace_summarize_{extension}.pdf")
+    plot.memory_trace.summarize(
+        p_recall=p_recall,
+        fig_name=f"memory_trace_summarize_{extension}.pdf")
 
+    plot.memory_trace.summarize_over_seen(
+        seen=teacher.seen,
+        p_recall=p_recall,
+        fig_name=f"memory_trace_summarize_over_seen_{extension}.pdf")
 
-    plot.n_seen.curve(seen=teacher.seen,
-                          fig_name=f"n_seen_{extension}.pdf")
-    plot.n_learnt.curve(seen=teacher.mat,
-                        fig_name=f"n_learnt_{extension}.pdf")
+    plot.n_seen.curve(
+        seen=teacher.seen,
+        fig_name=f"n_seen_{extension}.pdf")
+
+    plot.n_learnt.curve(
+        seen=teacher.mat,
+        fig_name=f"n_learnt_{extension}.pdf")
+
 
 def main():
 
     for teacher_model in (AvyaTeacher, RandomTeacher):
-        run(student_model=ActRMeaning, teacher_model=teacher_model ,t_max=5
-            )
+        run(student_model=ActRMeaning, teacher_model=teacher_model,
+            t_max=5)
 
 
 if __name__ == "__main__":

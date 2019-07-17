@@ -12,7 +12,7 @@ import datetime
 import numpy as np
 
 
-def main(n_iteration=100, n_item=9):
+def main_continuous(n_iteration=100, n_item=9):
 
     total_time = datetime.timedelta(days=10)
     sec = int(total_time.total_seconds())
@@ -55,30 +55,35 @@ def main(n_iteration=100, n_item=9):
                            success_value=success,
                            questions=questions)
 
-    plot.memory_trace.summarize(p_recall_value=p_recall,
+    plot.memory_trace.summarize(p_recall=p_recall,
                                 p_recall_time=time_sampling)
 
 
 def main_discrete(n_iteration=100, n_item=9):
 
     questions = np.random.randint(low=0, high=n_item, size=n_iteration)
-
+    seen = np.zeros((n_item, n_iteration), dtype=bool)
     success = np.zeros(n_iteration, dtype=bool)
 
     agent = ActR(
         param={"d": 0.5, "tau": 0.01, "s": 0.06},
         tk=Task(t_max=n_iteration, n_item=n_item))
 
-    for i in range(n_iteration):
+    for t in range(n_iteration):
 
-        item = questions[i]
+        item = questions[t]
 
         p = agent.p_recall(item=item)
         r = np.random.random()
 
-        success[i] = p > r
+        success[t] = p > r
 
         agent.learn(question=item)
+
+        if t:
+            seen[:, t] = seen[:, t-1]
+
+        seen[item, t] = 1
 
     p_recall = p_recall_over_time_after_learning(agent=agent,
                                                  t_max=n_iteration,
@@ -88,8 +93,10 @@ def main_discrete(n_iteration=100, n_item=9):
                            success_value=success,
                            questions=questions)
 
-    plot.memory_trace.summarize(p_recall_value=p_recall)
+    plot.memory_trace.summarize(p_recall=p_recall)
+
+    plot.memory_trace.summarize_over_seen(p_recall=p_recall, seen=seen)
 
 
 if __name__ == "__main__":
-    main()
+    main_discrete()
