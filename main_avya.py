@@ -8,6 +8,7 @@ from learner.act_r_custom import ActRMeaning, ActRGraphic, ActRPlus
 from learner.rl import QLearner
 from simulation.memory import p_recall_over_time_after_learning
 from teacher.avya import AvyaTeacher
+from teacher.avya_leitner import AvyaLeitTeacher
 from teacher.leitner import LeitnerTeacher
 from teacher.niraj import NirajTeacher
 from teacher.random import RandomTeacher
@@ -126,7 +127,7 @@ def run(student_model, teacher_model,
 def main():
 
     for teacher_model in (AvyaTeacher, RandomTeacher):
-        run(student_model=ActRMeaning, teacher_model=teacher_model,t_max=490
+        run(student_model=ActRMeaning, teacher_model=teacher_model ,t_max=5
             )
 
 
