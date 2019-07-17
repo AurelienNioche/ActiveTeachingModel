@@ -39,18 +39,7 @@ class LeitnerTeacher(GenericTeacher):
         return question, possible_replies
 
     # Learnt character set is represented by 2,Being learnt character set by 1, Unseen character set as 0
-    """
-    def update_sets(self, agent, n_items):
-        for k in range(n_items):
-            if agent.p_recall(k) > self.learn_threshhold:
-                self.learned[k] = 2
 
-        if self.count>0:
-            if self.learned[self.questions[self.count-1]] == 0:
-                self.learned[self.questions[self.count - 1]] = 1
-
-    # calculate usefulness and relative parameters.
-    """
     def get_next_node(self, questions, successes, agent, n_items):
         """
             :param questions: list of integers (index of questions). Empty at first iteration
