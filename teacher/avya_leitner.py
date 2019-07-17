@@ -1,6 +1,5 @@
 import copy
 
-# import random
 from teacher.metaclass import GenericTeacher
 import numpy as np
 

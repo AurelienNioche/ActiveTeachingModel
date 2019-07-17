@@ -318,3 +318,11 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# x, y = np.meshgrid(range(data.shape[0]), range(data.shape[1]))
+# z = data
+# c = ax.contourf(x, y, z, n_levels, cmap='viridis')
+# from mpl_toolkits.axes_grid1 import make_axes_locatable
+# divider = make_axes_locatable(ax)
+# cax = divider.append_axes("right", size="5%", pad=0.05)
+# plt.colorbar(c, cax=cax, ticks=y_ticks)

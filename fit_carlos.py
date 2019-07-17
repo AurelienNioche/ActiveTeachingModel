@@ -1,5 +1,6 @@
-import matplotlib as plt
+import matplotlib.pyplot as plt
 import numpy as np
+import scipy.stats
 from tqdm import tqdm
 
 from fit.fit import Fit
@@ -14,7 +15,7 @@ class FitFidelity(Fit):
                  normalize_similarity=False, verbose=False):
         super().__init__
 
-        self. t_min = t_min
+        self.t_min = t_min
         self.t_max = t_max
         self.n_kanji = n_kanji
         self.grade = grade
@@ -25,7 +26,8 @@ class FitFidelity(Fit):
         self.n_param = len(self.model.bounds)
         self.param = {}
         self.changes = np.zeros((self.n_param,
-                                     self.t_max - self.t_min - 1))
+                                self.t_max - self.t_min - 1))
+        self.mean_array = np.zeros((self.n_param, self.t_max - self.t_min - 2))
 
         self.compute_fidelity()
 
@@ -44,6 +46,9 @@ class FitFidelity(Fit):
 
     def compute_fidelity(self, n_agents=3):
 
+        self.mean_array = np.zeros((self.n_param, self.t_max - self.t_min - 2))
+        # - 2 because we will compute the difference and then the mean
+
         for i in range(n_agents):
             self._simulate_data()
 
@@ -57,7 +62,7 @@ class FitFidelity(Fit):
                              self.data.possible_replies[:self.t_min, :])
 
             self.tk.t_max = self.t_min
-            f = Fit(model=ActR, tk=self.tk, data=data_view)
+            f = Fit(model=self.model, tk=self.tk, data=data_view)
             fit_r = f.evaluate()
 
             best_v = {}
@@ -78,9 +83,20 @@ class FitFidelity(Fit):
                 f = Fit(model=self.model, tk=self.tk, data=data_view)
                 fit_r = f.evaluate()
 
-                for j, k in enumerate(sorted(fit_r["best_param"].keys())):
-                    self.changes[j, i] =\
+                for iteration, k in\
+                        enumerate(sorted(fit_r["best_param"].keys())):
+                    self.changes[iteration, i] =\
                         np.abs(best_v[k] - fit_r["best_param"][k])
+
+                    if i != 0:
+                        self.mean_array[iteration, i - 1] = (
+                                                    last_change +
+                                                    self.changes[iteration, i]
+                                                    ) / 2
+                        print("arr", self.mean_array, "arrr")
+                        # print("chachacha", self.changes)
+
+                    last_change = self.changes[iteration, i]
 
                 best_v.update(fit_r["best_param"])
 
@@ -90,6 +106,8 @@ class FitFidelity(Fit):
                 print(self.changes)
                 print(fit_r)
 
+            self._plot()
+
     def _plot(self, font_size=42):
 
         # if p_recall_time is None:
@@ -98,29 +116,25 @@ class FitFidelity(Fit):
         fig = plt.figure(figsize=(15, 12))
         ax = fig.subplots()
 
-        mean = np.mean(p_recall_value, axis=0)
-        sem = scipy.stats.sem(p_recall_value, axis=0)
+        mean = self.mean_array[0, :]
+        sem = scipy.stats.sem(self.mean_array[0, :], axis=0)
+        n_trial = np.arange(0, self.mean_array[0, :].size, 1)
 
-        min_ = np.min(p_recall_value, axis=0)
-        max_ = np.max(p_recall_value, axis=0)
-
-        ax.plot(p_recall_time, mean, lw=1.5)
+        ax.plot(n_trial, mean, lw=1.5)
         ax.fill_between(
-            p_recall_time,
+            mean,
             y1=mean - sem,
             y2=mean + sem,
             alpha=0.2
         )
 
-        ax.plot(p_recall_time, min_, linestyle=':', color='C0')
-        ax.plot(p_recall_time, max_, linestyle=':', color='C0')
+        ax.plot(mean, linestyle=':', color='C0')
+        ax.plot(mean, linestyle=':', color='C0')
 
-        ax.set_xlabel('Time', fontsize=font_size)
-        ax.set_ylabel('Prob. of recall',fontsize=font_size)
+        ax.set_xlabel('Iteration', fontsize=font_size)
+        ax.set_ylabel('Mean', fontsize=font_size)
 
-        ax.set_ylim((-0.01, 1.01))
-
-        fig_name=f'fit-fidelity-{self.t_max}.pdf'
+        fig_name = f'fit-fidelity-t_max={self.t_max}.pdf'
 
         save_fig(fig_name=fig_name)
 
@@ -129,7 +143,7 @@ def main():
 
     np.random.seed(123)
 
-    fit_fidelity = FitFidelity(verbose=True)
+    fit_fidelity = FitFidelity(verbose=False)
 
 
 if __name__ == "__main__":
@@ -148,5 +162,3 @@ if __name__ == "__main__":
 #     y1=mean - sem,
 #     y2=mean + sem,
 #     alpha=0.2)
-
-
