@@ -10,17 +10,16 @@ class LeitnerTeacher(GenericTeacher):
 
         super().__init__(n_item=n_item, t_max=t_max, grade=grade, handle_similarities=handle_similarities,
                          verbose=verbose)
-        self.learnt = set()
-        self.learning = set()
-        self.unseen = set()
+        self.teach_set = np.zeros(n_item)
         self.buffer_threshold = 15
         # initialise buffer_threshhold number of characters to be in learning set
         for i in range(self.buffer_threshold):
-            self.learning.add(i)
+            self.teach_set[i] = 1
         self.count = 0
         self.num_learnt = np.zeros(t_max)
-        self.past_recall=np.full((n_item,self.buffer_threshold), -1)
-        self.taboo = 1
+        self.past_successes = np.full((n_item, self.buffer_threshold), -1)
+        self.taboo = -1
+        self.prob = np.zeros(n_item)
 
     def ask(self):
 
@@ -64,45 +63,86 @@ class LeitnerTeacher(GenericTeacher):
                 * Number of items included (0 ... n-1)
             :return: integer (index of the question to ask)
         """
-        print(successes)
-        #if successes[-1]
-        #self.past_recall[taboo]+=1
-        if len(self.learnt) == n_items:
-            print("All kanjis learnt")
-            return 0
-        if self.count != 0:
-            if successes[self.count] == True:
-                self.past_recall[self.taboo][-1] +
-        #for item in self.learning:
-        #    self.past_recall
-        #change sets according to reply if sum of sizes complete
-        """
-        self.update_sets(agent, n_items)
-        #show all characters once
-        if self.check < n_items:
-            new_question = self.check
-            self.check+=1
-            return new_question
-        else:
-            if self.count==0 or self.count==1 or self.count==3 or self.count==4 or self.count==5:
-                for i in range(n_items):
-                    if self.learned[i] == 0:
-                        new_question = i
-                        self.learning += 1
-                        return new_question
-            elif self.count==2 or self.count==8:
-                for i in range(n_items):
-                    if self.learned[i] == 1:
-                        new_question = i
-                        self.countlearnt += 1
-                        return new_question
+        print("hi")
+        count_learnt = 0
+        count_unseen = 0
+        count_learning = 0
+        for i in range(len(self.teach_set)):
+            if self.teach_set[i] == 2:
+                count_learnt += 1
+            elif self.teach_set[i] == 0:
+                count_unseen +=1
             else:
-                for i in range(n_items):
-                    if self.learned[i] == 1:
-                        new_question = i
-                        self.countlearnt += 1
-                        return new_question
-        """
-        #new_question = self.taboo
-        self.taboo+=1
-        return self.taboo
+                count_learning +=1
+
+        if count_learnt == n_items:
+            print("All kanjis learnt")
+            self.count += 1
+            return 0
+        #update the past recall memory
+        if self.count != 0:
+            result = np.where(self.past_successes[self.taboo] == -1)
+            if len(result) > 0 and len(result[0]) > 0:
+                self.past_successes[self.taboo][result[0][0]] = int(successes[self.count-1])
+            else:
+                self.past_successes[self.taboo] = np.add(self.past_successes[self.taboo][1:] , [int(successes[self.count-1])])
+
+        for item in range(n_items):
+            if self.teach_set[item] == 1:
+                succ_recalls = np.sum(np.where(self.past_successes[item]>0,1,0))
+                if succ_recalls >= self.buffer_threshold:
+                    self.teach_set[item] = 2
+                    count_learnt += 1
+                    count_learning -= 1
+
+                    if count_unseen > 0:
+                        # choose any item from unseen
+                        result = np.where(self.teach_set == 0)
+                        if len(result) > 0 and len(result[0]) >0:
+                            self.teach_set[result[0][0]] = 1
+                            count_unseen -= 1
+                            count_learning += 1
+                        else:
+                            assert "error- no unseen char found, error in count_unseen computation"
+
+        if count_learning >= 2:
+            self.prob[self.taboo] = 0
+            for item in range(n_items):
+                if self.teach_set[item] >= 1 and item != self.taboo:
+                    #get the last successful recalls value
+                    succ_recalls = np.sum(
+                        np.where(self.past_successes[item] > 0, 1, 0))
+                    self.prob[item] = self.buffer_threshold + 1 - succ_recalls
+            psum = np.sum(self.prob)
+            if psum == 0 :
+                assert "error - the total probability is 0"
+            for item in range(1,n_items):
+                if self.prob[item] < 0:
+                    assert "error in probability computation, cant be negative"
+                self.prob[item] += self.prob[item-1]
+        else:
+            # find the only element or if no element then return learnt
+            result = np.where(self.teach_set == 1)
+            if len(result) > 0 and len(result[0]) > 0:
+                new_question = self.teach_set[result[0][0]]
+                self.taboo = new_question
+                self.count += 1
+                return new_question
+            else:
+                print("all kanjis learnt")
+                self.count += 1
+                return 0
+
+
+        #find random from 0 to psum
+        ran = random.randint(0, psum)
+
+
+        for item in range(n_items):
+            if ran > self.prob[item]:
+                new_question = item - 1
+                self.taboo = new_question
+                self.count += 1
+                return new_question
+        # do binary search instead "more optimum"
+        assert "error, no question returned"

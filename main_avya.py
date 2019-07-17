@@ -1,5 +1,5 @@
 import plot.memory_trace
-import plot.p_recall
+#import plot.p_recall
 import plot.success
 import plot.n_seen
 import plot.n_learnt
@@ -9,9 +9,9 @@ from learner.rl import QLearner
 from simulation.memory import p_recall_over_time_after_learning
 from teacher.avya import AvyaTeacher
 from teacher.leitner import LeitnerTeacher
-from teacher.niraj import NirajTeacher
+#from teacher.niraj import NirajTeacher
 from teacher.random import RandomTeacher
-from teacher.tugce import TugceTeacher
+#from teacher.tugce import TugceTeacher
 
 
 def run(student_model, teacher_model,
@@ -80,7 +80,7 @@ def run(student_model, teacher_model,
         (ActR, ActRMeaning, ActRGraphic, ActRPlus, QLearner), \
         "Student model not recognized."
     assert teacher_model in \
-        (NirajTeacher, AvyaTeacher, TugceTeacher,
+        ( AvyaTeacher,
          RandomTeacher, LeitnerTeacher), \
         "Teacher model not recognized."
 
