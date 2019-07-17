@@ -105,7 +105,7 @@ def summarize(p_recall, fig_name='memory_trace_summarize.pdf',
 
 def summarize_over_seen(
         p_recall, seen, fig_name='memory_trace_summarize_over_seen.pdf',
-        p_recall_time=None, font_size=42):
+        p_recall_time=None, font_size=42, ax=None):
 
     n_iteration = p_recall.shape[1]
 
@@ -114,8 +114,9 @@ def summarize_over_seen(
 
     p_recall[seen == 0] = np.nan
 
-    fig = plt.figure(figsize=(15, 12))
-    ax = fig.subplots()
+    if ax is None:
+        fig = plt.figure(figsize=(15, 12))
+        ax = fig.subplots()
 
     # for t in range(n_iteration):
     #     print(t)
@@ -158,4 +159,5 @@ def summarize_over_seen(
 
     ax.set_ylim((-0.01, 1.01))
 
-    save_fig(fig_name=fig_name)
+    if ax is not None:
+        save_fig(fig_name=fig_name)
