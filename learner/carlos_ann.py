@@ -326,3 +326,5 @@ if __name__ == "__main__":
 # divider = make_axes_locatable(ax)
 # cax = divider.append_axes("right", size="5%", pad=0.05)
 # plt.colorbar(c, cax=cax, ticks=y_ticks)
+for i in range(self.n_param):
+    self.mean_arrays[self.model.bounds[i][0]] = None

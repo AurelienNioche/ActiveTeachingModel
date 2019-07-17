@@ -17,6 +17,11 @@ class FitFidelity(Fit):
 
         self.t_min = t_min
         self.t_max = t_max
+
+        if (self.t_max - self.t_min) < 4:
+            raise IndexError("The difference between t_max and t_min must be "
+                             "of at least 4 to compute fidelity")
+
         self.n_kanji = n_kanji
         self.grade = grade
         self.model = model
@@ -106,7 +111,7 @@ class FitFidelity(Fit):
                 print(self.changes)
                 print(fit_r)
 
-            self._plot()
+        self._plot()
 
     def _plot(self, font_size=42):
 
@@ -134,7 +139,7 @@ class FitFidelity(Fit):
         ax.set_xlabel('Iteration', fontsize=font_size)
         ax.set_ylabel('Mean', fontsize=font_size)
 
-        fig_name = f'fit-fidelity-t_max={self.t_max}.pdf'
+        fig_name = f'fit-fidelity-{self.model.__name__}-t_max={self.t_max}.pdf'
 
         save_fig(fig_name=fig_name)
 
