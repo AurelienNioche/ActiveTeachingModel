@@ -3,7 +3,7 @@ import random
 from teacher.metaclass import GenericTeacher
 import numpy as np
 
-
+#
 class LeitnerTeacher(GenericTeacher):
 
     def __init__(self, n_item=20, t_max=200, grade=1, handle_similarities=True, verbose=False):
