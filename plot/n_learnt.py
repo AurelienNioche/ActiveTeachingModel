@@ -4,7 +4,7 @@ from matplotlib.ticker import MaxNLocator
 
 from plot.generic import save_fig
 
-
+#
 def curve(seen, n_item=25, fig_name='n_learnt.pdf',
           font_size=42, line_width=3,
           label_size=22):
