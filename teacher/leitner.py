@@ -1,6 +1,7 @@
 import copy
 import random
 from teacher.metaclass import GenericTeacher
+import numpy as np
 
 
 class LeitnerTeacher(GenericTeacher):
@@ -9,7 +10,17 @@ class LeitnerTeacher(GenericTeacher):
 
         super().__init__(n_item=n_item, t_max=t_max, grade=grade, handle_similarities=handle_similarities,
                          verbose=verbose)
-        self.learned = [0]*n_item
+        self.learnt = set()
+        self.learning = set()
+        self.unseen = set()
+        self.buffer_threshold = 15
+        # initialise buffer_threshhold number of characters to be in learning set
+        for i in range(self.buffer_threshold):
+            self.learning.add(i)
+        self.count = 0
+        self.num_learnt = np.zeros(t_max)
+        self.past_recall=np.full((n_item,self.buffer_threshold), -1)
+        self.taboo = 1
 
     def ask(self):
 
@@ -29,6 +40,7 @@ class LeitnerTeacher(GenericTeacher):
         return question, possible_replies
 
     # Learnt character set is represented by 2,Being learnt character set by 1, Unseen character set as 0
+    """
     def update_sets(self, agent, n_items):
         for k in range(n_items):
             if agent.p_recall(k) > self.learn_threshhold:
@@ -39,7 +51,7 @@ class LeitnerTeacher(GenericTeacher):
                 self.learned[self.questions[self.count - 1]] = 1
 
     # calculate usefulness and relative parameters.
-
+    """
     def get_next_node(self, questions, successes, agent, n_items):
         """
             :param questions: list of integers (index of questions). Empty at first iteration
@@ -53,7 +65,18 @@ class LeitnerTeacher(GenericTeacher):
             :return: integer (index of the question to ask)
         """
         print(successes)
+        #if successes[-1]
+        #self.past_recall[taboo]+=1
+        if len(self.learnt) == n_items:
+            print("All kanjis learnt")
+            return 0
+        if self.count != 0:
+            if successes[self.count] == True:
+                self.past_recall[self.taboo][-1] +
+        #for item in self.learning:
+        #    self.past_recall
         #change sets according to reply if sum of sizes complete
+        """
         self.update_sets(agent, n_items)
         #show all characters once
         if self.check < n_items:
@@ -79,3 +102,7 @@ class LeitnerTeacher(GenericTeacher):
                         new_question = i
                         self.countlearnt += 1
                         return new_question
+        """
+        #new_question = self.taboo
+        self.taboo+=1
+        return self.taboo
