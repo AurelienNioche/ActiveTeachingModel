@@ -142,7 +142,10 @@ def run(student_model, teacher_model,
 
 def main():
 
-    fig, axes = plt.subplots(nrows=3, ncols=2)
+    font_size = 10
+    n_rows, n_cols = 4, 2
+
+    fig, axes = plt.subplots(nrows=n_rows, ncols=n_cols)
 
     j = 0
 
@@ -150,30 +153,35 @@ def main():
         r = run(student_model=ActRMeaning, teacher_model=teacher_model)
 
         p_recall = r['p_recall']
+        seen = r['seen']
 
         ax1 = axes[0, j]
-
         plot.memory_trace.summarize(
             p_recall=p_recall,
             ax=ax1,
-            font_size=12
+            font_size=font_size
         )
 
         ax2 = axes[1, j]
-
         plot.memory_trace.summarize_over_seen(
             p_recall=p_recall,
-            seen=r['seen'],
+            seen=seen,
             ax=ax2,
-            font_size=12
+            font_size=font_size
         )
 
         ax3 = axes[2, j]
-
         plot.n_learnt.curve(
             p_recall=p_recall,
             ax=ax3,
-            font_size=12
+            font_size=font_size
+        )
+
+        ax4 = axes[3, j]
+        plot.n_seen.curve(
+            seen=seen,
+            ax=ax4,
+            font_size=font_size
         )
 
         j += 1

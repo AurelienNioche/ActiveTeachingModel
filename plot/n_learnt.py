@@ -1,38 +1,46 @@
 import matplotlib.pyplot as plt
-from matplotlib.ticker import MaxNLocator
+# from matplotlib.ticker import MaxNLocator
 import numpy as np
 
 from plot.generic import save_fig
 
 
 def curve(p_recall, fig_name='n_learnt.pdf',
-          font_size=42, line_width=3,
-          label_size=22, threshold=0.95, ax=None):
+          font_size=12, line_width=2,
+          label_size=8, threshold=0.95, ax=None):
 
     if ax is None:
         fig = plt.figure(figsize=(10, 10))
         ax = fig.add_subplot(111)
 
     # Data pre-processing
+    n_item, n_iteration = p_recall.shape
+
     learnt = p_recall[:] > threshold
-    n_item = p_recall.shape[0]
     n_learnt = np.sum(learnt, axis=0)
     y = n_learnt / n_item
 
-    ax.plot(y, color="black", linewidth=line_width)
+    # Horizontal lines
+    ax.axhline(0.5, linewidth=0.5, linestyle='dotted', color='black', alpha=0.5)
+    ax.axhline(0.25, linewidth=0.5, linestyle='dotted', color='black', alpha=0.5)
+    ax.axhline(0.75, linewidth=0.5, linestyle='dotted', color='black', alpha=0.5)
 
-    ax.set_xlabel('Time', fontsize=font_size)
+    # Plot
+    ax.plot(y, color="C0", linewidth=line_width)
 
+    # Both axis
     ax.tick_params(axis="both", labelsize=label_size)
 
-    ax.set_yticks((0, 0.25, 0.5, 0.75, 1))
-    ax.set_ylim((0, 1))
-    ax.set_ylabel('N learnt', fontsize=font_size)
-    # ax.yaxis.set_major_locator(MaxNLocator(integer=True))
+    # x-axis
+    ax.set_xlabel('Time', fontsize=font_size)
+    ax.set_xlim(1, n_iteration)
+    ax.set_xticks((1, int(n_iteration/2), n_iteration))
 
-    ax.axhline(0.5, linewidth=1, linestyle='--', color='black', alpha=0.5)
-    ax.axhline(0.25, linewidth=1, linestyle='--', color='black', alpha=0.5)
-    ax.axhline(0.75, linewidth=1, linestyle='--', color='black', alpha=0.5)
+    # y-axis
+    ax.set_ylabel(f'N | $p_{{recall}} > {threshold}$', fontsize=font_size)
+    ax.set_ylim((-0.01, 1.01))
+    ax.set_yticks((0, 0.5, 1))
+    # ax.yaxis.set_major_locator(MaxNLocator(integer=True))
 
     if ax is None:
         save_fig(fig_name=fig_name)

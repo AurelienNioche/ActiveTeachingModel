@@ -70,7 +70,10 @@ def plot(p_recall_value,
 
 
 def summarize(p_recall, fig_name='memory_trace_summarize.pdf',
-              p_recall_time=None, font_size=42, ax=None):
+              p_recall_time=None,
+              font_size=12,
+              label_size=8,
+              ax=None):
 
     n_iteration = p_recall.shape[1]
 
@@ -103,8 +106,11 @@ def summarize(p_recall, fig_name='memory_trace_summarize.pdf',
     ax.plot(p_recall_time, max_, linestyle='-', color='C0', linewidth=0.2,
             alpha=0.5)
 
+    # Both axis
+    ax.tick_params(axis="both", labelsize=label_size)
+
     ax.set_xlabel('Time', fontsize=font_size)
-    ax.set_ylabel('Prob. of recall', fontsize=font_size)
+    ax.set_ylabel('$p_{recall}$', fontsize=font_size)
 
     ax.set_ylim((-0.01, 1.01))
     ax.set_yticks((0, 0.5, 1))
@@ -118,7 +124,9 @@ def summarize(p_recall, fig_name='memory_trace_summarize.pdf',
 
 def summarize_over_seen(
         p_recall, seen, fig_name='memory_trace_summarize_over_seen.pdf',
-        p_recall_time=None, font_size=42, ax=None):
+        p_recall_time=None,
+        font_size=12, label_size=8,
+        ax=None):
 
     n_iteration = p_recall.shape[1]
 
@@ -170,14 +178,18 @@ def summarize_over_seen(
     ax.plot(p_recall_time, max_, linestyle='-', color='C0', linewidth=0.2,
             alpha=0.5)
 
+    # Both axis
+    ax.tick_params(axis="both", labelsize=label_size)
+
+    # x-axis
     ax.set_xlabel('Time', fontsize=font_size)
-    ax.set_ylabel('Prob. of recall [seen only]', fontsize=font_size)
-
-    ax.set_ylim((-0.01, 1.01))
-    ax.set_yticks((0, 0.5, 1))
-
     ax.set_xlim(1, n_iteration)
     ax.set_xticks((1, int(n_iteration/2), n_iteration))
+
+    # y-axis
+    ax.set_ylabel('$p_{recall}$ [seen]', fontsize=font_size)
+    ax.set_ylim((-0.01, 1.01))
+    ax.set_yticks((0, 0.5, 1))
 
     if ax is None:
         save_fig(fig_name=fig_name)
