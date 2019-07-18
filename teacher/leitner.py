@@ -20,7 +20,8 @@ class LeitnerTeacher(GenericTeacher):
         self.past_successes = np.full((n_item, self.buffer_threshold), -1)
         self.taboo = -1
         self.prob = np.zeros(n_item)
-        self.prob_threshhold = 0.9
+        self.prob_thresh = 0.9
+        self.learn_threshold = 0.95
 
     def ask(self):
 
@@ -31,6 +32,7 @@ class LeitnerTeacher(GenericTeacher):
             n_items=self.tk.n_item
         )
         possible_replies = self.get_possible_replies(question)
+        print(question)
 
         if self.verbose:
             print(f"Question chosen: {self.tk.kanji[question]}; "
@@ -63,7 +65,9 @@ class LeitnerTeacher(GenericTeacher):
                 count_unseen += 1
             else:
                 count_learning += 1
-        self.num_learnt[self.count]=count_learnt
+        for item in range(n_items):
+            if agent.p_recall(item)>self.learn_threshold:
+                self.num_learnt[self.count] += 1
         if count_learnt == n_items:
             print("All kanjis learnt")
             self.count += 1
@@ -78,29 +82,31 @@ class LeitnerTeacher(GenericTeacher):
                     self.past_successes[self.taboo,i] = self.past_successes[self.taboo,i+1]
                 self.past_successes[self.taboo, self.buffer_threshold - 1]= int(successes[self.count-1])
         else:
-            ran = random.randint(0, n_items)
+            #no past memory implies a random question to be shown from learning set
+            ran = random.randint(0, self.buffer_threshold)
             self.taboo = ran
             self.count += 1
             return ran
         for item in range(n_items):
+            #modify the learning set
             if self.teach_set[item] == 1:
                 succ_recalls = np.sum(np.where(self.past_successes[item]>0, 1, 0))
-
-                if succ_recalls >= (self.buffer_threshold*self.prob_threshhold):
+                if succ_recalls >= (self.buffer_threshold*self.prob_thresh):
+                    #send item from learning set to learnt set
                     self.teach_set[item] = 2
                     count_learnt += 1
                     count_learning -= 1
 
                     if count_unseen > 0:
-                        # choose any item from unseen
+                        # choose any item from unseen set and send to learning set
                         result = np.where(self.teach_set == 0)
                         if len(result) > 0 and len(result[0]) >0:
                             self.teach_set[result[0][0]] = 1
                             count_unseen -= 1
                             count_learning += 1
                         else:
-                            print( "error- no unseen char found, error in count_unseen computation")
-
+                            print( "Error- no unseen char found, error in count_unseen computation")
+        #update probabilities of items
         if count_learning >= 2:
             self.prob[self.taboo] = 0
             for item in range(n_items):
@@ -115,7 +121,7 @@ class LeitnerTeacher(GenericTeacher):
                 assert "error - the total probability is 0"
 
         else:
-            # find the only element or if no element then return learnt
+            # find the only item in learning set else return all learnt
             result = np.where(self.teach_set == 1)
             #no check for taboo needed
             if len(result) > 0 and len(result[0]) > 0:
@@ -129,12 +135,12 @@ class LeitnerTeacher(GenericTeacher):
                 return 0
 
 
-        #find random from 0 to psum
+        #find a random integer from 0 to psum
         ran = random.randint(0, psum)
 
         sum = 0
         for item in range(n_items):
-            #print(sum)
+            #map the random integer to an item according to its probabilty of being picked
             if ran <= sum + self.prob[item]:
                 new_question = item
                 self.taboo = new_question

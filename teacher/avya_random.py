@@ -16,6 +16,7 @@ class Avya_RandomTeacher(GenericTeacher):
                          verbose=verbose)
         self.num_learnt = np.zeros(t_max)
         self.count = 0
+        self.learn_threshold = 0.95
 
     def ask(self):
         question = self.get_next_node(
@@ -36,7 +37,7 @@ class Avya_RandomTeacher(GenericTeacher):
     def get_next_node(self, questions, agent, n_items):
         question = np.random.randint(n_items)
         for i in range(n_items):
-            if agent.p_recall(i) > 0.95:
+            if agent.p_recall(i) > self.learn_threshold :
                 self.num_learnt[self.count] += 1
         self.count += 1
         return question

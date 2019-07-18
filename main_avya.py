@@ -82,7 +82,7 @@ def run(student_model, teacher_model,
         "Student model not recognized."
     assert teacher_model in \
         ( AvyaTeacher,
-         RandomTeacher, LeitnerTeacher), \
+         Avya_RandomTeacher, LeitnerTeacher), \
         "Teacher model not recognized."
 
     teacher = teacher_model(t_max=t_max, n_item=n_item, grade=grade)
@@ -126,7 +126,7 @@ def run(student_model, teacher_model,
 
 def main():
 
-    for teacher_model in (LeitnerTeacher, AvyaTeacher, Avya_RandomTeacher):
+    for teacher_model in (LeitnerTeacher, Avya_RandomTeacher):
         run(student_model=ActRMeaning, teacher_model=teacher_model ,t_max=490
             )
 
