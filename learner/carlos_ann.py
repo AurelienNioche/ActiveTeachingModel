@@ -1,4 +1,6 @@
+import matplotlib.pyplot as plt
 import numpy as np
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 from tqdm import tqdm
 
 from behavior.data_structure import Task
@@ -22,7 +24,7 @@ class Network(Learner):
 
     roles = 'input', 'hidden', 'output'
 
-    def __init__(self, tk, param=None, verbose=False):
+    def __init__(self, tk, param, verbose=False):
 
         super().__init__()
 
@@ -52,6 +54,7 @@ class Network(Learner):
         self.create_hidden_neurons(n_hidden=self.pr.n_hidden)
 
         # self.train(n_epoch)
+
 
     def create_input_neurons(self, verbose=False):
         """
@@ -276,13 +279,6 @@ class Neuron:
             self.current = self._random_small_value()
 
     def compute_gain(self):
-        # assert self.role == "input", "Input neurons lack the gain function"
-        # for i in self.input_currents:
-        #     if i + self.theta > 0:
-        #         new_gain = (i + self.theta) ** self.gamma
-        #         self.gain = np.concatenate(self.gain, new_gain)
-        #     else:
-        #         self.gain = np.concatenate(self.gain, 0)
         if self.current + self.theta > 0:
             self.gain = (self.current + self.theta) ** self.gamma
         else:
@@ -329,6 +325,28 @@ class Neuron:
         )
 
 
+def plot(network):
+    data = np.zeros(network.pr.n_hidden)
+    for i, val in enumerate(network.neurons["hidden"]):
+        data[i] = network.neurons["hidden"][i].current
+    print(data)
+    factors = []
+    dimension_pairs = []
+    for i in range(network.pr.n_hidden):
+        if (network.pr.n_hidden % (network.pr.n_hidden - 1)) == 0:
+            factors.append()
+            # now I have the factors, make it pairs next
+    numbo[-1]
+    data = np.reshape(data, (-1, 5))
+    print(data)
+    x, y = np.meshgrid(range(data.shape[0]), range(data.shape[1]))
+    z = data
+    c = plt.ax.contourf(x, y, z)  # cmap='viridis')
+    # divider = make_axes_locatable(ax)
+    # cax = divider.append_axes("right", size="5%", pad=0.05)
+    # plt.colorbar(c, cax=cax, ticks=y_ticks)
+
+
 def main():
     """
     This example creates a fully connected recurrent network
@@ -336,16 +354,11 @@ def main():
 
     np.random.seed(1234)
 
-    network = Network(tk=Task(t_max=100, n_item=30))
+    network = Network(tk=Task(t_max=100, n_item=30), param={"n_epoch": 10,
+                                                            "n_hidden": 40})
 
-    # Input neurons
-    network.create_input_neurons()
-
-    # Hidden neurons
-    network.create_hidden_neurons(n_hidden=40)
-
-    # Show
     network.show_neurons()
+    plot(network)
 
     # spam = network.neurons["output"][0].weights_hebbian
     # network.train(6)
@@ -358,6 +371,7 @@ def main():
 if __name__ == "__main__":
     main()
 
+# Plotting:
 # x, y = np.meshgrid(range(data.shape[0]), range(data.shape[1]))
 # z = data
 # c = ax.contourf(x, y, z, n_levels, cmap='viridis')
