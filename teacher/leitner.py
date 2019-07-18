@@ -20,6 +20,7 @@ class LeitnerTeacher(GenericTeacher):
         self.past_successes = np.full((n_item, self.buffer_threshold), -1)
         self.taboo = -1
         self.prob = np.zeros(n_item)
+        self.prob_threshhold = 0.9
 
     def ask(self):
 
@@ -85,7 +86,7 @@ class LeitnerTeacher(GenericTeacher):
             if self.teach_set[item] == 1:
                 succ_recalls = np.sum(np.where(self.past_successes[item]>0, 1, 0))
 
-                if succ_recalls >= (self.buffer_threshold*self.prob):
+                if succ_recalls >= (self.buffer_threshold*self.prob_threshhold):
                     self.teach_set[item] = 2
                     count_learnt += 1
                     count_learning -= 1
@@ -93,12 +94,12 @@ class LeitnerTeacher(GenericTeacher):
                     if count_unseen > 0:
                         # choose any item from unseen
                         result = np.where(self.teach_set == 0)
-                        try len(result) > 0 and len(result[0]) >0:
+                        if len(result) > 0 and len(result[0]) >0:
                             self.teach_set[result[0][0]] = 1
                             count_unseen -= 1
                             count_learning += 1
-                        except:
-                            raise "error- no unseen char found, error in count_unseen computation"
+                        else:
+                            print( "error- no unseen char found, error in count_unseen computation")
 
         if count_learning >= 2:
             self.prob[self.taboo] = 0

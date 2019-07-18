@@ -11,6 +11,7 @@ from teacher.avya import AvyaTeacher
 from teacher.leitner import LeitnerTeacher
 #from teacher.niraj import NirajTeacher
 from teacher.random import RandomTeacher
+from teacher.avya_random import Avya_RandomTeacher
 #from teacher.tugce import TugceTeacher
 
 
@@ -125,7 +126,7 @@ def run(student_model, teacher_model,
 
 def main():
 
-    for teacher_model in (LeitnerTeacher, AvyaTeacher, RandomTeacher):
+    for teacher_model in (LeitnerTeacher, AvyaTeacher, Avya_RandomTeacher):
         run(student_model=ActRMeaning, teacher_model=teacher_model ,t_max=490
             )
 

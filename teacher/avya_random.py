@@ -4,7 +4,7 @@ import copy
 from teacher.metaclass import GenericTeacher
 
 
-class RandomTeacher(GenericTeacher):
+class Avya_RandomTeacher(GenericTeacher):
 
     def __init__(self, n_item=20, t_max=100, grade=1, seed=123,
                  handle_similarities=True, normalize_similarity=False,
@@ -35,6 +35,8 @@ class RandomTeacher(GenericTeacher):
 
     def get_next_node(self, questions, agent, n_items):
         question = np.random.randint(n_items)
-
+        for i in range(n_items):
+            if agent.p_recall(i) > 0.95:
+                self.num_learnt[self.count] += 1
         self.count += 1
         return question
