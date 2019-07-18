@@ -1,61 +1,8 @@
-from django.db import transaction
-import threading
-import django.db.utils
-import psycopg2
-
-import numpy as np
 import pickle
 import datetime
 from time import time
 import sys
-
-
-class Atomic:
-
-    def __init__(self, f):
-        self.f = f
-
-    def __call__(self, **kwargs):
-
-        while True:
-            try:
-
-                with transaction.atomic():
-                    return self.f(**kwargs)
-
-            except (
-                    django.db.IntegrityError,
-                    django.db.OperationalError,
-                    django.db.utils.OperationalError,
-                    psycopg2.IntegrityError,
-                    psycopg2.OperationalError
-            ) as e:
-                print("*" * 50)
-                print("INTEGRITY ERROR" + "!" * 10)
-                print(str(e))
-                print("*" * 50)
-                threading.Event().wait(1 + np.random.random() * 4)
-                continue
-
-
-class AskUser:
-
-    def __init__(self, f):
-        self.f = f
-
-    def __call__(self, **kwargs):
-
-        while True:
-            r = input("Are you sure you want to operate this change?")
-            r.lower()
-            if r in ('n', 'no'):
-                sys.exit()
-            elif r in ('y', 'yes'):
-                break
-            else:
-                print("Your response has to be 'y' or 'n'!")
-        self.f(**kwargs)
-        print("Done!")
+import os
 
 
 class Tee(object):
@@ -87,6 +34,8 @@ def dic2string(dic):
 
 def dump(obj, file_path, verbose=True):
 
+    os.makedirs(os.path.dirname(file_path), exist_ok=True)
+
     if verbose:
         t = time()
         print(f"Dumping to file '{file_path}'...", end=' ', flush=True)
@@ -99,14 +48,19 @@ def dump(obj, file_path, verbose=True):
 
 def load(file_path, verbose=True):
 
+    if not os.path.exists(file_path):
+        if verbose:
+            print(f"No backup file '{file_path}' existing.")
+        return None
+
     if verbose:
         t = time()
         print(f"Loading from file '{file_path}'...", end=' ', flush=True)
     obj = pickle.load(open(file_path, 'rb'))
     if verbose:
         # noinspection PyUnboundLocalVariable
-        print(f"Done [time elapsed: "
-              f"{datetime.timedelta(seconds=time() - t)}]")
+        print(f"Done! [time elapsed: "
+              f"{datetime.timedelta(seconds=time() - t)}]\n")
     return obj
 
 

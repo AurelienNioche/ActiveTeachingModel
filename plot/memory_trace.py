@@ -70,13 +70,14 @@ def plot(p_recall_value,
 
 
 def summarize(p_recall, fig_name='memory_trace_summarize.pdf',
-              p_recall_time=None, font_size=42):
+              p_recall_time=None, font_size=42, ax=None):
 
     if p_recall_time is None:
         p_recall_time = np.arange(p_recall.shape[1])
 
-    fig = plt.figure(figsize=(15, 12))
-    ax = fig.subplots()
+    if ax is None:
+        fig = plt.figure(figsize=(15, 12))
+        ax = fig.subplots()
 
     mean = np.mean(p_recall, axis=0)
     sem = scipy.stats.sem(p_recall, axis=0)
@@ -100,12 +101,13 @@ def summarize(p_recall, fig_name='memory_trace_summarize.pdf',
 
     ax.set_ylim((-0.01, 1.01))
 
-    save_fig(fig_name=fig_name)
+    if ax is None:
+        save_fig(fig_name=fig_name)
 
 
 def summarize_over_seen(
         p_recall, seen, fig_name='memory_trace_summarize_over_seen.pdf',
-        p_recall_time=None, font_size=42):
+        p_recall_time=None, font_size=42, ax=None):
 
     n_iteration = p_recall.shape[1]
 
@@ -114,8 +116,9 @@ def summarize_over_seen(
 
     p_recall[seen == 0] = np.nan
 
-    fig = plt.figure(figsize=(15, 12))
-    ax = fig.subplots()
+    if ax is None:
+        fig = plt.figure(figsize=(15, 12))
+        ax = fig.subplots()
 
     # for t in range(n_iteration):
     #     print(t)
@@ -158,4 +161,5 @@ def summarize_over_seen(
 
     ax.set_ylim((-0.01, 1.01))
 
-    save_fig(fig_name=fig_name)
+    if ax is None:
+        save_fig(fig_name=fig_name)

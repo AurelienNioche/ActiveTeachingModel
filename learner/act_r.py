@@ -19,7 +19,7 @@ class ActRParam:
 
 
 class ActR(Learner):
-    
+
     version = 2.2
     bounds = ('d', 0.001, 1.0), \
              ('tau', -1, 1), \
@@ -198,9 +198,8 @@ class ActR(Learner):
     def _p_correct(self, question, reply, possible_replies=None,
                    time=None, time_index=None):
 
-        p_correct = \
-            self._p_choice(question=question, reply=question,
-                           time=time, time_index=time_index)
+        p_correct = self._p_choice(question=question, reply=question,
+                                   time=time, time_index=time_index)
 
         correct = question == reply
         if correct:
