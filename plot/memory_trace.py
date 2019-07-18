@@ -72,8 +72,10 @@ def plot(p_recall_value,
 def summarize(p_recall, fig_name='memory_trace_summarize.pdf',
               p_recall_time=None, font_size=42, ax=None):
 
+    n_iteration = p_recall.shape[1]
+
     if p_recall_time is None:
-        p_recall_time = np.arange(p_recall.shape[1])
+        p_recall_time = np.arange(n_iteration) + 1
 
     if ax is None:
         fig = plt.figure(figsize=(15, 12))
@@ -82,10 +84,13 @@ def summarize(p_recall, fig_name='memory_trace_summarize.pdf',
     mean = np.mean(p_recall, axis=0)
     sem = scipy.stats.sem(p_recall, axis=0)
 
+    # print(p_recall)
+
     min_ = np.min(p_recall, axis=0)
     max_ = np.max(p_recall, axis=0)
 
     ax.plot(p_recall_time, mean, lw=1.5)
+
     ax.fill_between(
         p_recall_time,
         y1=mean - sem,
@@ -93,13 +98,19 @@ def summarize(p_recall, fig_name='memory_trace_summarize.pdf',
         alpha=0.2
     )
 
-    ax.plot(p_recall_time, min_, linestyle=':', color='C0')
-    ax.plot(p_recall_time, max_, linestyle=':', color='C0')
+    ax.plot(p_recall_time, min_, linestyle='-', color='C0', linewidth=0.2,
+            alpha=0.5)
+    ax.plot(p_recall_time, max_, linestyle='-', color='C0', linewidth=0.2,
+            alpha=0.5)
 
     ax.set_xlabel('Time', fontsize=font_size)
     ax.set_ylabel('Prob. of recall', fontsize=font_size)
 
     ax.set_ylim((-0.01, 1.01))
+    ax.set_yticks((0, 0.5, 1))
+
+    ax.set_xlim(1, n_iteration)
+    ax.set_xticks((1, int(n_iteration/2), n_iteration))
 
     if ax is None:
         save_fig(fig_name=fig_name)
@@ -112,7 +123,7 @@ def summarize_over_seen(
     n_iteration = p_recall.shape[1]
 
     if p_recall_time is None:
-        p_recall_time = np.arange(n_iteration)
+        p_recall_time = np.arange(n_iteration) + 1
 
     p_recall[seen == 0] = np.nan
 
@@ -153,13 +164,19 @@ def summarize_over_seen(
         alpha=0.2
     )
 
-    ax.plot(p_recall_time, min_, linestyle=':', color='C0')
-    ax.plot(p_recall_time, max_, linestyle=':', color='C0')
+    ax.plot(p_recall_time, min_, linestyle='-', color='C0', linewidth=0.2,
+            alpha=0.5)
+    ax.plot(p_recall_time, max_, linestyle='-', color='C0', linewidth=0.2,
+            alpha=0.5)
 
     ax.set_xlabel('Time', fontsize=font_size)
-    ax.set_ylabel('Prob. of recall', fontsize=font_size)
+    ax.set_ylabel('Prob. of recall [seen only]', fontsize=font_size)
 
     ax.set_ylim((-0.01, 1.01))
+    ax.set_yticks((0, 0.5, 1))
+
+    ax.set_xlim(1, n_iteration)
+    ax.set_xticks((1, int(n_iteration/2), n_iteration))
 
     if ax is None:
         save_fig(fig_name=fig_name)
