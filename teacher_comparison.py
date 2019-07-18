@@ -142,32 +142,37 @@ def run(student_model, teacher_model,
 
 def main():
 
-    fig, axes = plt.subplots(nrows=2, ncols=2)
+    fig, axes = plt.subplots(nrows=3, ncols=2)
 
     j = 0
 
     for teacher_model in (RandomTeacher, AvyaTeacher):
-        r = run(student_model=ActRMeaning, teacher_model=teacher_model,
-                force=True)
+        r = run(student_model=ActRMeaning, teacher_model=teacher_model)
 
         p_recall = r['p_recall']
 
         ax1 = axes[0, j]
 
-        print(p_recall)
-
-        plot.memory_trace.summarize_over_seen(
+        plot.memory_trace.summarize(
             p_recall=p_recall,
-            seen=r['seen'],
             ax=ax1,
             font_size=12
         )
 
         ax2 = axes[1, j]
 
-        plot.memory_trace.summarize(
+        plot.memory_trace.summarize_over_seen(
             p_recall=p_recall,
+            seen=r['seen'],
             ax=ax2,
+            font_size=12
+        )
+
+        ax3 = axes[2, j]
+
+        plot.n_learnt.curve(
+            p_recall=p_recall,
+            ax=ax3,
             font_size=12
         )
 

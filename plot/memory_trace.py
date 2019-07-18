@@ -84,7 +84,7 @@ def summarize(p_recall, fig_name='memory_trace_summarize.pdf',
     mean = np.mean(p_recall, axis=0)
     sem = scipy.stats.sem(p_recall, axis=0)
 
-    # print(p_recall)
+    print(p_recall)
 
     min_ = np.min(p_recall, axis=0)
     max_ = np.max(p_recall, axis=0)
@@ -125,6 +125,7 @@ def summarize_over_seen(
     if p_recall_time is None:
         p_recall_time = np.arange(n_iteration) + 1
 
+    p_recall = p_recall.copy()  # Otherwise, troubles...
     p_recall[seen == 0] = np.nan
 
     if ax is None:
