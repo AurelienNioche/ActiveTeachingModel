@@ -14,11 +14,18 @@ class NetworkParam:
 
 class Network(Learner):
 
+    version = 0.1
+    bounds = ('d', 0.001, 1.0), \
+             ('tau', -1, 1), \
+             ('s', 0.001, 1)  # TODO change
+
     roles = 'input', 'hidden', 'output'
 
-    def __init__(self, param, tk):
+    def __init__(self, tk, param=None):
 
         super().__init__()
+
+        self.tk = tk
 
         if param is None:
             pass
@@ -49,9 +56,6 @@ class Network(Learner):
         :param verbose: prints loop iteration number
         """
         for i in range(self.input_bits_needed):  # Instance n Neurons
-            # self.neurons['input'].append(
-            #     Neuron(neuron_id=self.neuron_id, role="input")
-            # )
             self._create_neuron(role='input')
             # Each neuron will be instanced inside a list, call them as a[n]
             if verbose:
@@ -121,35 +125,69 @@ class Network(Learner):
         """
         pass
 
-    def decide(self, question, possible_replies, time=None):
-        """If the network returns P(r), this does not apply"""
-        pass
-
-    def learn(self, question, time=None):
-        """
-        TODO remember to discuss cont time vs discrete in the case of unsupervi
-        sed vs supervised, hebbian or not. Also just implement paper's
-        """
-        pass
-
-    def unlearn(self):
-        pass
-
-    def _p_choice(self, question, reply, possible_replies=None, time=None):
-
-        p_retrieve = self.neurons["output"][0].current
-        p_correct = self.p_random + p_retrieve * (1 - self.p_random)
+    def _p_choice(self, question, reply, possible_replies=None,
+                  time=None, time_index=None):
+        """Modified from ActR"""
 
         success = question == reply
 
-        if success:
+        p_recall = self.neurons["output"][0].current
+
+        # If number of possible replies is defined
+        if self.tk.n_possible_replies is not None:
+            p_correct = self.p_random + p_recall*(1 - self.p_random)
+
+            if success:
+                p_choice = p_correct
+
+            else:
+                p_choice = (1-p_correct) / (self.tk.n_possible_replies - 1)
+
+        else:
+            # Ignore in computation of reply the alternatives
+            # p_choice = p_recall if success else 1-p_recall
+            p_correct = self.p_random + p_recall * (1 - self.p_random)
+
+            if success:
+                p_choice = p_correct
+
+            else:
+                p_choice = (1 - p_correct)
+
+        return p_choice
+
+    def _p_correct(self, question, reply, possible_replies=None,
+                   time=None, time_index=None):
+
+        p_correct = self._p_choice(question=question, reply=question,
+                                   time=time, time_index=time_index)
+
+        correct = question == reply
+        if correct:
             return p_correct
 
         else:
-            p_failure = (1-p_correct) / (self.tk.n_possible_replies - 1)
-            return p_failure
+            return 1-p_correct
 
-    def _p_correct(self, question, reply, possible_replies, time=None):
+    def decide(self, question, possible_replies, time=None,
+               time_index=None):
+
+        p_r = self.neurons["output"][0].weights_hebbian
+        r = np.random.random()
+
+        if p_r > r:
+            reply = question
+        else:
+            reply = np.random.choice(possible_replies)
+
+        if self.verbose:
+            print(f't={self.t}: question {question}, reply {reply}')
+        return reply
+
+    def learn(self, question, time=None):
+        pass
+
+    def unlearn(self):
         pass
 
 
@@ -308,12 +346,12 @@ def main():
     # Show
     network.show_neurons()
 
-    spam = network.neurons["output"][0].weights_hebbian
-    network.train(6)
-    eggs = network.neurons["output"][0].weights_hebbian
-    print("\nspam ", spam, "\neggs", eggs)
-    for i in network.neurons["input"]:
-        print(i.current)
+    # spam = network.neurons["output"][0].weights_hebbian
+    # network.train(6)
+    # eggs = network.neurons["output"][0].weights_hebbian
+    # print("\nspam ", spam, "\neggs", eggs)
+    # for i in network.neurons["input"]:
+    #     print(i.current)
 
 
 if __name__ == "__main__":
@@ -326,5 +364,3 @@ if __name__ == "__main__":
 # divider = make_axes_locatable(ax)
 # cax = divider.append_axes("right", size="5%", pad=0.05)
 # plt.colorbar(c, cax=cax, ticks=y_ticks)
-for i in range(self.n_param):
-    self.mean_arrays[self.model.bounds[i][0]] = None
