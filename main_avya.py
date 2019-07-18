@@ -122,6 +122,7 @@ def run(student_model, teacher_model,
     plot.n_seen.curve(seen=teacher.seen,
                           fig_name=f"n_seen_{extension}.pdf")
     plot.n_learnt.curve(learnt=teacher.num_learnt,
+                        n_item=n_item,
                         fig_name=f"n_learnt_{extension}.pdf")
 
 def main():
