@@ -31,6 +31,7 @@ class LeitnerTeacher(GenericTeacher):
             agent=copy.deepcopy(self.agent),
             n_items=self.tk.n_item
         )
+        print(question)
         possible_replies = self.get_possible_replies(question)
 
 
@@ -86,7 +87,7 @@ class LeitnerTeacher(GenericTeacher):
             ran = random.randint(0, self.buffer_threshold)
             self.taboo = ran
             self.count += 1
-            return ran
+            return int(ran)
         for item in range(n_items):
             #modify the learning set
             if self.teach_set[item] == 1:
@@ -125,9 +126,10 @@ class LeitnerTeacher(GenericTeacher):
             result = np.where(self.teach_set == 1)
             #no check for taboo needed
             if len(result) > 0 and len(result[0]) > 0:
-                new_question = self.teach_set[result[0][0]]
+                new_question = int(self.teach_set[result[0][0]])
                 self.taboo = new_question
                 self.count += 1
+                print(new_question)
                 return new_question
             else:
                 print("all kanjis learnt")
