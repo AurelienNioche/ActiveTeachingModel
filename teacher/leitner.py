@@ -32,7 +32,7 @@ class LeitnerTeacher(GenericTeacher):
             n_items=self.tk.n_item
         )
         possible_replies = self.get_possible_replies(question)
-        print(question)
+
 
         if self.verbose:
             print(f"Question chosen: {self.tk.kanji[question]}; "
