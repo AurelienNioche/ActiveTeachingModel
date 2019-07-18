@@ -5,16 +5,10 @@ from matplotlib.ticker import MaxNLocator
 from plot.generic import save_fig
 
 #
-def curve(seen, n_item=25, fig_name='n_learnt.pdf',
+def curve(learnt, n_item=25, fig_name='n_learnt.pdf',
           font_size=42, line_width=3,
           label_size=22):
-    row,col = seen.shape
-    y = np.zeros(col)
-    for i in range(col):
-        for j in range(row):
-            if seen[j][i] == 2:
-                y[i] += 1
-
+    y = learnt
     fig = plt.figure(figsize=(10, 10))
     ax = fig.add_subplot(111)
     ax.set_ylabel('N learnt', fontsize=font_size)

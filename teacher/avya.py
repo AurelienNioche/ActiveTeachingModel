@@ -17,7 +17,7 @@ class AvyaTeacher(GenericTeacher):
         self.learn_threshold = 0.95
         self.forgot_threshold = 0.85
         self.count = 0
-        self.mat = np.zeros((n_item, t_max))
+        self.num_learnt = np.zeros(t_max)
 
     def ask(self):
 
@@ -93,9 +93,13 @@ class AvyaTeacher(GenericTeacher):
                     if agent.p_recall(i) < self.learn_threshold:
                         if questions[self.count-1] != i:
                             new_question = i
+                            result = np.where(
+                                self.learned == 2,1,0)
+                            learn_char = np.sum(result)
+                            self.num_learnt[self.count] = learn_char
                             self.update_sets(agent, n_items)
-                            for i in range(n_items):
-                                self.mat[i][self.count] = self.learned[i]
+
+
                             self.count += 1
                             return new_question
             # Rule2: Bring an almost learnt Kanji to learnt set.
@@ -104,9 +108,12 @@ class AvyaTeacher(GenericTeacher):
                     if agent.p_recall(i) > self.forgot_threshold:
                         if questions[self.count-1] != i:
                             new_question = i
+                            result = np.where(
+                                self.learned == 2, 1, 0)
+                            learn_char = np.sum(result)
+                            self.num_learnt[self.count] = learn_char
                             self.update_sets(agent, n_items)
-                            for i in range(n_items):
-                                self.mat[i][self.count] = self.learned[i]
+
                             self.count += 1
                             return new_question
 
@@ -125,9 +132,12 @@ class AvyaTeacher(GenericTeacher):
             max_ind = 0
 
         new_question = max_ind
+        result = np.where(
+            self.learned == 2, 1, 0)
+        learn_char = np.sum(result)
+        self.num_learnt[self.count] = learn_char
         self.update_sets(agent, n_items)
-        for i in range(n_items):
-            self.mat[i][self.count] = self.learned[i]
+
 
 
         # Update the iteration index

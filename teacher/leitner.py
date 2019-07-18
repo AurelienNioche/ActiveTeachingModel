@@ -52,7 +52,6 @@ class LeitnerTeacher(GenericTeacher):
                 * Number of items included (0 ... n-1)
             :return: integer (index of the question to ask)
         """
-        print("hi")
         count_learnt = 0
         count_unseen = 0
         count_learning = 0
@@ -60,10 +59,10 @@ class LeitnerTeacher(GenericTeacher):
             if self.teach_set[i] == 2:
                 count_learnt += 1
             elif self.teach_set[i] == 0:
-                count_unseen +=1
+                count_unseen += 1
             else:
-                count_learning +=1
-
+                count_learning += 1
+        self.num_learnt[self.count]=count_learnt
         if count_learnt == n_items:
             print("All kanjis learnt")
             self.count += 1
@@ -72,14 +71,21 @@ class LeitnerTeacher(GenericTeacher):
         if self.count != 0:
             result = np.where(self.past_successes[self.taboo] == -1)
             if len(result) > 0 and len(result[0]) > 0:
-                self.past_successes[self.taboo][result[0][0]] = int(successes[self.count-1])
+                self.past_successes[self.taboo, result[0][0]] = int(successes[self.count-1])
             else:
-                self.past_successes[self.taboo] = np.add(self.past_successes[self.taboo][1:] , [int(successes[self.count-1])])
-
+                for i in range(self.buffer_threshold-1):
+                    self.past_successes[self.taboo,i] = self.past_successes[self.taboo,i+1]
+                self.past_successes[self.taboo, self.buffer_threshold - 1]= int(successes[self.count-1])
+        else:
+            ran = random.randint(0, n_items)
+            self.taboo = ran
+            self.count += 1
+            return ran
         for item in range(n_items):
             if self.teach_set[item] == 1:
-                succ_recalls = np.sum(np.where(self.past_successes[item]>0,1,0))
-                if succ_recalls >= self.buffer_threshold:
+                succ_recalls = np.sum(np.where(self.past_successes[item]>0, 1, 0))
+
+                if succ_recalls >= (self.buffer_threshold*self.prob):
                     self.teach_set[item] = 2
                     count_learnt += 1
                     count_learning -= 1
@@ -87,12 +93,12 @@ class LeitnerTeacher(GenericTeacher):
                     if count_unseen > 0:
                         # choose any item from unseen
                         result = np.where(self.teach_set == 0)
-                        if len(result) > 0 and len(result[0]) >0:
+                        try len(result) > 0 and len(result[0]) >0:
                             self.teach_set[result[0][0]] = 1
                             count_unseen -= 1
                             count_learning += 1
-                        else:
-                            assert "error- no unseen char found, error in count_unseen computation"
+                        except:
+                            raise "error- no unseen char found, error in count_unseen computation"
 
         if count_learning >= 2:
             self.prob[self.taboo] = 0
@@ -102,16 +108,15 @@ class LeitnerTeacher(GenericTeacher):
                     succ_recalls = np.sum(
                         np.where(self.past_successes[item] > 0, 1, 0))
                     self.prob[item] = self.buffer_threshold + 1 - succ_recalls
+
             psum = np.sum(self.prob)
             if psum == 0 :
                 assert "error - the total probability is 0"
-            for item in range(1,n_items):
-                if self.prob[item] < 0:
-                    assert "error in probability computation, cant be negative"
-                self.prob[item] += self.prob[item-1]
+
         else:
             # find the only element or if no element then return learnt
             result = np.where(self.teach_set == 1)
+            #no check for taboo needed
             if len(result) > 0 and len(result[0]) > 0:
                 new_question = self.teach_set[result[0][0]]
                 self.taboo = new_question
@@ -126,12 +131,14 @@ class LeitnerTeacher(GenericTeacher):
         #find random from 0 to psum
         ran = random.randint(0, psum)
 
-
+        sum = 0
         for item in range(n_items):
-            if ran > self.prob[item]:
-                new_question = item - 1
+            #print(sum)
+            if ran <= sum + self.prob[item]:
+                new_question = item
                 self.taboo = new_question
                 self.count += 1
                 return new_question
-        # do binary search instead "more optimum"
-        assert "error, no question returned"
+            sum += self.prob[item]
+        print(ran,sum,psum)
+        print("Error none")

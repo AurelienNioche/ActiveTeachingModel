@@ -115,18 +115,18 @@ def run(student_model, teacher_model,
                            questions=questions,
                            fig_name=f"memory_trace_{extension}.pdf")
 
-    plot.memory_trace.summarize(p_recall_value=p_recall, fig_name=f"memory_trace_summarize_{extension}.pdf")
+    plot.memory_trace.summarize(p_recall=p_recall, fig_name=f"memory_trace_summarize_{extension}.pdf")
 
 
     plot.n_seen.curve(seen=teacher.seen,
                           fig_name=f"n_seen_{extension}.pdf")
-    plot.n_learnt.curve(seen=teacher.mat,
+    plot.n_learnt.curve(learnt=teacher.num_learnt,
                         fig_name=f"n_learnt_{extension}.pdf")
 
 def main():
 
-    for teacher_model in (LeitnerTeacher, RandomTeacher):
-        run(student_model=ActRMeaning, teacher_model=teacher_model ,t_max=11
+    for teacher_model in (LeitnerTeacher, AvyaTeacher, RandomTeacher):
+        run(student_model=ActRMeaning, teacher_model=teacher_model ,t_max=490
             )
 
 
