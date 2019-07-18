@@ -16,7 +16,6 @@ from plot.generic import save_fig
 
 from utils.utils import dic2string, load, dump
 
-import pickle
 import os
 
 
@@ -84,7 +83,7 @@ def _produce_data(student_model, teacher_model, student_param,
 
 
 def run(student_model, teacher_model,
-        student_param=None, n_item=25, grade=1, t_max=250):
+        student_param=None, n_item=25, grade=1, t_max=500):
 
     """
         :param teacher_model: Can be one of those:
@@ -174,22 +173,31 @@ def run(student_model, teacher_model,
 
 def main():
 
-    fig, axes = plt.subplots(nrows=1, ncols=2)
+    fig, axes = plt.subplots(nrows=2, ncols=2)
 
-    i = 0
+    j = 0
 
-    for teacher_model in (AvyaTeacher, RandomTeacher):
+    for teacher_model in (RandomTeacher, AvyaTeacher):
         r = run(student_model=ActRMeaning, teacher_model=teacher_model)
 
-        ax = axes[i]
+        ax = axes[0, j]
 
         plot.memory_trace.summarize_over_seen(
             p_recall=r['p_recall'],
             seen=r['seen'],
-            ax=ax
+            ax=ax,
+            font_size=20
         )
 
-        i += 1
+        ax = axes[1, j]
+
+        plot.memory_trace.summarize(
+            p_recall=r['p_recall'],
+            ax=ax,
+            font_size=20
+        )
+
+        j += 1
 
     save_fig('teacher_comparison.pdf')
 
