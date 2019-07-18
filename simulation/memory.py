@@ -24,8 +24,12 @@ def p_recall_over_time_after_learning(
         for t_idx, t in enumerate(time_sampling):
 
             for item in range(n_item):
-                p_recall[item, t_idx] = \
+                p = \
                     agent.p_recall(item=item, time=t*time_norm)
+
+                assert not np.isnan(p), "Error of logic!"
+
+                p_recall[item, t_idx] = p
 
     else:
         p_recall = np.zeros((n_item, t_max))
@@ -33,7 +37,11 @@ def p_recall_over_time_after_learning(
         for t_idx in range(t_max):
 
             for item in range(n_item):
-                p_recall[item, t_idx] = \
+                p = \
                     agent.p_recall(item=item, time_index=t_idx)
+
+                assert not np.isnan(p), "Error of logic!"
+
+                p_recall[item, t_idx] = p
 
     return p_recall

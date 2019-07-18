@@ -43,39 +43,6 @@ def _produce_data(student_model, teacher_model, student_param,
 
     print('Done.\n')
 
-    # # Figures for success
-    # plot.success.curve(successes,
-    #                    fig_name=f"success_curve_{extension}.pdf")
-    # plot.success.scatter(successes,
-    #                      fig_name=f"success_scatter_{extension}.pdf")
-
-    # # Figure combining probability of recall and actual successes
-    # p_recall = p_recall_over_time_after_learning(
-    #     agent=learner,
-    #     t_max=t_max,
-    #     n_item=n_item)
-    #
-    # plot.memory_trace.plot(p_recall_value=p_recall,
-    #                        success_value=successes,
-    #                        questions=questions,
-    #                        fig_name=f"memory_trace_{extension}.pdf")
-    #
-    # plot.memory_trace.summarize(
-    #     p_recall=p_recall,
-    #     fig_name=f"memory_trace_summarize_{extension}.pdf")
-    #
-    # plot.memory_trace.summarize_over_seen(
-    #     seen=teacher.seen,
-    #     p_recall=p_recall,
-    #     fig_name=f"memory_trace_summarize_over_seen_{extension}.pdf")
-    #
-    # plot.n_seen.curve(
-    #     seen=teacher.seen,
-    #     fig_name=f"n_seen_{extension}.pdf")
-    #
-    # plot.n_learnt.curve(
-    #     seen=teacher.mat,
-    #     fig_name=f"n_learnt_{extension}.pdf")
     return {
         'seen': teacher.seen,
         'p_recall': p_recall
@@ -83,9 +50,10 @@ def _produce_data(student_model, teacher_model, student_param,
 
 
 def run(student_model, teacher_model,
-        student_param=None, n_item=25, grade=1, t_max=500):
+        student_param=None, n_item=25, grade=1, t_max=500, force=False):
 
     """
+        :param force: Force the computation
         :param teacher_model: Can be one of those:
             * NirajTeacher
             * RandomTeacher
@@ -158,7 +126,7 @@ def run(student_model, teacher_model,
     bkp_file = os.path.join('bkp', 'teacher_comparison', f'{extension}.p')
 
     r = load(bkp_file)
-    if r is not None:
+    if r is not None and not force:
         return r
     else:
         r = _produce_data(student_param=student_param,
@@ -167,6 +135,7 @@ def run(student_model, teacher_model,
                           t_max=t_max,
                           grade=grade,
                           n_item=n_item)
+
         dump(r, bkp_file)
         return r
 
@@ -178,23 +147,28 @@ def main():
     j = 0
 
     for teacher_model in (RandomTeacher, AvyaTeacher):
-        r = run(student_model=ActRMeaning, teacher_model=teacher_model)
+        r = run(student_model=ActRMeaning, teacher_model=teacher_model,
+                force=True)
 
-        ax = axes[0, j]
+        p_recall = r['p_recall']
+
+        ax1 = axes[0, j]
+
+        print(p_recall)
 
         plot.memory_trace.summarize_over_seen(
-            p_recall=r['p_recall'],
+            p_recall=p_recall,
             seen=r['seen'],
-            ax=ax,
-            font_size=20
+            ax=ax1,
+            font_size=12
         )
 
-        ax = axes[1, j]
+        ax2 = axes[1, j]
 
         plot.memory_trace.summarize(
-            p_recall=r['p_recall'],
-            ax=ax,
-            font_size=20
+            p_recall=p_recall,
+            ax=ax2,
+            font_size=12
         )
 
         j += 1
