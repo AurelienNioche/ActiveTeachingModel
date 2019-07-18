@@ -8,8 +8,9 @@ np.seterr(all='raise')
 
 
 class NetworkParam:
-    def __init__(self, n_epoch=3):
+    def __init__(self, n_hidden=40, n_epoch=3):
         self.n_epoch = n_epoch
+        self.n_hidden = n_hidden
 
 
 class Network(Learner):
@@ -21,11 +22,12 @@ class Network(Learner):
 
     roles = 'input', 'hidden', 'output'
 
-    def __init__(self, tk, param=None):
+    def __init__(self, tk, param=None, verbose=False):
 
         super().__init__()
 
         self.tk = tk
+        self.verbose = verbose
 
         if param is None:
             pass
@@ -44,8 +46,10 @@ class Network(Learner):
         self.input_bits_needed = len(bin(self.n_items)) - 2
 
         self.neurons = {role: [] for role in self.roles}
-
         self.neuron_id = 0
+
+        self.create_input_neurons()
+        self.create_hidden_neurons(n_hidden=self.pr.n_hidden)
 
         # self.train(n_epoch)
 
@@ -119,11 +123,8 @@ class Network(Learner):
                 neuron.update_current()
 
     def p_recall(self, item, time=None):
-        """
-        The network does not recall, memory is already imprinted as part of
-        the dynamic state; it just gives P(r) when asked
-        """
-        pass
+        p_recall = self.neurons["output"][0].current
+        return p_recall
 
     def _p_choice(self, question, reply, possible_replies=None,
                   time=None, time_index=None):
@@ -172,7 +173,7 @@ class Network(Learner):
     def decide(self, question, possible_replies, time=None,
                time_index=None):
 
-        p_r = self.neurons["output"][0].weights_hebbian
+        p_r = self.neurons["output"][0].current
         r = np.random.random()
 
         if p_r > r:
