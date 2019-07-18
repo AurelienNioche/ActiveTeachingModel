@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import scipy.stats
 from tqdm import tqdm
+from matplotlib.ticker import MaxNLocator
 
 from fit.fit import Fit
 from learner.act_r import ActR
@@ -9,11 +10,13 @@ from plot.generic import save_fig
 from simulation.data import SimulatedData, Data
 from simulation.task import Task
 
+from utils.utils import load, dump
 
-class FitFidelity(Fit):
+import os
+
+class FitFidelity:
     def __init__(self, t_min=25, t_max=30, n_kanji=79, grade=1, model=ActR,
                  normalize_similarity=False, verbose=False):
-        super().__init__
 
         self.t_min = t_min
         self.t_max = t_max
@@ -33,8 +36,6 @@ class FitFidelity(Fit):
         self.changes = np.zeros((self.n_param,
                                 self.t_max - self.t_min - 1))
         self.mean_array = np.zeros((self.n_param, self.t_max - self.t_min - 2))
-
-        self.compute_fidelity()
 
     def _simulate_data(self):
 
@@ -90,6 +91,9 @@ class FitFidelity(Fit):
 
                 for iteration, k in\
                         enumerate(sorted(fit_r["best_param"].keys())):
+
+                    last_change = self.changes[iteration, i]
+
                     self.changes[iteration, i] =\
                         np.abs(best_v[k] - fit_r["best_param"][k])
 
@@ -101,8 +105,6 @@ class FitFidelity(Fit):
                         print("arr", self.mean_array, "arrr")
                         # print("chachacha", self.changes)
 
-                    last_change = self.changes[iteration, i]
-
                 best_v.update(fit_r["best_param"])
 
                 i += 1
@@ -111,48 +113,60 @@ class FitFidelity(Fit):
                 print(self.changes)
                 print(fit_r)
 
-        self._plot()
-
-    def _plot(self, font_size=42):
-
-        # if p_recall_time is None:
-        #     p_recall_time = np.arange(p_recall_value.shape[1])
-
-        fig = plt.figure(figsize=(15, 12))
-        ax = fig.subplots()
-
-        mean = self.mean_array[0, :]
-        sem = scipy.stats.sem(self.mean_array[0, :], axis=0)
-        n_trial = np.arange(0, self.mean_array[0, :].size, 1)
-
-        ax.plot(n_trial, mean, lw=1.5)
-        ax.fill_between(
-            mean,
-            y1=mean - sem,
-            y2=mean + sem,
-            alpha=0.2
-        )
-
-        ax.plot(mean, linestyle=':', color='C0')
-        ax.plot(mean, linestyle=':', color='C0')
-
-        ax.set_xlabel('Iteration', fontsize=font_size)
-        ax.set_ylabel('Mean', fontsize=font_size)
-
-        fig_name = f'fit-fidelity-{self.model.__name__}-t_max={self.t_max}.pdf'
-
-        save_fig(fig_name=fig_name)
+        return self.mean_array
 
 
-def main():
+def _plot(mean_array, fig_name, font_size=42):
 
-    np.random.seed(123)
+    # if p_recall_time is None:
+    #     p_recall_time = np.arange(p_recall_value.shape[1])
 
-    fit_fidelity = FitFidelity(verbose=False)
+    fig = plt.figure(figsize=(15, 12))
+    ax = fig.subplots()
+
+    mean = mean_array[0, :]
+    # sem = scipy.stats.sem(self.mean_array[0, :], axis=0)
+    n_trial = np.arange(0, mean_array[0, :].size, 1)
+
+    ax.plot(n_trial, mean, lw=1.5)
+    # ax.fill_between(
+    #     mean,
+    #     y1=mean - sem,
+    #     y2=mean + sem,
+    #     alpha=0.2
+    # )
+    #
+    # ax.plot(mean, linestyle=':', color='C0')
+    # ax.plot(mean, linestyle=':', color='C0')
+
+    ax.set_xlabel('Iteration', fontsize=font_size)
+    ax.set_ylabel('Mean', fontsize=font_size)
+
+    ax.yaxis.set_major_locator(MaxNLocator(integer=True))
+
+    save_fig(fig_name=fig_name)
+
+
+def main(t_max, model):
+
+    extension = f"fit-fidelity-{model.__name__}-t_max={t_max}"
+    bkp_file = os.path.join("bkp", "fit_fidelity", f"{extension}.p")
+
+    mean_array = load(bkp_file)
+    if mean_array is None:
+        np.random.seed(123)
+
+        ff = FitFidelity(model=model, t_max=t_max, verbose=False)
+        mean_array = ff.compute_fidelity()
+        dump(mean_array, bkp_file)
+
+    _plot(
+        mean_array=mean_array,
+        fig_name=f'fit-fidelity-{model.__name__}-t_max={t_max}.pdf')
 
 
 if __name__ == "__main__":
-    main()
+    main(t_max=30, model=ActR)
 
 
 # Suppose you have an array 'data' with each line being the values for

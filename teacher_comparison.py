@@ -14,6 +14,74 @@ from teacher.random import RandomTeacher
 import matplotlib.pyplot as plt
 from plot.generic import save_fig
 
+from utils.utils import dic2string, load, dump
+
+import pickle
+import os
+
+
+def _produce_data(student_model, teacher_model, student_param,
+                  n_item, grade, t_max):
+
+    teacher = teacher_model(t_max=t_max, n_item=n_item, grade=grade)
+    learner = student_model(param=student_param, tk=teacher.tk)
+
+    print(f"\nSimulating data with a student {student_model.__name__} "
+          f"(parameters={student_param}), "
+          f"and a teacher {teacher_model.__name__} "
+          f"using {n_item} kanji of grade {grade} for {t_max} time steps...",
+          end=" ", flush=True)
+
+    questions, replies, successes = teacher.teach(agent=learner)
+
+    print("Done.")
+    print('Computing probabilities of recall...', end=' ', flush=True)
+
+    p_recall = p_recall_over_time_after_learning(
+        agent=learner,
+        t_max=t_max,
+        n_item=n_item)
+
+    print('Done.\n')
+
+    # # Figures for success
+    # plot.success.curve(successes,
+    #                    fig_name=f"success_curve_{extension}.pdf")
+    # plot.success.scatter(successes,
+    #                      fig_name=f"success_scatter_{extension}.pdf")
+
+    # # Figure combining probability of recall and actual successes
+    # p_recall = p_recall_over_time_after_learning(
+    #     agent=learner,
+    #     t_max=t_max,
+    #     n_item=n_item)
+    #
+    # plot.memory_trace.plot(p_recall_value=p_recall,
+    #                        success_value=successes,
+    #                        questions=questions,
+    #                        fig_name=f"memory_trace_{extension}.pdf")
+    #
+    # plot.memory_trace.summarize(
+    #     p_recall=p_recall,
+    #     fig_name=f"memory_trace_summarize_{extension}.pdf")
+    #
+    # plot.memory_trace.summarize_over_seen(
+    #     seen=teacher.seen,
+    #     p_recall=p_recall,
+    #     fig_name=f"memory_trace_summarize_over_seen_{extension}.pdf")
+    #
+    # plot.n_seen.curve(
+    #     seen=teacher.seen,
+    #     fig_name=f"n_seen_{extension}.pdf")
+    #
+    # plot.n_learnt.curve(
+    #     seen=teacher.mat,
+    #     fig_name=f"n_learnt_{extension}.pdf")
+    return {
+        'seen': teacher.seen,
+        'p_recall': p_recall
+    }
+
 
 def run(student_model, teacher_model,
         student_param=None, n_item=25, grade=1, t_max=250):
@@ -85,66 +153,23 @@ def run(student_model, teacher_model,
          RandomTeacher, LeitnerTeacher), \
         "Teacher model not recognized."
 
-    teacher = teacher_model(t_max=t_max, n_item=n_item, grade=grade)
-    learner = student_model(param=student_param, tk=teacher.tk)
+    extension = f'{teacher_model.__name__}_{student_model.__name__}_' \
+        f'{dic2string(student_param)}_ni_{n_item}_grade_{grade}_tmax_{t_max}'
 
-    print(f"\nSimulating data with a student {student_model.__name__} "
-          f"(parameters={student_param}), "
-          f"and a teacher {teacher_model.__name__} "
-          f"using {n_item} kanji of grade {grade} for {t_max} time steps...",
-          end=" ", flush=True)
+    bkp_file = os.path.join('bkp', 'teacher_comparison', f'{extension}.p')
 
-    questions, replies, successes = teacher.teach(agent=learner)
-
-    print("Done.\n")
-
-    print('Computing probabilities of recall...', end=' ', flush=True)
-
-    p_recall = p_recall_over_time_after_learning(
-        agent=learner,
-        t_max=t_max,
-        n_item=n_item)
-
-    print('Done.\n')
-
-    # # Figures for success
-    # extension = f'{student_model.__name__}_{teacher_model.__name__}'
-    # plot.success.curve(successes,
-    #                    fig_name=f"success_curve_{extension}.pdf")
-    # plot.success.scatter(successes,
-    #                      fig_name=f"success_scatter_{extension}.pdf")
-
-    # # Figure combining probability of recall and actual successes
-    # p_recall = p_recall_over_time_after_learning(
-    #     agent=learner,
-    #     t_max=t_max,
-    #     n_item=n_item)
-    #
-    # plot.memory_trace.plot(p_recall_value=p_recall,
-    #                        success_value=successes,
-    #                        questions=questions,
-    #                        fig_name=f"memory_trace_{extension}.pdf")
-    #
-    # plot.memory_trace.summarize(
-    #     p_recall=p_recall,
-    #     fig_name=f"memory_trace_summarize_{extension}.pdf")
-    #
-    # plot.memory_trace.summarize_over_seen(
-    #     seen=teacher.seen,
-    #     p_recall=p_recall,
-    #     fig_name=f"memory_trace_summarize_over_seen_{extension}.pdf")
-    #
-    # plot.n_seen.curve(
-    #     seen=teacher.seen,
-    #     fig_name=f"n_seen_{extension}.pdf")
-    #
-    # plot.n_learnt.curve(
-    #     seen=teacher.mat,
-    #     fig_name=f"n_learnt_{extension}.pdf")
-    return {
-        'seen': teacher.seen,
-        'p_recall': p_recall
-    }
+    r = load(bkp_file)
+    if r is not None:
+        return r
+    else:
+        r = _produce_data(student_param=student_param,
+                          student_model=student_model,
+                          teacher_model=teacher_model,
+                          t_max=t_max,
+                          grade=grade,
+                          n_item=n_item)
+        dump(r, bkp_file)
+        return r
 
 
 def main():

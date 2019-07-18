@@ -10,7 +10,7 @@ application = get_wsgi_application()
 # Your application specific imports
 from task.models import Kanji
 
-from utils.utils import AskUser
+from utils.django import AskUser
 
 
 @AskUser
