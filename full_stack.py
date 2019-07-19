@@ -34,8 +34,11 @@ def run(student_model, teacher_model, student_param,
 
     questions = np.zeros(t_max, dtype=int)
     replies = np.zeros(t_max, dtype=int)
+    successes = np.zeros(t_max, dtype=bool)
+    seen = np.zeros((n_item, t_max), dtype=bool)
 
     for t in iterator:
+        teacher.agent = learner
         question, possible_replies = teacher.ask()
 
         reply = learner.decide(
