@@ -2,7 +2,6 @@ import copy
 
 import numpy as np
 
-# import random
 from teacher.metaclass import GenericTeacher
 
 
@@ -10,16 +9,16 @@ class AvyaTeacher(GenericTeacher):
 
     def __init__(self, n_item=20, t_max=200, grades=(1, ),
                  handle_similarities=True,
-                 iteration=0, learn_threshold=0.95, forgot_threshold=0.85,
+                 iteration=0, learnt_threshold=0.95, forgot_threshold=0.85,
                  represent_learnt=2, represent_learning=1, represent_unseen=0,
                  verbose=False):
         """
         :param iteration: current iteration number.
             0 at first iteration.
-        :param learn_threshold: p_recall(probability of recall) threshold after
-            which an item is learnt
+        :param learnt_threshold: p_recall(probability of recall) threshold after
+            which an item is learnt.
         :param forgot_threshold: As learn_threshold but on the verge of being
-            learnt
+            learnt.
         """
 
         super().__init__(n_item=n_item, t_max=t_max, grades=grades,
@@ -27,7 +26,7 @@ class AvyaTeacher(GenericTeacher):
                          verbose=verbose)
 
         self.iteration = iteration
-        self.learn_threshold = learn_threshold
+        self.learn_threshold = learnt_threshold
         self.forgot_threshold = forgot_threshold
         self.represent_learnt = represent_learnt
         self.represent_learning = represent_learning
@@ -191,7 +190,7 @@ class AvyaTeacher(GenericTeacher):
             * Number of items included (0 ... n-1)
         :return: integer (index of the question to ask)
 
-        Function implements 3 Rules in order:
+        Function implements 3 Rules in order.
         """
         new_question = None
         taboo = None
