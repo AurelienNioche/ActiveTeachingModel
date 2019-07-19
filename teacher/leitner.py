@@ -9,25 +9,48 @@ from teacher.metaclass import GenericTeacher
 class LeitnerTeacher(GenericTeacher):
 
     def __init__(self, n_item=20, t_max=200, grades=(1, ),
-                 handle_similarities=True,
+                 handle_similarities=True, fractional_success=0.9,
+                 buffer_threshold=15, taboo=None, represent_learnt=2,
+                 represent_learning=1, represent_unseen=0,
                  verbose=False):
+        """
+            :var iteration: current iteration number.
+            0 at first iteration.
+            :param fractional_success: fraction of successful replies required for teaching
+            after which an item is learnt
+            :param buffer_threshold: integer value in range(0 to n_items):
+                *To prevent bottleneck, maximum number of items that can be taught at a time
+            :param taboo: integer value in range(0 to n_items)
+                *index of the item shown in previous iteration
+           """
 
         super().__init__(n_item=n_item, t_max=t_max, grades=grades,
                          handle_similarities=handle_similarities,
                          verbose=verbose)
-        self.learning_progress = np.zeros(n_item)
-        self.buffer_threshold = 15
+        self.iteration = 0
+        self.fractional_success = fractional_success
+        self.buffer_threshold = buffer_threshold
+        self.taboo = taboo
+        self.represent_learnt = represent_learnt
+        self.represent_learning = represent_learning
+        self.represent_unseen = represent_unseen
+
         # Initialize buffer_threshold number of characters in learning set
         for i in range(self.buffer_threshold):
             self.learning_progress[i] = 1
 
-        self.count = 0
-        self.num_learnt = np.zeros(t_max)
+        # Matrix to store the past successful attempts of every item
         self.past_successes = np.full((n_item, self.buffer_threshold), -1)
-        self.taboo = -1
+
+        # At i^th index stores probability of picking i^th item
         self.prob = np.zeros(n_item)
-        self.prob_thresh = 0.9
-        self.learn_threshold = 0.95
+
+        self.learning_progress = np.zeros(n_item)
+        # :param learning_progress: list of size n_items containing:
+        #     * param represent_learnt: at i^th index when i^th item is learnt
+        #     * param represent_learning: at i^th index when i^th item is seen
+        #     at least once but hasn't been learnt
+        #     * param represent_unseen: at i^th index when i^th item is unseen
 
     def ask(self):
 
@@ -70,34 +93,32 @@ class LeitnerTeacher(GenericTeacher):
                 count_unseen += 1
             else:
                 count_learning += 1
-        for item in range(n_items):
-            if agent.p_recall(item)>self.learn_threshold:
-                self.num_learnt[self.count] += 1
+
         if count_learnt == n_items:
             print("All kanjis learnt")
-            self.count += 1
+            self.iteration += 1
             return 0
         # Update the past recall memory
-        if self.count != 0:
+        if self.iteration != 0:
             result = np.where(self.past_successes[self.taboo] == -1)
             if len(result) > 0 and len(result[0]) > 0:
                 self.past_successes[self.taboo, result[0][0]] = \
-                    int(successes[self.count-1])
+                    int(successes[self.iteration - 1])
             else:
                 for i in range(self.buffer_threshold-1):
                     self.past_successes[self.taboo,i] = self.past_successes[self.taboo,i+1]
-                self.past_successes[self.taboo, self.buffer_threshold - 1]= int(successes[self.count-1])
+                self.past_successes[self.taboo, self.buffer_threshold - 1]= int(successes[self.iteration - 1])
         else:
             #no past memory implies a random question to be shown from learning set
             ran = random.randint(0, self.buffer_threshold)
             self.taboo = ran
-            self.count += 1
+            self.iteration += 1
             return int(ran)
         for item in range(n_items):
             #modify the learning set
             if self.learning_progress[item] == 1:
                 succ_recalls = np.sum(np.where(self.past_successes[item]>0, 1, 0))
-                if succ_recalls >= (self.buffer_threshold*self.prob_thresh):
+                if succ_recalls >= (self.buffer_threshold*self.fractional_success):
                     #send item from learning set to learnt set
                     self.learning_progress[item] = 2
                     count_learnt += 1
@@ -133,12 +154,12 @@ class LeitnerTeacher(GenericTeacher):
             if len(result) > 0 and len(result[0]) > 0:
                 new_question = int(self.learning_progress[result[0][0]])
                 self.taboo = new_question
-                self.count += 1
+                self.iteration += 1
                 print(new_question)
                 return new_question
             else:
                 print("all kanjis learnt")
-                self.count += 1
+                self.iteration += 1
                 return 0
 
         #find a random integer from 0 to psum
@@ -150,7 +171,7 @@ class LeitnerTeacher(GenericTeacher):
             if ran <= sum + self.prob[item]:
                 new_question = item
                 self.taboo = new_question
-                self.count += 1
+                self.iteration += 1
                 return new_question
             sum += self.prob[item]
         print(ran,sum,psum)
