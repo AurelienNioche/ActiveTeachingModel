@@ -1,20 +1,25 @@
 import copy
 import random
-from teacher.metaclass import GenericTeacher
+
 import numpy as np
 
-#
+from teacher.metaclass import GenericTeacher
+
+
 class LeitnerTeacher(GenericTeacher):
 
-    def __init__(self, n_item=20, t_max=200, grade=1, handle_similarities=True, verbose=False):
+    def __init__(self, n_item=20, t_max=200, grade=1, handle_similarities=True,
+                 verbose=False):
 
-        super().__init__(n_item=n_item, t_max=t_max, grade=grade, handle_similarities=handle_similarities,
+        super().__init__(n_item=n_item, t_max=t_max, grade=grade,
+                         handle_similarities=handle_similarities,
                          verbose=verbose)
         self.teach_set = np.zeros(n_item)
         self.buffer_threshold = 15
-        # initialise buffer_threshhold number of characters to be in learning set
+        # Initialize buffer_threshold number of characters in learning set
         for i in range(self.buffer_threshold):
             self.teach_set[i] = 1
+
         self.count = 0
         self.num_learnt = np.zeros(t_max)
         self.past_successes = np.full((n_item, self.buffer_threshold), -1)
@@ -34,7 +39,6 @@ class LeitnerTeacher(GenericTeacher):
         print(question)
         possible_replies = self.get_possible_replies(question)
 
-
         if self.verbose:
             print(f"Question chosen: {self.tk.kanji[question]}; "
                   f"correct answer: {self.tk.meaning[question]}; "
@@ -42,7 +46,6 @@ class LeitnerTeacher(GenericTeacher):
 
         return question, possible_replies
 
-    # Learnt character set is represented by 2,Being learnt character set by 1, Unseen character set as 0
 
     def get_next_node(self, questions, successes, agent, n_items):
         """
@@ -73,11 +76,12 @@ class LeitnerTeacher(GenericTeacher):
             print("All kanjis learnt")
             self.count += 1
             return 0
-        #update the past recall memory
+        # Update the past recall memory
         if self.count != 0:
             result = np.where(self.past_successes[self.taboo] == -1)
             if len(result) > 0 and len(result[0]) > 0:
-                self.past_successes[self.taboo, result[0][0]] = int(successes[self.count-1])
+                self.past_successes[self.taboo, result[0][0]] = \
+                    int(successes[self.count-1])
             else:
                 for i in range(self.buffer_threshold-1):
                     self.past_successes[self.taboo,i] = self.past_successes[self.taboo,i+1]
@@ -135,7 +139,6 @@ class LeitnerTeacher(GenericTeacher):
                 print("all kanjis learnt")
                 self.count += 1
                 return 0
-
 
         #find a random integer from 0 to psum
         ran = random.randint(0, psum)

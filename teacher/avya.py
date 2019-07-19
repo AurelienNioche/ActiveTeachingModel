@@ -1,23 +1,43 @@
 import copy
 
+import numpy as np
+
 # import random
 from teacher.metaclass import GenericTeacher
-import numpy as np
 
 
 class AvyaTeacher(GenericTeacher):
 
     def __init__(self, n_item=20, t_max=200, grade=1, handle_similarities=True,
+                 iteration=0, learn_threshold=0.95, forgot_threshold=0.85,
+                 represent_learnt=2, represent_learning=1, represent_unseen=0,
                  verbose=False):
+        """
+        :param iteration: current iteration number.
+            0 at first iteration.
+        :param learn_threshold: p_recall(probability of recall) threshold after
+            which an item is learnt
+        :param forgot_threshold: As learn_threshold but on the verge of being
+            learnt
+        """
 
         super().__init__(n_item=n_item, t_max=t_max, grade=grade,
                          handle_similarities=handle_similarities,
                          verbose=verbose)
-        self.learned = np.zeros(n_item)
-        self.learn_threshold = 0.95
-        self.forgot_threshold = 0.85
-        self.count = 0
-        self.num_learnt = np.zeros(t_max)
+
+        self.iteration = iteration
+        self.learn_threshold = learn_threshold
+        self.forgot_threshold = forgot_threshold
+        self.represent_learnt = represent_learnt
+        self.represent_learning = represent_learning
+        self.represent_unseen = represent_unseen
+
+        self.learning_progress = np.zeros(n_item)
+        # :param learning_progress: list of size n_items containing:
+        #     * param represent_learnt: at i^th index when i^th item is learnt
+        #     * param represent_learning: at i^th index when i^th item is seen
+        #     at least once but hasn't been learnt
+        #     * param represent_unseen: at i^th index when i^th item is unseen
 
     def ask(self):
 
@@ -35,38 +55,78 @@ class AvyaTeacher(GenericTeacher):
 
         return question, possible_replies
 
-    # Learnt character set is represented by 2,Being learnt character set by 1,
-    # Unseen character set as 0
     def update_sets(self, agent, n_items):
-        for k in range(n_items):
-            if agent.p_recall(k) > self.learn_threshold:
-                self.learned[k] = 2
+        """
+        :param agent:
+        :param n_items:
 
-        if self.count > 0:
-            if self.learned[self.questions[self.count-1]] == 0:
-                self.learned[self.questions[self.count - 1]] = 1
+        Updates the learning progress list after every iteration.
+        Follows the following rules:
+            1. When the probability of recall of any item is greater than
+            learn_threshold then update said item to represent_learnt value in
+            learning_progress array.
+            2. If the item is unseen until (current iteration - 1) then update
+            item value to represent_learning value in learning_progress array.
+        """
+        for i in range(n_items):
+            if agent.p_recall(i) > self.learn_threshold:
+                self.learning_progress[i] = self.represent_learnt
 
-    # calculate usefulness and relative parameters.
-    def parameters(self, n_items, agent):
-        recall = [0] * n_items
-        # recall[i] represents probability of recalling kanji[i] at current
-        # instant
-        usefulness = [0] * n_items
-        recall_next = [[0] * n_items] * n_items  # recall_next[i][j] is prob of
-        # recalling i with j learnt.
-        relative = [[0] * n_items] * n_items  # relative amount by which
-        # knowing j helps i
-        for item in range(n_items):
-            recall[item] = agent.p_recall(item)
-            for item2 in range(n_items):
-                if item2 != item:
-                    agent.learn(item2)
-                    recall_next[item][item2] = agent.p_recall(item)
-                    relative[item][item2] = recall_next[item][item2]\
-                                            - recall[item]
+        if self.iteration > 0:
+            shown_item = self.questions[self.iteration - 1]
+            if self.learning_progress[shown_item] == self.represent_unseen:
+                self.learning_progress[shown_item] = self.represent_learning
+
+    def get_parameters(self, n_items, agent):
+        """
+        Function to calculate Usefulness of items
+        :var recall_arr: list of integers size n_items (ith index has current
+        probability of recall of ith item)
+        :var recall_next_arr: matrix of integers size n_items*n_items ((i,j)th
+        index is probability of recalling i with j learnt by learner of recall
+        of ith item)
+        :return the following variables:
+            * :var relative: matrix of integers size n_items*n_items((i,j)th index
+                has relative amount by which knowing j helps i
+            * :var usefulness: list of integers that stores the usefulness of
+                teaching the ith item now.
+        """
+
+        recall_arr = np.zeros(n_items)
+        recall_next_arr = np.zeros((n_items, n_items))
+        relative = np.zeros((n_items, n_items))
+        usefulness = np.zeros(n_items)
+
+        for i in range(n_items):
+            recall_arr[i] = agent.p_recall(i)
+            for j in range(n_items):
+                if j != i:
+                    agent.learn(j)
+                    recall_next_arr[i][j] = agent.p_recall(i)
+                    relative[i][j] = recall_next_arr[i][j] - recall_arr[i]
                     agent.unlearn()
-                usefulness[item2] += relative[item][item2]
+                usefulness[j] += relative[i][j]
         return relative, usefulness
+
+    def get_useful(self, questions, agent, n_items):
+        """Rule 3: find the most useful item"""
+        relative, usefulness = self.get_parameters(n_items, agent)
+        max_ind = None
+        max_val = float('-inf')
+        for i in range(0, n_items):
+            if self.learning_progress[i] != self.represent_learnt:
+                if usefulness[i] > max_val:
+                    if questions[self.iteration - 1] != i:
+                        max_val = usefulness[i]
+                        max_ind = i
+        if max_ind is None:
+            print("All items learnt by Learner")
+            max_ind = 0
+
+        new_question = max_ind
+        self.update_sets(agent, n_items)
+        self.iteration += 1
+        return new_question
 
     def get_next_node(self, questions, agent, n_items):
         """
@@ -84,63 +144,33 @@ class AvyaTeacher(GenericTeacher):
             * Number of items included (0 ... n-1)
         :return: integer (index of the question to ask)
         """
+        """
+            Function implements 3 Rules in order:
+            1. Teach a learnt item whose p_recall slipped below learn_threshold 
+            2. Teach a learning item with p_recall above forgot threshold
+            3. Teach the most useful item 
+        """
 
-        relative, usefulness = self.parameters(n_items, agent)
-        if self.count > 0:
-            # Rule1: don't let a learnt kanji slip out of threshold
+        if self.iteration > 0:
             for i in range(n_items):
-                if self.learned[i] == 2:
+                # Rule1:
+                if self.learning_progress[i] == self.represent_learnt:
                     if agent.p_recall(i) < self.learn_threshold:
-                        if questions[self.count-1] != i:
+                        if questions[self.iteration - 1] != i:
                             new_question = i
-                            result = np.where(
-                                self.learned == 2,1,0)
-                            learn_char = np.sum(result)
-                            self.num_learnt[self.count] = learn_char
                             self.update_sets(agent, n_items)
-
-
-                            self.count += 1
+                            self.iteration += 1
                             return new_question
-            # Rule2: Bring an almost learnt Kanji to learnt set.
-            for i in range(n_items):
-                if self.learned[i] == 1:
+                # Rule2:
+                elif self.learning_progress[i] == self.represent_learning:
                     if agent.p_recall(i) > self.forgot_threshold:
-                        if questions[self.count-1] != i:
+                        if questions[self.iteration - 1] != i:
                             new_question = i
-                            result = np.where(
-                                self.learned == 2, 1, 0)
-                            learn_char = np.sum(result)
-                            self.num_learnt[self.count] = learn_char
                             self.update_sets(agent, n_items)
-
-                            self.count += 1
+                            self.iteration += 1
                             return new_question
 
-        # Rule3: find the most useful kanji.
-        max_ind = -1
-        max_val = -10000
-        for i in range(0, n_items):
-            if self.learned[i] < 2:
-                if usefulness[i] > max_val:
-                    if questions[self.count - 1] != i:
-                        max_val = usefulness[i]
-                        max_ind = i
-        if max_ind==-1:
-            print("all kanjis learnt")
-            #return exit value
-            max_ind = 0
-
-        new_question = max_ind
-        result = np.where(
-            self.learned == 2, 1, 0)
-        learn_char = np.sum(result)
-        self.num_learnt[self.count] = learn_char
-        self.update_sets(agent, n_items)
-
-
-
-        # Update the iteration index
-        self.count += 1
-
+        new_question = self.get_useful(questions, agent, n_items)
         return new_question
+
+
