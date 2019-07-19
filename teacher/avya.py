@@ -33,7 +33,7 @@ class AvyaTeacher(GenericTeacher):
         self.represent_unseen = represent_unseen
 
         self.learning_progress = np.zeros(n_item)
-        # :param learning_progress: list of size n_items containing:
+        # :param learning_progress: will contain:
         #     * param represent_learnt: at i^th index when i^th item is learnt
         #     * param represent_learning: at i^th index when i^th item is seen
         #     at least once but hasn't been learnt
@@ -57,7 +57,7 @@ class AvyaTeacher(GenericTeacher):
 
     def update_sets(self, recall_arr, n_items):
         """
-        :param recall_arr: list of integers size n_items ( i^th index has the
+        :param recall_arr: list of integers size n_items (i^th index has the
             probability of recall of i^th item)
         :param n_items: n = Number of items included (0 ... n-1)
 
@@ -82,28 +82,28 @@ class AvyaTeacher(GenericTeacher):
     @staticmethod
     def get_parameters(n_items, agent):
         """
-        Function to calculate Usefulness of items
-        :param agent: agent object (RL, ACT-R, ...) that implements at
-            least the following methods:
+        :param agent: agent object (RL, ACT-R, ...) that implements at least
+            the following methods:
             * p_recall(item): takes index of a question and gives the
                 probability of recall for the agent in current state.
             * learn(item): strengthen the association between a kanji and
                 its meaning.
             * unlearn(): cancel the effect of the last call of the learn
                 method.
-        :param n_items: as before
+        :param n_items: as before.
         :var recall_arr: list of integers size n_items (ith index has current
-        probability of recall of ith item)
+        probability of recall of ith item).
         :var recall_next_arr: matrix of integers size n_items*n_items ((i,j)th
-        index is probability of recalling i with j learnt)
+        index is probability of recalling i with j learnt).
         :var relative: matrix of integers size n_items*n_items((i,j)th index
-                has relative value by which knowing j helps i
+                has relative value by which knowing j helps i.
         :return the following variables:
             * :var usefulness: list of integers that stores the usefulness of
                 teaching the ith item in current iteration.
             * :var recall_arr: list of integers size n_items ( i^th index has
-            the probability of recall of i^th item)
+            the probability of recall of i^th item).
 
+        Calculate Usefulness of items
         """
 
         recall_arr = np.zeros(n_items)
@@ -125,9 +125,9 @@ class AvyaTeacher(GenericTeacher):
     def get_slipping(self, taboo, recall_arr, n_items):
         """
         :param taboo: Integer value from range(0 to n_items) is the item shown
-        in last iteration
-        :param recall_arr: as before
-        :param n_items: as before
+        in last iteration.
+        :param recall_arr: as before.
+        :param n_items: as before.
 
         Rule 1: Find a learnt item whose p_recall slipped below learn_threshold
         """
@@ -155,13 +155,13 @@ class AvyaTeacher(GenericTeacher):
 
     def get_useful(self, taboo, recall_arr, usefulness, n_items):
         """
-        :param taboo: as before
-        :param recall_arr: as before
+        :param taboo: as before.
+        :param recall_arr: as before.
         :param usefulness: list of integers that stores the usefulness of
                 teaching the ith item in current iteration.
-        :param n_items: as before
+        :param n_items: as before.
 
-        Rule 3: Find the most useful item
+        Rule 3: Find the most useful item.
         """
         max_ind = None
         max_val = float('-inf')
@@ -185,12 +185,12 @@ class AvyaTeacher(GenericTeacher):
         """
         :param questions: list of integers (index of questions).
             Empty at first iteration.
-        :param agent: as before
+        :param agent: as before.
         :param n_items:
-            * Number of items included (0 ... n-1)
-        :return: integer (index of the question to ask)
+            * Number of items included (0 ... n-1).
+        :return: integer (index of the question to ask).
 
-        Function implements 3 Rules in order
+        Function implements 3 Rules in order.
         """
         new_question = None
         taboo = None
