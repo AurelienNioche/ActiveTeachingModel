@@ -49,18 +49,20 @@ class Network(Learner):
 
         self.neurons = {role: [] for role in self.roles}
         self.neuron_id = 0
+        self.hidden_currents_history = np.zeros((self.pr.n_epoch,
+                                                 self.pr.n_hidden))
 
         self.create_input_neurons()
         self.create_hidden_neurons(n_hidden=self.pr.n_hidden)
 
-        # self.train(n_epoch)
-
+        self._train(self.pr.n_epoch)
 
     def create_input_neurons(self, verbose=False):
         """
+        :param verbose: prints loop iteration number.
+
         Instances n input neurons where n is the amount of neurons to represent
         the total number of question indices in binary form.
-        :param verbose: prints loop iteration number
         """
         for i in range(self.input_bits_needed):  # Instance n Neurons
             self._create_neuron(role='input')
@@ -108,22 +110,27 @@ class Network(Learner):
         for role in self.roles:
             print(f"Number of {role} neurons: ", len(self.neurons[role]))
 
-    def train(self, n_epochs):
+    def _train(self, n_epochs):
         """
         :param n_epochs: int in range(0, +inf). Number of epochs
-        :return: None
         """
 
         if n_epochs < 0:
             raise ValueError("n_epochs not int or not in range(0, +inf)")
 
-        for _ in tqdm(range(0, n_epochs)):
+        for i in tqdm(range(n_epochs)):
             for neuron in self.neurons["hidden"]:
                 neuron.compute_gain()
                 neuron.update_current()
+                for j, val in enumerate(self.neurons["hidden"]):
+                    self.hidden_currents_history[i, j] =\
+                        self.neurons["hidden"][j].current
+
             for neuron in self.neurons["output"]:
                 neuron.compute_gain()
                 neuron.update_current()
+
+        print(self.hidden_currents_history)
 
     def p_recall(self, item, time=None):
         p_recall = self.neurons["output"][0].current
@@ -204,6 +211,7 @@ class Neuron:
     :param gamma: gain func exponent. Always sub-linear, then value < 1
     :param kappa: excitation parameter
     :param phi: inhibition parameter in range(0.70, 1.06)
+
     Note: default argument values are the reference values in the article but
     for phi; only phi_min and phi_max are given in Recanatesi (2015).
     """
@@ -315,6 +323,8 @@ class Neuron:
         self.current = int(self.current > 0.5)
             # TODO find a way to implement output = P(r) w/o breaking script
             # / self.tau)
+        if self.role == "output":
+            print(self.weights_hebbian)  # Debugging
 
     def print_attributes(self):
         """
@@ -326,25 +336,48 @@ class Neuron:
 
 
 def plot(network):
-    data = np.zeros(network.pr.n_hidden)
-    for i, val in enumerate(network.neurons["hidden"]):
-        data[i] = network.neurons["hidden"][i].current
-    print(data)
-    factors = []
-    dimension_pairs = []
-    for i in range(network.pr.n_hidden):
-        if (network.pr.n_hidden % (network.pr.n_hidden - 1)) == 0:
-            factors.append()
-            # now I have the factors, make it pairs next
-    numbo[-1]
-    data = np.reshape(data, (-1, 5))
-    print(data)
-    x, y = np.meshgrid(range(data.shape[0]), range(data.shape[1]))
-    z = data
-    c = plt.ax.contourf(x, y, z)  # cmap='viridis')
-    # divider = make_axes_locatable(ax)
-    # cax = divider.append_axes("right", size="5%", pad=0.05)
-    # plt.colorbar(c, cax=cax, ticks=y_ticks)
+    # data = network.hidden_currents_history
+    # # data = np.zeros(network.pr.n_hidden)
+    # # for i, val in enumerate(network.neurons["hidden"]):
+    # #     data[i] = network.neurons["hidden"][i].current
+    # # print(data.shape)
+    # # factors = []
+    # # dimension_pairs = []
+    # # for i in range(network.pr.n_hidden):
+    # #     if (network.pr.n_hidden % (network.pr.n_hidden - 1)) == 0:
+    # #         factors.append()
+    # #         # now I have the factors, make it pairs next
+    # # numbo[-1]
+    # # data = np.reshape(data, (-1, 5))
+    # # print(data)
+    # # x, y = np.meshgrid(range(data.shape[0]), range(data.shape[1]))
+    #
+    # # x = np.arange(0, network.pr.n_hidden, 1)
+    # # y = np.zeros(1) + 1
+    # # z = data
+    # # h = plt.contourf(x, y, z)
+    #
+    # data = np.expand_dims(data, axis=0)
+    # # plt.pcolormesh(data)
+    # data2 = data * 0
+    # # plt.pcolormesh(data2)
+    # fig, axs = plt.subplots(nrows=2, ncols=1, subplot_kw={'xticks': [],
+    #                                                       'yticks': []})
+    #
+    # for ax in axs:
+    #     ax.imshow(data, cmap='viridis')
+    #     ax.imshow(data2, cmap='viridis')
+    #
+    # plt.tight_layout()
+    # plt.show()
+    # # z = data
+    # # c = plt.ax.contourf(x, y, z)  # cmap='viridis')
+    # # divider = make_axes_locatable(ax)
+    # # cax = divider.append_axes("right", size="5%", pad=0.05)
+    # # plt.colorbar(c, cax=cax, ticks=y_ticks)
+
+    print(network.hidden_currents_history)
+    plt.imshow(network.hidden_currents_history)
 
 
 def main():
@@ -354,14 +387,14 @@ def main():
 
     np.random.seed(1234)
 
-    network = Network(tk=Task(t_max=100, n_item=30), param={"n_epoch": 10,
+    network = Network(tk=Task(t_max=100, n_item=30), param={"n_epoch": 20,
                                                             "n_hidden": 40})
 
-    network.show_neurons()
+    # network.show_neurons()
     plot(network)
-
+    #
     # spam = network.neurons["output"][0].weights_hebbian
-    # network.train(6)
+    # # network.train(6)
     # eggs = network.neurons["output"][0].weights_hebbian
     # print("\nspam ", spam, "\neggs", eggs)
     # for i in network.neurons["input"]:
