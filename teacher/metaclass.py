@@ -1,12 +1,14 @@
 import numpy as np
 
+from tqdm import tqdm
+
 from task.parameters import N_POSSIBLE_REPLIES
 from simulation.task import Task
 
 
 class GenericTeacher:
 
-    def __init__(self, n_item=20, t_max=100, grade=1, seed=123,
+    def __init__(self, n_item=20, t_max=100, grades=(1, ), seed=123,
                  handle_similarities=True, normalize_similarity=False,
                  verbose=False):
 
@@ -15,11 +17,11 @@ class GenericTeacher:
             f"superior to the number of possible replies " \
             f"(set to {N_POSSIBLE_REPLIES} in 'task/parameters.py')"
 
-        assert grade != 1 or n_item <= 79, \
+        assert grades != (1, ) or n_item <= 79, \
             "The number of items has to be inferior to 80 if" \
             "selected grade is 1."
 
-        self.tk = Task(n_kanji=n_item, t_max=t_max, grade=grade, seed=seed,
+        self.tk = Task(n_kanji=n_item, t_max=t_max, grades=grades, seed=seed,
                        compute_similarity=handle_similarities,
                        normalize_similarity=normalize_similarity,
                        generate_full_task=False, verbose=verbose)
@@ -52,11 +54,14 @@ class GenericTeacher:
         np.random.shuffle(possible_replies)
         return possible_replies
 
-    def teach(self, agent):
+    def teach(self, agent, verbose=None):
 
         self.agent = agent
 
-        for t in range(self.tk.t_max):
+        iterator = tqdm(range(self.tk.t_max)) \
+            if verbose else range(self.tk.t_max)
+
+        for t in iterator:
             question, possible_replies = self.ask()
 
             reply = agent.decide(question=question,

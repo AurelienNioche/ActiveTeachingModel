@@ -14,7 +14,7 @@ os.makedirs(BKP_FOLDER, exist_ok=True)
 
 class Task:
 
-    def __init__(self, t_max=100, n_kanji=20, grade=1,
+    def __init__(self, t_max=100, n_kanji=20, grades=(1, ),
                  verbose=False, seed=123, compute_similarity=True,
                  normalize_similarity=False,
                  generate_full_task=True):
@@ -25,7 +25,7 @@ class Task:
         self.n_item = n_kanji
         self.n_possible_replies = N_POSSIBLE_REPLIES
         self.t_max = t_max
-        self.grade = grade
+        self.grades = grades
 
         self.kanji, self.meaning = self.kanji_and_meaning
 
@@ -51,7 +51,8 @@ class Task:
     def kanji_and_meaning(self):
 
         # Backup file
-        bkp_file = f"{BKP_FOLDER}/kanji_meaning_n{self.n_item}_g{self.grade}.p"
+        bkp_file = f"{BKP_FOLDER}/kanji_meaning_n{self.n_item}_" \
+            f"g{'_'.join([str(i) for i in self.grades])}.p"
         if os.path.exists(bkp_file):
             kanji, meaning = pickle.load(open(bkp_file, 'rb'))
             return kanji, meaning
@@ -70,7 +71,7 @@ class Task:
         np.random.seed(123)
 
         # Select n kanji among first grade
-        k = list(Kanji.objects.filter(grade=self.grade).order_by('id'))
+        k = list(Kanji.objects.filter(grade__in=self.grades).order_by('id'))
 
         while True:
 

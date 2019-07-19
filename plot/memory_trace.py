@@ -87,8 +87,6 @@ def summarize(p_recall, fig_name='memory_trace_summarize.pdf',
     mean = np.mean(p_recall, axis=0)
     sem = scipy.stats.sem(p_recall, axis=0)
 
-    print(p_recall)
-
     min_ = np.min(p_recall, axis=0)
     max_ = np.max(p_recall, axis=0)
 

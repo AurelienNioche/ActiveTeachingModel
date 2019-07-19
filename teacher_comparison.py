@@ -20,18 +20,19 @@ import os
 
 
 def _produce_data(student_model, teacher_model, student_param,
-                  n_item, grade, t_max):
+                  n_item, grades, t_max, verbose=False):
 
-    teacher = teacher_model(t_max=t_max, n_item=n_item, grade=grade)
+    teacher = teacher_model(t_max=t_max, n_item=n_item, grades=grades)
     learner = student_model(param=student_param, tk=teacher.tk)
 
     print(f"\nSimulating data with a student {student_model.__name__} "
           f"(parameters={student_param}), "
           f"and a teacher {teacher_model.__name__} "
-          f"using {n_item} kanji of grade {grade} for {t_max} time steps...",
+          f"using {n_item} kanji of grade {grades} for {t_max} time steps...",
           end=" ", flush=True)
 
-    questions, replies, successes = teacher.teach(agent=learner)
+    questions, replies, successes = \
+        teacher.teach(agent=learner, verbose=verbose)
 
     print("Done.")
     print('Computing probabilities of recall...', end=' ', flush=True)
@@ -45,14 +46,20 @@ def _produce_data(student_model, teacher_model, student_param,
 
     return {
         'seen': teacher.seen,
-        'p_recall': p_recall
+        'p_recall': p_recall,
+        'questions': questions,
+        'replies': replies,
+        'successes': successes
     }
 
 
 def run(student_model, teacher_model,
-        student_param=None, n_item=25, grade=1, t_max=500, force=False):
+        student_param=None, n_item=25, grades=(1, ), t_max=500,
+        verbose=False,
+        force=False):
 
     """
+        :param verbose: Display more stuff
         :param force: Force the computation
         :param teacher_model: Can be one of those:
             * NirajTeacher
@@ -61,7 +68,7 @@ def run(student_model, teacher_model,
             * TugceTeacher
             * RandomTeacher
             * LeitnerTeacher
-        :param grade: Level of difficulty of the kanji selected (1: easiest)
+        :param grades: Levels of difficulty of the kanji selected (1: easiest)
         :param n_item: Positive integer
         (above the number of possible answers displayed)
 
@@ -121,7 +128,7 @@ def run(student_model, teacher_model,
         "Teacher model not recognized."
 
     extension = f'{teacher_model.__name__}_{student_model.__name__}_' \
-        f'{dic2string(student_param)}_ni_{n_item}_grade_{grade}_tmax_{t_max}'
+        f'{dic2string(student_param)}_ni_{n_item}_grade_{grades}_tmax_{t_max}'
 
     bkp_file = os.path.join('bkp', 'teacher_comparison', f'{extension}.p')
 
@@ -133,14 +140,25 @@ def run(student_model, teacher_model,
                           student_model=student_model,
                           teacher_model=teacher_model,
                           t_max=t_max,
-                          grade=grade,
-                          n_item=n_item)
+                          grades=grades,
+                          n_item=n_item,
+                          verbose=verbose)
 
         dump(r, bkp_file)
         return r
 
 
 def main():
+
+    n_item = 150
+    t_max = 2000
+    grades = (1, 2)
+
+    student_param = {"d": 0.5, "tau": 0.01, "s": 0.06,
+                     "m": 0.1}
+
+    student_model = ActRMeaning
+    teacher_models = (RandomTeacher, AvyaTeacher)
 
     font_size = 10
     n_rows, n_cols = 4, 2
@@ -149,8 +167,10 @@ def main():
 
     j = 0
 
-    for teacher_model in (RandomTeacher, AvyaTeacher):
-        r = run(student_model=ActRMeaning, teacher_model=teacher_model)
+    for teacher_model in teacher_models:
+        r = run(student_model=student_model, teacher_model=teacher_model,
+                n_item=n_item, t_max=t_max,
+                grades=grades, verbose=True)
 
         p_recall = r['p_recall']
         seen = r['seen']
@@ -186,7 +206,11 @@ def main():
 
         j += 1
 
-    save_fig('teacher_comparison.pdf')
+    extension = f'{teacher_models[0].__name__}_' \
+        f'{teacher_models[0].__name__}_' \
+        f'{student_model.__name__}_' \
+        f'{dic2string(student_param)}_ni_{n_item}_grade_{grades}_tmax_{t_max}'
+    save_fig(f'teacher_comparison_{extension}.pdf')
 
 
 if __name__ == "__main__":

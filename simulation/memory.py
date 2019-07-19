@@ -1,4 +1,31 @@
 import numpy as np
+import multiprocessing as mlt
+
+
+def run(args):
+
+    agent, item, t_idx = args
+    p = \
+        agent.p_recall(item=item, time_index=t_idx)
+
+    # assert not np.isnan(p), "Error of logic!"
+
+    return p
+
+
+def _compute_discrete(agent, n_item, t_max):
+
+    p_recall = np.zeros((n_item, t_max))
+
+    pool = mlt.Pool()
+
+    for t_idx in range(t_max):
+
+        p_recall[:, t_idx] = pool.map(
+            run,
+            ((agent, i, t_idx) for i in range(n_item)))
+
+    return p_recall
 
 
 def p_recall_over_time_after_learning(
@@ -15,7 +42,10 @@ def p_recall_over_time_after_learning(
         "If 'discrete_time' is True, then " \
         "'time_norm' and 'time_sampling' have to be defined"
 
-    if not discrete_time:
+    if discrete_time:
+        p_recall = _compute_discrete(agent=agent, n_item=n_item, t_max=t_max)
+
+    else:
 
         samp_size = time_sampling.shape[0]
 
@@ -25,22 +55,9 @@ def p_recall_over_time_after_learning(
 
             for item in range(n_item):
                 p = \
-                    agent.p_recall(item=item, time=t*time_norm)
+                    agent.p_recall(item=item, time=t * time_norm)
 
-                assert not np.isnan(p), "Error of logic!"
-
-                p_recall[item, t_idx] = p
-
-    else:
-        p_recall = np.zeros((n_item, t_max))
-
-        for t_idx in range(t_max):
-
-            for item in range(n_item):
-                p = \
-                    agent.p_recall(item=item, time_index=t_idx)
-
-                assert not np.isnan(p), "Error of logic!"
+                # assert not np.isnan(p), "Error of logic!"
 
                 p_recall[item, t_idx] = p
 

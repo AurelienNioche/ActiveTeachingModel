@@ -8,10 +8,11 @@ from teacher.metaclass import GenericTeacher
 
 class LeitnerTeacher(GenericTeacher):
 
-    def __init__(self, n_item=20, t_max=200, grade=1, handle_similarities=True,
+    def __init__(self, n_item=20, t_max=200, grades=(1, ),
+                 handle_similarities=True,
                  verbose=False):
 
-        super().__init__(n_item=n_item, t_max=t_max, grade=grade,
+        super().__init__(n_item=n_item, t_max=t_max, grades=grades,
                          handle_similarities=handle_similarities,
                          verbose=verbose)
         self.teach_set = np.zeros(n_item)

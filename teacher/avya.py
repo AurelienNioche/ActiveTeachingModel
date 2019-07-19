@@ -8,7 +8,8 @@ from teacher.metaclass import GenericTeacher
 
 class AvyaTeacher(GenericTeacher):
 
-    def __init__(self, n_item=20, t_max=200, grade=1, handle_similarities=True,
+    def __init__(self, n_item=20, t_max=200, grades=(1, ),
+                 handle_similarities=True,
                  iteration=0, learn_threshold=0.95, forgot_threshold=0.85,
                  represent_learnt=2, represent_learning=1, represent_unseen=0,
                  verbose=False):
@@ -21,7 +22,7 @@ class AvyaTeacher(GenericTeacher):
             learnt
         """
 
-        super().__init__(n_item=n_item, t_max=t_max, grade=grade,
+        super().__init__(n_item=n_item, t_max=t_max, grades=grades,
                          handle_similarities=handle_similarities,
                          verbose=verbose)
 
