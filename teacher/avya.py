@@ -123,7 +123,6 @@ class AvyaTeacher(GenericTeacher):
         if max_ind is None:
             print("All items learnt by Learner")
             max_ind = 0
-
         new_question = max_ind
         self.update_sets(agent, n_items)
         self.iteration += 1
