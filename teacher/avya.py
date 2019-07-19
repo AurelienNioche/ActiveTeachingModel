@@ -190,7 +190,7 @@ class AvyaTeacher(GenericTeacher):
             * Number of items included (0 ... n-1)
         :return: integer (index of the question to ask)
 
-        Function implements 3 Rules in order.
+        Function implements 3 Rules in order
         """
         new_question = None
         taboo = None
