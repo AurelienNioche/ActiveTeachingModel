@@ -15,11 +15,11 @@ class LeitnerTeacher(GenericTeacher):
         super().__init__(n_item=n_item, t_max=t_max, grades=grades,
                          handle_similarities=handle_similarities,
                          verbose=verbose)
-        self.teach_set = np.zeros(n_item)
+        self.learning_progress = np.zeros(n_item)
         self.buffer_threshold = 15
         # Initialize buffer_threshold number of characters in learning set
         for i in range(self.buffer_threshold):
-            self.teach_set[i] = 1
+            self.learning_progress[i] = 1
 
         self.count = 0
         self.num_learnt = np.zeros(t_max)
@@ -63,10 +63,10 @@ class LeitnerTeacher(GenericTeacher):
         count_learnt = 0
         count_unseen = 0
         count_learning = 0
-        for i in range(len(self.teach_set)):
-            if self.teach_set[i] == 2:
+        for i in range(len(self.learning_progress)):
+            if self.learning_progress[i] == 2:
                 count_learnt += 1
-            elif self.teach_set[i] == 0:
+            elif self.learning_progress[i] == 0:
                 count_unseen += 1
             else:
                 count_learning += 1
@@ -95,19 +95,19 @@ class LeitnerTeacher(GenericTeacher):
             return int(ran)
         for item in range(n_items):
             #modify the learning set
-            if self.teach_set[item] == 1:
+            if self.learning_progress[item] == 1:
                 succ_recalls = np.sum(np.where(self.past_successes[item]>0, 1, 0))
                 if succ_recalls >= (self.buffer_threshold*self.prob_thresh):
                     #send item from learning set to learnt set
-                    self.teach_set[item] = 2
+                    self.learning_progress[item] = 2
                     count_learnt += 1
                     count_learning -= 1
 
                     if count_unseen > 0:
                         # choose any item from unseen set and send to learning set
-                        result = np.where(self.teach_set == 0)
+                        result = np.where(self.learning_progress == 0)
                         if len(result) > 0 and len(result[0]) >0:
-                            self.teach_set[result[0][0]] = 1
+                            self.learning_progress[result[0][0]] = 1
                             count_unseen -= 1
                             count_learning += 1
                         else:
@@ -116,7 +116,7 @@ class LeitnerTeacher(GenericTeacher):
         if count_learning >= 2:
             self.prob[self.taboo] = 0
             for item in range(n_items):
-                if self.teach_set[item] >= 1 and item != self.taboo:
+                if self.learning_progress[item] >= 1 and item != self.taboo:
                     #get the last successful recalls value
                     succ_recalls = np.sum(
                         np.where(self.past_successes[item] > 0, 1, 0))
@@ -128,10 +128,10 @@ class LeitnerTeacher(GenericTeacher):
 
         else:
             # find the only item in learning set else return all learnt
-            result = np.where(self.teach_set == 1)
+            result = np.where(self.learning_progress == 1)
             #no check for taboo needed
             if len(result) > 0 and len(result[0]) > 0:
-                new_question = int(self.teach_set[result[0][0]])
+                new_question = int(self.learning_progress[result[0][0]])
                 self.taboo = new_question
                 self.count += 1
                 print(new_question)

@@ -56,21 +56,23 @@ class AvyaTeacher(GenericTeacher):
 
         return question, possible_replies
 
-    def update_sets(self, agent, n_items):
+    def update_sets(self, recall_arr, n_items):
         """
-        :param agent:
-        :param n_items:
+        :param recall_arr: list of integers size n_items ( i^th index has the
+            probability of recall of i^th item)
+        :param n_items: n = Number of items included (0 ... n-1)
 
         Updates the learning progress list after every iteration.
-        Follows the following rules:
+        Implements the following update:
             1. When the probability of recall of any item is greater than
             learn_threshold then update said item to represent_learnt value in
             learning_progress array.
-            2. If the item is unseen until (current iteration - 1) then update
-            item value to represent_learning value in learning_progress array.
+            2. If the previously shown item was unseen until the last iteration
+             then update item value to represent_learning value in
+             learning_progress array.
         """
         for i in range(n_items):
-            if agent.p_recall(i) > self.learn_threshold:
+            if recall_arr[i] > self.learn_threshold:
                 self.learning_progress[i] = self.represent_learnt
 
         if self.iteration > 0:
@@ -78,19 +80,31 @@ class AvyaTeacher(GenericTeacher):
             if self.learning_progress[shown_item] == self.represent_unseen:
                 self.learning_progress[shown_item] = self.represent_learning
 
-    def get_parameters(self, n_items, agent):
+    @staticmethod
+    def get_parameters(n_items, agent):
         """
         Function to calculate Usefulness of items
+        :param agent: agent object (RL, ACT-R, ...) that implements at
+            least the following methods:
+            * p_recall(item): takes index of a question and gives the
+                probability of recall for the agent in current state.
+            * learn(item): strengthen the association between a kanji and
+                its meaning.
+            * unlearn(): cancel the effect of the last call of the learn
+                method.
+        :param n_items: as before
         :var recall_arr: list of integers size n_items (ith index has current
         probability of recall of ith item)
         :var recall_next_arr: matrix of integers size n_items*n_items ((i,j)th
-        index is probability of recalling i with j learnt by learner of recall
-        of ith item)
+        index is probability of recalling i with j learnt)
+        :var relative: matrix of integers size n_items*n_items((i,j)th index
+                has relative value by which knowing j helps i
         :return the following variables:
-            * :var relative: matrix of integers size n_items*n_items((i,j)th index
-                has relative amount by which knowing j helps i
             * :var usefulness: list of integers that stores the usefulness of
-                teaching the ith item now.
+                teaching the ith item in current iteration.
+            * :var recall_arr: list of integers size n_items ( i^th index has
+            the probability of recall of i^th item)
+
         """
 
         recall_arr = np.zeros(n_items)
@@ -107,24 +121,64 @@ class AvyaTeacher(GenericTeacher):
                     relative[i][j] = recall_next_arr[i][j] - recall_arr[i]
                     agent.unlearn()
                 usefulness[j] += relative[i][j]
-        return relative, usefulness
+        return usefulness, recall_arr
 
-    def get_useful(self, questions, agent, n_items):
-        """Rule 3: find the most useful item"""
-        relative, usefulness = self.get_parameters(n_items, agent)
+    def get_slipping(self, taboo, recall_arr, n_items):
+        """
+        :param taboo: Integer value from range(0 to n_items) is the item shown
+        in last iteration
+        :param recall_arr: as before
+        :param n_items: as before
+
+        Rule 1: Find a learnt item whose p_recall slipped below learn_threshold
+        """
+        for i in range(n_items):
+            if self.learning_progress[i] == self.represent_learnt:
+                if recall_arr[i] < self.learn_threshold:
+                    if taboo != i:
+                        new_question = i
+                        self.update_sets(recall_arr, n_items)
+                        self.iteration += 1
+                        return new_question
+        return None
+
+    def get_almost_learnt(self, taboo, recall_arr, n_items):
+        """Rule 2: Find learning item with p_recall above forgot threshold"""
+        for i in range(n_items):
+            if self.learning_progress[i] == self.represent_learning:
+                if recall_arr[i] > self.forgot_threshold:
+                    if taboo != i:
+                        new_question = i
+                        self.update_sets(recall_arr, n_items)
+                        self.iteration += 1
+                        return new_question
+        return None
+
+    def get_useful(self, taboo, recall_arr, usefulness, n_items):
+        """
+        :param taboo: as before
+        :param recall_arr: as before
+        :param usefulness: list of integers that stores the usefulness of
+                teaching the ith item in current iteration.
+        :param n_items: as before
+
+        Rule 3: Find the most useful item
+        """
         max_ind = None
         max_val = float('-inf')
         for i in range(0, n_items):
             if self.learning_progress[i] != self.represent_learnt:
                 if usefulness[i] > max_val:
-                    if questions[self.iteration - 1] != i:
+                    if taboo != i:
                         max_val = usefulness[i]
                         max_ind = i
         if max_ind is None:
             print("All items learnt by Learner")
-            max_ind = 0
+            # find the least learnt item
+            result = np.where(recall_arr == np.amin(recall_arr))
+            max_ind = result[0][0]
         new_question = max_ind
-        self.update_sets(agent, n_items)
+        self.update_sets(recall_arr, n_items)
         self.iteration += 1
         return new_question
 
@@ -132,45 +186,24 @@ class AvyaTeacher(GenericTeacher):
         """
         :param questions: list of integers (index of questions).
             Empty at first iteration.
-        :param agent: agent object (RL, ACT-R, ...) that implements at
-            least the following methods:
-            * p_recall(item): takes index of a question and gives the
-                probability of recall for the agent in current state.
-            * learn(item): strengthen the association between a kanji and
-                its meaning.
-            * unlearn(): cancel the effect of the last call of the learn
-                method.
+        :param agent: as before
         :param n_items:
             * Number of items included (0 ... n-1)
         :return: integer (index of the question to ask)
-        """
-        """
-            Function implements 3 Rules in order:
-            1. Teach a learnt item whose p_recall slipped below learn_threshold 
-            2. Teach a learning item with p_recall above forgot threshold
-            3. Teach the most useful item 
-        """
 
+        Function implements 3 Rules in order:
+        """
+        new_question = None
+        taboo = None
+        usefulness, recall_arr = self.get_parameters(n_items, agent)
         if self.iteration > 0:
-            for i in range(n_items):
-                # Rule1:
-                if self.learning_progress[i] == self.represent_learnt:
-                    if agent.p_recall(i) < self.learn_threshold:
-                        if questions[self.iteration - 1] != i:
-                            new_question = i
-                            self.update_sets(agent, n_items)
-                            self.iteration += 1
-                            return new_question
-                # Rule2:
-                elif self.learning_progress[i] == self.represent_learning:
-                    if agent.p_recall(i) > self.forgot_threshold:
-                        if questions[self.iteration - 1] != i:
-                            new_question = i
-                            self.update_sets(agent, n_items)
-                            self.iteration += 1
-                            return new_question
+            taboo = questions[self.iteration-1]
+            new_question = self.get_slipping(taboo, recall_arr, n_items)
+            if new_question is None:
+                new_question = self.get_almost_learnt(taboo, recall_arr,
+                                                      n_items)
 
-        new_question = self.get_useful(questions, agent, n_items)
+        if new_question is None:
+            new_question = self.get_useful(taboo, recall_arr, usefulness,
+                                           n_items)
         return new_question
-
-
