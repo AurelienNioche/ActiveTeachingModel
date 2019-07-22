@@ -16,13 +16,14 @@ class AvyaTeacher(GenericTeacher):
     """
 
     def __init__(self, n_item=20, t_max=200, grades=(1, ),
-                 handle_similarities=True,
+                 handle_similarities=True, normalize_similarity=False,
                  iteration=0, learnt_threshold=0.95, forgot_threshold=0.85,
                  represent_learnt=2, represent_learning=1, represent_unseen=0,
                  verbose=False):
 
         super().__init__(n_item=n_item, t_max=t_max, grades=grades,
                          handle_similarities=handle_similarities,
+                         normalize_similarity=normalize_similarity,
                          verbose=verbose)
 
         self.iteration = iteration

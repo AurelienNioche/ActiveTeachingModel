@@ -134,7 +134,7 @@ class Network(Learner):
             for neuron in self.neurons["hidden"]:
                 neuron.compute_gain()
                 neuron.update_current()
-                if self.pr.t_max is None: # Only when NOT simulating
+                if self.pr.t_max is None:  # Only when NOT simulating
                     self._update_hidden_currents_history(i)
 
             for neuron in self.neurons["output"]:
@@ -158,6 +158,7 @@ class Network(Learner):
         ((d[:, None] & (1 << np.arange(8))) > 0).astype(int)
 
         for j, val in enumerate(self.neurons["input"]):
+            pass  # TODO
 
     def p_recall(self, item, time=None):
         p_recall = self.neurons["output"][0].current
@@ -243,7 +244,6 @@ class Network(Learner):
 
 class Neuron:
     """
-    Modified from Recanatesi (2015) equations 1 to 4.
     :param input_neurons: list of neuron_id connected to this neuron
     :param tau: decay time
     :param theta: gain function threshold
@@ -251,6 +251,7 @@ class Neuron:
     :param kappa: excitation parameter
     :param phi: inhibition parameter in range(0.70, 1.06)
 
+    Modified from Recanatesi (2015) equations 1 to 4.
     Note: default argument values are the reference values in the article but
     for phi; only phi_min and phi_max are given in Recanatesi (2015).
     """
@@ -361,6 +362,7 @@ class Neuron:
         # if self.role == "hidden":
         self.current = int(self.current > 0.5)
             # TODO find a way to implement output = P(r) w/o breaking script
+            # perhaps stringer vector normalization
             # / self.tau)
         if self.role == "output":
             print(self.weights_hebbian)  # Debugging
@@ -427,11 +429,11 @@ def plot(network):
 
     # print(network.hidden_currents_history)
     plt.title("Hidden layer currents")
-    # plt.axvline()
+    # plt.grid()
 
-    # Turn spines off and create white grid.
-    for edge, spine in ax.spines.items():
-        spine.set_visible(False)
+    # # Turn spines off and create white grid.
+    # for edge, spine in ax.spines.items():
+    #     spine.set_visible(False)
 
     fig.tight_layout()
     # plt.matshow(network.hidden_currents_history)
