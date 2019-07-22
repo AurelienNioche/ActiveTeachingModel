@@ -151,7 +151,7 @@ def run(student_model, teacher_model,
 def main():
 
     n_item = 150
-    t_max = 2000
+    t_max = 4000
     grades = (1, 2)
 
     student_param = {"d": 0.5, "tau": 0.01, "s": 0.06,

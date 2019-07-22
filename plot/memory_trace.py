@@ -92,8 +92,8 @@ def summarize(p_recall, fig_name='memory_trace_summarize.pdf',
     y1 = mean-std
     y2 = mean+std
 
-    for t in range(n_iteration):
-        print(t, y[t], y1[t], y2[t])
+    # for t in range(n_iteration):
+    #     print(t, y[t], y1[t], y2[t])
 
     min_ = np.min(p_recall, axis=0)
     max_ = np.max(p_recall, axis=0)
