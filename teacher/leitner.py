@@ -206,7 +206,7 @@ class LeitnerTeacher(GenericTeacher):
             self.store_item_past(successes)
 
         count_learning = self.modify_sets(n_items, count_learning,
-                                          count_learnt)
+                                          count_learnt, count_unseen)
 
         # Update probabilities of items
         if count_learning >= 2:
