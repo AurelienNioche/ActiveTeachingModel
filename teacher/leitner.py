@@ -4,10 +4,12 @@ import numpy as np
 
 from teacher.metaclass import GenericTeacher
 
+np.random.seed(123)
+
 
 class LeitnerTeacher(GenericTeacher):
 
-    def __init__(self, n_item=20, t_max=200, grades=(1, ), seed=123,
+    def __init__(self, n_item=20, t_max=200, grades=(1, ),
                  handle_similarities=True, fractional_success=0.9,
                  buffer_threshold=15, taboo=None, represent_learnt=2,
                  represent_learning=1, represent_unseen=0,
@@ -39,7 +41,7 @@ class LeitnerTeacher(GenericTeacher):
         # current iteration
         """
 
-        super().__init__(n_item=n_item, t_max=t_max, grades=grades, seed=seed,
+        super().__init__(n_item=n_item, t_max=t_max, grades=grades,
                          handle_similarities=handle_similarities,
                          verbose=verbose)
         self.iteration = 0
@@ -53,7 +55,6 @@ class LeitnerTeacher(GenericTeacher):
         self.past_successes = np.full((n_item, self.buffer_threshold), -1)
         self.learning_progress = np.zeros(n_item)
         self.pick_probability = np.zeros(n_item)
-        self.seed = seed
 
         # Initialize certain number of characters in learning set according to
         # buffer_threshold to prevent bottleneck.
@@ -65,8 +66,7 @@ class LeitnerTeacher(GenericTeacher):
         question = self.get_next_node(
             successes=self.successes,
             agent=copy.deepcopy(self.agent),
-            n_items=self.tk.n_item,
-            seed=self.seed
+            n_items=self.tk.n_item
         )
         print(question)
         possible_replies = self.get_possible_replies(question)
@@ -81,7 +81,7 @@ class LeitnerTeacher(GenericTeacher):
     def update_probabilities(self, n_items):
         """
         :param n_items: n = Number of items included (0 ... n-1)
-        :var prob: array that stores probability of picking i^th item at i^th
+        :var pick_probability: array that stores probability of picking i^th item at i^th
         index
 
         Updates the pick_probability array at every iteration. The probability
@@ -96,7 +96,7 @@ class LeitnerTeacher(GenericTeacher):
                 successful_recalls = np.sum(
                     np.where(self.past_successes[item] > 0, 1, 0))
                 self.pick_probability[item] = self.buffer_threshold +\
-                                              1 - successful_recalls
+                    1 - successful_recalls
 
     def store_item_past(self, successes):
         """
@@ -156,7 +156,7 @@ class LeitnerTeacher(GenericTeacher):
                                 Exception('Error in unseen items computation')
         return count_learning
 
-    def get_next_node(self, successes, agent, n_items, seed):
+    def get_next_node(self, successes, agent, n_items):
         """
         :param questions: list of integers (index of questions). Empty at first
             iteration
@@ -237,7 +237,6 @@ class LeitnerTeacher(GenericTeacher):
 
         probability_sum = np.sum(self.pick_probability)
         assert(probability_sum > 0)
-        np.random.seed(seed)
         pick_question = np.random.randint(0, probability_sum)
 
         iterating_sum = 0
@@ -249,4 +248,4 @@ class LeitnerTeacher(GenericTeacher):
                 self.iteration += 1
                 return new_question
             iterating_sum += self.pick_probability[item]
-        raise Exception('No question returned')
+        raise Exception("No question returned")
