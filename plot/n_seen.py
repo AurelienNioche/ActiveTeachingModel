@@ -5,7 +5,7 @@ from matplotlib.ticker import MaxNLocator
 from plot.generic import save_fig
 
 
-def curve(seen, fig_name='seen.pdf',
+def curve(seen, fig_name=None,
           font_size=12, line_width=3,
           label_size=8, ax=None):
 
@@ -34,5 +34,5 @@ def curve(seen, fig_name='seen.pdf',
     ax.set_yticks((0, 0.5, 1))
     # ax.yaxis.set_major_locator(MaxNLocator(integer=True))
 
-    if ax is None:
+    if fig_name is not None:
         save_fig(fig_name=fig_name)

@@ -160,10 +160,13 @@ def main():
     student_model = ActRMeaning
     teacher_models = (RandomTeacher, AvyaTeacher)
 
-    font_size = 10
-    n_rows, n_cols = 4, 2
+    font_size = 8
+    label_size = 6
+    line_width = 1
 
-    fig, axes = plt.subplots(nrows=n_rows, ncols=n_cols)
+    n_rows, n_cols = 5, 2
+
+    fig, axes = plt.subplots(nrows=n_rows, ncols=n_cols, figsize=(12, 14))
 
     j = 0
 
@@ -174,12 +177,15 @@ def main():
 
         p_recall = r['p_recall']
         seen = r['seen']
+        successes = r['successes']
 
         ax1 = axes[0, j]
         plot.memory_trace.summarize(
             p_recall=p_recall,
             ax=ax1,
-            font_size=font_size
+            font_size=font_size,
+            label_size=label_size,
+            line_width=line_width,
         )
 
         ax2 = axes[1, j]
@@ -187,21 +193,36 @@ def main():
             p_recall=p_recall,
             seen=seen,
             ax=ax2,
-            font_size=font_size
+            font_size=font_size,
+            label_size=label_size,
+            line_width=line_width
         )
 
         ax3 = axes[2, j]
         plot.n_learnt.curve(
             p_recall=p_recall,
             ax=ax3,
-            font_size=font_size
+            font_size=font_size,
+            label_size=label_size,
+            line_width=line_width
         )
 
         ax4 = axes[3, j]
         plot.n_seen.curve(
             seen=seen,
             ax=ax4,
-            font_size=font_size
+            font_size=font_size,
+            label_size=label_size,
+            line_width=line_width*2
+        )
+
+        ax5 = axes[4, j]
+        plot.success.curve(
+            successes=successes,
+            ax=ax5,
+            font_size=font_size,
+            label_size=label_size,
+            line_width=line_width*2
         )
 
         j += 1

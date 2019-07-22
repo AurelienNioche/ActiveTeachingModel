@@ -116,7 +116,11 @@ class Task:
             f"connect_graphic_norm_{normalize}_{len(self.kanji)}_{list_id}.p")
 
         if os.path.exists(bkp_file) and not force:
+            print(f"I will load graphic connection from '{bkp_file}'.")
             return pickle.load(file=open(bkp_file, 'rb'))
+
+        print(f"I will compute the graphic connections "
+              f"and save it to '{bkp_file}'.")
 
         sg = similarity_graphic.measure.get(
                 self.kanji, normalize_similarity=normalize,

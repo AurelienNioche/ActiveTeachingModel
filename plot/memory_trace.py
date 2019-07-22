@@ -73,6 +73,7 @@ def summarize(p_recall, fig_name='memory_trace_summarize.pdf',
               p_recall_time=None,
               font_size=12,
               label_size=8,
+              line_width=1,
               ax=None):
 
     n_iteration = p_recall.shape[1]
@@ -85,17 +86,24 @@ def summarize(p_recall, fig_name='memory_trace_summarize.pdf',
         ax = fig.subplots()
 
     mean = np.mean(p_recall, axis=0)
-    sem = scipy.stats.sem(p_recall, axis=0)
+    std = np.std(p_recall, axis=0) # scipy.stats.sem(p_recall, axis=0)
+
+    y = mean
+    y1 = mean-std
+    y2 = mean+std
+
+    for t in range(n_iteration):
+        print(t, y[t], y1[t], y2[t])
 
     min_ = np.min(p_recall, axis=0)
     max_ = np.max(p_recall, axis=0)
 
-    ax.plot(p_recall_time, mean, lw=1.5)
+    ax.plot(p_recall_time, y, lw=line_width)
 
     ax.fill_between(
         p_recall_time,
-        y1=mean - sem,
-        y2=mean + sem,
+        y1=y1,
+        y2=y2,
         alpha=0.2
     )
 
@@ -124,6 +132,7 @@ def summarize_over_seen(
         p_recall, seen, fig_name='memory_trace_summarize_over_seen.pdf',
         p_recall_time=None,
         font_size=12, label_size=8,
+        line_width=1,
         ax=None):
 
     n_iteration = p_recall.shape[1]
@@ -152,22 +161,24 @@ def summarize_over_seen(
     #     print('_' * 10)
 
     mean = np.nanmean(p_recall, axis=0)
+
+    std = np.nanstd(p_recall)
     # sem = scipy.stats.sem(p_recall, axis=0, nan_policy='omit')
-    sem = [
-        scipy.stats.sem(p_recall[np.isnan(p_recall[:, t]) == 0, t])
-        if t > 0 else 0
-        for t in range(n_iteration)
-    ]
+    # sem = [
+    #     scipy.stats.sem(p_recall[np.isnan(p_recall[:, t]) == 0, t])
+    #     if t > 0 else 0
+    #     for t in range(n_iteration)
+    # ]
 
     min_ = np.nanmin(p_recall, axis=0)
     max_ = np.nanmax(p_recall, axis=0)
 
-    ax.plot(p_recall_time, mean, lw=1.5)
+    ax.plot(p_recall_time, mean, lw=line_width)
 
     ax.fill_between(
         p_recall_time,
-        y1=mean - sem,
-        y2=mean + sem,
+        y1=mean - std,
+        y2=mean + std,
         alpha=0.2
     )
 
