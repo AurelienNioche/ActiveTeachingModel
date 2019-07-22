@@ -134,7 +134,7 @@ class Network(Learner):
             for neuron in self.neurons["hidden"]:
                 neuron.compute_gain()
                 neuron.update_current()
-                if self.pr.t_max is None:  # Only when NOT simulating
+                if self.pr.t_max is None: # Only when NOT simulating
                     self._update_hidden_currents_history(i)
 
             for neuron in self.neurons["output"]:
