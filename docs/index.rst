@@ -3,8 +3,10 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to ActiveTeachingModel's documentation!
+Active Teaching Model documentation
 ===============================================
+
+How selecting carefully the next item based on a cognitive model of the user in an associate learning task can improve the learning process? 
 
 .. toctree::
    :maxdepth: 2
@@ -12,6 +14,8 @@ Welcome to ActiveTeachingModel's documentation!
 
 
 
+.. toctree:: code
+    
 Indices and tables
 ==================
 

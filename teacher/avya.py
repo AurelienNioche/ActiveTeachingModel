@@ -6,20 +6,20 @@ from teacher.metaclass import GenericTeacher
 
 
 class AvyaTeacher(GenericTeacher):
+    """
+    :param iteration: current iteration number.
+        0 at first iteration.
+    :param learnt_threshold: p_recall(probability of recall) threshold after
+        which an item is learnt.
+    :param forgot_threshold: As learn_threshold but on the verge of being
+        learnt.
+    """
 
     def __init__(self, n_item=20, t_max=200, grades=(1, ),
                  handle_similarities=True, normalize_similarity=False,
                  iteration=0, learnt_threshold=0.95, forgot_threshold=0.85,
                  represent_learnt=2, represent_learning=1, represent_unseen=0,
                  verbose=False):
-        """
-        :param iteration: current iteration number.
-            0 at first iteration.
-        :param learnt_threshold: p_recall(probability of recall) threshold after
-            which an item is learnt.
-        :param forgot_threshold: As learn_threshold but on the verge of being
-            learnt.
-        """
 
         super().__init__(n_item=n_item, t_max=t_max, grades=grades,
                          handle_similarities=handle_similarities,

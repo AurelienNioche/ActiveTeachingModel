@@ -206,7 +206,7 @@ class LeitnerTeacher(GenericTeacher):
             self.store_item_past(successes)
 
         count_learning = self.modify_sets(n_items, count_learning,
-                                          count_learnt)
+                                          count_learnt, count_unseen)
 
         # Update probabilities of items
         if count_learning >= 2:
@@ -234,9 +234,7 @@ class LeitnerTeacher(GenericTeacher):
                 return new_question
 
         probability_sum = np.sum(self.pick_probability)
-        if probability_sum == 0:
-            print("The total probability is 0 of picking an item is 0")  # TODO DO PROPER ERROR
-            exit()
+        assert(probability_sum)
         pick_question = random.randint(0, probability_sum)  # TODO do you have a seed?
 
         iterating_sum = 0
