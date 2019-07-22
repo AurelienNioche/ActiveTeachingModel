@@ -1,11 +1,13 @@
 Documentation for the Code
 **************************
 
-.. automodule:: ActiveTeachingModel
-    :members:
+
 
 .. automodule:: model_simulation
     :members:
+
+Learners
+==================
 
 .. automodule:: learner.carlos_ann
     :members:

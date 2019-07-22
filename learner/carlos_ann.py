@@ -151,14 +151,14 @@ class Network(Learner):
     def _update_input_currents(self, question):
         """
         :param question:
-        TODO
+
         Question to binary vector
         """
         d = np.array([question])
         ((d[:, None] & (1 << np.arange(8))) > 0).astype(int)
 
         for j, val in enumerate(self.neurons["input"]):
-            pass
+            pass  # TODO
 
     def p_recall(self, item, time=None):
         p_recall = self.neurons["output"][0].current
@@ -362,6 +362,7 @@ class Neuron:
         # if self.role == "hidden":
         self.current = int(self.current > 0.5)
             # TODO find a way to implement output = P(r) w/o breaking script
+            # perhaps stringer vector normalization
             # / self.tau)
         if self.role == "output":
             print(self.weights_hebbian)  # Debugging
@@ -428,11 +429,11 @@ def plot(network):
 
     # print(network.hidden_currents_history)
     plt.title("Hidden layer currents")
-    # plt.axvline()
+    # plt.grid()
 
-    # Turn spines off and create white grid.
-    for edge, spine in ax.spines.items():
-        spine.set_visible(False)
+    # # Turn spines off and create white grid.
+    # for edge, spine in ax.spines.items():
+    #     spine.set_visible(False)
 
     fig.tight_layout()
     # plt.matshow(network.hidden_currents_history)

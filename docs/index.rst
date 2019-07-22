@@ -12,8 +12,6 @@ How selecting carefully the next item based on a cognitive model of the user in 
    :maxdepth: 2
    :caption: Contents:
 
-
-
 .. toctree:: code
     
 Indices and tables
