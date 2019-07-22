@@ -28,13 +28,17 @@ def _load_model():
     print('Load Word2Vec data...', end=" ", flush=True)
     if not os.path.exists(MODEL):
         try:
-            print('Loading from the "bin" file, it can take a while...', end=" ", flush=True)
+            print('Loading from the "bin" file, it can take a while...',
+                  end=" ", flush=True)
             model = KeyedVectors.load_word2vec_format(DATA, binary=True)
             model.save(MODEL)
         except Exception:
-            raise Exception(f"File '{DATA_FOLDER}/GoogleNews-vectors-negative300.bin' is missing. \n"
-                            f"File should be available at "
-                            f"'https://drive.google.com/file/d/0B7XkCwpI5KDYNlNUTTlSS21pQmM/edit'")
+            raise Exception(
+                f"File '{DATA_FOLDER}/GoogleNews-vectors-negative300.bin'"
+                f" is missing. \n"
+                f"File should be available at "
+                f"'https://drive.google.com/"
+                f"file/d/0B7XkCwpI5KDYNlNUTTlSS21pQmM/edit'")
 
     else:
         model = KeyedVectors.load(MODEL, mmap='r')
@@ -54,7 +58,8 @@ def _ask_user_for_replacement(model, word):
         new_word = input("Which word I should use in replacement?")
         if new_word in model.vocab:
             print("Thanks!")
-            reply = input(f"Do you confirm the replacement of '{word}' by '{new_word}' (y/n)?")
+            reply = input(f"Do you confirm the replacement of '{word}' "
+                          f"by '{new_word}' (y/n)?")
             if reply in ('y', 'yes', 'ok'):
                 print("Replacement registered!")
                 return new_word
@@ -95,7 +100,8 @@ def evaluate_similarity(word_list, use_nan=False):
 
         if a not in model.vocab:
             a = _replacement(model=model, word=a)
-        elif b not in model.vocab:
+
+        if b not in model.vocab:
             b = _replacement(model=model, word=b)
 
         raw_similarity = model.similarity(a, b)
