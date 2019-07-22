@@ -142,7 +142,11 @@ class Task:
             f"connect_semantic_norm_{normalize}_{len(word_list)}_{list_id}.p")
 
         if os.path.exists(bkp_file) and not force:
+            print(f"I will load semantic connection from '{bkp_file}'.")
             return pickle.load(file=open(bkp_file, 'rb'))
+
+        print(f"I will compute the semantic connections "
+              f"and save it to '{bkp_file}'.")
 
         ss = similarity_semantic.measure.get(
                 self.meaning, normalize_similarity=normalize,
