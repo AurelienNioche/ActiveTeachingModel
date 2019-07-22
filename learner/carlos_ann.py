@@ -12,10 +12,14 @@ np.seterr(all='raise')
 class NetworkParam:
     """
     :param weight_updates: string in ["random", "hebbian", "recanatesi"]
+    :param t_max: int as in the model_simulation script. None when no
+        simulation script is being used with the model
     """
-    def __init__(self, n_hidden=40, n_epoch=3, weight_updates="hebbian"):
+    def __init__(self, n_hidden=40, n_epoch=3, weight_updates="hebbian",
+                 t_max=None):
         self.n_epoch = n_epoch
         self.n_hidden = n_hidden
+        self.t_max = t_max
 
         weight_updates_methods = ["random", "hebbian", "recanatesi"]
         assert weight_updates in weight_updates_methods
@@ -56,8 +60,15 @@ class Network(Learner):
 
         self.neurons = {role: [] for role in self.roles}
         self.neuron_id = 0
-        self.hidden_currents_history = np.zeros((self.pr.n_epoch,
-                                                 self.pr.n_hidden))
+
+        # Create history array according to simulation or the lack thereof
+        if self.pr.t_max is None:
+            self.hidden_currents_history = np.zeros((self.pr.n_epoch,
+                                                    self.pr.n_hidden))
+        else:
+            self.hidden_currents_history = np.zeros((self.pr.t_max,
+                                                     self.pr.n_hidden))
+            self.time_step = 0
 
         self.create_input_neurons()
         self.create_hidden_neurons(n_hidden=self.pr.n_hidden)
@@ -129,15 +140,21 @@ class Network(Learner):
             for neuron in self.neurons["hidden"]:
                 neuron.compute_gain()
                 neuron.update_current()
-                for j, val in enumerate(self.neurons["hidden"]):
-                    self.hidden_currents_history[i, j] =\
-                        self.neurons["hidden"][j].current
+                # for j, val in enumerate(self.neurons["hidden"]):
+                #     self.hidden_currents_history[i, j] =\
+                #         self.neurons["hidden"][j].current
+                self._update_hidden_currents_history(i)
 
             for neuron in self.neurons["output"]:
                 neuron.compute_gain()
                 neuron.update_current()
 
         print(self.hidden_currents_history)
+
+    def _update_hidden_currents_history(self, time_step):
+        for j, val in enumerate(self.neurons["hidden"]):
+            self.hidden_currents_history[time_step, j] = \
+                self.neurons["hidden"][j].current
 
     def p_recall(self, item, time=None):
         p_recall = self.neurons["output"][0].current
@@ -197,6 +214,11 @@ class Network(Learner):
             reply = question
         else:
             reply = np.random.choice(possible_replies)
+
+        self._update_hidden_currents_history(self.time_step)
+        self.time_step += 1
+        if self.time_step == self.pr.t_max:
+            plot(self)
 
         if self.verbose:
             print(f't={self.t}: question {question}, reply {reply}')
