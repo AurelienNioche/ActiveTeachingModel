@@ -88,12 +88,6 @@ class Network(Learner):
             if verbose:
                 print(i)
 
-    # def create_output_neurons(self, input_neurons):
-    #     for i in range(0, self.n_output):
-    #         self.neurons_output.append(
-    #             Neuron(input_neurons, role="output")
-    #         )
-
     def create_hidden_neurons(self, n_hidden=10, verbose=False):
 
         hidden_neuron_inputs = []
@@ -140,10 +134,8 @@ class Network(Learner):
             for neuron in self.neurons["hidden"]:
                 neuron.compute_gain()
                 neuron.update_current()
-                # for j, val in enumerate(self.neurons["hidden"]):
-                #     self.hidden_currents_history[i, j] =\
-                #         self.neurons["hidden"][j].current
-                self._update_hidden_currents_history(i)
+                if self.pr.t_max is None:  # Only when NOT simulating
+                    self._update_hidden_currents_history(i)
 
             for neuron in self.neurons["output"]:
                 neuron.compute_gain()
@@ -156,6 +148,17 @@ class Network(Learner):
             self.hidden_currents_history[time_step, j] = \
                 self.neurons["hidden"][j].current
 
+    def _update_input_currents(self, question):
+        """
+        :param question:
+
+        Question to binary vector
+        """
+        d = np.array([question])
+        ((d[:, None] & (1 << np.arange(8))) > 0).astype(int)
+
+        for j, val in enumerate(self.neurons["input"]):
+
     def p_recall(self, item, time=None):
         p_recall = self.neurons["output"][0].current
         return p_recall
@@ -165,6 +168,8 @@ class Network(Learner):
         """Modified from ActR"""
 
         success = question == reply
+
+        self._train(10)
 
         p_recall = self.neurons["output"][0].current
 
@@ -206,6 +211,11 @@ class Network(Learner):
 
     def decide(self, question, possible_replies, time=None,
                time_index=None):
+
+        # for j, val in enumerate(self.neurons["input"]):
+        #     self.hidden_currents_history[time_step, j] = \
+        #         self.neurons["hidden"][j].current
+
 
         p_r = self.neurons["output"][0].current
         r = np.random.random()
