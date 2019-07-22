@@ -1,5 +1,4 @@
 import copy
-import random
 
 import numpy as np
 
@@ -54,6 +53,7 @@ class LeitnerTeacher(GenericTeacher):
         self.past_successes = np.full((n_item, self.buffer_threshold), -1)
         self.learning_progress = np.zeros(n_item)
         self.pick_probability = np.zeros(n_item)
+        self.seed = seed
 
         # Initialize certain number of characters in learning set according to
         # buffer_threshold to prevent bottleneck.
@@ -65,7 +65,8 @@ class LeitnerTeacher(GenericTeacher):
         question = self.get_next_node(
             successes=self.successes,
             agent=copy.deepcopy(self.agent),
-            n_items=self.tk.n_item
+            n_items=self.tk.n_item,
+            seed=self.seed
         )
         print(question)
         possible_replies = self.get_possible_replies(question)
@@ -151,10 +152,11 @@ class LeitnerTeacher(GenericTeacher):
                             count_unseen -= 1
                             count_learning += 1
                         else:
-                            print("Error: no unseen char found")
+                            raise \
+                                Exception('Error in unseen items computation')
         return count_learning
 
-    def get_next_node(self, successes, agent, n_items):
+    def get_next_node(self, successes, agent, n_items, seed):
         """
         :param questions: list of integers (index of questions). Empty at first
             iteration
@@ -198,7 +200,7 @@ class LeitnerTeacher(GenericTeacher):
 
         if self.iteration == 0:
             # No past memory, so a random question shown from learning set
-            random_question = random.randint(0, self.buffer_threshold)
+            random_question = np.random.randint(0, self.buffer_threshold)
             self.taboo = random_question
             self.iteration += 1
             return int(random_question)
@@ -234,8 +236,9 @@ class LeitnerTeacher(GenericTeacher):
                 return new_question
 
         probability_sum = np.sum(self.pick_probability)
-        assert(probability_sum)
-        pick_question = random.randint(0, probability_sum)  # TODO do you have a seed?
+        assert(probability_sum > 0)
+        np.random.seed(seed)
+        pick_question = np.random.randint(0, probability_sum)
 
         iterating_sum = 0
         for item in range(n_items):
@@ -246,4 +249,4 @@ class LeitnerTeacher(GenericTeacher):
                 self.iteration += 1
                 return new_question
             iterating_sum += self.pick_probability[item]
-        print("Error -- no question returned")  # TODO do the error thingy thing
+        raise Exception('No question returned')

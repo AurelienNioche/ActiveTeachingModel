@@ -16,12 +16,14 @@ class RandomTeacher(GenericTeacher):
                          verbose=verbose)
         self.num_learnt = np.zeros(t_max)
         self.count = 0
+        self.seed = seed
 
     def ask(self):
         question = self.get_next_node(
             questions=self.questions,
             agent=copy.deepcopy(self.agent),
-            n_items=self.tk.n_item
+            n_items=self.tk.n_item,
+            seed=self.seed
         )
 
         possible_replies = self.get_possible_replies(question)
@@ -33,7 +35,9 @@ class RandomTeacher(GenericTeacher):
 
         return question, possible_replies
 
-    def get_next_node(self, questions, agent, n_items):
+    def get_next_node(self, questions, agent, n_items,seed):
+        np.random.seed(seed)
+        np.random.seed(self.seed)
         question = np.random.randint(n_items)
 
         self.count += 1
