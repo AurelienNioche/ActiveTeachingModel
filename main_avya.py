@@ -128,7 +128,7 @@ def run(student_model, teacher_model,
 
 def main():
 
-    for teacher_model in (AvyaTeacher, RandomTeacher):
+    for teacher_model in (AvyaTeacher, LeitnerTeacher):
         run(student_model=ActRMeaning, teacher_model=teacher_model, t_max=490)
 
 
