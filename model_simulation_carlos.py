@@ -5,7 +5,7 @@ from learner.carlos_exponential import Exponential
 from learner.carlos_ann import Network
 
 
-def main(t_max=300, n_item=30):
+def main(t_max=300, n_item=31):
 
     teacher = RandomTeacher(t_max=t_max, n_item=n_item,
                             handle_similarities=True,
