@@ -54,8 +54,12 @@ class Task:
         bkp_file = f"{BKP_FOLDER}/kanji_meaning_n{self.n_item}_" \
             f"g{'_'.join([str(i) for i in self.grades])}.p"
         if os.path.exists(bkp_file):
+            print(f"I will the backup file '{bkp_file}'.")
             kanji, meaning = pickle.load(open(bkp_file, 'rb'))
             return kanji, meaning
+
+        print(f"I was unable to find the backup file '{bkp_file}'.")
+        print("I will produce the data and create it.")
 
         # Django specific settings
         os.environ.setdefault("DJANGO_SETTINGS_MODULE",
