@@ -10,9 +10,16 @@ np.seterr(all='raise')
 
 
 class NetworkParam:
-    def __init__(self, n_hidden=40, n_epoch=3):
+    """
+    :param weight_updates: string in ["random", "hebbian", "recanatesi"]
+    """
+    def __init__(self, n_hidden=40, n_epoch=3, weight_updates="hebbian"):
         self.n_epoch = n_epoch
         self.n_hidden = n_hidden
+
+        weight_updates_methods = ["random", "hebbian", "recanatesi"]
+        assert weight_updates in weight_updates_methods
+        self.weight = weight_updates
 
 
 class Network(Learner):
@@ -376,8 +383,27 @@ def plot(network):
     # # cax = divider.append_axes("right", size="5%", pad=0.05)
     # # plt.colorbar(c, cax=cax, ticks=y_ticks)
 
-    print(network.hidden_currents_history)
-    plt.imshow(network.hidden_currents_history)
+    data = network.hidden_currents_history
+
+    fig, ax = plt.subplots()
+    im = ax.imshow(data)
+
+    ax.set_xticks(np.arange(len(data[0, :])))
+    font_size = 40 * 10 / len(data[0, :])  # Font size 10 good for 40 neurons
+    plt.setp(ax.get_xticklabels(), rotation=90, ha="right",
+             rotation_mode="anchor", fontsize=font_size)
+
+    # print(network.hidden_currents_history)
+    plt.title("Hidden layer currents")
+    # plt.axvline()
+
+    # Turn spines off and create white grid.
+    for edge, spine in ax.spines.items():
+        spine.set_visible(False)
+
+    fig.tight_layout()
+    # plt.matshow(network.hidden_currents_history)
+    plt.show()
 
 
 def main():
