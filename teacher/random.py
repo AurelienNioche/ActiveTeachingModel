@@ -35,7 +35,7 @@ class RandomTeacher(GenericTeacher):
 
         return question, possible_replies
 
-    def get_next_node(self, questions, agent, n_items,seed):
+    def get_next_node(self, questions, agent, n_items, seed):
         np.random.seed(seed)
         np.random.seed(self.seed)
         question = np.random.randint(n_items)

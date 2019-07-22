@@ -150,15 +150,14 @@ class Network(Learner):
 
     def _update_input_currents(self, question):
         """
-        :param question:
+        :param question: int question index
 
-        Question to binary vector
+        Question to binary vector as input neurons current.
         """
-        d = np.array([question])
-        ((d[:, None] & (1 << np.arange(8))) > 0).astype(int)
-
-        for j, val in enumerate(self.neurons["input"]):
-            pass  # TODO
+        np_question = np.array([question])
+        self.neurons["input"] =\
+            ((np_question[:, None] & (1 << np.arange(8))) > 0).astype(int)
+        print(self.neurons["input"])
 
     def p_recall(self, item, time=None):
         p_recall = self.neurons["output"][0].current
@@ -169,8 +168,6 @@ class Network(Learner):
         """Modified from ActR"""
 
         success = question == reply
-
-        self._train(10)
 
         p_recall = self.neurons["output"][0].current
 
@@ -217,6 +214,8 @@ class Network(Learner):
         #     self.hidden_currents_history[time_step, j] = \
         #         self.neurons["hidden"][j].current
 
+        self._update_input_currents(question)
+        self._train(self.pr.n_epoch)
 
         p_r = self.neurons["output"][0].current
         r = np.random.random()
@@ -304,7 +303,8 @@ class Neuron:
             if self.role is not "input":
                 self.compute_gain()
                 self.update_current()
-        self.print_attributes()
+
+        # self.print_attributes()
 
     @staticmethod
     def _random_small_value():
@@ -462,7 +462,8 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    # main()
+    pass
 
 # Plotting:
 # x, y = np.meshgrid(range(data.shape[0]), range(data.shape[1]))
