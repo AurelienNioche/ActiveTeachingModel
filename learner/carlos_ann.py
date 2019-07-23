@@ -155,9 +155,12 @@ class Network(Learner):
         Question to binary vector as input neurons current.
         """
         np_question = np.array([question])
-        self.neurons["input"] =\
-            ((np_question[:, None] & (1 << np.arange(8))) > 0).astype(int)
-        print(self.neurons["input"])
+        bin_question = ((np_question[:, None]
+                         & (1 << np.arange(8))) > 0).astype(int)
+        for j, val in enumerate(self.neurons["input"]):
+            self.neurons["input"][j].current = bin_question[0, j]
+
+        # print(self.neurons["input"])
 
     def p_recall(self, item, time=None):
         p_recall = self.neurons["output"][0].current
@@ -423,7 +426,7 @@ def plot(network):
     im = ax.imshow(data)
 
     ax.set_xticks(np.arange(len(data[0, :])))
-    font_size = 40 * 10 / len(data[0, :])  # Font size 10 good for 40 neurons
+    font_size = 40 * 8 / len(data[0, :])  # Font size 10 good for 40 neurons
     plt.setp(ax.get_xticklabels(), rotation=90, ha="right",
              rotation_mode="anchor", fontsize=font_size)
 
@@ -448,7 +451,7 @@ def main():
     np.random.seed(1234)
 
     network = Network(tk=Task(t_max=100, n_item=30), param={"n_epoch": 20,
-                                                            "n_hidden": 40})
+                                                            "n_hidden": 100})
 
     # network.show_neurons()
     plot(network)
