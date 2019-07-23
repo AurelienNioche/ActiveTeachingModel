@@ -74,12 +74,13 @@ class Network(Learner):
 
         self.create_input_neurons()
         self.create_hidden_neurons(n_hidden=self.pr.n_hidden)
+        self.connect_everything()
+        self.start_network()
 
         self._train(self.pr.n_epoch)
 
-    def create_input_neurons(self, verbose=False):
+    def create_input_neurons(self):
         """
-        :param verbose: prints loop iteration number.
 
         Instances n input neurons where n is the amount of neurons to represent
         the total number of question indices in binary form.
@@ -87,40 +88,65 @@ class Network(Learner):
         for i in range(self.input_bits_needed):  # Instance n Neurons
             self._create_neuron(role='input')
             # Each neuron will be instanced inside a list, call them as a[n]
-            if verbose:
-                print(i)
 
-    def create_hidden_neurons(self, n_hidden=10, verbose=False):
+    def create_hidden_neurons(self, n_hidden=10):
 
-        hidden_neuron_inputs = []
+        for j in range(n_hidden):
 
-        for i in self.neurons['input']:
-            hidden_neuron_inputs.append(i)
-        if verbose:
-            print(hidden_neuron_inputs)
-        for j in range(0, n_hidden):
-            hidden_neuron_inputs.append(self.neuron_id + 1)
-            self._create_neuron(input_neurons=hidden_neuron_inputs,
+            hidden_neuron_inputs = []
+
+            for i in range(len(self.neurons['input'])):
+
+                hidden_neuron_inputs.append(('input', i))
+
+            hid = list(range(n_hidden))
+            hid.remove(j)
+            for h in hid:
+                hidden_neuron_inputs.append(('hidden', h))
+
+            self._create_neuron(input_neuron_ids=hidden_neuron_inputs,
                                 role="hidden")
 
-        print("HELLO MIXED", hidden_neuron_inputs)
+        # if verbose:
+        #     print(hidden_neuron_inputs)
 
         # Output layer
-        output_neuron_inputs = []
-        for k in self.neurons['hidden']:
-            output_neuron_inputs.append(k)
-        self._create_neuron(input_neurons=hidden_neuron_inputs,
-                            role="output")
+        # output_neuron_inputs = []
+        # for k in self.neurons['hidden']:
+        #     output_neuron_inputs.append(k)
+        # self._create_neuron(input_neurons=hidden_neuron_inputs,
+        #                     role="output")
 
-    def _create_neuron(self, input_neurons=None, role="hidden"):
-                      # neuron_id=0):
+    def _create_neuron(self, input_neuron_ids=None, role="hidden"):
 
         self.neurons[role].append(
             Neuron(neuron_id=self.neuron_id,
-                   role=role, input_neurons=input_neurons)
+                   role=role, input_neuron_ids=input_neuron_ids)
         )
 
         self.neuron_id += 1
+
+    def connect_everything(self):
+
+        for layer in self.neurons.keys():
+            if layer == 'input':
+                continue
+            for n in self.neurons[layer]:
+
+                connected_neurons = []
+                for k, v in n.input_neuron_ids:
+
+                    connected_neurons.append(
+                        self.neurons[k][v]
+                    )
+
+                    n.input_neurons = connected_neurons
+
+    def start_network(self):
+
+        for layer in self.neurons.keys():
+            for n in self.neurons[layer]:
+                n.start()
 
     def show_neurons(self):
         for role in self.roles:
@@ -263,19 +289,19 @@ class Neuron:
 
     def __init__(self, neuron_id, role, tau=0.01, theta=0, gamma=0.4,
                  kappa=13000, phi=1,
-                 input_neurons=None, current=0, verbose=False):
+                 input_neuron_ids=None, current=0, verbose=False):
 
         self.neuron_id = neuron_id
 
-        self.input_neurons = input_neurons
-        if self.input_neurons is not None:
-
-            # I simplified ============================
-            # if self.neuron_id in self.input_neurons:
-            #     self.recurrent = True
-            # else:
-            #     self.recurrent = False
-            self.recurrent = self.neuron_id in self.input_neurons
+        self.input_neuron_ids = input_neuron_ids
+        # if self.input_neurons is not None:
+        #
+        #     # I simplified ============================
+        #     # if self.neuron_id in self.input_neurons:
+        #     #     self.recurrent = True
+        #     # else:
+        #     #     self.recurrent = False
+        #     self.recurrent = self.neuron_id in self.input_neurons
 
         self.input_currents = None
         self.weights = None
@@ -293,7 +319,7 @@ class Neuron:
         # Neuron dynamics
         self.current = current
         self.tau = tau
-        self.input_neurons = input_neurons
+        # self.input_neurons = input_neuron_ids
 
         # Gain function
         self.theta = theta
@@ -302,6 +328,10 @@ class Neuron:
         # Hebbian rule
         self.kappa = kappa
         self.phi = phi
+
+        self.input_neurons = [] # will be filled by the network
+
+    def start(self):
 
         self._initialize_attributes()
 
@@ -479,8 +509,7 @@ def main():
 
 
 if __name__ == "__main__":
-    # main()
-    pass
+    main()
 
 # Plotting:
 # x, y = np.meshgrid(range(data.shape[0]), range(data.shape[1]))

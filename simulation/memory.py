@@ -1,29 +1,39 @@
 import numpy as np
-import multiprocessing as mlt
+# import multiprocessing as mlt
 from tqdm import tqdm
 
-def _run(args):
-
-    agent, item, t_idx = args
-    p = \
-        agent.p_recall(item=item, time_index=t_idx)
-
-    # assert not np.isnan(p), "Error of logic!"
-
-    return p
+# def _run(args):
+#
+#     agent, item, t_idx = args
+#     p = \
+#         agent.p_recall(item=item, time_index=t_idx)
+#
+#     # assert not np.isnan(p), "Error of logic!"
+#
+#     return p
 
 
 def _compute_discrete(agent, n_item, t_max):
 
     p_recall = np.zeros((n_item, t_max))
 
-    pool = mlt.Pool()
+    # pool = mlt.Pool()
 
-    for i in tqdm(range(t_max)):
+    for t in tqdm(range(t_max)):
 
-        p_recall[:, i] = pool.map(
-            _run,
-            ((agent, item, i) for item in range(n_item)))
+        for item in range(n_item):
+            p = \
+                agent.p_recall(item=item, time_index=t)
+
+            # assert not np.isnan(p), "Error of logic!"
+
+            p_recall[item, t] = p
+
+        # p_recall[:, i] = pool.map(
+        #     _run,
+        #     ((agent, item, i) for item in range(n_item)))
+
+    tqdm.write('\n')
 
     return p_recall
 
@@ -48,6 +58,8 @@ def _compute_continuous(agent, n_item, time_sampling,
             p_recall[item, i] = p
 
         i += 1
+
+    tqdm.write('\n')
 
     return p_recall
 

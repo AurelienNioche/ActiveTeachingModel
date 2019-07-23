@@ -173,7 +173,7 @@ class AvyaTeacher(GenericTeacher):
                         max_val = usefulness[i]
                         max_ind = i
         if max_ind is None:
-            print("All items learnt by Learner")
+            # print("All items learnt by Learner")
             # find the least learnt item
             result = np.where(recall_arr == np.amin(recall_arr))
             max_ind = result[0][0]

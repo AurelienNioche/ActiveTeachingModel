@@ -191,7 +191,7 @@ class LeitnerTeacher(GenericTeacher):
                 count_learning += 1
 
         if count_learnt == n_items:
-            print("All items learnt by Learner")
+            # print("All items learnt by Learner")
             # find the least learnt item
             recall_arr = np.zeros(n_items)
             for i in range(n_items):

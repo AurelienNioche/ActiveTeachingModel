@@ -154,8 +154,8 @@ def run(student_model, teacher_model,
 def main(force=False):
 
     # Task attributes
-    n_item = 30   # 30, 150
-    t_max = 1000  # 4000
+    n_item = 60   # 30, 150
+    t_max = 4000  # 4000
     grades = (1, )  # (1, 2)
     normalize_similarity = True
 
