@@ -10,7 +10,7 @@ def main(t_max=300, n_item=32):
     teacher = RandomTeacher(t_max=t_max, n_item=n_item,
                             handle_similarities=True,
                             normalize_similarity=True,
-                            verbose=True)
+                            verbose=False)
 
     # agent = ActRMeaning(param={"d": 0.5, "tau": 0.01, "s": 0.06, "m": 0.02},
     #                    tk=teacher.tk, track_p_recall=True)

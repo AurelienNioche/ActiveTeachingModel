@@ -16,10 +16,11 @@ class NetworkParam:
         simulation script is being used with the model
     """
     def __init__(self, n_hidden=40, n_epoch=3, weight_updates="hebbian",
-                 t_max=None):
+                 t_max=None, verbose=False):
         self.n_epoch = n_epoch
         self.n_hidden = n_hidden
         self.t_max = t_max
+        self.verbose = verbose
 
         weight_updates_methods = ["random", "hebbian", "recanatesi"]
         assert weight_updates in weight_updates_methods
@@ -122,7 +123,7 @@ class Network(Learner):
         for role in self.roles:
             print(f"Number of {role} neurons: ", len(self.neurons[role]))
 
-    def _train(self, n_epochs):
+    def _train(self, n_epochs, verbose=False):
         """
         :param n_epochs: int in range(0, +inf). Number of epochs
         """
@@ -141,7 +142,8 @@ class Network(Learner):
                 neuron.compute_gain()
                 neuron.update_current()
 
-        print(self.hidden_currents_history)
+        # if verbose:
+        #     print(self.hidden_currents_history)
 
     def _update_hidden_currents_history(self, time_step):
         for j, val in enumerate(self.neurons["hidden"]):
@@ -159,7 +161,6 @@ class Network(Learner):
                          & (1 << np.arange(8))) > 0).astype(int)
         for j, val in enumerate(self.neurons["input"]):
             self.neurons["input"][j].current = bin_question[0, j]
-
         # print(self.neurons["input"])
 
     def p_recall(self, item, time=None):
@@ -260,7 +261,7 @@ class Neuron:
 
     def __init__(self, neuron_id, role, tau=0.01, theta=0, gamma=0.4,
                  kappa=13000, phi=1,
-                 input_neurons=None, current=0):
+                 input_neurons=None, current=0, verbose=False):
 
         self.neuron_id = neuron_id
 
@@ -307,7 +308,7 @@ class Neuron:
                 self.compute_gain()
                 self.update_current()
 
-        # self.print_attributes()
+        self.print_attributes()
 
     @staticmethod
     def _random_small_value():
@@ -367,8 +368,8 @@ class Neuron:
             # TODO find a way to implement output = P(r) w/o breaking script
             # perhaps stringer vector normalization
             # / self.tau)
-        if self.role == "output":
-            print(self.weights_hebbian)  # Debugging
+        # if self.role == "output":
+        #     print(self.weights_hebbian)  # Debugging
 
     def print_attributes(self):
         """
@@ -450,8 +451,9 @@ def main():
 
     np.random.seed(1234)
 
-    network = Network(tk=Task(t_max=100, n_item=30), param={"n_epoch": 20,
-                                                            "n_hidden": 100})
+    network = Network(tk=Task(t_max=100, n_item=30), param={"n_epoch": 200,
+                                                            "n_hidden": 10,
+                                                            "verbose": False})
 
     # network.show_neurons()
     plot(network)
@@ -465,7 +467,7 @@ def main():
 
 
 if __name__ == "__main__":
-    # main()
+    main()
     pass
 
 # Plotting:
