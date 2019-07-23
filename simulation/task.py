@@ -18,7 +18,7 @@ class Task:
     def __init__(self, t_max=100, n_kanji=20, grades=(1, ),
                  verbose=False, seed=123, compute_similarity=True,
                  normalize_similarity=False,
-                 generate_full_task=True, force=False):
+                 generate_full_task=False, force=False):
 
         # Seed
         np.random.seed(seed)

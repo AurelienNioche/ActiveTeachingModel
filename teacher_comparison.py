@@ -20,21 +20,23 @@ import os
 
 
 def _produce_data(student_model, teacher_model, student_param,
-                  n_item, grades, t_max, verbose=False):
+                  n_item, grades, t_max,
+                  normalize_similarity,
+                  verbose=False):
 
-    teacher = teacher_model(t_max=t_max, n_item=n_item, grades=grades)
+    teacher = teacher_model(t_max=t_max, n_item=n_item, grades=grades,
+                            normalize_similarity=normalize_similarity)
     learner = student_model(param=student_param, tk=teacher.tk)
 
     print(f"\nSimulating data with a student {student_model.__name__} "
           f"(parameters={student_param}), "
           f"and a teacher {teacher_model.__name__} "
-          f"using {n_item} kanji of grade {grades} for {t_max} time steps...",
-          end=" ", flush=True)
+          f"using {n_item} kanji of grade {grades} for {t_max} time steps...")
 
     questions, replies, successes = \
         teacher.teach(agent=learner, verbose=verbose)
 
-    print("Done.")
+    # print("Done.")
     print('Computing probabilities of recall...', end=' ', flush=True)
 
     p_recall = p_recall_over_time_after_learning(
@@ -54,11 +56,15 @@ def _produce_data(student_model, teacher_model, student_param,
 
 
 def run(student_model, teacher_model,
-        student_param=None, n_item=25, grades=(1, ), t_max=500,
+        student_param=None,
+        n_item=25, grades=(1, ), t_max=500,
+        normalize_similarity=False,
         verbose=False,
         force=False):
 
     """
+        :param normalize_similarity: Normalize description of semantic
+        and graphic similarities
         :param verbose: Display more stuff
         :param force: Force the computation
         :param teacher_model: Can be one of those:
@@ -128,7 +134,8 @@ def run(student_model, teacher_model,
         "Teacher model not recognized."
 
     extension = f'{teacher_model.__name__}_{student_model.__name__}_' \
-        f'{dic2string(student_param)}_ni_{n_item}_grade_{grades}_tmax_{t_max}'
+        f'{dic2string(student_param)}_' \
+        f'ni_{n_item}_grade_{grades}_tmax_{t_max}_norm_{normalize_similarity}'
 
     bkp_file = os.path.join('bkp', 'teacher_comparison', f'{extension}.p')
 
@@ -142,24 +149,31 @@ def run(student_model, teacher_model,
                           t_max=t_max,
                           grades=grades,
                           n_item=n_item,
+                          normalize_similarity=normalize_similarity,
                           verbose=verbose)
 
         dump(r, bkp_file)
         return r
 
 
-def main():
+def main(force=False):
 
-    n_item = 150
-    t_max = 4000
-    grades = (1, 2)
+    # Task attributes
+    n_item = 30   # 150
+    t_max = 1000  # 4000
+    grades = (1, )  # (1, 2)
+    normalize_similarity = True
 
-    student_param = {"d": 0.5, "tau": 0.01, "s": 0.06,
-                     "m": 0.1}
-
+    # Student
+    student_param = {"d": 0.5, "tau": 0.01, "s": 0.06, "m": 0.02}
+    # student_param = {"d": 0.5, "tau": 0.01, "s": 0.06,
+    #                  "m": 0.1}
     student_model = ActRMeaning
+
+    # Teacher
     teacher_models = (RandomTeacher, AvyaTeacher)
 
+    # Plot
     font_size = 8
     label_size = 6
     line_width = 1
@@ -173,7 +187,8 @@ def main():
     for teacher_model in teacher_models:
         r = run(student_model=student_model, teacher_model=teacher_model,
                 n_item=n_item, t_max=t_max,
-                grades=grades, verbose=True)
+                grades=grades, verbose=True,
+                normalize_similarity=normalize_similarity, force=force)
 
         p_recall = r['p_recall']
         seen = r['seen']
@@ -236,4 +251,4 @@ def main():
 
 if __name__ == "__main__":
 
-    main()
+    main(True)

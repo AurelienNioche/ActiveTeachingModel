@@ -33,7 +33,7 @@ class SimulationAndFit:
 
         self.tk = Task(t_max=t_max, n_kanji=n_kanji, grades=grades,
                        normalize_similarity=normalize_similarity,
-                       verbose=verbose)
+                       verbose=verbose, generate_full_task=True)
 
         self.verbose = verbose
 
@@ -149,4 +149,4 @@ def main(model, max_=20, t_max=300, n_kanji=30, normalize_similarity=True,
 if __name__ == "__main__":
 
     main(ActRMeaning, max_=100, n_kanji=79, t_max=1000, force=False,
-         normalize_similarity=False)
+         normalize_similarity=True)

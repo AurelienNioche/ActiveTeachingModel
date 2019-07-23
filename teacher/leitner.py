@@ -15,7 +15,7 @@ class LeitnerTeacher(GenericTeacher):
                  represent_learning=1, represent_unseen=0,
                  verbose=False):
         """
-        :var iteration: current iteration number.
+        :var self.iteration: current iteration number.
         0 at first iteration.
         :param fractional_success: float fraction of successful replies
             required for teaching after which an item is learnt.
@@ -27,17 +27,17 @@ class LeitnerTeacher(GenericTeacher):
         :param represent_learnt: representation of a learnt item(Learnt by
         learner).
         :param represent_learning: representation of a learning item(shown
-        atleast once but has not been learnt by learner).
+        at least once but has not been learnt by learner).
         :param represent_unseen: representation of an unseen item(not shown to
         the learner yet).
         :param verbose: displays each question asked and replies at each
         iteration
-        :var past_successes: Array to store the past successful attempts of
-        every item.
-        :var learning_progress: list of size n_items containing:
+        :var self.past_successes: Array to store the past successful attempts
+        of every item.
+        :var self.learning_progress: list of size n_items containing:
         represent_learnt, represent_learning and represent_unseen
-        :var pick_probability: Array to store probability of picking i^th item
-        at i^th index in
+        :var self.pick_probability: Array to store probability
+        of picking i^th item at i^th index in
         # current iteration
         """
 
@@ -81,8 +81,8 @@ class LeitnerTeacher(GenericTeacher):
     def update_probabilities(self, n_items):
         """
         :param n_items: n = Number of items included (0 ... n-1)
-        :var pick_probability: array that stores probability of picking i^th item at i^th
-        index
+        :var self.pick_probability: array that stores probability
+        of picking i^th item at i^th index
 
         Updates the pick_probability array at every iteration. The probability
         of picking taboo is 0. For rest, the probability of an item(P) =
@@ -235,9 +235,9 @@ class LeitnerTeacher(GenericTeacher):
                 self.iteration += 1
                 return new_question
 
-        probability_sum = np.sum(self.pick_probability)
+        probability_sum = sum(self.pick_probability)
         assert(probability_sum > 0)
-        pick_question = np.random.randint(0, probability_sum)
+        pick_question = np.random.randint(probability_sum)
 
         iterating_sum = 0
         for item in range(n_items):

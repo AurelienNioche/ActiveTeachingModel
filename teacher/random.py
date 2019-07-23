@@ -1,5 +1,4 @@
 import numpy as np
-import copy
 
 from teacher.metaclass import GenericTeacher
 
@@ -14,17 +13,12 @@ class RandomTeacher(GenericTeacher):
                          normalize_similarity=normalize_similarity,
                          handle_similarities=handle_similarities,
                          verbose=verbose)
-        self.num_learnt = np.zeros(t_max)
-        self.count = 0
-        self.seed = seed
+
+        np.random.seed(seed)
 
     def ask(self):
-        question = self.get_next_node(
-            questions=self.questions,
-            agent=copy.deepcopy(self.agent),
-            n_items=self.tk.n_item,
-            seed=self.seed
-        )
+
+        question = self.get_next_node()
 
         possible_replies = self.get_possible_replies(question)
 
@@ -35,10 +29,7 @@ class RandomTeacher(GenericTeacher):
 
         return question, possible_replies
 
-    def get_next_node(self, questions, agent, n_items, seed):
-        np.random.seed(seed)
-        np.random.seed(self.seed)
-        question = np.random.randint(n_items)
+    def get_next_node(self):
 
-        self.count += 1
+        question = np.random.randint(self.tk.n_item)
         return question
