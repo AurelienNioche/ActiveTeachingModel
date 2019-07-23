@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from tqdm import tqdm
+from sys import exit
 
 from behavior.data_structure import Task
 from learner.generic import Learner
@@ -102,6 +103,8 @@ class Network(Learner):
             self._create_neuron(input_neurons=hidden_neuron_inputs,
                                 role="hidden")
 
+        print("HELLO MIXED", hidden_neuron_inputs)
+
         # Output layer
         output_neuron_inputs = []
         for k in self.neurons['hidden']:
@@ -161,7 +164,6 @@ class Network(Learner):
                          & (1 << np.arange(8))) > 0).astype(int)
         for j, val in enumerate(self.neurons["input"]):
             self.neurons["input"][j].current = bin_question[0, j]
-        # print(self.neurons["input"])
 
     def p_recall(self, item, time=None):
         p_recall = self.neurons["output"][0].current
@@ -308,7 +310,7 @@ class Neuron:
                 self.compute_gain()
                 self.update_current()
 
-        self.print_attributes()
+        # self.print_attributes()
 
     @staticmethod
     def _random_small_value():
@@ -323,6 +325,7 @@ class Neuron:
             self.input_currents = \
                 np.array([self._random_small_value()
                           for _ in range(len(self.input_neurons))])
+            print(len(self.input_neurons))
             # self.input_currents = np.random.normal(loc=0.5, scale=0.25,
             # size=len(self.input_neurons))
             # self.input_currents[self.input_currents>1] = 1
@@ -338,9 +341,16 @@ class Neuron:
 
     def update_current(self):
         assert self.role is not "input"
-        self.weights_hebbian = np.dot(self.current, self.input_currents)
 
+        self.weights_hebbian = self.current * self.input_currents
+        # i = 0
+        # while i < 5:
+        #     self.weights_hebbian[i] = self.weights_hebbian[i] * 40
+        #     i += 1  # TODO remove this temporal bias for input currents
+
+        # print(self.weights_hebbian.shape)
         r = self._random_small_value()
+        # print(self.current, "\n i am input currents", self.input_currents)
 
         try:
             sum_gain = np.sum(self.weights_hebbian) * self.gain
@@ -351,7 +361,8 @@ class Neuron:
             #       * self.gain
             #       + self._random_small_value()))
             self.current *= \
-                (-self.current + sum_gain + r)
+                (-self.current + sum_gain) #+ r)
+            print("MY SHAPE", self.input_currents.shape)
 
         except FloatingPointError as e:
             print('gain:', self.gain)
@@ -369,7 +380,7 @@ class Neuron:
             # perhaps stringer vector normalization
             # / self.tau)
         # if self.role == "output":
-        #     print(self.weights_hebbian)  # Debugging
+        # print(self.current)  # Debugging
 
     def print_attributes(self):
         """
@@ -442,6 +453,7 @@ def plot(network):
     fig.tight_layout()
     # plt.matshow(network.hidden_currents_history)
     plt.show()
+    network.show_neurons()
 
 
 def main():
@@ -467,7 +479,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    # main()
     pass
 
 # Plotting:

@@ -14,7 +14,7 @@ def main(t_max=300, n_item=32):
 
     # agent = ActRMeaning(param={"d": 0.5, "tau": 0.01, "s": 0.06, "m": 0.02},
     #                    tk=teacher.tk, track_p_recall=True)
-    agent = Network(param={"n_epoch": 20, "t_max": t_max, "n_hidden": 100},
+    agent = Network(param={"n_epoch": 5, "t_max": t_max, "n_hidden": 5},
                     tk=teacher.tk)
     # questions, replies, successes = teacher.teach(agent=agent)
     teacher.teach(agent=agent)
