@@ -37,14 +37,12 @@ def _produce_data(student_model, teacher_model, student_param,
         teacher.teach(agent=learner, verbose=verbose)
 
     # print("Done.")
-    print('Computing probabilities of recall...', end=' ', flush=True)
+    print('Computing probabilities of recall...')
 
     p_recall = p_recall_over_time_after_learning(
         agent=learner,
         t_max=t_max,
         n_item=n_item)
-
-    print('Done.\n')
 
     return {
         'seen': teacher.seen,
@@ -68,11 +66,8 @@ def run(student_model, teacher_model,
         :param verbose: Display more stuff
         :param force: Force the computation
         :param teacher_model: Can be one of those:
-            * NirajTeacher
             * RandomTeacher
             * AvyaTeacher
-            * TugceTeacher
-            * RandomTeacher
             * LeitnerTeacher
         :param grades: Levels of difficulty of the kanji selected (1: easiest)
         :param n_item: Positive integer
@@ -159,7 +154,7 @@ def run(student_model, teacher_model,
 def main(force=False):
 
     # Task attributes
-    n_item = 30   # 150
+    n_item = 60   # 30, 150
     t_max = 1000  # 4000
     grades = (1, )  # (1, 2)
     normalize_similarity = True
@@ -171,14 +166,14 @@ def main(force=False):
     student_model = ActRMeaning
 
     # Teacher
-    teacher_models = (RandomTeacher, AvyaTeacher)
+    teacher_models = (RandomTeacher, LeitnerTeacher, AvyaTeacher)
 
     # Plot
     font_size = 8
     label_size = 6
     line_width = 1
 
-    n_rows, n_cols = 5, 2
+    n_rows, n_cols = 5, len(teacher_models)
 
     fig, axes = plt.subplots(nrows=n_rows, ncols=n_cols, figsize=(12, 14))
 
@@ -242,7 +237,8 @@ def main(force=False):
 
         j += 1
 
-    extension = f'{teacher_models[0].__name__}_' \
+    extension = \
+        '_'.join([t.__name__ for t in teacher_models]) +  \
         f'{teacher_models[0].__name__}_' \
         f'{student_model.__name__}_' \
         f'{dic2string(student_param)}_ni_{n_item}_grade_{grades}_tmax_{t_max}'
@@ -251,4 +247,4 @@ def main(force=False):
 
 if __name__ == "__main__":
 
-    main(True)
+    main()

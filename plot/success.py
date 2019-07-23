@@ -4,23 +4,25 @@ import matplotlib.pyplot as plt
 from plot.generic import save_fig
 
 
-def scatter(successes, fig_name='backup.pdf'):
+def scatter(successes, ax=None, fig_name=None):
 
-    fig = plt.figure(figsize=(10, 2))
-    ax = fig.add_subplot(111)
+    if ax is None:
+        fig = plt.figure(figsize=(10, 2))
+        ax = fig.add_subplot(111)
     ax.set_ylabel('Success')
     ax.set_xlabel('Time')
     ax.set_yticks((0, 1))
     ax.scatter(x=np.arange(len(successes)), y=successes, alpha=0.2, color="black")
 
-    save_fig(fig_name)
+    if fig_name is not None:
+        save_fig(fig_name)
 
 
 def curve(successes, fig_name=None, font_size=12, line_width=1,
           label_size=8, ax=None, color='C0'):
 
     y = []
-    for i in range(1, len(successes)):
+    for i in range(1, len(successes)+1):
         y.append(np.mean(successes[:i]))
 
     n_iteration = len(y)
@@ -29,6 +31,15 @@ def curve(successes, fig_name=None, font_size=12, line_width=1,
         fig = plt.figure(figsize=(10, 10))
         ax = fig.add_subplot(111)
 
+    # Horizontal lines
+    ax.axhline(0.5, linewidth=0.5, linestyle='dotted',
+               color='black', alpha=0.5)
+    ax.axhline(0.25, linewidth=0.5, linestyle='dotted',
+               color='black', alpha=0.5)
+    ax.axhline(0.75, linewidth=0.5, linestyle='dotted',
+               color='black', alpha=0.5)
+
+    # Main plot
     ax.plot(y, color=color, linewidth=line_width)
 
     # Both axis
@@ -37,7 +48,11 @@ def curve(successes, fig_name=None, font_size=12, line_width=1,
     # x-axis
     ax.set_xlabel('Time', fontsize=font_size)
     ax.set_xlim(1, n_iteration)
-    ax.set_xticks((1, int(n_iteration/2), n_iteration))
+    ax.set_xticks((1,
+                   int(n_iteration * 0.25),
+                   int(n_iteration * 0.5),
+                   int(n_iteration * 0.75),
+                   n_iteration))
 
     # y-axis
     ax.set_ylabel('Success rate', fontsize=font_size)
@@ -48,8 +63,9 @@ def curve(successes, fig_name=None, font_size=12, line_width=1,
         save_fig(fig_name)
 
 
-def multi_curve(questions, replies, fig_name, font_size=42, line_width=3,
-                label_size=22, max_lines=None):
+def multi_curve(questions, replies, font_size=42, line_width=3,
+                label_size=22, max_lines=None,
+                ax=None, fig_name=None):
 
     n_items = len(np.unique(questions))
     t_max = len(questions)
@@ -77,8 +93,9 @@ def multi_curve(questions, replies, fig_name, font_size=42, line_width=3,
 
         data = data[:max_lines]
 
-    fig = plt.figure(figsize=(10, 10))
-    ax = fig.add_subplot(111)
+    if ax is None:
+        fig = plt.figure(figsize=(10, 10))
+        ax = fig.add_subplot(111)
     ax.set_ylabel('Success rate', fontsize=font_size)
     ax.set_xlabel('Time', fontsize=font_size)
     ax.set_yticks((0, 1))
@@ -86,6 +103,5 @@ def multi_curve(questions, replies, fig_name, font_size=42, line_width=3,
     ax.tick_params(axis="both", labelsize=label_size)
     ax.plot(data.T, linewidth=line_width, alpha=0.5)
 
-    plt.tight_layout()
-
-    save_fig(fig_name)
+    if fig_name is not None:
+        save_fig(fig_name)

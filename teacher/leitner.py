@@ -10,11 +10,15 @@ np.random.seed(123)
 class LeitnerTeacher(GenericTeacher):
 
     def __init__(self, n_item=20, t_max=200, grades=(1, ),
-                 handle_similarities=True, fractional_success=0.9,
+                 handle_similarities=True,
+                 normalize_similarity=False,
+                 fractional_success=0.9,
                  buffer_threshold=15, taboo=None, represent_learnt=2,
                  represent_learning=1, represent_unseen=0,
                  verbose=False):
         """
+        :param normalize_similarity: bool. Normalized description of
+        semantic and graphic connections between items
         :var self.iteration: current iteration number.
         0 at first iteration.
         :param fractional_success: float fraction of successful replies
@@ -43,6 +47,7 @@ class LeitnerTeacher(GenericTeacher):
 
         super().__init__(n_item=n_item, t_max=t_max, grades=grades,
                          handle_similarities=handle_similarities,
+                         normalize_similarity=normalize_similarity,
                          verbose=verbose)
         self.iteration = 0
         self.fractional_success = fractional_success
@@ -68,7 +73,7 @@ class LeitnerTeacher(GenericTeacher):
             agent=copy.deepcopy(self.agent),
             n_items=self.tk.n_item
         )
-        print(question)
+
         possible_replies = self.get_possible_replies(question)
 
         if self.verbose:
@@ -158,8 +163,6 @@ class LeitnerTeacher(GenericTeacher):
 
     def get_next_node(self, successes, agent, n_items):
         """
-        :param questions: list of integers (index of questions). Empty at first
-            iteration
         :param successes: list of booleans (True: success, False: failure) for
             every question
         :param agent: agent object (RL, ACT-R, ...) that implements at least

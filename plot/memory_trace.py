@@ -88,41 +88,61 @@ def summarize(p_recall, fig_name='memory_trace_summarize.pdf',
     mean = np.mean(p_recall, axis=0)
     std = np.std(p_recall, axis=0) # scipy.stats.sem(p_recall, axis=0)
 
+    x = p_recall_time
+
     y = mean
     y1 = mean-std
     y2 = mean+std
 
-    # for t in range(n_iteration):
-    #     print(t, y[t], y1[t], y2[t])
-
     min_ = np.min(p_recall, axis=0)
     max_ = np.max(p_recall, axis=0)
 
-    ax.plot(p_recall_time, y, lw=line_width)
+    # for t in range(n_iteration):
+    #     print(t, y[t], y1[t], y2[t])
 
+    # Horizontal lines
+    ax.axhline(0.5, linewidth=0.5, linestyle='dotted',
+               color='black', alpha=0.5)
+    ax.axhline(0.25, linewidth=0.5, linestyle='dotted',
+               color='black', alpha=0.5)
+    ax.axhline(0.75, linewidth=0.5, linestyle='dotted',
+               color='black', alpha=0.5)
+
+    # Plot mean
+    ax.plot(x, y, lw=line_width)
+
+    # Plot max
     ax.fill_between(
-        p_recall_time,
+        x,
         y1=y1,
         y2=y2,
         alpha=0.2
     )
 
-    ax.plot(p_recall_time, min_, linestyle='-', color='C0', linewidth=0.2,
+    # Plot min and max
+    ax.plot(x, min_, linestyle='-', color='C0', linewidth=0.2,
             alpha=0.5)
-    ax.plot(p_recall_time, max_, linestyle='-', color='C0', linewidth=0.2,
+    ax.plot(x, max_, linestyle='-', color='C0', linewidth=0.2,
             alpha=0.5)
 
     # Both axis
     ax.tick_params(axis="both", labelsize=label_size)
 
+    # labels
     ax.set_xlabel('Time', fontsize=font_size)
     ax.set_ylabel('$p_{recall}$', fontsize=font_size)
 
+    # x-axis
+    ax.set_xlim(1, n_iteration)
+    ax.set_xticks((1,
+                   int(n_iteration * 0.25),
+                   int(n_iteration*0.5),
+                   int(n_iteration * 0.75),
+                   n_iteration))
+
+    # y-axis
     ax.set_ylim((-0.01, 1.01))
     ax.set_yticks((0, 0.5, 1))
-
-    ax.set_xlim(1, n_iteration)
-    ax.set_xticks((1, int(n_iteration/2), n_iteration))
 
     if ax is None:
         save_fig(fig_name=fig_name)
@@ -160,6 +180,8 @@ def summarize_over_seen(
     #     print()
     #     print('_' * 10)
 
+    x = p_recall_time
+
     mean = np.nanmean(p_recall, axis=0)
 
     std = np.nanstd(p_recall)
@@ -173,18 +195,29 @@ def summarize_over_seen(
     min_ = np.nanmin(p_recall, axis=0)
     max_ = np.nanmax(p_recall, axis=0)
 
-    ax.plot(p_recall_time, mean, lw=line_width)
+    # Horizontal lines
+    ax.axhline(0.5, linewidth=0.5, linestyle='dotted',
+               color='black', alpha=0.5)
+    ax.axhline(0.25, linewidth=0.5, linestyle='dotted',
+               color='black', alpha=0.5)
+    ax.axhline(0.75, linewidth=0.5, linestyle='dotted',
+               color='black', alpha=0.5)
 
+    # Plot mean
+    ax.plot(x, mean, lw=line_width)
+
+    # Plot std
     ax.fill_between(
-        p_recall_time,
+        x,
         y1=mean - std,
         y2=mean + std,
         alpha=0.2
     )
 
-    ax.plot(p_recall_time, min_, linestyle='-', color='C0', linewidth=0.2,
+    # Plot min and max
+    ax.plot(x, min_, linestyle='-', color='C0', linewidth=0.2,
             alpha=0.5)
-    ax.plot(p_recall_time, max_, linestyle='-', color='C0', linewidth=0.2,
+    ax.plot(x, max_, linestyle='-', color='C0', linewidth=0.2,
             alpha=0.5)
 
     # Both axis
@@ -193,7 +226,11 @@ def summarize_over_seen(
     # x-axis
     ax.set_xlabel('Time', fontsize=font_size)
     ax.set_xlim(1, n_iteration)
-    ax.set_xticks((1, int(n_iteration/2), n_iteration))
+    ax.set_xticks((1,
+                   int(n_iteration * 0.25),
+                   int(n_iteration*0.5),
+                   int(n_iteration * 0.75),
+                   n_iteration))
 
     # y-axis
     ax.set_ylabel('$p_{recall}$ [seen]', fontsize=font_size)
