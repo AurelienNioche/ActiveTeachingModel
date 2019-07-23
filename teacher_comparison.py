@@ -154,7 +154,7 @@ def run(student_model, teacher_model,
 def main(force=False):
 
     # Task attributes
-    n_item = 60   # 30, 150
+    n_item = 30   # 30, 150
     t_max = 1000  # 4000
     grades = (1, )  # (1, 2)
     normalize_similarity = True
@@ -180,10 +180,13 @@ def main(force=False):
     j = 0
 
     for teacher_model in teacher_models:
-        r = run(student_model=student_model, teacher_model=teacher_model,
-                n_item=n_item, t_max=t_max,
-                grades=grades, verbose=True,
-                normalize_similarity=normalize_similarity, force=force)
+        r = run(
+            teacher_model=teacher_model,
+            student_model=student_model,
+            student_param=student_param,
+            n_item=n_item, t_max=t_max,
+            grades=grades, verbose=True,
+            normalize_similarity=normalize_similarity, force=force)
 
         p_recall = r['p_recall']
         seen = r['seen']
@@ -239,7 +242,6 @@ def main(force=False):
 
     extension = \
         '_'.join([t.__name__ for t in teacher_models]) +  \
-        f'{teacher_models[0].__name__}_' \
         f'{student_model.__name__}_' \
         f'{dic2string(student_param)}_ni_{n_item}_grade_{grades}_tmax_{t_max}'
     save_fig(f'teacher_comparison_{extension}.pdf')
