@@ -9,7 +9,7 @@ class Learner:
     bounds = ('<name of parameter>', 0.0000001, 1.0),
 
     def __init__(self):
-        pass
+        self.pr = None
 
     def decide(self, question, possible_replies, time=None):
         """Expected return from specific learner: reply"""
@@ -70,3 +70,25 @@ class Learner:
             self.learn(question=question, time=time)
 
         return p_choices
+
+    @classmethod
+    def generate_random_parameters(cls):
+
+        return {t[0]: np.random.uniform(t[1], t[2]) for t in cls.bounds}
+
+    def set_parameters(self, param):
+
+        if param is None:
+            pass
+
+        elif type(param) == dict:
+            for k, v in param.items():
+                setattr(self, k, v)
+
+        elif type(param) in (tuple, list, np.ndarray):
+
+            for tup, v in zip(self.bounds, param):
+                setattr(self, tup[0], v)
+        else:
+            raise Exception(f"Type {type(param)} "
+                            f"is not handled for parameters")

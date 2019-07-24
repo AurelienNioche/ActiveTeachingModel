@@ -120,7 +120,7 @@ class Network(Learner):
     def _create_neuron(self, input_neuron_ids=None, role="hidden"):
 
         self.neurons[role].append(
-            Neuron(neuron_id=self.neuron_id,
+            Neuron(network=self, neuron_id=self.neuron_id,
                    role=role, input_neuron_ids=input_neuron_ids)
         )
 
@@ -249,7 +249,10 @@ class Network(Learner):
         self._update_input_currents(question)
         self._train(self.pr.n_epoch)
 
-        p_r = self.neurons["output"][0].current
+        # p_r = self.neurons["output"][0].current
+        number = abs(np.random.normal(loc=0.5, scale=0.25))
+        number = max(min(1, number), 0)
+        p_r = number  # TODO ugly fix as we removed the output layer
         r = np.random.random()
 
         if p_r > r:
@@ -281,16 +284,18 @@ class Neuron:
     :param gamma: gain func exponent. Always sub-linear, then value < 1
     :param kappa: excitation parameter
     :param phi: inhibition parameter in range(0.70, 1.06)
+    :param f: sparsity of bit probability
 
     Modified from Recanatesi (2015) equations 1 to 4.
     Note: default argument values are the reference values in the article but
     for phi; only phi_min and phi_max are given in Recanatesi (2015).
     """
 
-    def __init__(self, neuron_id, role, tau=0.01, theta=0, gamma=0.4,
-                 kappa=13000, phi=1,
+    def __init__(self, network, neuron_id, role, tau=0.01, theta=0, gamma=0.4,
+                 kappa=13000, phi=1, f=0.1,
                  input_neuron_ids=None, current=0, verbose=False):
 
+        self.network = network
         self.neuron_id = neuron_id
 
         self.input_neuron_ids = input_neuron_ids
@@ -328,8 +333,9 @@ class Neuron:
         # Hebbian rule
         self.kappa = kappa
         self.phi = phi
+        self.f = f
 
-        self.input_neurons = [] # will be filled by the network
+        self.input_neurons = []  # Will be filled by the network
 
     def start(self):
 
@@ -372,18 +378,25 @@ class Neuron:
     def update_current(self):
         assert self.role is not "input"
 
-        self.weights_hebbian = self.current * self.input_currents
+        # This update strategy "works"
+        # self.weights_hebbian = self.current * self.input_currents
+
+        # Bias:
         # i = 0
         # while i < 5:
         #     self.weights_hebbian[i] = self.weights_hebbian[i] * 40
         #     i += 1  # TODO remove this temporal bias for input currents
 
-        # print(self.weights_hebbian.shape)
+        self.weights_hebbian = self.kappa / 100000\
+                               * (np.sum(self.current * self.input_currents)
+                                  - self.phi)
         r = self._random_small_value()
-        # print(self.current, "\n i am input currents", self.input_currents)
+        # self.print_attributes()
 
         try:
-            sum_gain = np.sum(self.weights_hebbian) * self.gain
+            # Older Hebbian
+            # sum_gain = np.sum(self.weights_hebbian) * self.gain
+            sum_gain = self.weights_hebbian * self.gain
 
             # I rewrote
             # self.current *= \
@@ -391,8 +404,7 @@ class Neuron:
             #       * self.gain
             #       + self._random_small_value()))
             self.current *= \
-                (-self.current + sum_gain + r)
-            print("MY SHAPE", self.input_currents.shape)
+                (-self.current + sum_gain + r) # / self.tau
 
         except FloatingPointError as e:
             print('gain:', self.gain)
@@ -406,11 +418,6 @@ class Neuron:
 
         # if self.role == "hidden":
         self.current = int(self.current > 0.5)
-            # TODO find a way to implement output = P(r) w/o breaking script
-            # perhaps stringer vector normalization
-            # / self.tau)
-        # if self.role == "output":
-        # print(self.current)  # Debugging
 
     def print_attributes(self):
         """
@@ -422,68 +429,22 @@ class Neuron:
 
 
 def plot(network):
-    # data = network.hidden_currents_history
-    # # data = np.zeros(network.pr.n_hidden)
-    # # for i, val in enumerate(network.neurons["hidden"]):
-    # #     data[i] = network.neurons["hidden"][i].current
-    # # print(data.shape)
-    # # factors = []
-    # # dimension_pairs = []
-    # # for i in range(network.pr.n_hidden):
-    # #     if (network.pr.n_hidden % (network.pr.n_hidden - 1)) == 0:
-    # #         factors.append()
-    # #         # now I have the factors, make it pairs next
-    # # numbo[-1]
-    # # data = np.reshape(data, (-1, 5))
-    # # print(data)
-    # # x, y = np.meshgrid(range(data.shape[0]), range(data.shape[1]))
-    #
-    # # x = np.arange(0, network.pr.n_hidden, 1)
-    # # y = np.zeros(1) + 1
-    # # z = data
-    # # h = plt.contourf(x, y, z)
-    #
-    # data = np.expand_dims(data, axis=0)
-    # # plt.pcolormesh(data)
-    # data2 = data * 0
-    # # plt.pcolormesh(data2)
-    # fig, axs = plt.subplots(nrows=2, ncols=1, subplot_kw={'xticks': [],
-    #                                                       'yticks': []})
-    #
-    # for ax in axs:
-    #     ax.imshow(data, cmap='viridis')
-    #     ax.imshow(data2, cmap='viridis')
-    #
-    # plt.tight_layout()
-    # plt.show()
-    # # z = data
-    # # c = plt.ax.contourf(x, y, z)  # cmap='viridis')
-    # # divider = make_axes_locatable(ax)
-    # # cax = divider.append_axes("right", size="5%", pad=0.05)
-    # # plt.colorbar(c, cax=cax, ticks=y_ticks)
 
     data = network.hidden_currents_history
 
     fig, ax = plt.subplots()
     im = ax.imshow(data)
 
-    ax.set_xticks(np.arange(len(data[0, :])))
-    font_size = 40 * 8 / len(data[0, :])  # Font size 10 good for 40 neurons
+    # ax.set_xticks(np.arange(len(data[0, :])))
+    # font_size = 40 * 8 / len(data[0, :])  # Font size 10 good for 40 neurons
+    # TODO fix font size
     plt.setp(ax.get_xticklabels(), rotation=90, ha="right",
-             rotation_mode="anchor", fontsize=font_size)
+             rotation_mode="anchor")  # , fontsize=font_size)
 
-    # print(network.hidden_currents_history)
     plt.title("Hidden layer currents")
-    # plt.grid()
-
-    # # Turn spines off and create white grid.
-    # for edge, spine in ax.spines.items():
-    #     spine.set_visible(False)
 
     fig.tight_layout()
-    # plt.matshow(network.hidden_currents_history)
     plt.show()
-    network.show_neurons()
 
 
 def main():

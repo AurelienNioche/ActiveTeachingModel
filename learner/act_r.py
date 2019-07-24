@@ -3,21 +3,6 @@ import numpy as np
 from learner.generic import Learner
 
 
-class ActRParam:
-    """
-    :param d: decay rate of the forgetting curve. Range 0.001 to 1.0
-    :param tau: retrieval threshold. Range not determined
-    :param s: noise in the activation levels. Range s > 0
-
-    """
-
-    def __init__(self, d, tau, s):
-
-        self.d = d
-        self.tau = tau
-        self.s = s
-
-
 class ActR(Learner):
 
     version = 2.2
@@ -25,25 +10,17 @@ class ActR(Learner):
              ('tau', -1, 1), \
              ('s', 0.001, 1)
 
-    """
-    A chunk is composed of:
-        * a type (here: means)
-        * several slots (here: slot 1: kanji, slot2: meaning)
-    """
+    def __init__(self, tk, param=None, metaclass=False, verbose=False):
 
-    def __init__(self, tk, param=None, verbose=False):
+        if not metaclass:
+            # Decay parameter
+            self.d = None
+            # Retrieval threshold
+            self.tau = None
+            # Noise in the activation levels
+            self.s = None
 
-        super().__init__()
-
-        if param is None:
-            pass  # ActR is used as abstract class
-        elif type(param) == dict:
-            self.pr = ActRParam(**param)
-        elif type(param) in (tuple, list, np.ndarray):
-            self.pr = ActRParam(*param)
-        else:
-            raise Exception(f"Type {type(param)} "
-                            f"is not handled for parameters")
+            self.set_parameters(param)
 
         self.tk = tk
 
@@ -65,6 +42,8 @@ class ActR(Learner):
         self.times = np.zeros(self.tk.t_max)
 
         self._bkp_presentation_effect = {}
+
+        super().__init__()
 
     def _activation_function(self, i, time=None,
                              time_index=None):
@@ -142,7 +121,7 @@ class ActR(Learner):
             time_elapsed = self.t - time_presentation
 
         # Presentation effect
-        pe = np.power(time_elapsed, -self.pr.d).sum()
+        pe = np.power(time_elapsed, -self.d).sum()
 
         # # Save it!
         if time is not None:
@@ -166,7 +145,7 @@ class ActR(Learner):
         some retrieval threshold τ is
         """
 
-        x = (self.pr.tau - a) / (self.pr.s*np.square(2))
+        x = (self.tau - a) / (self.s*np.square(2))
 
         # Avoid overflow
         if x < -10**2:  # 1 / (1+exp(-1000)) equals approx 1.
@@ -178,7 +157,7 @@ class ActR(Learner):
         try:
             return 1 / (1 + np.exp(x))
         except FloatingPointError as e:
-            print(f'x={x}, tau = {self.pr.tau}, a = {a}, s = {self.pr.s}')
+            print(f'x={x}, tau = {self.tau}, a = {a}, s = {self.s}')
             raise e
 
     def p_recall(self, item, time=None, time_index=None):
