@@ -98,6 +98,9 @@ class QLearner(Learner):
         self.q[question, question] = \
             self._temporal_difference(v=self.q[question, question])
 
+    def unlearn(self):
+        raise NotImplementedError
+
         # success = question == reply  # We suppose matching (0,0), (1,1) ... (n,n)
         #
         # old_q_value = self.q[question, reply]

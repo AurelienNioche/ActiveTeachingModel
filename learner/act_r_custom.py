@@ -9,29 +9,28 @@ class ActRMeaning(ActR):
     bounds = ('d', 0.0000001, 1.0), ('tau', -1, 1), ('s', 0.0000001, 1), \
              ('m', -0.1, 0.1)
 
-    def __init__(self, tk, param=None, **kwargs):
+    def __init__(self, tk, param=None, metaclass=False, **kwargs):
 
-        # Decay parameter
-        self.d = None
-        # Retrieval threshold
-        self.tau = None
-        # Noise in the activation levels
-        self.s = None
+        if not metaclass:
+            # Decay parameter
+            self.d = None
+            # Retrieval threshold
+            self.tau = None
+            # Noise in the activation levels
+            self.s = None
 
-        # Helping from items with close meaning
-        self.m = None
+            # Helping from items with close meaning
+            self.m = None
 
-        self.set_parameters(param)
+            self.set_parameters(param)
 
-        if param is not None:
+            # Aliases for easiness of computation
             self.x = self.m
             self.c_x = tk.c_semantic
 
         self.items = np.arange(tk.n_item)
 
-        super().__init__(tk=tk, **kwargs)
-
-        print(self.d)
+        super().__init__(tk=tk, metaclass=True, **kwargs)
 
     def p_recall(self, item, time=None, time_index=None):
 
@@ -72,7 +71,7 @@ class ActRGraphic(ActRMeaning):
     bounds = ('d', 0.0000001, 1.0), ('tau', -5, 5), ('s', 0.0000001, 1), \
              ('g', -0.1, 0.1)
 
-    def __init__(self, param, tk, verbose=False):
+    def __init__(self, param, tk, **kwargs):
 
         # Decay parameter
         self.d = None
@@ -88,28 +87,14 @@ class ActRGraphic(ActRMeaning):
 
         self.set_parameters(param)
 
-        super().__init__(tk=tk, verbose=verbose)
-
+        # Aliases for the easiness of computation
         self.c_x = self.tk.c_graphic
         self.x = self.g
 
+        super().__init__(tk=tk, metaclass=True, **kwargs)
+
 
 # ========================================================================== #
-
-
-class ActRPlusParam:
-
-    def __init__(self, d, tau, s, g, m):
-
-        # Decay parameter
-        self.d = d
-        # Retrieval threshold
-        self.tau = tau
-        # Noise in the activation levels
-        self.s = s
-
-        self.g = g
-        self.m = m
 
 
 class ActRPlus(ActRMeaning):
@@ -117,17 +102,21 @@ class ActRPlus(ActRMeaning):
     bounds = ('d', 0.0000001, 1.0), ('tau', 0.00, 5), ('s', 0.0000001, 10), \
              ('g', -0.1, 0.1), ('m', -0.1, 0.1)
 
-    def __init__(self, tk, param, verbose=False, track_p_recall=False):
+    def __init__(self, tk, param, **kwargs):
 
-        if type(param) == dict:
-            self.pr = ActRPlusParam(**param)
-        elif type(param) in (tuple, list, np.ndarray):
-            self.pr = ActRPlusParam(*param)
-        else:
-            raise Exception(f"Type {type(param)} "
-                            f"is not handled for parameters")
+        # Decay parameter
+        self.d = None
+        # Retrieval threshold
+        self.tau = None
+        # Noise in the activation levels
+        self.s = None
 
-        super().__init__(tk=tk, verbose=verbose, track_p_recall=track_p_recall)
+        self.g = None
+        self.m = None
+
+        self.set_parameters(param)
+
+        super().__init__(tk=tk, metaclass=True, **kwargs)
 
         self.items = np.arange(self.tk.n_item)
 
@@ -149,9 +138,9 @@ class ActRPlus(ActRMeaning):
                                        ) for j in list_j])
 
         semantic_contrib = \
-            (self.tk.c_semantic[item, list_j] * pr_effect_j).sum() * self.pr.m
+            (self.tk.c_semantic[item, list_j] * pr_effect_j).sum() * self.m
         graphic_contrib = \
-            (self.tk.c_graphic[item, list_j] * pr_effect_j).sum() * self.pr.g
+            (self.tk.c_graphic[item, list_j] * pr_effect_j).sum() * self.g
 
         _sum = pr_effect_i + semantic_contrib + graphic_contrib
         if _sum <= 0:

@@ -51,9 +51,6 @@ def run(student_model, teacher_model, student_param,
 
     teacher.agent = model_learner
 
-    print(learner.d)
-    raise Exception
-
     for t in iterator:
 
         question, poss_replies = teacher.ask()
@@ -88,15 +85,88 @@ def run(student_model, teacher_model, student_param,
         # We assume that the matching is (0,0), (1, 1), (n, n)
         # print(model_learner.d)
         # print("IIII")
-    return questions, replies, successes
+
+    p_recall = p_recall_over_time_after_learning(
+        agent=learner,
+        t_max=t_max,
+        n_item=n_item)
+
+    return {
+        'seen': seen,
+        'p_recall': p_recall,
+        'questions': questions,
+        'replies': replies,
+        'successes': successes
+    }
 
 
 def main():
 
-    run(student_model=ActRMeaning, teacher_model=AvyaTeacher,
+    r = run(
+        student_model=ActRMeaning, teacher_model=AvyaTeacher,
         student_param={"d": 0.5, "tau": 0.01, "s": 0.06, "m": 0.02},
-        n_item=40, grades=(1, ), t_max=500, normalize_similarity=True
-        )
+        n_item=40, grades=(1, ), t_max=500, normalize_similarity=True)
+
+    seen = r['seen']
+    p_recall = r['p_recall']
+    successes = r['successes']
+
+    # Plot...
+    font_size = 10
+    label_size = 8
+    line_width = 1
+
+    n_rows, n_cols = 5, 1
+
+    fig, axes = plt.subplots(nrows=n_rows, ncols=n_cols, figsize=(6, 14))
+
+    ax1 = axes[0]
+    plot.memory_trace.summarize(
+        p_recall=p_recall,
+        ax=ax1,
+        font_size=font_size,
+        label_size=label_size,
+        line_width=line_width,
+    )
+
+    ax2 = axes[1]
+    plot.memory_trace.summarize_over_seen(
+        p_recall=p_recall,
+        seen=seen,
+        ax=ax2,
+        font_size=font_size,
+        label_size=label_size,
+        line_width=line_width
+    )
+
+    ax3 = axes[2]
+    plot.n_learnt.curve(
+        p_recall=p_recall,
+        ax=ax3,
+        font_size=font_size,
+        label_size=label_size,
+        line_width=line_width
+    )
+
+    ax4 = axes[3]
+    plot.n_seen.curve(
+        seen=seen,
+        ax=ax4,
+        font_size=font_size,
+        label_size=label_size,
+        line_width=line_width * 2
+    )
+
+    ax5 = axes[4]
+    plot.success.curve(
+        successes=successes,
+        ax=ax5,
+        font_size=font_size,
+        label_size=label_size,
+        line_width=line_width * 2
+    )
+
+    save_fig(f"demo_simulation_{teacher_model.__name__}.pdf")
 
 
 if __name__ == '__main__':
