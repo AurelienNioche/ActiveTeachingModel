@@ -91,9 +91,9 @@ class LeitnerTeacher(GenericTeacher):
 
         Updates the pick_probability array at every iteration. The probability
         of picking taboo is 0. For rest, the probability of an item(P) =
-        buffer_threshold(int value) + 1 - number of successes
+        (buffer_threshold(int value) + 1 - number of successes
         of that item in past buffer_threshold(int value) iterations of that
-        item.
+        item)/total probability.
         """
         self.pick_probability[self.taboo] = 0
         for item in range(n_items):
@@ -161,10 +161,9 @@ class LeitnerTeacher(GenericTeacher):
                                 Exception('Error in unseen items computation')
         return count_learning
 
-    def get_next_node(self, successes, agent, n_items):
+    def completed_learning(self, n_items, agent):
         """
-        :param successes: list of booleans (True: success, False: failure) for
-            every question
+        :param n_items: as before
         :param agent: agent object (RL, ACT-R, ...) that implements at least
             the following methods:
             * p_recall(item): takes index of a question and gives the
@@ -172,6 +171,22 @@ class LeitnerTeacher(GenericTeacher):
             * learn(item): strengthen the association between a kanji and its
                 meaning
             * unlearn(): cancel the effect of the last call of the learn method
+        :return: the item that is least recalled by the learner
+        """
+        print("All items learnt by Learner")
+        recall_arr = np.zeros(n_items)
+        for i in range(n_items):
+            recall_arr[i] = agent.p_recall(i)
+        result = np.where(recall_arr == np.amin(recall_arr))
+        new_question = result[0][0]
+        self.iteration += 1
+        return new_question
+
+    def get_next_node(self, successes, agent, n_items):
+        """
+        :param successes: list of booleans (True: success, False: failure) for
+            every question
+        :param agent: as before
         :param n_items:
             * Number of items included (0 ... n-1)
         :return: integer (index of the question to ask)
@@ -191,15 +206,8 @@ class LeitnerTeacher(GenericTeacher):
                 count_learning += 1
 
         if count_learnt == n_items:
-            # print("All items learnt by Learner")
-            # find the least learnt item
-            recall_arr = np.zeros(n_items)
-            for i in range(n_items):
-                recall_arr[i] = agent.p_recall(i)
-            result = np.where(recall_arr == np.amin(recall_arr))
-            new_question = result[0][0]
-            self.iteration += 1
-            return new_question
+            new_question = self.completed_learning(n_items, agent)
+            return  new_question
 
         if self.iteration == 0:
             # No past memory, so a random question shown from learning set
@@ -229,13 +237,7 @@ class LeitnerTeacher(GenericTeacher):
                 else:
                     self.update_probabilities(n_items)
             else:
-                print("All items learnt by Learner")
-                recall_arr = np.zeros(n_items)
-                for i in range(n_items):
-                    recall_arr[i] = agent.p_recall(i)
-                result = np.where(recall_arr == np.amin(recall_arr))
-                new_question = result[0][0]
-                self.iteration += 1
+                new_question = self.completed_learning(n_items, agent)
                 return new_question
 
         probability_sum = sum(self.pick_probability)
