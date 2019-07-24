@@ -64,6 +64,8 @@ class ActR(Learner):
         # For continuous time
         self.times = np.zeros(self.tk.t_max)
 
+        self._bkp_presentation_effect = {}
+
     def _activation_function(self, i, time=None,
                              time_index=None):
 
@@ -93,6 +95,16 @@ class ActR(Learner):
 
     def _presentation_effect(self, i, time=None,
                              time_index=None):
+
+        try:
+            if time is not None:
+                return self._bkp_presentation_effect[time][i]
+            elif time_index is not None:
+                return self._bkp_presentation_effect[time_index][i]
+            else:
+                return self._bkp_presentation_effect[self.t][i]
+        except KeyError:
+            pass
 
         i_presented = self.hist == i
 
@@ -130,7 +142,23 @@ class ActR(Learner):
             time_elapsed = self.t - time_presentation
 
         # Presentation effect
-        return np.power(time_elapsed, -self.pr.d).sum()
+        pe = np.power(time_elapsed, -self.pr.d).sum()
+
+        # # Save it!
+        if time is not None:
+            t = time
+
+        elif time_index is not None:
+            t = time_index
+
+        else:
+            t = self.t
+
+        if time not in self._bkp_presentation_effect.keys():
+            self._bkp_presentation_effect[t] = {}
+        self._bkp_presentation_effect[t][i] = pe
+
+        return pe
 
     def _sigmoid_function(self, a):
 
@@ -198,9 +226,8 @@ class ActR(Learner):
     def _p_correct(self, question, reply, possible_replies=None,
                    time=None, time_index=None):
 
-        p_correct = \
-            self._p_choice(question=question, reply=question,
-                           time=time, time_index=time_index)
+        p_correct = self._p_choice(question=question, reply=question,
+                                   time=time, time_index=time_index)
 
         correct = question == reply
         if correct:
@@ -244,15 +271,25 @@ class ActR(Learner):
         #     raise AssertionError("I can not unlearn something
         #     that has not been learned!")
 
-        if time_index is None:
+        if time_index is not None:
+            self.hist[time_index] = -99
+            self.times[time_index] = -1
+
+            try:
+                del self._bkp_presentation_effect[time_index]
+            except KeyError:
+                pass
+
+        else:
             self.t -= 1
 
             self.hist[self.t] = -99
             self.times[self.t] = -1
 
-        else:
-            self.hist[time_index] = -99
-            self.times[time_index] = -1
+            try:
+                del self._bkp_presentation_effect[self.t]
+            except KeyError:
+                pass
 
 
 # class ActROriginal(ActR):

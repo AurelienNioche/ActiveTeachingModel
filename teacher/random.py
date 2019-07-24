@@ -1,28 +1,24 @@
 import numpy as np
-import copy
 
 from teacher.metaclass import GenericTeacher
 
 
 class RandomTeacher(GenericTeacher):
 
-    def __init__(self, n_item=20, t_max=100, grade=1, seed=123,
+    def __init__(self, n_item=20, t_max=100, grades=(1, ), seed=123,
                  handle_similarities=True, normalize_similarity=False,
                  verbose=False):
 
-        super().__init__(n_item=n_item, t_max=t_max, grade=grade, seed=seed,
+        super().__init__(n_item=n_item, t_max=t_max, grades=grades, seed=seed,
                          normalize_similarity=normalize_similarity,
                          handle_similarities=handle_similarities,
                          verbose=verbose)
-        self.mat = np.zeros((n_item, t_max))
-        self.count=0
+
+        np.random.seed(seed)
 
     def ask(self):
-        question = self.get_next_node(
-            questions=self.questions,
-            agent=copy.deepcopy(self.agent),
-            n_items=self.tk.n_item
-        )
+
+        question = self.get_next_node()
 
         possible_replies = self.get_possible_replies(question)
 
@@ -33,13 +29,7 @@ class RandomTeacher(GenericTeacher):
 
         return question, possible_replies
 
-    def get_next_node(self, questions, agent, n_items):
-        question = np.random.randint(n_items)
-        for i in range(n_items):
-            if agent.p_recall(i) > 0.95:
-                self.mat[i, self.count] = 2
-            elif agent.p_recall(i)>0:
-                self.mat[i, self.count] = 1
-        self.count += 1
-        return question
+    def get_next_node(self):
 
+        question = np.random.randint(self.tk.n_item)
+        return question

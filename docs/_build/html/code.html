@@ -1,0 +1,246 @@
+
+
+<!doctype html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Documentation for the Code &#8212; ActiveTeachingModel  documentation</title>
+    <link rel="stylesheet" href="_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <script type="text/javascript" src="_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Active Teaching Model documentation" href="index.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Active Teaching Model documentation"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">ActiveTeachingModel  documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Documentation for the Code</a><ul>
+<li><a class="reference internal" href="#module-learner.carlos_ann">Learners</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Active Teaching Model documentation</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/code.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-model_simulation">
+<span id="documentation-for-the-code"></span><h1>Documentation for the Code<a class="headerlink" href="#module-model_simulation" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-learner.carlos_ann">
+<span id="learners"></span><h2>Learners<a class="headerlink" href="#module-learner.carlos_ann" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="learner.carlos_ann.Network">
+<em class="property">class </em><code class="sig-prename descclassname">learner.carlos_ann.</code><code class="sig-name descname">Network</code><span class="sig-paren">(</span><em class="sig-param">tk</em>, <em class="sig-param">param</em>, <em class="sig-param">verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/learner/carlos_ann.html#Network"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#learner.carlos_ann.Network" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="learner.carlos_ann.Network.bounds">
+<code class="sig-name descname">bounds</code><em class="property"> = (('d', 0.001, 1.0), ('tau', -1, 1), ('s', 0.001, 1))</em><a class="headerlink" href="#learner.carlos_ann.Network.bounds" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="learner.carlos_ann.Network.create_hidden_neurons">
+<code class="sig-name descname">create_hidden_neurons</code><span class="sig-paren">(</span><em class="sig-param">n_hidden=10</em>, <em class="sig-param">verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/learner/carlos_ann.html#Network.create_hidden_neurons"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#learner.carlos_ann.Network.create_hidden_neurons" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="learner.carlos_ann.Network.create_input_neurons">
+<code class="sig-name descname">create_input_neurons</code><span class="sig-paren">(</span><em class="sig-param">verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/learner/carlos_ann.html#Network.create_input_neurons"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#learner.carlos_ann.Network.create_input_neurons" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>verbose</strong> – prints loop iteration number.</p>
+</dd>
+</dl>
+<p>Instances n input neurons where n is the amount of neurons to represent
+the total number of question indices in binary form.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="learner.carlos_ann.Network.decide">
+<code class="sig-name descname">decide</code><span class="sig-paren">(</span><em class="sig-param">question</em>, <em class="sig-param">possible_replies</em>, <em class="sig-param">time=None</em>, <em class="sig-param">time_index=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/learner/carlos_ann.html#Network.decide"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#learner.carlos_ann.Network.decide" title="Permalink to this definition">¶</a></dt>
+<dd><p>Expected return from specific learner: reply</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="learner.carlos_ann.Network.get_p_choices">
+<code class="sig-name descname">get_p_choices</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">use_p_correct=False</em><span class="sig-paren">)</span><a class="headerlink" href="#learner.carlos_ann.Network.get_p_choices" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="learner.carlos_ann.Network.learn">
+<code class="sig-name descname">learn</code><span class="sig-paren">(</span><em class="sig-param">question</em>, <em class="sig-param">time=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/learner/carlos_ann.html#Network.learn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#learner.carlos_ann.Network.learn" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="learner.carlos_ann.Network.p_recall">
+<code class="sig-name descname">p_recall</code><span class="sig-paren">(</span><em class="sig-param">item</em>, <em class="sig-param">time=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/learner/carlos_ann.html#Network.p_recall"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#learner.carlos_ann.Network.p_recall" title="Permalink to this definition">¶</a></dt>
+<dd><p>Expected return from specific learner: p_r</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="learner.carlos_ann.Network.roles">
+<code class="sig-name descname">roles</code><em class="property"> = ('input', 'hidden', 'output')</em><a class="headerlink" href="#learner.carlos_ann.Network.roles" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="learner.carlos_ann.Network.show_neurons">
+<code class="sig-name descname">show_neurons</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/learner/carlos_ann.html#Network.show_neurons"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#learner.carlos_ann.Network.show_neurons" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="learner.carlos_ann.Network.unlearn">
+<code class="sig-name descname">unlearn</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/learner/carlos_ann.html#Network.unlearn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#learner.carlos_ann.Network.unlearn" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="learner.carlos_ann.Network.version">
+<code class="sig-name descname">version</code><em class="property"> = 0.1</em><a class="headerlink" href="#learner.carlos_ann.Network.version" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="learner.carlos_ann.NetworkParam">
+<em class="property">class </em><code class="sig-prename descclassname">learner.carlos_ann.</code><code class="sig-name descname">NetworkParam</code><span class="sig-paren">(</span><em class="sig-param">n_hidden=40</em>, <em class="sig-param">n_epoch=3</em>, <em class="sig-param">weight_updates='hebbian'</em>, <em class="sig-param">t_max=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/learner/carlos_ann.html#NetworkParam"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#learner.carlos_ann.NetworkParam" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>weight_updates</strong> – string in [“random”, “hebbian”, “recanatesi”]</p></li>
+<li><p><strong>t_max</strong> – int as in the model_simulation script. None when no
+simulation script is being used with the model</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="learner.carlos_ann.Neuron">
+<em class="property">class </em><code class="sig-prename descclassname">learner.carlos_ann.</code><code class="sig-name descname">Neuron</code><span class="sig-paren">(</span><em class="sig-param">neuron_id</em>, <em class="sig-param">role</em>, <em class="sig-param">tau=0.01</em>, <em class="sig-param">theta=0</em>, <em class="sig-param">gamma=0.4</em>, <em class="sig-param">kappa=13000</em>, <em class="sig-param">phi=1</em>, <em class="sig-param">input_neurons=None</em>, <em class="sig-param">current=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/learner/carlos_ann.html#Neuron"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#learner.carlos_ann.Neuron" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_neurons</strong> – list of neuron_id connected to this neuron</p></li>
+<li><p><strong>tau</strong> – decay time</p></li>
+<li><p><strong>theta</strong> – gain function threshold</p></li>
+<li><p><strong>gamma</strong> – gain func exponent. Always sub-linear, then value &lt; 1</p></li>
+<li><p><strong>kappa</strong> – excitation parameter</p></li>
+<li><p><strong>phi</strong> – inhibition parameter in range(0.70, 1.06)</p></li>
+</ul>
+</dd>
+</dl>
+<p>Modified from Recanatesi (2015) equations 1 to 4.
+Note: default argument values are the reference values in the article but
+for phi; only phi_min and phi_max are given in Recanatesi (2015).</p>
+<dl class="method">
+<dt id="learner.carlos_ann.Neuron.compute_gain">
+<code class="sig-name descname">compute_gain</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/learner/carlos_ann.html#Neuron.compute_gain"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#learner.carlos_ann.Neuron.compute_gain" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="learner.carlos_ann.Neuron.print_attributes">
+<code class="sig-name descname">print_attributes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/learner/carlos_ann.html#Neuron.print_attributes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#learner.carlos_ann.Neuron.print_attributes" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>multi-line string of instance attributes</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="learner.carlos_ann.Neuron.update_current">
+<code class="sig-name descname">update_current</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/learner/carlos_ann.html#Neuron.update_current"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#learner.carlos_ann.Neuron.update_current" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="learner.carlos_ann.main">
+<code class="sig-prename descclassname">learner.carlos_ann.</code><code class="sig-name descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/learner/carlos_ann.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#learner.carlos_ann.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>This example creates a fully connected recurrent network</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="learner.carlos_ann.plot">
+<code class="sig-prename descclassname">learner.carlos_ann.</code><code class="sig-name descname">plot</code><span class="sig-paren">(</span><em class="sig-param">network</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/learner/carlos_ann.html#plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#learner.carlos_ann.plot" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<span class="target" id="module-teacher"></span></div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Active Teaching Model documentation"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">ActiveTeachingModel  documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2019, Nioche, Ramesh, de la Torre, Bansal.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.1.2.
+    </div>
+  </body>
+</html>

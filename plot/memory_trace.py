@@ -69,35 +69,173 @@ def plot(p_recall_value,
         save_fig(fig_name_idx)
 
 
-def summarize(p_recall_value, fig_name='memory_trace_summarize.pdf',
-              p_recall_time=None,font_size=42):
+def summarize(p_recall, fig_name='memory_trace_summarize.pdf',
+              p_recall_time=None,
+              font_size=12,
+              label_size=8,
+              line_width=1,
+              ax=None):
+
+    n_iteration = p_recall.shape[1]
 
     if p_recall_time is None:
-        p_recall_time = np.arange(p_recall_value.shape[1])
+        p_recall_time = np.arange(n_iteration) + 1
 
-    fig = plt.figure(figsize=(15, 12))
-    ax = fig.subplots()
+    if ax is None:
+        fig = plt.figure(figsize=(15, 12))
+        ax = fig.subplots()
 
-    mean = np.mean(p_recall_value, axis=0)
-    sem = scipy.stats.sem(p_recall_value, axis=0)
+    mean = np.mean(p_recall, axis=0)
+    std = np.std(p_recall, axis=0) # scipy.stats.sem(p_recall, axis=0)
 
-    min_ = np.min(p_recall_value, axis=0)
-    max_ = np.max(p_recall_value, axis=0)
+    x = p_recall_time
 
-    ax.plot(p_recall_time, mean, lw=1.5)
+    y = mean
+    y1 = mean-std
+    y2 = mean+std
+
+    min_ = np.min(p_recall, axis=0)
+    max_ = np.max(p_recall, axis=0)
+
+    # for t in range(n_iteration):
+    #     print(t, y[t], y1[t], y2[t])
+
+    # Horizontal lines
+    ax.axhline(0.5, linewidth=0.5, linestyle='dotted',
+               color='black', alpha=0.5)
+    ax.axhline(0.25, linewidth=0.5, linestyle='dotted',
+               color='black', alpha=0.5)
+    ax.axhline(0.75, linewidth=0.5, linestyle='dotted',
+               color='black', alpha=0.5)
+
+    # Plot mean
+    ax.plot(x, y, lw=line_width)
+
+    # Plot max
     ax.fill_between(
-        p_recall_time,
-        y1=mean - sem,
-        y2=mean + sem,
+        x,
+        y1=y1,
+        y2=y2,
         alpha=0.2
     )
 
-    ax.plot(p_recall_time, min_, linestyle=':', color='C0')
-    ax.plot(p_recall_time, max_, linestyle=':', color='C0')
+    # Plot min and max
+    ax.plot(x, min_, linestyle='-', color='C0', linewidth=0.2,
+            alpha=0.5)
+    ax.plot(x, max_, linestyle='-', color='C0', linewidth=0.2,
+            alpha=0.5)
 
-    ax.set_xlabel('Time',fontsize=font_size)
-    ax.set_ylabel('Prob. of recall',fontsize=font_size)
+    # Both axis
+    ax.tick_params(axis="both", labelsize=label_size)
 
+    # labels
+    ax.set_xlabel('Time', fontsize=font_size)
+    ax.set_ylabel('$p_{recall}$', fontsize=font_size)
+
+    # x-axis
+    ax.set_xlim(1, n_iteration)
+    ax.set_xticks((1,
+                   int(n_iteration * 0.25),
+                   int(n_iteration*0.5),
+                   int(n_iteration * 0.75),
+                   n_iteration))
+
+    # y-axis
     ax.set_ylim((-0.01, 1.01))
+    ax.set_yticks((0, 0.5, 1))
 
-    save_fig(fig_name=fig_name)
+    if ax is None:
+        save_fig(fig_name=fig_name)
+
+
+def summarize_over_seen(
+        p_recall, seen, fig_name='memory_trace_summarize_over_seen.pdf',
+        p_recall_time=None,
+        font_size=12, label_size=8,
+        line_width=1,
+        ax=None):
+
+    n_iteration = p_recall.shape[1]
+
+    if p_recall_time is None:
+        p_recall_time = np.arange(n_iteration) + 1
+
+    p_recall = p_recall.copy()  # Otherwise, troubles...
+    p_recall[seen == 0] = np.nan
+
+    if ax is None:
+        fig = plt.figure(figsize=(15, 12))
+        ax = fig.subplots()
+
+    # for t in range(n_iteration):
+    #     print(t)
+    #     print('_'*10)
+    #     print(p_recall[:, t])
+    #     print(seen[:, t])
+    #     print()
+    #     if t:
+    #         a = p_recall[np.isnan(p_recall[:, t]) == 0, t]
+    #         print(a)
+    #         print(scipy.stats.sem(a, nan_policy='omit'))
+    #     print()
+    #     print('_' * 10)
+
+    x = p_recall_time
+
+    mean = np.nanmean(p_recall, axis=0)
+
+    std = np.nanstd(p_recall)
+    # sem = scipy.stats.sem(p_recall, axis=0, nan_policy='omit')
+    # sem = [
+    #     scipy.stats.sem(p_recall[np.isnan(p_recall[:, t]) == 0, t])
+    #     if t > 0 else 0
+    #     for t in range(n_iteration)
+    # ]
+
+    min_ = np.nanmin(p_recall, axis=0)
+    max_ = np.nanmax(p_recall, axis=0)
+
+    # Horizontal lines
+    ax.axhline(0.5, linewidth=0.5, linestyle='dotted',
+               color='black', alpha=0.5)
+    ax.axhline(0.25, linewidth=0.5, linestyle='dotted',
+               color='black', alpha=0.5)
+    ax.axhline(0.75, linewidth=0.5, linestyle='dotted',
+               color='black', alpha=0.5)
+
+    # Plot mean
+    ax.plot(x, mean, lw=line_width)
+
+    # Plot std
+    ax.fill_between(
+        x,
+        y1=mean - std,
+        y2=mean + std,
+        alpha=0.2
+    )
+
+    # Plot min and max
+    ax.plot(x, min_, linestyle='-', color='C0', linewidth=0.2,
+            alpha=0.5)
+    ax.plot(x, max_, linestyle='-', color='C0', linewidth=0.2,
+            alpha=0.5)
+
+    # Both axis
+    ax.tick_params(axis="both", labelsize=label_size)
+
+    # x-axis
+    ax.set_xlabel('Time', fontsize=font_size)
+    ax.set_xlim(1, n_iteration)
+    ax.set_xticks((1,
+                   int(n_iteration * 0.25),
+                   int(n_iteration*0.5),
+                   int(n_iteration * 0.75),
+                   n_iteration))
+
+    # y-axis
+    ax.set_ylabel('$p_{recall}$ [seen]', fontsize=font_size)
+    ax.set_ylim((-0.01, 1.01))
+    ax.set_yticks((0, 0.5, 1))
+
+    if ax is None:
+        save_fig(fig_name=fig_name)

@@ -65,7 +65,7 @@ instance/
 .scrapy
 
 # Sphinx documentation
-docs/_build/
+# docs/_build/
 
 # PyBuilder
 target/
@@ -135,6 +135,9 @@ similarity_graphic/auto_encoder/fig
 log/
 bkp/model_comparison/*
 bkp/model_evaluation/*
+bkp/fit_fidelity/
+bkp/learning_material/kanji_meaning_n150_g1_2.p
+bkp/teacher_comparison/
 
 # Related to use data
 data/user_and_question_tables2.sql
@@ -146,4 +149,3 @@ data/duolingo_user/
 % Related to django
 task/migrations/*
 duolingo/migrations/*
-

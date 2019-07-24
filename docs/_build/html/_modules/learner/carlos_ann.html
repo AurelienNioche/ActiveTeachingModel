@@ -1,0 +1,557 @@
+
+
+<!doctype html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>learner.carlos_ann &#8212; ActiveTeachingModel  documentation</title>
+    <link rel="stylesheet" href="../../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <script type="text/javascript" src="../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">ActiveTeachingModel  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for learner.carlos_ann</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">mpl_toolkits.axes_grid1</span> <span class="k">import</span> <span class="n">make_axes_locatable</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="k">import</span> <span class="n">tqdm</span>
+
+<span class="kn">from</span> <span class="nn">behavior.data_structure</span> <span class="k">import</span> <span class="n">Task</span>
+<span class="kn">from</span> <span class="nn">learner.generic</span> <span class="k">import</span> <span class="n">Learner</span>
+
+<span class="n">np</span><span class="o">.</span><span class="n">seterr</span><span class="p">(</span><span class="nb">all</span><span class="o">=</span><span class="s1">&#39;raise&#39;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="NetworkParam"><a class="viewcode-back" href="../../code.html#learner.carlos_ann.NetworkParam">[docs]</a><span class="k">class</span> <span class="nc">NetworkParam</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :param weight_updates: string in [&quot;random&quot;, &quot;hebbian&quot;, &quot;recanatesi&quot;]</span>
+<span class="sd">    :param t_max: int as in the model_simulation script. None when no</span>
+<span class="sd">        simulation script is being used with the model</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_hidden</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">n_epoch</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">weight_updates</span><span class="o">=</span><span class="s2">&quot;hebbian&quot;</span><span class="p">,</span>
+                 <span class="n">t_max</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_epoch</span> <span class="o">=</span> <span class="n">n_epoch</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_hidden</span> <span class="o">=</span> <span class="n">n_hidden</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">t_max</span> <span class="o">=</span> <span class="n">t_max</span>
+
+        <span class="n">weight_updates_methods</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;random&quot;</span><span class="p">,</span> <span class="s2">&quot;hebbian&quot;</span><span class="p">,</span> <span class="s2">&quot;recanatesi&quot;</span><span class="p">]</span>
+        <span class="k">assert</span> <span class="n">weight_updates</span> <span class="ow">in</span> <span class="n">weight_updates_methods</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weight</span> <span class="o">=</span> <span class="n">weight_updates</span></div>
+
+
+<div class="viewcode-block" id="Network"><a class="viewcode-back" href="../../code.html#learner.carlos_ann.Network">[docs]</a><span class="k">class</span> <span class="nc">Network</span><span class="p">(</span><span class="n">Learner</span><span class="p">):</span>
+
+    <span class="n">version</span> <span class="o">=</span> <span class="mf">0.1</span>
+    <span class="n">bounds</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="mf">0.001</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span> \
+             <span class="p">(</span><span class="s1">&#39;tau&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> \
+             <span class="p">(</span><span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="mf">0.001</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1"># TODO change</span>
+
+    <span class="n">roles</span> <span class="o">=</span> <span class="s1">&#39;input&#39;</span><span class="p">,</span> <span class="s1">&#39;hidden&#39;</span><span class="p">,</span> <span class="s1">&#39;output&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tk</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">tk</span> <span class="o">=</span> <span class="n">tk</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
+
+        <span class="k">if</span> <span class="n">param</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">param</span><span class="p">)</span> <span class="o">==</span> <span class="nb">dict</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pr</span> <span class="o">=</span> <span class="n">NetworkParam</span><span class="p">(</span><span class="o">**</span><span class="n">param</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">param</span><span class="p">)</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pr</span> <span class="o">=</span> <span class="n">NetworkParam</span><span class="p">(</span><span class="o">*</span><span class="n">param</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="n">f</span><span class="s2">&quot;Type {type(param)} is not handled for parameters&quot;</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>  <span class="c1"># Try so it can be used even without the &quot;model_simulation&quot; file</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">n_items</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">n_item</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No automatic input neurons instantiation used&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_bits_needed</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">bin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_items</span><span class="p">))</span> <span class="o">-</span> <span class="mi">2</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">neurons</span> <span class="o">=</span> <span class="p">{</span><span class="n">role</span><span class="p">:</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">role</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">roles</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">neuron_id</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># Create history array according to simulation or the lack thereof</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pr</span><span class="o">.</span><span class="n">t_max</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">hidden_currents_history</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">pr</span><span class="o">.</span><span class="n">n_epoch</span><span class="p">,</span>
+                                                    <span class="bp">self</span><span class="o">.</span><span class="n">pr</span><span class="o">.</span><span class="n">n_hidden</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">hidden_currents_history</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">pr</span><span class="o">.</span><span class="n">t_max</span><span class="p">,</span>
+                                                     <span class="bp">self</span><span class="o">.</span><span class="n">pr</span><span class="o">.</span><span class="n">n_hidden</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">time_step</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">create_input_neurons</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">create_hidden_neurons</span><span class="p">(</span><span class="n">n_hidden</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pr</span><span class="o">.</span><span class="n">n_hidden</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_train</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pr</span><span class="o">.</span><span class="n">n_epoch</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Network.create_input_neurons"><a class="viewcode-back" href="../../code.html#learner.carlos_ann.Network.create_input_neurons">[docs]</a>    <span class="k">def</span> <span class="nf">create_input_neurons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param verbose: prints loop iteration number.</span>
+
+<span class="sd">        Instances n input neurons where n is the amount of neurons to represent</span>
+<span class="sd">        the total number of question indices in binary form.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_bits_needed</span><span class="p">):</span>  <span class="c1"># Instance n Neurons</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_create_neuron</span><span class="p">(</span><span class="n">role</span><span class="o">=</span><span class="s1">&#39;input&#39;</span><span class="p">)</span>
+            <span class="c1"># Each neuron will be instanced inside a list, call them as a[n]</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">i</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Network.create_hidden_neurons"><a class="viewcode-back" href="../../code.html#learner.carlos_ann.Network.create_hidden_neurons">[docs]</a>    <span class="k">def</span> <span class="nf">create_hidden_neurons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_hidden</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+        <span class="n">hidden_neuron_inputs</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">neurons</span><span class="p">[</span><span class="s1">&#39;input&#39;</span><span class="p">]:</span>
+            <span class="n">hidden_neuron_inputs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">hidden_neuron_inputs</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n_hidden</span><span class="p">):</span>
+            <span class="n">hidden_neuron_inputs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">neuron_id</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_create_neuron</span><span class="p">(</span><span class="n">input_neurons</span><span class="o">=</span><span class="n">hidden_neuron_inputs</span><span class="p">,</span>
+                                <span class="n">role</span><span class="o">=</span><span class="s2">&quot;hidden&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Output layer</span>
+        <span class="n">output_neuron_inputs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">neurons</span><span class="p">[</span><span class="s1">&#39;hidden&#39;</span><span class="p">]:</span>
+            <span class="n">output_neuron_inputs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_create_neuron</span><span class="p">(</span><span class="n">input_neurons</span><span class="o">=</span><span class="n">hidden_neuron_inputs</span><span class="p">,</span>
+                            <span class="n">role</span><span class="o">=</span><span class="s2">&quot;output&quot;</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_create_neuron</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_neurons</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">role</span><span class="o">=</span><span class="s2">&quot;hidden&quot;</span><span class="p">):</span>
+                      <span class="c1"># neuron_id=0):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">neurons</span><span class="p">[</span><span class="n">role</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">Neuron</span><span class="p">(</span><span class="n">neuron_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">neuron_id</span><span class="p">,</span>
+                   <span class="n">role</span><span class="o">=</span><span class="n">role</span><span class="p">,</span> <span class="n">input_neurons</span><span class="o">=</span><span class="n">input_neurons</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">neuron_id</span> <span class="o">+=</span> <span class="mi">1</span>
+
+<div class="viewcode-block" id="Network.show_neurons"><a class="viewcode-back" href="../../code.html#learner.carlos_ann.Network.show_neurons">[docs]</a>    <span class="k">def</span> <span class="nf">show_neurons</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">role</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">roles</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Number of </span><span class="si">{role}</span><span class="s2"> neurons: &quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">neurons</span><span class="p">[</span><span class="n">role</span><span class="p">]))</span></div>
+
+    <span class="k">def</span> <span class="nf">_train</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_epochs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param n_epochs: int in range(0, +inf). Number of epochs</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">n_epochs</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;n_epochs not int or not in range(0, +inf)&quot;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">n_epochs</span><span class="p">)):</span>
+            <span class="k">for</span> <span class="n">neuron</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">neurons</span><span class="p">[</span><span class="s2">&quot;hidden&quot;</span><span class="p">]:</span>
+                <span class="n">neuron</span><span class="o">.</span><span class="n">compute_gain</span><span class="p">()</span>
+                <span class="n">neuron</span><span class="o">.</span><span class="n">update_current</span><span class="p">()</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pr</span><span class="o">.</span><span class="n">t_max</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># Only when NOT simulating</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_update_hidden_currents_history</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">neuron</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">neurons</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">]:</span>
+                <span class="n">neuron</span><span class="o">.</span><span class="n">compute_gain</span><span class="p">()</span>
+                <span class="n">neuron</span><span class="o">.</span><span class="n">update_current</span><span class="p">()</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hidden_currents_history</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_update_hidden_currents_history</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time_step</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">neurons</span><span class="p">[</span><span class="s2">&quot;hidden&quot;</span><span class="p">]):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">hidden_currents_history</span><span class="p">[</span><span class="n">time_step</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> \
+                <span class="bp">self</span><span class="o">.</span><span class="n">neurons</span><span class="p">[</span><span class="s2">&quot;hidden&quot;</span><span class="p">][</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">current</span>
+
+    <span class="k">def</span> <span class="nf">_update_input_currents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">question</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param question:</span>
+<span class="sd">        TODO</span>
+<span class="sd">        Question to binary vector</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">question</span><span class="p">])</span>
+        <span class="p">((</span><span class="n">d</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">&amp;</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">8</span><span class="p">)))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">neurons</span><span class="p">[</span><span class="s2">&quot;input&quot;</span><span class="p">]):</span>
+            <span class="k">pass</span>
+
+<div class="viewcode-block" id="Network.p_recall"><a class="viewcode-back" href="../../code.html#learner.carlos_ann.Network.p_recall">[docs]</a>    <span class="k">def</span> <span class="nf">p_recall</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">p_recall</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">neurons</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">current</span>
+        <span class="k">return</span> <span class="n">p_recall</span></div>
+
+    <span class="k">def</span> <span class="nf">_p_choice</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">question</span><span class="p">,</span> <span class="n">reply</span><span class="p">,</span> <span class="n">possible_replies</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                  <span class="n">time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">time_index</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Modified from ActR&quot;&quot;&quot;</span>
+
+        <span class="n">success</span> <span class="o">=</span> <span class="n">question</span> <span class="o">==</span> <span class="n">reply</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_train</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+
+        <span class="n">p_recall</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">neurons</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">current</span>
+
+        <span class="c1"># If number of possible replies is defined</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tk</span><span class="o">.</span><span class="n">n_possible_replies</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">p_correct</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p_random</span> <span class="o">+</span> <span class="n">p_recall</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">p_random</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">success</span><span class="p">:</span>
+                <span class="n">p_choice</span> <span class="o">=</span> <span class="n">p_correct</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">p_choice</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">p_correct</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tk</span><span class="o">.</span><span class="n">n_possible_replies</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Ignore in computation of reply the alternatives</span>
+            <span class="c1"># p_choice = p_recall if success else 1-p_recall</span>
+            <span class="n">p_correct</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p_random</span> <span class="o">+</span> <span class="n">p_recall</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">p_random</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">success</span><span class="p">:</span>
+                <span class="n">p_choice</span> <span class="o">=</span> <span class="n">p_correct</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">p_choice</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">p_correct</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">p_choice</span>
+
+    <span class="k">def</span> <span class="nf">_p_correct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">question</span><span class="p">,</span> <span class="n">reply</span><span class="p">,</span> <span class="n">possible_replies</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                   <span class="n">time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">time_index</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+        <span class="n">p_correct</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_p_choice</span><span class="p">(</span><span class="n">question</span><span class="o">=</span><span class="n">question</span><span class="p">,</span> <span class="n">reply</span><span class="o">=</span><span class="n">question</span><span class="p">,</span>
+                                   <span class="n">time</span><span class="o">=</span><span class="n">time</span><span class="p">,</span> <span class="n">time_index</span><span class="o">=</span><span class="n">time_index</span><span class="p">)</span>
+
+        <span class="n">correct</span> <span class="o">=</span> <span class="n">question</span> <span class="o">==</span> <span class="n">reply</span>
+        <span class="k">if</span> <span class="n">correct</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">p_correct</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">1</span><span class="o">-</span><span class="n">p_correct</span>
+
+<div class="viewcode-block" id="Network.decide"><a class="viewcode-back" href="../../code.html#learner.carlos_ann.Network.decide">[docs]</a>    <span class="k">def</span> <span class="nf">decide</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">question</span><span class="p">,</span> <span class="n">possible_replies</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">time_index</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+        <span class="c1"># for j, val in enumerate(self.neurons[&quot;input&quot;]):</span>
+        <span class="c1">#     self.hidden_currents_history[time_step, j] = \</span>
+        <span class="c1">#         self.neurons[&quot;hidden&quot;][j].current</span>
+
+
+        <span class="n">p_r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">neurons</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">current</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">p_r</span> <span class="o">&gt;</span> <span class="n">r</span><span class="p">:</span>
+            <span class="n">reply</span> <span class="o">=</span> <span class="n">question</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">reply</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">possible_replies</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update_hidden_currents_history</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time_step</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">time_step</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_step</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">pr</span><span class="o">.</span><span class="n">t_max</span><span class="p">:</span>
+            <span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;t=</span><span class="si">{self.t}</span><span class="s1">: question </span><span class="si">{question}</span><span class="s1">, reply </span><span class="si">{reply}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">reply</span></div>
+
+<div class="viewcode-block" id="Network.learn"><a class="viewcode-back" href="../../code.html#learner.carlos_ann.Network.learn">[docs]</a>    <span class="k">def</span> <span class="nf">learn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">question</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="Network.unlearn"><a class="viewcode-back" href="../../code.html#learner.carlos_ann.Network.unlearn">[docs]</a>    <span class="k">def</span> <span class="nf">unlearn</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span></div></div>
+
+
+<div class="viewcode-block" id="Neuron"><a class="viewcode-back" href="../../code.html#learner.carlos_ann.Neuron">[docs]</a><span class="k">class</span> <span class="nc">Neuron</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :param input_neurons: list of neuron_id connected to this neuron</span>
+<span class="sd">    :param tau: decay time</span>
+<span class="sd">    :param theta: gain function threshold</span>
+<span class="sd">    :param gamma: gain func exponent. Always sub-linear, then value &lt; 1</span>
+<span class="sd">    :param kappa: excitation parameter</span>
+<span class="sd">    :param phi: inhibition parameter in range(0.70, 1.06)</span>
+
+<span class="sd">    Modified from Recanatesi (2015) equations 1 to 4.</span>
+<span class="sd">    Note: default argument values are the reference values in the article but</span>
+<span class="sd">    for phi; only phi_min and phi_max are given in Recanatesi (2015).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">neuron_id</span><span class="p">,</span> <span class="n">role</span><span class="p">,</span> <span class="n">tau</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">theta</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">gamma</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span>
+                 <span class="n">kappa</span><span class="o">=</span><span class="mi">13000</span><span class="p">,</span> <span class="n">phi</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                 <span class="n">input_neurons</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">current</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">neuron_id</span> <span class="o">=</span> <span class="n">neuron_id</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_neurons</span> <span class="o">=</span> <span class="n">input_neurons</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_neurons</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+            <span class="c1"># I simplified ============================</span>
+            <span class="c1"># if self.neuron_id in self.input_neurons:</span>
+            <span class="c1">#     self.recurrent = True</span>
+            <span class="c1"># else:</span>
+            <span class="c1">#     self.recurrent = False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">recurrent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">neuron_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_neurons</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_currents</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weights</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weights_hebbian</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gain</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Neuron role</span>
+        <span class="n">roles</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;input&quot;</span><span class="p">,</span> <span class="s2">&quot;hidden&quot;</span><span class="p">,</span> <span class="s2">&quot;output&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">role</span> <span class="o">=</span> <span class="n">role</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">role</span> <span class="ow">in</span> <span class="n">roles</span><span class="p">,</span> <span class="s2">&quot;Neuron does not have a valid role&quot;</span>
+        <span class="c1"># if self.input_neurons is None and self.role is not &quot;input&quot;:</span>
+        <span class="c1">#     self.role = roles[0]</span>
+        <span class="c1">#     print(&quot;Neuron instanced as role=&#39;input&#39;&quot;)</span>
+
+        <span class="c1"># Neuron dynamics</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="n">current</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tau</span> <span class="o">=</span> <span class="n">tau</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_neurons</span> <span class="o">=</span> <span class="n">input_neurons</span>
+
+        <span class="c1"># Gain function</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">theta</span> <span class="o">=</span> <span class="n">theta</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gamma</span> <span class="o">=</span> <span class="n">gamma</span>
+
+        <span class="c1"># Hebbian rule</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kappa</span> <span class="o">=</span> <span class="n">kappa</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">phi</span> <span class="o">=</span> <span class="n">phi</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_initialize_attributes</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">role</span> <span class="ow">is</span> <span class="ow">not</span> <span class="s2">&quot;input&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">compute_gain</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">update_current</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">print_attributes</span><span class="p">()</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_random_small_value</span><span class="p">():</span>
+        <span class="n">number</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.25</span><span class="p">))</span>
+        <span class="n">number</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">number</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">number</span>
+
+    <span class="k">def</span> <span class="nf">_initialize_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">role</span> <span class="ow">is</span> <span class="s2">&quot;input&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">input_currents</span> <span class="o">=</span> \
+                <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_random_small_value</span><span class="p">()</span>
+                          <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_neurons</span><span class="p">))])</span>
+            <span class="c1"># self.input_currents = np.random.normal(loc=0.5, scale=0.25,</span>
+            <span class="c1"># size=len(self.input_neurons))</span>
+            <span class="c1"># self.input_currents[self.input_currents&gt;1] = 1</span>
+            <span class="c1"># self.input_currents[self.input_currents&lt;0] = 0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_neurons</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_random_small_value</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Neuron.compute_gain"><a class="viewcode-back" href="../../code.html#learner.carlos_ann.Neuron.compute_gain">[docs]</a>    <span class="k">def</span> <span class="nf">compute_gain</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">theta</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gain</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">theta</span><span class="p">)</span> <span class="o">**</span> <span class="bp">self</span><span class="o">.</span><span class="n">gamma</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gain</span> <span class="o">=</span> <span class="mi">0</span></div>
+
+<div class="viewcode-block" id="Neuron.update_current"><a class="viewcode-back" href="../../code.html#learner.carlos_ann.Neuron.update_current">[docs]</a>    <span class="k">def</span> <span class="nf">update_current</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">role</span> <span class="ow">is</span> <span class="ow">not</span> <span class="s2">&quot;input&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weights_hebbian</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_currents</span><span class="p">)</span>
+
+        <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_random_small_value</span><span class="p">()</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">sum_gain</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">weights_hebbian</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">gain</span>
+
+            <span class="c1"># I rewrote</span>
+            <span class="c1"># self.current *= \</span>
+            <span class="c1">#     ((-self.current + sum(self.weights_hebbian)</span>
+            <span class="c1">#       * self.gain</span>
+            <span class="c1">#       + self._random_small_value()))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">*=</span> \
+                <span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">+</span> <span class="n">sum_gain</span> <span class="o">+</span> <span class="n">r</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">FloatingPointError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;gain:&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gain</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">()</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;weights_hebbian&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights_hebbian</span><span class="p">)</span>
+            <span class="c1"># If you want to continue the execution, comment this line...</span>
+            <span class="k">raise</span> <span class="n">e</span>
+
+            <span class="c1"># ... and uncomment this one</span>
+            <span class="c1"># self.current = np.inf</span>
+
+        <span class="c1"># if self.role == &quot;hidden&quot;:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">&gt;</span> <span class="mf">0.5</span><span class="p">)</span>
+            <span class="c1"># TODO find a way to implement output = P(r) w/o breaking script</span>
+            <span class="c1"># / self.tau)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">role</span> <span class="o">==</span> <span class="s2">&quot;output&quot;</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">weights_hebbian</span><span class="p">)</span>  <span class="c1"># Debugging</span></div>
+
+<div class="viewcode-block" id="Neuron.print_attributes"><a class="viewcode-back" href="../../code.html#learner.carlos_ann.Neuron.print_attributes">[docs]</a>    <span class="k">def</span> <span class="nf">print_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :returns: multi-line string of instance attributes</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="s1">&#39;* &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">vars</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="plot"><a class="viewcode-back" href="../../code.html#learner.carlos_ann.plot">[docs]</a><span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="n">network</span><span class="p">):</span>
+    <span class="c1"># data = network.hidden_currents_history</span>
+    <span class="c1"># # data = np.zeros(network.pr.n_hidden)</span>
+    <span class="c1"># # for i, val in enumerate(network.neurons[&quot;hidden&quot;]):</span>
+    <span class="c1"># #     data[i] = network.neurons[&quot;hidden&quot;][i].current</span>
+    <span class="c1"># # print(data.shape)</span>
+    <span class="c1"># # factors = []</span>
+    <span class="c1"># # dimension_pairs = []</span>
+    <span class="c1"># # for i in range(network.pr.n_hidden):</span>
+    <span class="c1"># #     if (network.pr.n_hidden % (network.pr.n_hidden - 1)) == 0:</span>
+    <span class="c1"># #         factors.append()</span>
+    <span class="c1"># #         # now I have the factors, make it pairs next</span>
+    <span class="c1"># # numbo[-1]</span>
+    <span class="c1"># # data = np.reshape(data, (-1, 5))</span>
+    <span class="c1"># # print(data)</span>
+    <span class="c1"># # x, y = np.meshgrid(range(data.shape[0]), range(data.shape[1]))</span>
+    <span class="c1">#</span>
+    <span class="c1"># # x = np.arange(0, network.pr.n_hidden, 1)</span>
+    <span class="c1"># # y = np.zeros(1) + 1</span>
+    <span class="c1"># # z = data</span>
+    <span class="c1"># # h = plt.contourf(x, y, z)</span>
+    <span class="c1">#</span>
+    <span class="c1"># data = np.expand_dims(data, axis=0)</span>
+    <span class="c1"># # plt.pcolormesh(data)</span>
+    <span class="c1"># data2 = data * 0</span>
+    <span class="c1"># # plt.pcolormesh(data2)</span>
+    <span class="c1"># fig, axs = plt.subplots(nrows=2, ncols=1, subplot_kw={&#39;xticks&#39;: [],</span>
+    <span class="c1">#                                                       &#39;yticks&#39;: []})</span>
+    <span class="c1">#</span>
+    <span class="c1"># for ax in axs:</span>
+    <span class="c1">#     ax.imshow(data, cmap=&#39;viridis&#39;)</span>
+    <span class="c1">#     ax.imshow(data2, cmap=&#39;viridis&#39;)</span>
+    <span class="c1">#</span>
+    <span class="c1"># plt.tight_layout()</span>
+    <span class="c1"># plt.show()</span>
+    <span class="c1"># # z = data</span>
+    <span class="c1"># # c = plt.ax.contourf(x, y, z)  # cmap=&#39;viridis&#39;)</span>
+    <span class="c1"># # divider = make_axes_locatable(ax)</span>
+    <span class="c1"># # cax = divider.append_axes(&quot;right&quot;, size=&quot;5%&quot;, pad=0.05)</span>
+    <span class="c1"># # plt.colorbar(c, cax=cax, ticks=y_ticks)</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">hidden_currents_history</span>
+
+    <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+    <span class="n">im</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:])))</span>
+    <span class="n">font_size</span> <span class="o">=</span> <span class="mi">40</span> <span class="o">*</span> <span class="mi">10</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:])</span>  <span class="c1"># Font size 10 good for 40 neurons</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">setp</span><span class="p">(</span><span class="n">ax</span><span class="o">.</span><span class="n">get_xticklabels</span><span class="p">(),</span> <span class="n">rotation</span><span class="o">=</span><span class="mi">90</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="s2">&quot;right&quot;</span><span class="p">,</span>
+             <span class="n">rotation_mode</span><span class="o">=</span><span class="s2">&quot;anchor&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">font_size</span><span class="p">)</span>
+
+    <span class="c1"># print(network.hidden_currents_history)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Hidden layer currents&quot;</span><span class="p">)</span>
+    <span class="c1"># plt.axvline()</span>
+
+    <span class="c1"># Turn spines off and create white grid.</span>
+    <span class="k">for</span> <span class="n">edge</span><span class="p">,</span> <span class="n">spine</span> <span class="ow">in</span> <span class="n">ax</span><span class="o">.</span><span class="n">spines</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">spine</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+    <span class="c1"># plt.matshow(network.hidden_currents_history)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../code.html#learner.carlos_ann.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This example creates a fully connected recurrent network</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">1234</span><span class="p">)</span>
+
+    <span class="n">network</span> <span class="o">=</span> <span class="n">Network</span><span class="p">(</span><span class="n">tk</span><span class="o">=</span><span class="n">Task</span><span class="p">(</span><span class="n">t_max</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">n_item</span><span class="o">=</span><span class="mi">30</span><span class="p">),</span> <span class="n">param</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;n_epoch&quot;</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span>
+                                                            <span class="s2">&quot;n_hidden&quot;</span><span class="p">:</span> <span class="mi">40</span><span class="p">})</span>
+
+    <span class="c1"># network.show_neurons()</span>
+    <span class="n">plot</span><span class="p">(</span><span class="n">network</span><span class="p">)</span></div>
+    <span class="c1">#</span>
+    <span class="c1"># spam = network.neurons[&quot;output&quot;][0].weights_hebbian</span>
+    <span class="c1"># # network.train(6)</span>
+    <span class="c1"># eggs = network.neurons[&quot;output&quot;][0].weights_hebbian</span>
+    <span class="c1"># print(&quot;\nspam &quot;, spam, &quot;\neggs&quot;, eggs)</span>
+    <span class="c1"># for i in network.neurons[&quot;input&quot;]:</span>
+    <span class="c1">#     print(i.current)</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+
+<span class="c1"># Plotting:</span>
+<span class="c1"># x, y = np.meshgrid(range(data.shape[0]), range(data.shape[1]))</span>
+<span class="c1"># z = data</span>
+<span class="c1"># c = ax.contourf(x, y, z, n_levels, cmap=&#39;viridis&#39;)</span>
+<span class="c1"># from mpl_toolkits.axes_grid1 import make_axes_locatable</span>
+<span class="c1"># divider = make_axes_locatable(ax)</span>
+<span class="c1"># cax = divider.append_axes(&quot;right&quot;, size=&quot;5%&quot;, pad=0.05)</span>
+<span class="c1"># plt.colorbar(c, cax=cax, ticks=y_ticks) aaa</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">ActiveTeachingModel  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2019, Nioche, Ramesh, de la Torre, Bansal.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.1.2.
+    </div>
+  </body>
+</html>

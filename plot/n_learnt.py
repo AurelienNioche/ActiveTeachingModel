@@ -1,31 +1,56 @@
-import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.ticker import MaxNLocator
+# from matplotlib.ticker import MaxNLocator
+import numpy as np
 
 from plot.generic import save_fig
 
 
-def curve(seen, n_item=None, fig_name='learnt.pdf',
-          font_size=42, line_width=3,
-          label_size=22):
-    m,n = seen.shape
-    y = np.zeros((n))
-    for i in range(n):
-        for j in range(m):
-            if seen[j, i] == 2:
-                y[i] += 1
-    fig = plt.figure(figsize=(10, 10))
-    ax = fig.add_subplot(111)
-    ax.set_ylabel('N learnt', fontsize=font_size)
-    ax.set_xlabel('Time', fontsize=font_size)
+def curve(p_recall,
+          font_size=12, line_width=2,
+          label_size=8, threshold=0.95,
+          color='C0',
+          ax=None,
+          fig_name=None):
 
+    if ax is None:
+        fig = plt.figure(figsize=(10, 10))
+        ax = fig.add_subplot(111)
+
+    # Data pre-processing
+    n_item, n_iteration = p_recall.shape
+
+    learnt = p_recall[:] > threshold
+    n_learnt = np.sum(learnt, axis=0)
+    y = n_learnt / n_item
+
+    # Horizontal lines
+    ax.axhline(0.5, linewidth=0.5, linestyle='dotted',
+               color='black', alpha=0.5)
+    ax.axhline(0.25, linewidth=0.5, linestyle='dotted',
+               color='black', alpha=0.5)
+    ax.axhline(0.75, linewidth=0.5, linestyle='dotted',
+               color='black', alpha=0.5)
+
+    # Plot
+    ax.plot(y, color=color, linewidth=line_width)
+
+    # Both axis
     ax.tick_params(axis="both", labelsize=label_size)
-    ax.plot(y, color="black", linewidth=line_width)
 
-    ax.yaxis.set_major_locator(MaxNLocator(integer=True))
+    # x-axis
+    ax.set_xlabel('Time', fontsize=font_size)
+    ax.set_xlim(1, n_iteration)
+    ax.set_xticks((1,
+                   int(n_iteration * 0.25),
+                   int(n_iteration * 0.5),
+                   int(n_iteration * 0.75),
+                   n_iteration))
 
-    if n_item is not None:
-        ax.set_ylim(top=n_item+0.5)
+    # y-axis
+    ax.set_ylabel(f'N | $p_{{recall}} > {threshold}$', fontsize=font_size)
+    ax.set_ylim((-0.01, 1.01))
+    ax.set_yticks((0, 0.5, 1))
+    # ax.yaxis.set_major_locator(MaxNLocator(integer=True))
 
-    plt.tight_layout()
-    save_fig(fig_name)
+    if fig_name is not None:
+        save_fig(fig_name=fig_name)

@@ -1,43 +1,24 @@
-# from learner.carlos_power import Power
-from learner.carlos_exponential import Exponential
-# from learner.carlos_decay import Decay
+# import plot.p_recall
+from learner.act_r_custom import ActRMeaning
 from teacher.random import RandomTeacher
-from learner.act_r import ActR
-from learner.carlos_power import Power
-
-import plot.p_recall
-import plot.success
+from learner.carlos_exponential import Exponential
+from learner.carlos_ann import Network
 
 
-def run(model, parameters, t_max=3000, n_item=30):
+def main(t_max=300, n_item=32):
 
     teacher = RandomTeacher(t_max=t_max, n_item=n_item,
                             handle_similarities=True,
                             normalize_similarity=True,
-                            verbose=False, seed=10)
+                            verbose=False)
 
-    agent = model(param=parameters, tk=teacher.tk)
+    # agent = ActRMeaning(param={"d": 0.5, "tau": 0.01, "s": 0.06, "m": 0.02},
+    #                    tk=teacher.tk, track_p_recall=True)
+    agent = Network(param={"n_epoch": 5, "t_max": t_max, "n_hidden": 5},
+                    tk=teacher.tk)
     # questions, replies, successes = teacher.teach(agent=agent)
-    questions, replies, successes = teacher.teach(agent=agent)
+    teacher.teach(agent=agent)
     # plot.p_recall.curve(agent.p)
-    # print(agent.success)
-    print(agent.hist)
-
-    print("Done.\n")
-
-    # Figures
-    extension = f'{model.__name__}_{RandomTeacher.__name__}'
-    plot.success.curve(successes,
-                       fig_name=f"success_curve_{extension}.pdf")
-    plot.success.scatter(successes,
-                         fig_name=f"success_scatter_{extension}.pdf")
-
-
-def main():
-    # run(Exponential, {"alpha": 0.9, "beta": 0.5, "n_0": 0.9})
-    run(Power, {"alpha": .50, "beta": 9.0, "n_0": 0.01, "omega": -1.0})  # Floats!
-    # run(Decay, {"difficulty": 1})
-    # run(ActR, {"d": 1.1, "tau": 1.1, "s": 1.1}, n_item=30)
 
 
 if __name__ == "__main__":

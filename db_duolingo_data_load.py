@@ -17,7 +17,7 @@ import pandas as pd
 import numpy as np
 from tqdm import tqdm
 
-from utils.utils import AskUser
+from utils.django import AskUser
 
 RAW_DATA = "./data/duolingo.csv"
 

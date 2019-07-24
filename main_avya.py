@@ -1,5 +1,5 @@
 import plot.memory_trace
-import plot.p_recall
+#import plot.p_recall
 import plot.success
 import plot.n_seen
 import plot.n_learnt
@@ -9,13 +9,13 @@ from learner.rl import QLearner
 from simulation.memory import p_recall_over_time_after_learning
 from teacher.avya import AvyaTeacher
 from teacher.leitner import LeitnerTeacher
-from teacher.niraj import NirajTeacher
+#from teacher.niraj import NirajTeacher
 from teacher.random import RandomTeacher
-from teacher.tugce import TugceTeacher
+#from teacher.tugce import TugceTeacher
 
 
 def run(student_model, teacher_model,
-        student_param=None, n_item=25, grade=1, t_max=250):
+        student_param=None, n_item=25, grades=(1, ), t_max=250):
 
     """
         :param teacher_model: Can be one of those:
@@ -25,7 +25,7 @@ def run(student_model, teacher_model,
             * TugceTeacher
             * RandomTeacher
             * LeitnerTeacher
-        :param grade: Level of difficulty of the kanji selected (1: easiest)
+        :param grades: Levels of difficulty of the kanji selected (1: easiest)
         :param n_item: Positive integer
         (above the number of possible answers displayed)
 
@@ -80,17 +80,16 @@ def run(student_model, teacher_model,
         (ActR, ActRMeaning, ActRGraphic, ActRPlus, QLearner), \
         "Student model not recognized."
     assert teacher_model in \
-        (NirajTeacher, AvyaTeacher, TugceTeacher,
-         RandomTeacher, LeitnerTeacher), \
+        (AvyaTeacher, RandomTeacher, LeitnerTeacher), \
         "Teacher model not recognized."
 
-    teacher = teacher_model(t_max=t_max, n_item=n_item, grade=grade)
+    teacher = teacher_model(t_max=t_max, n_item=n_item, grades=grades)
     learner = student_model(param=student_param, tk=teacher.tk)
 
     print(f"\nSimulating data with a student {student_model.__name__} "
           f"(parameters={student_param}), "
           f"and a teacher {teacher_model.__name__} "
-          f"using {n_item} kanji of grade {grade} for {t_max} time steps...",
+          f"using {n_item} kanji of grade {grades} for {t_max} time steps...",
           end=" ", flush=True)
 
     questions, replies, successes = teacher.teach(agent=learner)
@@ -115,19 +114,22 @@ def run(student_model, teacher_model,
                            questions=questions,
                            fig_name=f"memory_trace_{extension}.pdf")
 
-    plot.memory_trace.summarize(p_recall_value=p_recall, fig_name=f"memory_trace_summarize_{extension}.pdf")
+    plot.memory_trace.summarize(
+        p_recall=p_recall,
+        fig_name=f"memory_trace_summarize_{extension}.pdf")
 
+    plot.n_seen.curve(
+        seen=teacher.seen,
+        fig_name=f"n_seen_{extension}.pdf")
 
-    plot.n_seen.curve(seen=teacher.seen,
-                          fig_name=f"n_seen_{extension}.pdf")
-    plot.n_learnt.curve(seen=teacher.mat,
+    plot.n_learnt.curve(p_recall=p_recall,
                         fig_name=f"n_learnt_{extension}.pdf")
+
 
 def main():
 
-    for teacher_model in (AvyaTeacher, RandomTeacher):
-        run(student_model=ActRMeaning, teacher_model=teacher_model,t_max=490
-            )
+    for teacher_model in (AvyaTeacher, LeitnerTeacher):
+        run(student_model=ActRMeaning, teacher_model=teacher_model, t_max=490)
 
 
 if __name__ == "__main__":
