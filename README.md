@@ -157,7 +157,7 @@ Auto-documentation is handled by Sphinx. In order to make changes:
 2. In the terminal, navigate to /docs and run:
     make html
 
-If the build is successful the html files were updated.
+If the build is successful the html files were updated at /docs/_build/html. Open index.html to start navigating the documentation pages.
 
 More options and full documentation available at https://www.sphinx-doc.org/en/master/
 
