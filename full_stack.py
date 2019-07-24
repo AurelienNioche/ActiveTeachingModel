@@ -5,25 +5,16 @@ import plot.memory_trace
 import plot.success
 import plot.n_seen
 import plot.n_learnt
-from learner.act_r import ActR
-from learner.act_r_custom import ActRMeaning, ActRGraphic, ActRPlus
-from learner.rl import QLearner
+
+from learner.act_r_custom import ActRMeaning
 from simulation.memory import p_recall_over_time_after_learning
 from teacher.avya import AvyaTeacher
-# from teacher.avya_leitner import AvyaLeitTeacher
-from teacher.leitner import LeitnerTeacher
-from teacher.random import RandomTeacher
 
 import matplotlib.pyplot as plt
-from plot.generic import save_fig
-
-from utils.utils import dic2string, load, dump
 
 from plot.generic import save_fig
-from simulation.data import SimulatedData, Data
+from simulation.data import Data
 from fit.fit import Fit
-
-import os
 
 
 def run(student_model, teacher_model, student_param,
@@ -78,10 +69,12 @@ def run(student_model, teacher_model, student_param,
                          replies=replies[:t+1],
                          possible_replies=possible_replies[:t+1, :])
 
-        f = Fit(model=student_model, tk=teacher.tk, data=data_view)
-        fit_r = f.evaluate()
-
-        model_learner.set_parameters(fit_r['best_param'])
+        try:
+            f = Fit(model=student_model, tk=teacher.tk, data=data_view)
+            fit_r = f.evaluate()
+            model_learner.set_parameters(fit_r['best_param'])
+        except RuntimeError:
+            pass
         # We assume that the matching is (0,0), (1, 1), (n, n)
         # print(model_learner.d)
         # print("IIII")
@@ -166,7 +159,7 @@ def main():
         line_width=line_width * 2
     )
 
-    save_fig(f"demo_simulation_{teacher_model.__name__}.pdf")
+    save_fig(f"fullstack.pdf")
 
 
 if __name__ == '__main__':

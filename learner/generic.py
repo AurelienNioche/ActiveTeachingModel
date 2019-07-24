@@ -9,7 +9,7 @@ class Learner:
     bounds = ('<name of parameter>', 0.0000001, 1.0),
 
     def __init__(self):
-        self.pr = None
+        pass
 
     def decide(self, question, possible_replies, time=None):
         """Expected return from specific learner: reply"""
