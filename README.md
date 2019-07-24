@@ -147,7 +147,7 @@ In case the user does not have enough privileges:
 
 Auto-documentation is handled by Sphinx. In order to make changes:
 
-1. Modify index.rst to change the main documentation page if needed. code.rst will build the auto-documentation page if updated with the name of the script file as in:
+1. Modify index.rst to change the main documentation page if needed. In addition, code.rst will be used to build the auto-documentation page if updated with the name of the script file as in:
 
 ```
     .. automodule:: learner.carlos_ann

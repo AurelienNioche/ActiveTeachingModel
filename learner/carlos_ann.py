@@ -391,7 +391,7 @@ class Neuron:
             #       * self.gain
             #       + self._random_small_value()))
             self.current *= \
-                (-self.current + sum_gain) #+ r)
+                (-self.current + sum_gain + r)
             print("MY SHAPE", self.input_currents.shape)
 
         except FloatingPointError as e:
