@@ -1,7 +1,7 @@
 import plot.memory_trace
 from learner.act_r import ActR
 from learner.act_r_custom import ActRMeaning
-from teacher.random import RandomTeacher #
+from teacher.random import RandomTeacher
 
 from behavior.data_structure import Task
 
