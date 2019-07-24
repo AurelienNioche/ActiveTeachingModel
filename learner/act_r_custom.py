@@ -3,21 +3,6 @@ from learner.act_r import ActR
 np.seterr(all='raise')
 
 
-class ActRMeaningParam:
-
-    def __init__(self, d, tau, s, m):
-
-        # Decay parameter
-        self.d = d
-        # Retrieval threshold
-        self.tau = tau
-        # Noise in the activation levels
-        self.s = s
-
-        # Helping from items with close meaning
-        self.m = m
-
-
 class ActRMeaning(ActR):
 
     version = 3.1
@@ -26,25 +11,27 @@ class ActRMeaning(ActR):
 
     def __init__(self, tk, param=None, **kwargs):
 
+        # Decay parameter
+        self.d = None
+        # Retrieval threshold
+        self.tau = None
+        # Noise in the activation levels
+        self.s = None
+
+        # Helping from items with close meaning
+        self.m = None
+
+        self.set_parameters(param)
+
         if param is not None:
-
-            t_param = type(param)
-            if t_param == dict:
-                self.pr = ActRMeaningParam(**param)
-
-            elif t_param in (tuple, list, np.ndarray):
-                self.pr = ActRMeaningParam(*param)
-
-            else:
-                raise Exception(f"Type {type(param)} "
-                                f"is not handled for parameters")
-
-            self.x = self.pr.m
+            self.x = self.m
             self.c_x = tk.c_semantic
 
         self.items = np.arange(tk.n_item)
 
         super().__init__(tk=tk, **kwargs)
+
+        print(self.d)
 
     def p_recall(self, item, time=None, time_index=None):
 
@@ -80,39 +67,31 @@ class ActRMeaning(ActR):
 # ========================================================================== #
 
 
-class ActRGraphicParam:
-
-    def __init__(self, d, tau, s, g):
-
-        # Decay parameter
-        self.d = d
-        # Retrieval threshold
-        self.tau = tau
-        # Noise in the activation levels
-        self.s = s
-
-        self.g = g
-
-
 class ActRGraphic(ActRMeaning):
 
     bounds = ('d', 0.0000001, 1.0), ('tau', -5, 5), ('s', 0.0000001, 1), \
              ('g', -0.1, 0.1)
 
-    def __init__(self, param, tk, verbose=False, track_p_recall=False):
+    def __init__(self, param, tk, verbose=False):
 
-        if type(param) == dict:
-            self.pr = ActRGraphicParam(**param)
-        elif type(param) in (tuple, list, np.ndarray):
-            self.pr = ActRGraphicParam(*param)
-        else:
-            raise Exception(f"Type {type(param)} "
-                            f"is not handled for parameters")
+        # Decay parameter
+        self.d = None
 
-        super().__init__(tk=tk, verbose=verbose, track_p_recall=track_p_recall)
+        # Retrieval threshold
+        self.tau = None
+
+        # Noise in the activation levels
+        self.s = None
+
+        # Graphic 'help'
+        self.g = None
+
+        self.set_parameters(param)
+
+        super().__init__(tk=tk, verbose=verbose)
 
         self.c_x = self.tk.c_graphic
-        self.x = self.pr.g
+        self.x = self.g
 
 
 # ========================================================================== #
