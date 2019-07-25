@@ -77,7 +77,6 @@ class TraditionalLeitnerTeacher(GenericTeacher):
         """
         :return:
         """
-
         result = np.where(self.wait_time_arr > 0)
         arr = result[0]
         if len(arr) == 0:
@@ -104,7 +103,7 @@ class TraditionalLeitnerTeacher(GenericTeacher):
         return seen_due_items, count
 
     def find_max_waiting(self, items_arr):
-        max_wait = -100
+        max_wait = float('-inf')
         arr = None
         for i in range(len(items_arr)):
             wait_time_item = self.wait_time_arr[items_arr[i]]
