@@ -126,6 +126,7 @@ class TraditionalLeitnerTeacher(GenericTeacher):
                 min_box = box
             elif box == min_box:
                 items_arr.append(item)
+        assert len(items_arr) > 0
 
         return items_arr
 
