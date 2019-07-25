@@ -1,3 +1,5 @@
+import sys
+
 from bayes_opt import BayesianOptimization
 
 import numpy as np
@@ -25,7 +27,7 @@ class BayesianFit(Fit):
 
         if p_choices_ is None or np.any(np.isnan(p_choices_)):
             # print("WARNING! Objective function returning 'None'")
-            to_return = np.finfo(np.float64).min * 100
+            to_return = sys.float_info.min
 
         else:
             to_return = self._log_likelihood_sum(p_choices_)

@@ -1,5 +1,3 @@
-import copy
-
 import numpy as np
 
 from teacher.metaclass import GenericTeacher
@@ -7,7 +5,7 @@ from teacher.metaclass import GenericTeacher
 np.random.seed(123)
 
 
-class Traditional_LeitnerTeacher(GenericTeacher):
+class TraditionalLeitnerTeacher(GenericTeacher):
 
     def __init__(self, n_item=20, t_max=200, grades=(1, ),
                  handle_similarities=True,
