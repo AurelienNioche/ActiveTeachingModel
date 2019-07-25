@@ -27,12 +27,13 @@ class BayesianFit(Fit):
 
         if p_choices_ is None or np.any(np.isnan(p_choices_)):
             # print("WARNING! Objective function returning 'None'")
-            to_return = sys.float_info.min
+            to_return = -np.inf
 
         else:
             to_return = self._log_likelihood_sum(p_choices_)
 
-        return to_return
+        print(to_return)
+        return to_return  # * 10**100
 
     def evaluate(self, init_points=20, n_iter=20, verbose=2):
 
