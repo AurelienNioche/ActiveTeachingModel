@@ -14,7 +14,9 @@ import matplotlib.pyplot as plt
 
 from plot.generic import save_fig
 from simulation.data import Data
-from fit.fit import Fit
+from fit.bayesian import BayesianFit
+
+import warnings
 
 
 def run(student_model, teacher_model, student_param,
@@ -28,53 +30,42 @@ def run(student_model, teacher_model, student_param,
 
     iterator = tqdm(range(t_max))  # if verbose else range(t_max)
 
-    questions = np.zeros(t_max, dtype=int)
-    replies = np.zeros(t_max, dtype=int)
-    successes = np.zeros(t_max, dtype=bool)
-    possible_replies = np.zeros((t_max, teacher.tk.n_possible_replies),
-                                dtype=int)
-    seen = np.zeros((n_item, t_max), dtype=bool)
-
     model_learner = student_model(
         tk=teacher.tk,
         param=student_model.generate_random_parameters()
     )
 
-    teacher.agent = model_learner
-
     for t in iterator:
 
-        question, poss_replies = teacher.ask()
+        question, possible_replies = teacher.ask(
+            agent=model_learner,
+            make_learn=False)
 
         reply = learner.decide(
             question=question,
-            possible_replies=poss_replies)
+            possible_replies=possible_replies)
+
         learner.learn(question=question)
 
-        # For backup
-        questions[t] = question
-        replies[t] = reply
-        successes[t] = reply == question
-        possible_replies[t] = poss_replies
+        teacher.register_question_and_reply(question=question, reply=reply,
+                                            possible_replies=possible_replies)
 
-        # Update the count of item seen
-        if t > 0:
-            seen[:, t] = seen[:, t - 1]
-        seen[question, t] = True
+        print('Q&R', question, reply)
 
         # Update the model of the learner
 
         data_view = Data(n_items=n_item,
-                         questions=questions[:t+1],
-                         replies=replies[:t+1],
-                         possible_replies=possible_replies[:t+1, :])
+                         questions=teacher.questions[:t+1],
+                         replies=teacher.replies[:t+1],
+                         possible_replies=teacher.possible_replies[:t+1, :])
 
-        try:
-            f = Fit(model=student_model, tk=teacher.tk, data=data_view)
-            fit_r = f.evaluate()
+        f = BayesianFit(model=student_model, tk=teacher.tk, data=data_view)
+        fit_r = f.evaluate()
+        if fit_r is not None:
+            warnings.showwarning('Tamere')
             model_learner.set_parameters(fit_r['best_param'])
-        except RuntimeError:
-            pass
+
+        model_learner.learn(question=question)
         # We assume that the matching is (0,0), (1, 1), (n, n)
         # print(model_learner.d)
         # print("IIII")
@@ -85,11 +76,11 @@ def run(student_model, teacher_model, student_param,
         n_item=n_item)
 
     return {
-        'seen': seen,
+        'seen': teacher.seen,
         'p_recall': p_recall,
-        'questions': questions,
-        'replies': replies,
-        'successes': successes
+        'questions': teacher.questions,
+        'replies': teacher.replies,
+        'successes': teacher.successes
     }
 
 

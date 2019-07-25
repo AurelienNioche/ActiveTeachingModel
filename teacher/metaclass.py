@@ -31,19 +31,32 @@ class GenericTeacher:
         self.questions = np.ones(t_max, dtype=int) * -1
         self.replies = np.ones(t_max, dtype=int) * -1
         self.successes = np.zeros(t_max, dtype=bool)
+        self.possible_replies = np.zeros((t_max, self.tk.n_possible_replies),
+                                         dtype=int)
 
         self.seen = np.zeros((n_item, t_max), dtype=bool)
 
         self.t = 0
 
-    def ask(self, agent=None):
+    def ask(self, agent=None, make_learn=True):
 
         question = self._get_next_node(agent=agent)
         possible_replies = self._get_possible_replies(question)
 
-        reply = agent.decide(question=question,
-                             possible_replies=possible_replies)
-        agent.learn(question=question)
+        if make_learn:
+
+            reply = agent.decide(question=question,
+                                 possible_replies=possible_replies)
+            agent.learn(question=question)
+
+            self.register_question_and_reply(
+                reply=reply,
+                question=question,
+                possible_replies=possible_replies)
+
+        return question, possible_replies
+
+    def register_question_and_reply(self, reply, question, possible_replies):
 
         # Update the count of item seen
         if self.t > 0:
@@ -54,6 +67,7 @@ class GenericTeacher:
         self.questions[self.t] = question
         self.replies[self.t] = reply
         self.successes[self.t] = reply == question
+        self.possible_replies[self.t] = possible_replies
 
         if self.verbose:
             print(f"Question chosen: {self.tk.kanji[question]}; "
