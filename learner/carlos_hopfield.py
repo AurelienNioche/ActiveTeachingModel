@@ -1,8 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from mpl_toolkits.axes_grid1 import make_axes_locatable
 from tqdm import tqdm
-from sys import exit
 
 from behavior.data_structure import Task
 from learner.generic import Learner
@@ -12,7 +10,7 @@ np.seterr(all='raise')
 
 class Neuron:
     """
-    :param input_neurons: list of neuron_id connected to this neuron
+    :param input_neurons: list of connected to this neuron
     :param tau: decay time
     :param theta: gain function threshold
     :param gamma: gain func exponent. Always sub-linear, then value < 1
@@ -23,12 +21,11 @@ class Neuron:
     Modified from Recanatesi (2015) equations 1 to 4.
     """
 
-    def __init__(self, network, neuron_id, tau=0.01, theta=0, gamma=0.4,
+    def __init__(self, network, tau=0.01, theta=0, gamma=0.4,
                  kappa=13000, f=0.1,
                  input_neuron_ids=None, current=0):
 
         self.network = network
-        self.neuron_id = neuron_id
 
         self.input_neuron_ids = input_neuron_ids
 
@@ -55,9 +52,8 @@ class Neuron:
         self._initialize_attributes()
 
         for i in range(0, 1):
-            if self.role is not "input":
-                self.compute_gain()
-                self.update_current()
+            self.compute_gain()
+            self.update_current()
 
     @staticmethod
     def _random_small_value():
@@ -119,10 +115,10 @@ class NetworkParam:
     :param t_max: int as in the model_simulation script. None when no
         simulation script is being used with the model
     """
-    def __init__(self, n_hidden=40, n_epoch=3,
+    def __init__(self, n_neurons=40, n_epoch=3,
                  t_max=None):
         self.n_epoch = n_epoch
-        self.n_hidden = n_hidden
+        self.n_neurons = n_neurons
         self.t_max = t_max
 
 
@@ -152,96 +148,59 @@ class Network(Learner):
 
         # Create history array according to simulation or the lack thereof
         if self.pr.t_max is None:
-            self.hidden_currents_history = np.zeros((self.pr.n_epoch,
-                                                    self.pr.n_hidden))
+            self.currents_history = np.zeros((self.pr.n_epoch,
+                                              self.pr.n_neurons))
         else:
-            self.hidden_currents_history = np.zeros((self.pr.t_max,
-                                                     self.pr.n_hidden))
+            self.currents_history = np.zeros((self.pr.t_max,
+                                              self.pr.n_neurons))
             self.time_step = 0
 
-        self.create_hidden_neurons(n_hidden=self.pr.n_hidden)
+        self.neurons = []
+        self.create_neurons(n_neurons=self.pr.n_neurons)
         self.connect_everything()
         self.start_network()
 
         self._train(self.pr.n_epoch)
 
-    def create_hidden_neurons(self, n_hidden):
-
-        for j in range(n_hidden):
-
-            hidden_neuron_inputs = []
-
-            for i in range(len(self.neurons['input'])):
-
-                hidden_neuron_inputs.append(('input', i))
-
-            hid = list(range(n_hidden))
-            hid.remove(j)
-            for h in hid:
-                hidden_neuron_inputs.append(('hidden', h))
-
-            self._create_neuron(input_neuron_ids=hidden_neuron_inputs)
-
-
-
-
-        self, n_neurons
+    def create_neurons(self, n_neurons):
 
         for j in range(n_neurons):
 
             neuron_inputs = []
 
-            for i in range(len(self.neurons['input'])):
+            for i in range(self.pr.n_neurons):
+                neuron_inputs.append(i)
 
-                hidden_neuron_inputs.append(('input', i))
+            self.neurons = list(range(n_neurons))
+            self.neurons.remove(j)
+            for n in self.neurons:
+                neuron_inputs.append(n)
 
-            hid = list(range(n_hidden))
-            hid.remove(j)
-            for h in hid:
-                hidden_neuron_inputs.append(('hidden', h))
+            self._create_neuron(input_neuron_ids=neuron_inputs)
 
-            self._create_neuron(input_neuron_ids=hidden_neuron_inputs)
+    def _create_neuron(self, input_neuron_ids=None):
 
-
-
-
-
-    def _create_neuron(self, input_neuron_ids=None, role="hidden"):
-
-        self.neurons[role].append(
-            Neuron(network=self, neuron_id=self.neuron_id,
-                   role=role, input_neuron_ids=input_neuron_ids)
+        self.neurons.append(
+            Neuron(network=self, input_neuron_ids=input_neuron_ids)
         )
-
-        self.neuron_id += 1
 
     def connect_everything(self):
 
-        for layer in self.neurons.keys():
-            if layer == 'input':
-                continue
-            for n in self.neurons[layer]:
+        for n in self.neurons:
+            connected_neurons = []
+            for k, v in connected_neurons:
+                connected_neurons.append(
+                    self.neurons[k][v]
+                )
 
-                connected_neurons = []
-                for k, v in n.input_neuron_ids:
-
-                    connected_neurons.append(
-                        self.neurons[k][v]
-                    )
-
-                    n.input_neurons = connected_neurons
+                n.input_neurons = connected_neurons
 
     def start_network(self):
 
-        for layer in self.neurons.keys():
-            for n in self.neurons[layer]:
-                n.start()
+        for n in self.neurons:
+            n.start()
 
-    def show_neurons(self):
-        for role in self.roles:
-            print(f"Number of {role} neurons: ", len(self.neurons[role]))
-
-    def _train(self, n_epochs, verbose=False):
+    def _train(self, n_epochs):
         """
         :param n_epochs: int in range(0, +inf). Number of epochs
         """
@@ -250,38 +209,19 @@ class Network(Learner):
             raise ValueError("n_epochs not int or not in range(0, +inf)")
 
         for i in tqdm(range(n_epochs)):
-            for neuron in self.neurons["hidden"]:
+            for neuron in self.neurons:
                 neuron.compute_gain()
                 neuron.update_current()
                 if self.pr.t_max is None:  # Only when NOT simulating
                     self._update_hidden_currents_history(i)
 
-            for neuron in self.neurons["output"]:
-                neuron.compute_gain()
-                neuron.update_current()
-
-        # if verbose:
-        #     print(self.hidden_currents_history)
-
     def _update_hidden_currents_history(self, time_step):
-        for j, val in enumerate(self.neurons["hidden"]):
-            self.hidden_currents_history[time_step, j] = \
-                self.neurons["hidden"][j].current
-
-    def _update_input_currents(self, question):
-        """
-        :param question: int question index
-
-        Question to binary vector as input neurons current.
-        """
-        np_question = np.array([question])
-        bin_question = ((np_question[:, None]
-                         & (1 << np.arange(8))) > 0).astype(int)
-        for j, val in enumerate(self.neurons["input"]):
-            self.neurons["input"][j].current = bin_question[0, j]
+        for j, val in enumerate(self.neurons):
+            self.currents_history[time_step, j] = \
+                self.neurons.current
 
     def p_recall(self, item, time=None):
-        p_recall = self.neurons["output"][0].current
+        p_recall = 1  # TODO output p_r
         return p_recall
 
     def _p_choice(self, question, reply, possible_replies=None,
@@ -332,7 +272,7 @@ class Network(Learner):
                time_index=None):
 
         # for j, val in enumerate(self.neurons["input"]):
-        #     self.hidden_currents_history[time_step, j] = \
+        #     self.currents_history[time_step, j] = \
         #         self.neurons["hidden"][j].current
 
         self._update_input_currents(question)
@@ -389,10 +329,9 @@ def main():
     np.random.seed(1234)
 
     network = Network(tk=Task(t_max=100, n_item=30), param={"n_epoch": 200,
-                                                            "n_hidden": 10,
-                                                            "verbose": False})
+                                                            "n_neurons": 10})
 
-    plot(network)
+    # plot(network)
 
 
 if __name__ == "__main__":

@@ -1,8 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from mpl_toolkits.axes_grid1 import make_axes_locatable
 from tqdm import tqdm
-from sys import exit
 
 from behavior.data_structure import Task
 from learner.generic import Learner
@@ -172,7 +170,7 @@ class Network(Learner):
                 neuron.update_current()
 
         # if verbose:
-        #     print(self.hidden_currents_history)
+        #     print(self.currents_history)
 
     def _update_hidden_currents_history(self, time_step):
         for j, val in enumerate(self.neurons["hidden"]):
@@ -243,7 +241,7 @@ class Network(Learner):
                time_index=None):
 
         # for j, val in enumerate(self.neurons["input"]):
-        #     self.hidden_currents_history[time_step, j] = \
+        #     self.currents_history[time_step, j] = \
         #         self.neurons["hidden"][j].current
 
         self._update_input_currents(question)
