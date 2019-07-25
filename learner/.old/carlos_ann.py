@@ -28,7 +28,7 @@ class NetworkParam:
 
 class Network(Learner):
 
-    version = 0.1
+    version = 4.0
     bounds = ('d', 0.001, 1.0), \
              ('tau', -1, 1), \
              ('s', 0.001, 1)  # TODO change
