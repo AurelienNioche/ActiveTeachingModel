@@ -116,7 +116,6 @@ class Traditional_LeitnerTeacher(GenericTeacher):
                 max_wait = wait_time_item
             elif max_wait == wait_time_item:
                 arr.append(items_arr[i])
-
         return arr
 
     def pick_least_box(self, max_overdue_items):

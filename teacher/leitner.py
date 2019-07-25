@@ -62,6 +62,11 @@ class LeitnerTeacher(GenericTeacher):
         for i in range(self.buffer_threshold):
             self.learning_progress[i] = self.represent_learning
 
+    def pick_random_item(self):
+
+        new_question = np.random.randint(0, self.buffer_threshold)
+        return int(new_question)
+
     def update_probabilities(self, n_items):
         """
         :param n_items: n = Number of items included (0 ... n-1)
@@ -187,12 +192,11 @@ class LeitnerTeacher(GenericTeacher):
             return new_question
 
         if self.t == 0:
-            # No past memory, so a random question shown from learning set
-            random_question = np.random.randint(0, self.buffer_threshold)
+            random_question = self.pick_random_item()
             self.taboo = random_question
-            return int(random_question)
-        else:
-            self.store_item_past(successes)
+            return random_question
+
+        self.store_item_past(successes)
 
         count_learning = self.modify_sets(self.tk.n_item, count_learning,
                                           count_learnt, count_unseen)
