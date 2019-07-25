@@ -1,5 +1,7 @@
 import multiprocessing
 import os
+import sys
+
 import pickle
 import scipy.stats
 
@@ -21,6 +23,7 @@ FIG_FOLDER = "fig"
 
 os.makedirs(DATA_FOLDER, exist_ok=True)
 os.makedirs(FIG_FOLDER, exist_ok=True)
+
 
 def main():
 

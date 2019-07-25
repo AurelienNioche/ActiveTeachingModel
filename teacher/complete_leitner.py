@@ -1,5 +1,3 @@
-import copy
-
 import numpy as np
 
 from teacher.metaclass import GenericTeacher
@@ -7,7 +5,7 @@ from teacher.metaclass import GenericTeacher
 np.random.seed(123)
 
 
-class Traditional_LeitnerTeacher(GenericTeacher):
+class TraditionalLeitnerTeacher(GenericTeacher):
 
     def __init__(self, n_item=20, t_max=200, grades=(1, ),
                  handle_similarities=True,
@@ -77,7 +75,6 @@ class Traditional_LeitnerTeacher(GenericTeacher):
 
     def find_due_items(self, n_items):
         """
-        :param n_items:
         :return:
         """
 
@@ -139,8 +136,7 @@ class Traditional_LeitnerTeacher(GenericTeacher):
             * learn(item): strengthen the association between a kanji and its
                 meaning
             * unlearn(): cancel the effect of the last call of the learn method
-        :param n_items:
-            * Number of items included (0 ... n-1)
+
         :return: integer (index of the question to ask)
         Function implements 4 rules in order:
 
