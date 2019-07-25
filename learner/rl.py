@@ -5,13 +5,6 @@ from learner.generic import Learner
 import task.parameters
 
 
-class QParam:
-
-    def __init__(self, alpha, tau):
-        self.alpha = alpha
-        self.tau = tau
-
-
 class QLearner(Learner):
 
     version = 1.0
@@ -19,14 +12,12 @@ class QLearner(Learner):
 
     def __init__(self, param, tk, verbose=False):
 
-        super().__init__()
+        self.alpha = None
+        self.tau = None
 
-        if type(param) == dict:
-            self.pr = QParam(**param)
-        elif type(param) in (list, tuple, np.ndarray):
-            self.pr = QParam(*param)
-        else:
-            raise Exception(f"Type {type(param)} is not handled for parameters")
+        self.set_parameters(param)
+
+        super().__init__()
 
         self.tk = tk
 
@@ -37,24 +28,24 @@ class QLearner(Learner):
 
     def _softmax(self, x):
         try:
-            return np.exp(x / self.pr.tau) / np.sum(np.exp(x / self.pr.tau))
+            return np.exp(x / self.tau) / np.sum(np.exp(x / self.tau))
         except (Warning, FloatingPointError) as w:
-            print(x, self.pr.tau)
-            raise Exception(f'{w} [x={x}, temp={self.pr.tau}]')
+            print(x, self.tau)
+            raise Exception(f'{w} [x={x}, temp={self.tau}]')
 
     def _temporal_difference(self, v, obs=1):
 
-        return v + self.pr.alpha * (obs - v)
+        return v + self.alpha * (obs - v)
 
     def _softmax_unique(self, x_i, x):
 
         try:
-            p = np.exp(x_i / self.pr.tau) / np.sum(np.exp(x / self.pr.tau))
+            p = np.exp(x_i / self.tau) / np.sum(np.exp(x / self.tau))
             return p
 
         except (Warning, RuntimeWarning, FloatingPointError) as w:
             # print(w, x, self.tau)
-            raise Exception(f'{w} [x={x}, temp={self.pr.tau}]')
+            raise Exception(f'{w} [x={x}, temp={self.tau}]')
 
     def p_recall(self, item, time=None):
 

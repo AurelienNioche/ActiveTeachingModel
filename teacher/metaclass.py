@@ -30,18 +30,43 @@ class GenericTeacher:
 
         self.questions = np.ones(t_max, dtype=int) * -1
         self.replies = np.ones(t_max, dtype=int) * -1
-        self.successes = np.ones(t_max, dtype=bool)
+        self.successes = np.zeros(t_max, dtype=bool)
 
         self.seen = np.zeros((n_item, t_max), dtype=bool)
 
-        self.agent = None
+        self.t = 0
 
-    def ask(self):
+    def ask(self, agent=None):
 
-        raise NotImplementedError("Tracking Teacher is a meta-class."
-                                  "Ask method need to be overridden")
+        question = self._get_next_node(agent=agent)
+        possible_replies = self._get_possible_replies(question)
 
-    def get_possible_replies(self, question):
+        reply = agent.decide(question=question,
+                             possible_replies=possible_replies)
+        agent.learn(question=question)
+
+        # Update the count of item seen
+        if self.t > 0:
+            self.seen[:, self.t] = self.seen[:, self.t - 1]
+        self.seen[question, self.t] = True
+
+        # For backup
+        self.questions[self.t] = question
+        self.replies[self.t] = reply
+        self.successes[self.t] = reply == question
+
+        if self.verbose:
+            print(f"Question chosen: {self.tk.kanji[question]}; "
+                  f"correct answer: {self.tk.meaning[question]}; "
+                  f"possible replies: {self.tk.meaning[possible_replies]};")
+
+        self.t += 1
+
+    def _get_next_node(self, agent=None):
+        raise NotImplementedError(f"{type(self).__name__} is a meta-class."
+                                  "This method need to be overridden")
+
+    def _get_possible_replies(self, question):
 
         # Select randomly possible replies, including the correct one
         all_replies = list(range(self.tk.n_item))
@@ -54,29 +79,14 @@ class GenericTeacher:
         np.random.shuffle(possible_replies)
         return possible_replies
 
-    def teach(self, agent, verbose=None):
+    def teach(self, agent=None):
 
-        self.agent = agent
+        tqdm.write("Teaching...")
 
         iterator = tqdm(range(self.tk.t_max)) \
-            if verbose else range(self.tk.t_max)
+            if not self.verbose else range(self.tk.t_max)
 
-        for t in iterator:
-            question, possible_replies = self.ask()
-
-            reply = agent.decide(question=question,
-                                 possible_replies=possible_replies)
-            agent.learn(question=question)
-
-            # Update the count of item seen
-            if t > 0:
-                self.seen[:, t] = self.seen[:, t - 1]
-            self.seen[question, t] = True
-
-            # For backup
-            self.questions[t] = question
-            self.replies[t] = reply
-            self.successes[t] = reply == question
-            # We assume that the matching is (0,0), (1, 1), (n, n)
+        for _ in iterator:
+            self.ask(agent=agent)
 
         return self.questions, self.replies, self.successes

@@ -70,6 +70,8 @@ def p_recall_over_time_after_learning(
         time_norm=None,
         time_sampling=None):
 
+    tqdm.write("Computing the probabilities of recall...")
+
     if time_sampling is not None:
         discrete_time = False
 
