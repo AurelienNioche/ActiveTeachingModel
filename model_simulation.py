@@ -14,7 +14,7 @@ import plot.success
 from plot.generic import save_fig
 
 
-def main(t_max=300, n_item=30, teacher_model=None, verbose=True,
+def main(t_max=300, n_item=30, teacher_model=None, verbose=False,
          normalize_similarity=True):
 
     if teacher_model is None:

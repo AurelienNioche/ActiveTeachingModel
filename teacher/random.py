@@ -16,20 +16,7 @@ class RandomTeacher(GenericTeacher):
 
         np.random.seed(seed)
 
-    def ask(self):
-
-        question = self.get_next_node()
-
-        possible_replies = self.get_possible_replies(question)
-
-        if self.verbose:
-            print(f"Question chosen: {self.tk.kanji[question]}; "
-                  f"correct answer: {self.tk.meaning[question]}; "
-                  f"possible replies: {self.tk.meaning[possible_replies]};")
-
-        return question, possible_replies
-
-    def get_next_node(self):
+    def _get_next_node(self, agent=None):
 
         question = np.random.randint(self.tk.n_item)
         return question

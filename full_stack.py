@@ -98,7 +98,7 @@ def main():
     r = run(
         student_model=ActRMeaning, teacher_model=AvyaTeacher,
         student_param={"d": 0.5, "tau": 0.01, "s": 0.06, "m": 0.02},
-        n_item=40, grades=(1, ), t_max=500, normalize_similarity=True)
+        n_item=30, grades=(1, ), t_max=300, normalize_similarity=True)
 
     seen = r['seen']
     p_recall = r['p_recall']
