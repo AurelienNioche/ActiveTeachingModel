@@ -75,7 +75,6 @@ class TraditionalLeitnerTeacher(GenericTeacher):
 
     def find_due_items(self, n_items):
         """
-        :param n_items:
         :return:
         """
 
@@ -138,8 +137,7 @@ class TraditionalLeitnerTeacher(GenericTeacher):
             * learn(item): strengthen the association between a kanji and its
                 meaning
             * unlearn(): cancel the effect of the last call of the learn method
-        :param n_items:
-            * Number of items included (0 ... n-1)
+
         :return: integer (index of the question to ask)
         Function implements 4 rules in order:
 
