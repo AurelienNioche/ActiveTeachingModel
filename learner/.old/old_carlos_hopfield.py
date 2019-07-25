@@ -1,3 +1,6 @@
+# This is the modified version of carlos_ann in order to adapt it to the true
+# Hopfield architecture, dropped in favor of a matrix architecture
+
 import matplotlib.pyplot as plt
 import numpy as np
 from tqdm import tqdm
