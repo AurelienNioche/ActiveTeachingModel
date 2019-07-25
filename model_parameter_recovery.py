@@ -15,12 +15,12 @@ from learner.act_r_custom import ActRMeaning, ActRGraphic, ActRPlus
 from simulation.data import SimulatedData
 from simulation.task import Task
 
+import plot.parameter_recovery
+
 
 DATA_FOLDER = os.path.join("bkp", "model_evaluation")
-FIG_FOLDER = "fig"
 
 os.makedirs(DATA_FOLDER, exist_ok=True)
-os.makedirs(FIG_FOLDER, exist_ok=True)
 
 
 class SimulationAndFit:
@@ -58,48 +58,6 @@ class SimulationAndFit:
                 "initial": param,
                 "recovered": fit_r["best_param"],
             }
-
-
-def create_fig(data, extension=''):
-
-    # Create fig
-    fig, axes = plt.subplots(nrows=len(data.keys()), figsize=(5, 10))
-
-    i = 0
-    for title, dic in sorted(data.items()):
-
-        ax = axes[i]
-
-        x, y = dic["initial"], dic["recovered"]
-
-        ax.scatter(x, y, alpha=0.5)
-
-        cor, p = scipy.stats.pearsonr(x, y)
-
-        print(f'Pearson corr {title}: $r_pearson={cor:.2f}$, $p={p:.3f}$')
-
-        ax.set_title(title)
-
-        max_ = max(x+y)
-        min_ = min(x+y)
-
-        ax.set_xlim(min_, max_)
-        ax.set_ylim(min_, max_)
-
-        ticks_positions = [round(i, 2) for i in np.linspace(min_, max_, 3)]
-
-        ax.set_xticks(ticks_positions)
-        ax.set_yticks(ticks_positions)
-
-        ax.set_aspect(1)
-        i += 1
-
-    plt.tight_layout()
-    f_name = f"parameter_recovery{extension}.pdf"
-    fig_path = os.path.join(FIG_FOLDER, f_name)
-    plt.savefig(fig_path)
-    print(f"Figure '{fig_path}' created.\n")
-    plt.tight_layout()
 
 
 def main(model, max_=20, t_max=300, n_kanji=30, normalize_similarity=True,
@@ -143,7 +101,7 @@ def main(model, max_=20, t_max=300, n_kanji=30, normalize_similarity=True,
     else:
         data = pickle.load(open(file_path, 'rb'))
 
-    create_fig(data=data, extension=extension)
+    plot.parameter_recovery.plot(data=data, extension=extension)
 
 
 if __name__ == "__main__":

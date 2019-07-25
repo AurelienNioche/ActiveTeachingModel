@@ -25,15 +25,14 @@ class BayesianFit(Fit):
 
         if p_choices_ is None or np.any(np.isnan(p_choices_)):
             # print("WARNING! Objective function returning 'None'")
-            to_return = - np.inf
+            to_return = np.finfo(np.float64).min * 100
 
         else:
             to_return = self._log_likelihood_sum(p_choices_)
 
-        assert not np.isnan(to_return), 'I got a nan'
         return to_return
 
-    def evaluate(self, init_points=40, n_iter=40, verbose=2):
+    def evaluate(self, init_points=20, n_iter=20, verbose=2):
 
         pbounds = {tup[0]: (tup[1], tup[2]) for tup in self.model.bounds}
 
@@ -49,10 +48,10 @@ class BayesianFit(Fit):
                 params=self.best_param,
                 lazy=True
             )
-        try:
-            res = optimizer.maximize(init_points=init_points, n_iter=n_iter)
-        except (StopIteration, FloatingPointError, ValueError):
-            return
+        # try:
+        res = optimizer.maximize(init_points=init_points, n_iter=n_iter)
+        # except (StopIteration, FloatingPointError, ValueError):
+        #     return
 
         self.best_param = res.max['params']
 

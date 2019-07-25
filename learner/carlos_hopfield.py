@@ -92,10 +92,12 @@ class Network(Learner):
             np.pi * t + (np.pi / 2))
 
     def update_weights(self):
-        for i, j in enumerate(self.weights[i, j]):
-            self.weights = self.kappa / self.pr.n_neurons * (
-                sum((self.currents[i,j] - self.f) * (self.currents[i+1, j+1] - self.f))
-            - self.phi)
+        for i in range(self.weights.shape[0]):   # P
+            for j in range(self.weights.shape[1]):  # N
+
+                self.weights = self.kappa / self.pr.n_neurons * (
+                    sum((self.currents[i,j] - self.f) * (self.currents[i+1, j+1] - self.f))
+                - self.phi)
 
     #####################################
     # Integration with teacher and task #
@@ -115,16 +117,7 @@ class Network(Learner):
 
         # If number of possible replies is defined
         if self.tk.n_possible_replies is not None:
-            p_correct = self.p_random + p_recall*(1 - self.p_ran
-
-
-
-
-
-
-
-
-dom)
+            p_correct = self.p_random + p_recall*(1 - self.p_random)
 
             if success:
                 p_choice = p_correct

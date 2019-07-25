@@ -40,6 +40,10 @@ class GenericTeacher:
 
     def ask(self, agent=None, make_learn=True):
 
+        # print("___ Question ___")
+        # print(self.questions)
+        # print(agent.questions)
+
         question = self._get_next_node(agent=agent)
         possible_replies = self._get_possible_replies(question)
 
