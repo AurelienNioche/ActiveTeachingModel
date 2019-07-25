@@ -17,8 +17,8 @@ class LeitnerTeacher(GenericTeacher):
         """
         :param normalize_similarity: bool. Normalized description of
         semantic and graphic connections between items
-        :param fractional_success: float fraction of successful replies
-            required for teaching after which an item is learnt.
+        :param fractional_success: minimum float fraction of successful replies
+            required for teaching completely.
         :param buffer_threshold: integer value in range(0 to n_items):
             * To prevent bottleneck, maximum number of items that can be
             taught at a time
@@ -140,7 +140,7 @@ class LeitnerTeacher(GenericTeacher):
                                 Exception('Error in unseen items computation')
         return count_learning
 
-    def _get_next_node(self, agent=None):
+    def completed_learning(self, agent):
         """
         :param agent: agent object (RL, ACT-R, ...) that implements at least
             the following methods:
@@ -149,6 +149,19 @@ class LeitnerTeacher(GenericTeacher):
             * learn(item): strengthen the association between a kanji and its
                 meaning
             * unlearn(): cancel the effect of the last call of the learn method
+        :return: the item with least probability of recall by learner
+        """
+
+        recall_arr = np.zeros(self.tk.n_item)
+        for i in range(self.tk.n_item):
+            recall_arr[i] = agent.p_recall(i)
+        result = np.where(recall_arr == np.amin(recall_arr))
+        new_question = result[0][0]
+        return new_question
+
+    def _get_next_node(self, agent=None):
+        """
+
         :var successes: list of booleans (True: success, False: failure) for
             every question
         :return: integer (index of the question to ask)
@@ -170,14 +183,7 @@ class LeitnerTeacher(GenericTeacher):
                 count_learning += 1
 
         if count_learnt == self.tk.n_item:
-            # print("All items learnt by Learner")
-            # find the least learnt item
-            recall_arr = np.zeros(self.tk.n_item)
-            for i in range(self.tk.n_item):
-                recall_arr[i] = agent.p_recall(i)
-            result = np.where(recall_arr == np.amin(recall_arr))
-            new_question = result[0][0]
-            self.t += 1
+            new_question = self.completed_learning(agent)
             return new_question
 
         if self.t == 0:
@@ -206,12 +212,7 @@ class LeitnerTeacher(GenericTeacher):
                 else:
                     self.update_probabilities(self.tk.n_item)
             else:
-                print("All items learnt by Learner")
-                recall_arr = np.zeros(self.tk.n_item)
-                for i in range(self.tk.n_item):
-                    recall_arr[i] = agent.p_recall(i)
-                result = np.where(recall_arr == np.amin(recall_arr))
-                new_question = result[0][0]
+                new_question = self.completed_learning(agent)
                 return new_question
 
         probability_sum = sum(self.pick_probability)

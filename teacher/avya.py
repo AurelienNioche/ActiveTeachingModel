@@ -168,6 +168,7 @@ class AvyaTeacher(GenericTeacher):
         usefulness, recall_arr = self.get_parameters(agent)
 
         if self.t > 0:
+            self.update_sets(recall_arr)
             taboo = self.questions[self.t - 1]
             new_question = self.get_slipping(taboo, recall_arr)
             if new_question is None:
@@ -176,5 +177,4 @@ class AvyaTeacher(GenericTeacher):
         if new_question is None:
             new_question = self.get_useful(taboo, recall_arr, usefulness)
 
-        self.update_sets(recall_arr)
         return new_question

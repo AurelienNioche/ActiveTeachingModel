@@ -9,7 +9,7 @@ from learner.rl import QLearner
 from simulation.memory import p_recall_over_time_after_learning
 from teacher.avya import AvyaTeacher
 from teacher.leitner import LeitnerTeacher
-#from teacher.niraj import NirajTeacher
+from teacher.complete_leitner import Traditional_LeitnerTeacher
 from teacher.random import RandomTeacher
 #from teacher.tugce import TugceTeacher
 
@@ -80,7 +80,7 @@ def run(student_model, teacher_model,
         (ActR, ActRMeaning, ActRGraphic, ActRPlus, QLearner), \
         "Student model not recognized."
     assert teacher_model in \
-        (AvyaTeacher, RandomTeacher, LeitnerTeacher), \
+        (AvyaTeacher, RandomTeacher, LeitnerTeacher, Traditional_LeitnerTeacher), \
         "Teacher model not recognized."
 
     teacher = teacher_model(t_max=t_max, n_item=n_item, grades=grades)
@@ -128,8 +128,9 @@ def run(student_model, teacher_model,
 
 def main():
 
-    for teacher_model in (AvyaTeacher, LeitnerTeacher):
-        run(student_model=ActRMeaning, teacher_model=teacher_model, t_max=490)
+    for teacher_model in (Traditional_LeitnerTeacher, AvyaTeacher,
+                          LeitnerTeacher, RandomTeacher):
+        run(student_model=ActRMeaning, teacher_model=teacher_model, t_max=550)
 
 
 if __name__ == "__main__":
