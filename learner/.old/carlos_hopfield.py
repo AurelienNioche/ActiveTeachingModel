@@ -62,15 +62,11 @@ class Neuron:
         return number
 
     def _initialize_attributes(self):
-        if self.role is "input":
-            self.current = np.random.randint(0, 2)
-        else:
-            self.input_currents = \
-                np.array([self._random_small_value()
-                          for _ in range(len(self.input_neurons))])
-            print(len(self.input_neurons))
-            self.weights = np.random.rand(1, len(self.input_neurons))
-            self.current = self._random_small_value()
+        self.input_currents = \
+            np.array([self._random_small_value()
+                      for _ in range(len(self.input_neurons))])
+        self.weights = np.random.rand(1, len(self.input_neurons))
+        self.current = self._random_small_value()
 
     def compute_gain(self):
         if self.current + self.theta > 0:
@@ -79,11 +75,9 @@ class Neuron:
             self.gain = 0
 
     def update_current(self):
-        assert self.role is not "input"
-
         self.weights_hebbian = self.kappa / 100000\
-                               * (np.sum(self.current * self.input_currents)
-                                  - self.phi)
+            * (np.sum(self.current * self.input_currents)
+                - self.phi)
         r = self._random_small_value()
 
         try:
@@ -115,11 +109,12 @@ class NetworkParam:
     :param t_max: int as in the model_simulation script. None when no
         simulation script is being used with the model
     """
-    def __init__(self, n_neurons=40, n_epoch=3,
+    def __init__(self, n_neurons=40, p=16, n_epoch=3,
                  t_max=None):
         self.n_epoch = n_epoch
         self.n_neurons = n_neurons
         self.t_max = t_max
+        self.p = p
 
 
 class Network(Learner):
@@ -230,7 +225,7 @@ class Network(Learner):
 
         success = question == reply
 
-        p_recall = self.neurons["output"][0].current
+        p_recall = 1  # TODO output p_r
 
         # If number of possible replies is defined
         if self.tk.n_possible_replies is not None:

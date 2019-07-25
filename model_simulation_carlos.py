@@ -1,7 +1,5 @@
 # import plot.p_recall
-from learner.act_r_custom import ActRMeaning
 from teacher.random import RandomTeacher
-from learner.carlos_exponential import Exponential
 from learner.carlos_ann import Network
 
 
