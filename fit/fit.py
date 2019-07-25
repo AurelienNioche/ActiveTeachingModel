@@ -8,8 +8,6 @@ IDX_PARAMETERS = 0
 IDX_MODEL = 1
 IDX_ARGUMENTS = 2
 
-MAX_EVAL = 500  # Only if tpe
-
 
 class Fit:
 
@@ -48,7 +46,7 @@ class Fit:
 
         return mean_p, lls, bic
 
-    def evaluate(self):
+    def evaluate(self, max_iter=1000):
 
         def objective(param):
 
@@ -69,7 +67,7 @@ class Fit:
 
             space = [hp.uniform(*b) for b in self.model.bounds]
             best_param = fmin(fn=objective, space=space, algo=tpe.suggest,
-                              max_evals=MAX_EVAL)
+                              max_evals=max_iter)
 
         elif self.method in \
                 ('de', 'L-BFGS-B', 'TNC', 'COBYLA', 'SLSQP'):
@@ -81,11 +79,14 @@ class Fit:
 
             if self.method == 'de':
                 res = scipy.optimize.differential_evolution(
-                        func=objective, bounds=bounds_scipy)
+                    func=objective, bounds=bounds_scipy,
+                    maxiter=max_iter
+                )
             else:
                 x0 = np.zeros(len(self.model.bounds)) * 0.5
                 res = scipy.optimize.minimize(fun=objective,
-                                              bounds=bounds_scipy, x0=x0)
+                                              bounds=bounds_scipy, x0=x0,
+                                              maxiter=max_iter)
 
             best_param = {b[0]: v for b, v in zip(self.model.bounds, res.x)}
             if self.verbose:
