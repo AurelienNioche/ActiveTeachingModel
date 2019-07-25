@@ -115,6 +115,9 @@ class TraditionalLeitnerTeacher(GenericTeacher):
         return arr
 
     def pick_least_box(self, max_overdue_items):
+
+        items_arr = []
+
         min_box = float('inf')
         for item in max_overdue_items:
             box = self.learning_progress[item]
@@ -123,6 +126,7 @@ class TraditionalLeitnerTeacher(GenericTeacher):
                 min_box = box
             elif box == min_box:
                 items_arr.append(item)
+
         return items_arr
 
     def _get_next_node(self, agent=None):
