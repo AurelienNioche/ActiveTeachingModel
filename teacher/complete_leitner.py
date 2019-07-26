@@ -105,7 +105,6 @@ class TraditionalLeitnerTeacher(GenericTeacher):
                 seen_due_items[count] = item
                 count += 1
 
-        # find most overdue item
         if count == 0:
             seen_due_items = due_items
             count = len(due_items)
