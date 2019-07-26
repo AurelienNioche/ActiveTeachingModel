@@ -41,7 +41,8 @@ class NetworkParam:
     # Not Yet Classified
     :param xi_0: noise variance.
     :param r_threshold: recall threshold.
-    :param n_trials: number of trials.
+    :param n_trials: number of trials, which corresponds to the number of
+        simulated networks.
     :param r_ini: initial rate. All neurons belonging to memory \mu are
     initialized to this value. Others are set to 0.
 
@@ -149,14 +150,21 @@ class Network(Learner):
                              size=(self.pr.p, self.pr.n_neurons))
 
         self.phi = None
+        self.t_tot_discrete = None
 
-        # self._initialize()
-        self._present_pattern(3)
+        self._initialize()
 
     def _initialize(self):
+        """
+        Performs the following initial operations:
+        * Update the inhibition parameter for time step 0.
+        * Gives a random seeded pattern as the initial activation vector.
+        * Calculates the total discrete time from the total continuous time
+        """
         self.update_phi(0)
         self.activation = self._present_pattern(np.random.randint(0, 79))
-        # self.update_weights()
+        self.t_tot_discrete = self.pr.t_tot / self.pr.dt
+        self.update_weights()
 
     def update_phi(self, t):
         self.phi = np.sin(2 * np.pi * self.pr.tau_0 * t + (np.pi / 2))\
@@ -169,8 +177,8 @@ class Network(Learner):
                 for j in range(self.weights.shape[1]):  # N
                     print("j", j)
                     self.weights[i, j] = self.pr.kappa / self.pr.n_neurons * (
-                         (self.currents[i, j] - self.pr.f)
-                         * (self.currents[i+1, j+1] - self.pr.f)
+                         (self.weights[i, j] - self.pr.f)
+                         * (self.weights[i+1, j+1] - self.pr.f)
                          - self.phi) + 1
         # except:
         #     pass
@@ -184,8 +192,9 @@ class Network(Learner):
         shape is forced to be same as activation.shape.
         """
         np_question = np.array([question])
-        pattern = ((np_question[:, None]
-                    & (1 << np.arange(8))) > 0).astype(int)
+        pattern = (((np_question[:, None]
+                    & (1 << np.arange(8))) > 0).astype(int)) * self.pr.r_ini
+        assert np.amax(pattern) == self.pr.r_ini
         pattern = np.resize(pattern, self.activation.shape)
         return pattern
 
