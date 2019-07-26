@@ -10,24 +10,81 @@ np.seterr(all='raise')
 
 class NetworkParam:
     """
-    :param t_max: int as in the model_simulation script. None when no
-        simulation script is being used with the model
-    :param tau: decay time
-    :param theta: gain function threshold
-    :param gamma: gain func exponent. Always sub-linear, then value < 1
-    :param kappa: excitation parameter
-    :param phi_min: minimum value of the inhibition parameter
-    :param phi_max: maximum "
-    :param f: sparsity of bit probability
-    """
-    def __init__(self, n_epoch=3, n_neurons=100000, p=16, tau=0.01, theta=0,
-                 gamma=0.4, f=0.01, kappa=13000, phi_min=0.7, phi_max=1.06,
-                 tau_0=1, t_max=None, verbose=False):
+    # Architecture
+    :param n_neurons: int total number of neurons. "N" in the original article.
+    :param p: int number of memories.
 
+    # Activation Function
+    :param tau: float decay time.
+
+    # Gain Function
+    :param theta: gain function threshold.
+    :param gamma: float gain func exponent. Always sub-linear, then value < 1.
+
+    # Hebbian Rule
+    :param kappa: excitation parameter.
+    :param f: sparsity of bit probability.
+
+    # Inhibition Parameter Calculation
+    :param phi_min: float inhibition parameter minimum value.
+    :param phi_max: float inhibition parameter maximum value.
+    :param tau_0: oscillation time.
+
+    # Short Term Association of Items
+    :param j_forward: forward contiguity.
+    :param j_backward: backward contiguity.
+
+    # Time-related Attributes
+    :param t_tot: total time when working on continuous time.
+    :param dt: float integration time step.
+
+    # Not Yet Classified
+    :param xi_0: noise variance.
+    :param r_threshold: recall threshold.
+    :param n_trials: number of trials.
+    :param r_ini: initial rate. All neurons belonging to memory \mu are
+    initialized to this value. Others are set to 0.
+
+
+    Gives the parameters to the network. Default values as listed in Recanatesi
+    (2015).
+    """
+    def __init__(self,
+                 # Architecture
+                 n_epoch=3,
+                 n_neurons=100000,
+                 p=16,
+                 # Activation #############
+                 tau=0.01,
+                 # Gain ###################
+                 theta=0,
+                 gamma=0.4,
+                 # Hebbian rule ###########
+                 kappa=13000,
+                 f=0.01,
+                 # Inhibition #############
+                 phi_min=0.7,
+                 phi_max=1.06,
+                 tau_0=1,
+                 # Short term association #
+                 j_forward=1500,
+                 j_backward=400,
+                 # Time ###################
+                 t_tot=450,
+                 dt=0.001,
+                 # Not classified #########
+                 xi_0=65,
+                 r_threshold=15,
+                 n_trials=10000,
+                 r_ini=1,
+                 verbose=False):
+
+        # Architecture
         self.n_epoch = n_epoch
         self.n_neurons = n_neurons
+        self.p = p
 
-        # Neuron dynamics
+        # Activation function
         self.tau = tau
 
         # Gain function
@@ -36,17 +93,26 @@ class NetworkParam:
 
         # Hebbian rule
         self.kappa = kappa
-        self.phi = phi_min
-        self.phi = phi_max
         self.f = f
 
-        # Function parameters
-        self.p = p
-        self.f = f
-        self.kappa = kappa
+        # Inhibition
+        self.phi_min = phi_min
+        self.phi_max = phi_max
         self.tau_0 = tau_0
 
-        self.t_max = t_max
+        # Short term association
+        self.j_forward = j_forward
+        self.j_backward = j_backward
+
+        # Time
+        self.t_tot = t_tot
+        self.dt = dt
+
+        # Not yet classified
+        self.xi_0 = xi_0
+        self.r_threshold = r_threshold
+        self.n_trials = n_trials
+        self.r_ini = r_ini
         self.verbose = verbose
 
 
@@ -74,8 +140,9 @@ class Network(Learner):
             raise Exception(
                 f"Type {type(param)} is not handled for parameters")
 
-        self.weights = np.zeros((self.pr.p, self.pr.n_neurons))
-        self.currents = self.weights
+        self.connectivity = np.zeros((self.pr.p, self.pr.n_neurons))
+        self.weights = np.zeros((self.pr.n_neurons, self.pr.n_neurons))
+        self.activation = np.zeros(self.pr.n_neurons)
 
         self.representation_memory = \
             np.random.choice([0, 1], p=[self.pr.f, 1 - self.pr.f],
@@ -83,12 +150,13 @@ class Network(Learner):
 
         self.phi = None
 
-        self._initialize()
+        # self._initialize()
+        self._present_pattern(3)
 
     def _initialize(self):
         self.update_phi(0)
-        print(self.phi)
-        self.update_weights()
+        self.activation = self._present_pattern(np.random.randint(0, 79))
+        # self.update_weights()
 
     def update_phi(self, t):
         self.phi = np.sin(2 * np.pi * self.pr.tau_0 * t + (np.pi / 2))\
@@ -107,6 +175,19 @@ class Network(Learner):
         # except:
         #     pass
         # print(self.weights)
+
+    def _present_pattern(self, question):
+        """
+        :param question: int question index
+
+        Question to binary vector as pattern for the activation array. Array
+        shape is forced to be same as activation.shape.
+        """
+        np_question = np.array([question])
+        pattern = ((np_question[:, None]
+                    & (1 << np.arange(8))) > 0).astype(int)
+        pattern = np.resize(pattern, self.activation.shape)
+        return pattern
 
     #####################################
     # Integration with teacher and task #
@@ -185,8 +266,11 @@ class Network(Learner):
 
 
 def main():
+
+    np.random.seed(123)
+
     network = Network(tk=Task(t_max=100, n_item=30),
-                      param={"n_neurons": 100000})
+                      param={"n_neurons": 10000})
 
 
 if __name__ == main():

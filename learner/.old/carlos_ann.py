@@ -79,7 +79,6 @@ class Network(Learner):
 
     def create_input_neurons(self):
         """
-
         Instances n input neurons where n is the amount of neurons to represent
         the total number of question indices in binary form.
         """
