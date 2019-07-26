@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 from plot.generic import save_fig
 from simulation.data import Data
 from fit.bayesian import BayesianFit
+from fit.bayesian_gpyopt import BayesianGPyOptFit
 from fit.fit import Fit
 
 import warnings
@@ -60,8 +61,9 @@ def run(student_model, teacher_model, student_param,
                          replies=teacher.replies[:t+1],
                          possible_replies=teacher.possible_replies[:t+1, :])
 
-        f = Fit(model=student_model, tk=teacher.tk, data=data_view)
-        fit_r = f.evaluate(max_iter=200)
+        f = Fit(model=student_model, tk=teacher.tk,
+                data=data_view, method='de')
+        fit_r = f.evaluate(max_iter=100)
         if fit_r is not None:
             model_learner.set_parameters(fit_r['best_param'])
         else:

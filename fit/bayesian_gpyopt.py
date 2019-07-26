@@ -19,7 +19,7 @@ class BayesianGPyOptFit(Fit):
 
         # self.optimizer = BayesianOptimization()
 
-    def _objective(self, **param):
+    def _objective(self, param):
 
         agent = self.model(param=param, tk=self.tk)
         p_choices_ = agent.get_p_choices(data=self.data,
@@ -27,19 +27,20 @@ class BayesianGPyOptFit(Fit):
 
         if p_choices_ is None or np.any(np.isnan(p_choices_)):
             # print("WARNING! Objective function returning 'None'")
-            to_return = np.inf
+            to_return = 10**2
+            #to_return = np.inf
 
         else:
             to_return = - self._log_likelihood_sum(p_choices_)
 
         return to_return  # * 10**100
 
-    def evaluate(self, init_points=20, n_iter=20, verbose=2):
-
-        pbounds = {tup[0]: (tup[1], tup[2]) for tup in self.model.bounds}
+    def evaluate(self, max_iter=1000):
 
         domain = [
-            {'name': 'var_1', 'type': 'continuous', 'domain': (0,1)
+            {'name': f'{b[0]}',
+             'type': 'continuous',
+             'domain': (b[1], b[2])
              } for b in self.model.bounds
         ]
 
@@ -48,8 +49,9 @@ class BayesianGPyOptFit(Fit):
         myBopt.run_optimization(max_iter=15)
 
         best_param_list = myBopt.x_opt
-        self.best_param = {b[0]: v for b, v in zip(self.model.bounds,
-                                              best_param_list)}
+        self.best_param = {b[0]: v for b, v in
+                           zip(self.model.bounds,
+                               best_param_list)}
 
         # self.best_value = res.max['target']
         # if self.verbose:

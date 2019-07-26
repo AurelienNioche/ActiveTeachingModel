@@ -183,4 +183,4 @@ def main(n_agent, t_min, t_max, model, force=False):
 
 
 if __name__ == "__main__":
-    main(n_agent=10, t_max=300, model=ActRMeaning)
+    main(n_agent=10, t_min=25, t_max=300, model=ActR)
