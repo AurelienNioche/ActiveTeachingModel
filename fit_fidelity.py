@@ -14,6 +14,7 @@ from utils.utils import load, dump
 
 import os
 
+
 class FitFidelity:
     def __init__(self, t_min=25, t_max=30, n_kanji=79, grade=1, model=ActR,
                  normalize_similarity=False, verbose=False):
@@ -51,6 +52,11 @@ class FitFidelity:
                                   tk=self.tk, verbose=False)
 
     def compute_fidelity(self, n_agents=3):
+        """
+        :param n_agents: number of simulated agents.
+        :return: 2D array with each parameter as rows and the mean of the best
+        value difference as columns.
+        """
 
         self.mean_array = np.zeros((self.n_param, self.t_max - self.t_min - 2))
         # - 2 because we will compute the difference and then the mean
@@ -116,35 +122,75 @@ class FitFidelity:
         return self.mean_array
 
 
-def _plot(mean_array, fig_name, font_size=42):
+def _plot(mean_array, fig_name, model, font_size=42):
 
-    # if p_recall_time is None:
-    #     p_recall_time = np.arange(p_recall_value.shape[1])
+                    # if p_recall_time is None:
+                    #     p_recall_time = np.arange(p_recall_value.shape[1])
 
-    fig = plt.figure(figsize=(15, 12))
-    ax = fig.subplots()
-
-    mean = mean_array[0, :]
-    # sem = scipy.stats.sem(self.mean_array[0, :], axis=0)
-    n_trial = np.arange(0, mean_array[0, :].size, 1)
-
-    ax.plot(n_trial, mean, lw=1.5)
-    # ax.fill_between(
-    #     mean,
-    #     y1=mean - sem,
-    #     y2=mean + sem,
-    #     alpha=0.2
-    # )
+    # fig = plt.figure(figsize=(15, 12))
+    # ax = fig.subplots()
     #
-    # ax.plot(mean, linestyle=':', color='C0')
-    # ax.plot(mean, linestyle=':', color='C0')
+    mean = mean_array[0, :]
+    #                 # sem = scipy.stats.sem(self.mean_array[0, :], axis=0)
+    n_trial = np.arange(0, mean_array[0, :].size, 1)
+    #
+    # ax.plot(n_trial, mean, lw=1.5)
+    #                 # ax.fill_between(
+    #                 #     mean,
+    #                 #     y1=mean - sem,
+    #                 #     y2=mean + sem,
+    #                 #     alpha=0.2
+    #                 # )
+    #                 #
+    #                 # ax.plot(mean, linestyle=':', color='C0')
+    #                 # ax.plot(mean, linestyle=':', color='C0')
+    #
+    # ax.set_xlabel('Iteration', fontsize=font_size)
+    # ax.set_ylabel('Mean', fontsize=font_size)
+    #
+    # ax.yaxis.set_major_locator(MaxNLocator(integer=True))
+    #
+    # save_fig(fig_name=fig_name)
 
-    ax.set_xlabel('Iteration', fontsize=font_size)
-    ax.set_ylabel('Mean', fontsize=font_size)
+    # begin paste...
+    n_item = len(model.bounds)
+    array_item = np.arange(n_item)
 
-    ax.yaxis.set_major_locator(MaxNLocator(integer=True))
+    max_n_item_per_figure = 100
+    n_fig = n_item // max_n_item_per_figure + \
+        int(n_item % max_n_item_per_figure != 0)
 
-    save_fig(fig_name=fig_name)
+    item_groups = np.array_split(array_item, n_fig)
+
+    assert 'pdf' in fig_name
+    root = fig_name.split('.pdf')[0]
+
+    for idx_fig, item_gp in enumerate(item_groups):
+
+        n_item = len(model.bounds)
+        fig, axes = plt.subplots(nrows=n_item, figsize=(5, 0.9*n_item))
+
+        for ax_idx, item in enumerate(item_gp):
+
+            color = 'black'  # f'C{i}'
+            ax = axes[ax_idx]
+            ax.set_ylabel('Recall')
+            ax.set_yticks((0, 1))
+            ax.set_ylim((-0.1, 1.1))
+            print(mean.shape)
+            print()
+
+            ax.plot(mean, n_trial[item], alpha=0.2, color=color)
+            if ax_idx != n_item-1:
+                ax.set_xticks([])
+
+        axes[-1].set_xlabel('Time')
+
+        plt.tight_layout()
+
+        fig_name_idx = root + f'_{idx_fig}.pdf'
+        save_fig(fig_name_idx)
+        # end paste.
 
 
 def main(t_max, model):
@@ -161,7 +207,7 @@ def main(t_max, model):
         dump(mean_array, bkp_file)
 
     _plot(
-        mean_array=mean_array,
+        mean_array=mean_array, model=model,
         fig_name=f'fit-fidelity-{model.__name__}-t_max={t_max}.pdf')
 
 

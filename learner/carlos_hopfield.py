@@ -91,19 +91,22 @@ class Network(Learner):
         self.update_weights()
 
     def update_phi(self, t):
-        self.phi = np.sin(2 * np.pi * self.pr.tau_0 * t + (np.pi / 2)) * np.cos(
-            np.pi * t + (np.pi / 2))
+        self.phi = np.sin(2 * np.pi * self.pr.tau_0 * t + (np.pi / 2))\
+                   * np.cos(np.pi * t + (np.pi / 2))
 
     def update_weights(self):
-        try:
+        # try:
             for i in range(self.weights.shape[0]):  # P
+                print("i", i)
                 for j in range(self.weights.shape[1]):  # N
+                    print("j", j)
                     self.weights[i, j] = self.pr.kappa / self.pr.n_neurons * (
                          (self.currents[i, j] - self.pr.f)
-                             * (self.currents[i+1, j+1] - self.pr.f) - self.phi)
-        except:
-            pass
-        print(self.weights)
+                         * (self.currents[i+1, j+1] - self.pr.f)
+                         - self.phi) + 1
+        # except:
+        #     pass
+        # print(self.weights)
 
     #####################################
     # Integration with teacher and task #
