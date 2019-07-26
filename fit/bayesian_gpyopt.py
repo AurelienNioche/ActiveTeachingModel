@@ -27,7 +27,7 @@ class BayesianGPyOptFit(Fit):
 
         if p_choices_ is None or np.any(np.isnan(p_choices_)):
             # print("WARNING! Objective function returning 'None'")
-            to_return = 10**2
+            to_return = np.inf  #10**2
             #to_return = np.inf
 
         else:
@@ -57,7 +57,9 @@ class BayesianGPyOptFit(Fit):
         # if self.verbose:
         #     print(f"Best value: {self.best_value}")
 
-        return self.best_param
+        return {
+            'best_param': self.best_param
+        }
 
     def get_stats(self):
 

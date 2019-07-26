@@ -16,13 +16,15 @@ from plot.generic import save_fig
 from simulation.data import Data
 from fit.bayesian import BayesianFit
 from fit.bayesian_gpyopt import BayesianGPyOptFit
+from fit.bayesian_pygpgo import BayesianPYGPGOFit
 from fit.fit import Fit
 
 import warnings
 
 
 def run(student_model, teacher_model, student_param,
-        n_item, grades, t_max, normalize_similarity):
+        n_item, grades, t_max, normalize_similarity,
+        max_iter):
 
     teacher = teacher_model(t_max=t_max, n_item=n_item,
                             normalize_similarity=normalize_similarity,
@@ -62,8 +64,8 @@ def run(student_model, teacher_model, student_param,
                          possible_replies=teacher.possible_replies[:t+1, :])
 
         f = Fit(model=student_model, tk=teacher.tk,
-                data=data_view, method='de')
-        fit_r = f.evaluate(max_iter=100)
+                data=data_view)
+        fit_r = f.evaluate(max_iter=max_iter)
         if fit_r is not None:
             model_learner.set_parameters(fit_r['best_param'])
         else:
@@ -93,7 +95,8 @@ def main():
     r = run(
         student_model=ActRMeaning, teacher_model=AvyaTeacher,
         student_param={"d": 0.5, "tau": 0.01, "s": 0.06, "m": 0.02},
-        n_item=30, grades=(1, ), t_max=300, normalize_similarity=True)
+        n_item=30, grades=(1, ), t_max=1000, normalize_similarity=True,
+        max_iter=25)
 
     seen = r['seen']
     p_recall = r['p_recall']

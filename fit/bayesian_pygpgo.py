@@ -1,20 +1,23 @@
-import sys
-
-from bayes_opt import BayesianOptimization
+from pyGPGO.covfunc import squaredExponential
+from pyGPGO.acquisition import Acquisition
+from pyGPGO.surrogates.GaussianProcess import GaussianProcess
+from pyGPGO.GPGO import GPGO
 
 import numpy as np
 from fit.fit import Fit
 
+import sys
 
-class BayesianFit(Fit):
+
+class BayesianPYGPGOFit(Fit):
 
     def __init__(self, tk, model, data, verbose=False, **kwargs):
 
         super().__init__(tk=tk, model=model, data=data, verbose=verbose,
-                         method='Bayesian',
+                         method='BayesianGPyOpt',
                          **kwargs)
 
-        self.best_value = None
+        # self.best_value = None
         self.best_param = None
 
         # self.optimizer = BayesianOptimization()
@@ -27,40 +30,39 @@ class BayesianFit(Fit):
 
         if p_choices_ is None or np.any(np.isnan(p_choices_)):
             # print("WARNING! Objective function returning 'None'")
-            to_return = -np.inf
+            # to_return = -np.inf  # 10**2
+            to_return = sys.float_info.max
+            # to_return = np.inf
 
         else:
-            to_return = self._log_likelihood_sum(p_choices_)
+            to_return = -self._log_likelihood_sum(p_choices_)
 
-        print(to_return)
         return to_return  # * 10**100
 
-    def evaluate(self, init_points=20, n_iter=20, verbose=2):
+    def evaluate(self, max_iter=1000):
 
-        pbounds = {tup[0]: (tup[1], tup[2]) for tup in self.model.bounds}
+        param = {
+            f'{b[0]}': ('cont', [b[1], b[2]])
+            for b in self.model.bounds
+        }
 
-        optimizer = BayesianOptimization(
-            f=self._objective,
-            pbounds=pbounds,
-            random_state=1,
-            verbose=verbose
-        )
+        f = self._objective
 
-        if self.best_param is not None:
-            optimizer.probe(
-                params=self.best_param,
-                lazy=True
-            )
-        # try:
-        res = optimizer.maximize(init_points=init_points, n_iter=n_iter)
-        # except (StopIteration, FloatingPointError, ValueError):
-        #     return
+        sexp = squaredExponential()
+        gp = GaussianProcess(sexp)
+        acq = Acquisition(mode='ExpectedImprovement')
 
-        self.best_param = res.max['params']
+        np.random.seed(23)
+        gpgo = GPGO(gp, acq, f, param)
+        gpgo.run(max_iter=max_iter)
+        r = gpgo.getResult()
 
-        self.best_value = res.max['target']
-        if self.verbose:
-            print(f"Best value: {self.best_value}")
+        self.best_param = {}
+        self.best_param.update(r[0])
+
+        # self.best_value = res.max['target']
+        # if self.verbose:
+        #     print(f"Best value: {self.best_value}")
 
         return {
             'best_param': self.best_param
