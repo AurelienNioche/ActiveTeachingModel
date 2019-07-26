@@ -174,13 +174,12 @@ def _plot(mean_array, fig_name, model, font_size=42):
 
             color = 'black'  # f'C{i}'
             ax = axes[ax_idx]
-            ax.set_ylabel('Recall')
+            label = model.bounds[ax_idx]
+            ax.set_ylabel(f'{label}')
             ax.set_yticks((0, 1))
             ax.set_ylim((-0.1, 1.1))
-            print(mean.shape)
-            print()
 
-            ax.plot(mean, n_trial[item], alpha=0.2, color=color)
+            ax.plot(mean_array[item, :], n_trial, alpha=0.2, color=color)
             if ax_idx != n_item-1:
                 ax.set_xticks([])
 
