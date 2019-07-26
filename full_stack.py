@@ -60,16 +60,10 @@ def run(student_model, teacher_model, student_param,
                          possible_replies=teacher.possible_replies[:t+1, :])
 
         f = BayesianFit(model=student_model, tk=teacher.tk, data=data_view)
-        fit_r = f.evaluate(verbose=False)
+        fit_r = f.evaluate()
         if fit_r is not None:
-            print(t, 'FIT')
+            warnings.showwarning('Tamere')
             model_learner.set_parameters(fit_r['best_param'])
-        else:
-            print(t, 'TA MERE')
-
-        # model_learner.set_parameters(
-        #     {tup[0]: getattr(learner, tup[0]) for tup in learner.bounds}
-        # )
 
         model_learner.learn(question=question)
         # We assume that the matching is (0,0), (1, 1), (n, n)

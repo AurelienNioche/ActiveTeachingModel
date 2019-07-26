@@ -74,30 +74,39 @@ class Network(Learner):
             raise Exception(
                 f"Type {type(param)} is not handled for parameters")
 
-        self.weights = np.zeros((self.pr.n_neurons, self.pr.n_neurons))
+        self.weights = np.zeros((self.pr.p, self.pr.n_neurons))
         self.currents = self.weights
 
         self.representation_memory = \
             np.random.choice([0, 1], p=[self.pr.f, 1 - self.pr.f],
-                             size=(self.pr.p, self.pr.n_neuronsn_))
+                             size=(self.pr.p, self.pr.n_neurons))
 
         self.phi = None
 
+        self._initialize()
 
     def _initialize(self):
         self.update_phi(0)
+        print(self.phi)
+        self.update_weights()
 
     def update_phi(self, t):
-        self.phi = np.sin(2 * np.pi * self.pr.tau_0 * t + (np.pi / 2)) * np.cos(
-            np.pi * t + (np.pi / 2))
+        self.phi = np.sin(2 * np.pi * self.pr.tau_0 * t + (np.pi / 2))\
+                   * np.cos(np.pi * t + (np.pi / 2))
 
     def update_weights(self):
-        for i in range(self.weights.shape[0]):   # P
-            for j in range(self.weights.shape[1]):  # N
-
-                self.weights = self.kappa / self.pr.n_neurons * (
-                    sum((self.currents[i,j] - self.f) * (self.currents[i+1, j+1] - self.f))
-                - self.phi)
+        # try:
+            for i in range(self.weights.shape[0]):  # P
+                print("i", i)
+                for j in range(self.weights.shape[1]):  # N
+                    print("j", j)
+                    self.weights[i, j] = self.pr.kappa / self.pr.n_neurons * (
+                         (self.currents[i, j] - self.pr.f)
+                         * (self.currents[i+1, j+1] - self.pr.f)
+                         - self.phi) + 1
+        # except:
+        #     pass
+        # print(self.weights)
 
     #####################################
     # Integration with teacher and task #
@@ -174,3 +183,11 @@ class Network(Learner):
     def unlearn(self):
         pass
 
+
+def main():
+    network = Network(tk=Task(t_max=100, n_item=30),
+                      param={"n_neurons": 100000})
+
+
+if __name__ == main():
+    main()
