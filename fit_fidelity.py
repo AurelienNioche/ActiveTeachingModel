@@ -1,11 +1,11 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import scipy.stats
+# import scipy.stats
 from tqdm import tqdm
-from matplotlib.ticker import MaxNLocator
 
 from fit.fit import Fit
 from learner.act_r import ActR
+from learner.act_r_custom import ActRMeaning
 from plot.generic import save_fig
 from simulation.data import SimulatedData, Data
 from simulation.task import Task
@@ -16,56 +16,60 @@ import os
 
 
 class FitFidelity:
-    def __init__(self, t_min=25, t_max=30, n_kanji=79, grade=1, model=ActR,
-                 normalize_similarity=False, verbose=False):
+
+    def __init__(self, t_min=25, t_max=30, n_kanji=79, grades=(1, ),
+                 model=ActR,
+                 normalize_similarity=False,
+                 n_agent=3):
 
         self.t_min = t_min
         self.t_max = t_max
 
         if (self.t_max - self.t_min) < 4:
-            raise IndexError("The difference between t_max and t_min must be "
+            raise ValueError("The difference between t_max and t_min must be "
                              "of at least 4 to compute fidelity")
 
         self.n_kanji = n_kanji
-        self.grade = grade
+        self.grades = grades
         self.model = model
         self.normalize_similarity = normalize_similarity
-        self.verbose = verbose
 
         self.n_param = len(self.model.bounds)
         self.param = {}
-        self.changes = np.zeros((self.n_param,
-                                self.t_max - self.t_min - 1))
-        self.mean_array = np.zeros((self.n_param, self.t_max - self.t_min - 2))
 
-    def _simulate_data(self):
+        self.n_agent = n_agent
+
+    def _simulate_data(self, seed):
+
+        np.random.seed(seed)
 
         for bound in self.model.bounds:
             self.param[bound[0]] = np.random.uniform(bound[1], bound[2])
 
         self.tk = Task(t_max=self.t_max, n_kanji=self.n_kanji,
-                       grade=self.grade,
+                       grades=self.grades,
                        normalize_similarity=self.normalize_similarity,
-                       verbose=False)
+                       verbose=False,
+                       generate_full_task=True)
 
         self.data = SimulatedData(model=self.model, param=self.param,
                                   tk=self.tk, verbose=False)
 
-    def compute_fidelity(self, n_agents=3):
+    def compute_fidelity(self):
         """
-        :param n_agents: number of simulated agents.
         :return: 2D array with each parameter as rows and the mean of the best
         value difference as columns.
         """
 
-        self.mean_array = np.zeros((self.n_param, self.t_max - self.t_min - 2))
-        # - 2 because we will compute the difference and then the mean
+        seeds = np.arange(self.n_agent)
 
-        for i in range(n_agents):
-            self._simulate_data()
+        changes = np.zeros((self.n_param,
+                            self.n_agent,
+                            self.t_max - self.t_min - 1))
 
-            self.changes = np.zeros((self.n_param,
-                                     self.t_max - self.t_min - 1))
+        for i in range(self.n_agent):
+
+            self._simulate_data(seed=seeds[i])
 
             data_view = Data(n_items=self.n_kanji,
                              questions=self.data.questions[:self.t_min],
@@ -80,7 +84,7 @@ class FitFidelity:
             best_v = {}
             best_v.update(fit_r["best_param"])
 
-            i = 0
+            t_idx = 0
 
             for t in tqdm(range(self.t_min+1, self.t_max)):
 
@@ -95,70 +99,29 @@ class FitFidelity:
                 f = Fit(model=self.model, tk=self.tk, data=data_view)
                 fit_r = f.evaluate()
 
-                for iteration, k in\
+                for p_idx, k in\
                         enumerate(sorted(fit_r["best_param"].keys())):
 
-                    last_change = self.changes[iteration, i]
-
-                    self.changes[iteration, i] =\
+                    changes[p_idx, i, t_idx] =\
                         np.abs(best_v[k] - fit_r["best_param"][k])
-
-                    if i != 0:
-                        self.mean_array[iteration, i - 1] = (
-                                                    last_change +
-                                                    self.changes[iteration, i]
-                                                    ) / 2
-                        print("arr", self.mean_array, "arrr")
-                        # print("chachacha", self.changes)
 
                 best_v.update(fit_r["best_param"])
 
-                i += 1
+                t_idx += 1
 
-            if self.verbose:
-                print(self.changes)
-                print(fit_r)
-
-        return self.mean_array
+        return changes
 
 
-def _plot(mean_array, fig_name, model, font_size=42):
+def _plot(changes, t_min, fig_name, model):
 
-                    # if p_recall_time is None:
-                    #     p_recall_time = np.arange(p_recall_value.shape[1])
+    x = t_min + np.arange(changes.shape[2])
 
-    # fig = plt.figure(figsize=(15, 12))
-    # ax = fig.subplots()
-    #
-    mean = mean_array[0, :]
-    #                 # sem = scipy.stats.sem(self.mean_array[0, :], axis=0)
-    n_trial = np.arange(0, mean_array[0, :].size, 1)
-    #
-    # ax.plot(n_trial, mean, lw=1.5)
-    #                 # ax.fill_between(
-    #                 #     mean,
-    #                 #     y1=mean - sem,
-    #                 #     y2=mean + sem,
-    #                 #     alpha=0.2
-    #                 # )
-    #                 #
-    #                 # ax.plot(mean, linestyle=':', color='C0')
-    #                 # ax.plot(mean, linestyle=':', color='C0')
-    #
-    # ax.set_xlabel('Iteration', fontsize=font_size)
-    # ax.set_ylabel('Mean', fontsize=font_size)
-    #
-    # ax.yaxis.set_major_locator(MaxNLocator(integer=True))
-    #
-    # save_fig(fig_name=fig_name)
-
-    # begin paste...
-    n_item = len(model.bounds)
-    array_item = np.arange(n_item)
+    n_param = len(model.bounds)
+    array_item = np.arange(n_param)
 
     max_n_item_per_figure = 100
-    n_fig = n_item // max_n_item_per_figure + \
-        int(n_item % max_n_item_per_figure != 0)
+    n_fig = n_param // max_n_item_per_figure + \
+        int(n_param % max_n_item_per_figure != 0)
 
     item_groups = np.array_split(array_item, n_fig)
 
@@ -167,63 +130,57 @@ def _plot(mean_array, fig_name, model, font_size=42):
 
     for idx_fig, item_gp in enumerate(item_groups):
 
-        n_item = len(model.bounds)
-        fig, axes = plt.subplots(nrows=n_item, figsize=(5, 0.9*n_item))
+        fig, axes = plt.subplots(nrows=n_param, figsize=(5, 1.5*n_param))
 
         for ax_idx, item in enumerate(item_gp):
 
-            color = 'black'  # f'C{i}'
             ax = axes[ax_idx]
-            ax.set_ylabel('Recall')
-            ax.set_yticks((0, 1))
-            ax.set_ylim((-0.1, 1.1))
-            print(mean.shape)
-            print()
 
-            ax.plot(mean, n_trial[item], alpha=0.2, color=color)
-            if ax_idx != n_item-1:
+            param_name = model.bounds[ax_idx][0]
+            ax.set_ylabel(f'{param_name}-change')
+
+            data = changes[ax_idx, :]
+
+            mean = np.mean(data, axis=0)
+            # std = np.std(data, axis=0)
+
+            ax.plot(x, mean,
+                    alpha=1, color='C0')
+
+            # ax.fill_between(
+            #     mean,
+            #     y1=mean - std,
+            #     y2=mean + std,
+            #     alpha=0.2,
+            #     color='C0'
+            # )
+
+            if ax_idx != n_param-1:
                 ax.set_xticks([])
 
         axes[-1].set_xlabel('Time')
 
-        plt.tight_layout()
-
         fig_name_idx = root + f'_{idx_fig}.pdf'
         save_fig(fig_name_idx)
-        # end paste.
 
 
-def main(t_max, model):
+def main(n_agent, t_min, t_max, model, force=False):
 
-    extension = f"fit-fidelity-{model.__name__}-t_max={t_max}"
+    extension = f"fit-fidelity-{model.__name__}-t_min={t_min}-t_max={t_max}"
     bkp_file = os.path.join("bkp", "fit_fidelity", f"{extension}.p")
 
     mean_array = load(bkp_file)
-    if mean_array is None:
+    if mean_array is None or force:
         np.random.seed(123)
 
-        ff = FitFidelity(model=model, t_max=t_max, verbose=False)
+        ff = FitFidelity(model=model, t_max=t_max, n_agent=n_agent)
         mean_array = ff.compute_fidelity()
         dump(mean_array, bkp_file)
 
     _plot(
-        mean_array=mean_array, model=model,
-        fig_name=f'fit-fidelity-{model.__name__}-t_max={t_max}.pdf')
+        changes=mean_array, model=model, t_min=t_min,
+        fig_name=f'{extension}.pdf')
 
 
 if __name__ == "__main__":
-    main(t_max=30, model=ActR)
-
-
-# Suppose you have an array 'data' with each line being the values for
-# a specific agent, and each column, values for a fit including data until
-# specific time step.
-#
-# mean = np.mean(data, axis=0)
-# sem = scipy.stats.sem(data, axis=0)
-# ax.plot(mean, lw=1.5)
-# ax.fill_between(
-#     range(len(mean)),
-#     y1=mean - sem,
-#     y2=mean + sem,
-#     alpha=0.2)
+    main(n_agent=10, t_max=300, model=ActRMeaning)

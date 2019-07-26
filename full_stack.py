@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 from plot.generic import save_fig
 from simulation.data import Data
 from fit.bayesian import BayesianFit
+from fit.fit import Fit
 
 import warnings
 
@@ -59,11 +60,12 @@ def run(student_model, teacher_model, student_param,
                          replies=teacher.replies[:t+1],
                          possible_replies=teacher.possible_replies[:t+1, :])
 
-        f = BayesianFit(model=student_model, tk=teacher.tk, data=data_view)
-        fit_r = f.evaluate()
+        f = Fit(model=student_model, tk=teacher.tk, data=data_view)
+        fit_r = f.evaluate(max_iter=200)
         if fit_r is not None:
-            warnings.showwarning('Tamere')
             model_learner.set_parameters(fit_r['best_param'])
+        else:
+            warnings.warn("Fit did not end up successfully :/")
 
         model_learner.learn(question=question)
         # We assume that the matching is (0,0), (1, 1), (n, n)
