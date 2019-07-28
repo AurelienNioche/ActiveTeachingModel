@@ -1,9 +1,10 @@
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import numpy as np
 from tqdm import tqdm
+import math
+import matplotlib.pyplot as plt
 
 from behavior.data_structure import Task
-from learner.generic import Learner
 
 np.seterr(all='raise')
 
@@ -51,7 +52,7 @@ class NetworkParam:
     (2015).
     """
     def __init__(self,
-                 # Architecture
+                 # Architecture ###########
                  n_epoch=3,
                  n_neurons=100000,
                  p=16,
@@ -145,40 +146,35 @@ class Network:
             np.random.choice([0, 1], p=[self.pr.f, 1 - self.pr.f],
                              size=(self.pr.p, self.pr.n_neurons))
 
-        # self.connectivity = np.zeros((self.pr.p, self.pr.n_neurons))
         self.weights = np.zeros((self.pr.n_neurons, self.pr.n_neurons))
         self.activation = np.zeros(self.pr.n_neurons)
 
         self.phi = None
         self.t_tot_discrete = None
 
-        self.t_tot_discrete = self.pr.t_tot / self.pr.dt
+        self.t_tot_discrete = int(self.pr.t_tot / self.pr.dt)
+        self.noise_sigma = math.sqrt(self.pr.xi_0)  # Standard deviation noise
 
+        self.phi_history = np.zeros(self.t_tot_discrete)  # Debugging phi
         self._initialize()
 
-    def _initialize(self):
-        """
-        Performs the following initial operations:
-        * Update the inhibition parameter for time step 0.
-        * Gives a random seeded pattern as the initial activation vector.
-        * Calculates the total discrete time from the total continuous time
-        """
-        self.update_phi(0)
+    def _update_phi(self, t):
+        # phi = np.sin(2 * np.pi * self.pr.tau_0 * t + (np.pi / 2))\
+        #            * np.cos(np.pi * t + (np.pi / 2))
 
-        self.update_weights()
-
-        self._present_pattern()
-
-    def update_phi(self, t):
-        self.phi = np.sin(2 * np.pi * self.pr.tau_0 * t + (np.pi / 2))\
-                   * np.cos(np.pi * t + (np.pi / 2))
+        self.phi = ((self.pr.phi_max - self.pr.phi_min) / 2.) * np.sin(2. * np.pi * (1 / self.pr.tau_0) * t + self.pr.phi_min)
+        print(((self.pr.phi_max - self.pr.phi_min) / 2) * np.sin(2 * np.pi * (1 / self.pr.tau_0) * t + self.pr.phi_min))
+        print(np.sin(2 * np.pi))
+        # if phi < self.pr.phi_min:
+        #     self.phi = self.pr.phi_min
+        # elif phi > self.pr.phi_max:
+        #     self.phi = self.pr.phi_max
+        self.phi_history[t] = self.phi
 
     def update_weights(self):
-        # try:
-        for i in range(self.weights.shape[0]):  # P
-            print("i", i)
+        print("Updating weights...")
+        for i in tqdm(range(self.weights.shape[0])):  # P
             for j in range(self.weights.shape[1]):  # N
-                print("j", j)
 
                 sum_ = 0
                 for mu in range(self.pr.p):
@@ -189,21 +185,78 @@ class Network:
 
                 self.weights[i, j] = \
                     (self.pr.kappa / self.pr.n_neurons) * sum_
-        # except:
-        #     pass
-        # print(self.weights)
 
     def _present_pattern(self):
-        """
-        """
         # np_question = np.array([question])
         # pattern = (((np_question[:, None]
         #             & (1 << np.arange(8))) > 0).astype(int)) * self.pr.r_ini
         # assert np.amax(pattern) == self.pr.r_ini
         # pattern = np.resize(pattern, self.activation.shape)
         # return pattern
-        i = np.random.choice(np.arange(self.pr.p))
-        self.activation[:] = self.connectivity[i, :]
+        chosen_pattern_number = np.random.choice(np.arange(self.pr.p))
+        print(f"Chosen pattern number {chosen_pattern_number} of {self.pr.p}")
+
+        self.activation[:] = self.connectivity[chosen_pattern_number, :]
+
+    def _initialize(self):
+        """
+        Performs the following initial operations:
+        * Update the inhibition parameter for time step 0.
+        * Gives a random seeded pattern as the initial activation vector.
+        TODO document
+        """
+        self._update_phi(0)
+
+        self.update_weights()
+
+        self._present_pattern()
+
+        self.simulate()
+
+    def _update_gain(self, current):
+
+        if current + self.pr.theta > 0:
+            gain = (current + self.pr.theta) ** self.pr.gamma
+        else:
+            gain = 0
+
+        return gain
+
+    def _update_gaussian_noise(self):
+        gaussian_noise = np.random.normal(loc=0, scale=self.noise_sigma)
+        return gaussian_noise
+
+    def _update_activation(self):
+
+        for i in enumerate(self.activation):
+            iterator = i[0]
+            current = self.activation[iterator]
+            gain = self._update_gain(current)
+            gaussian_noise = self._update_gaussian_noise()
+
+            self.activation[iterator] = (-current + np.sum(self.weights[iterator, :]) * gain
+                                          + gaussian_noise) / self.pr.tau
+
+    def simulate(self):
+        print(f"Simulating for {self.t_tot_discrete} time steps...")
+        for t in tqdm(range(self.t_tot_discrete)):
+            self._update_phi(t)
+            # self.update_weights()
+            # print("\nweights \n", self.weights)
+            # print(np.sum(self.weights))
+            # print(self.phi)
+            # self._update_activation()
+            # print("\nactivation \n", self.activation)
+
+
+def plot_phi(network):
+    data = network.phi_history
+    time = np.arange(0, network.phi_history.size)
+    plt.plot(time, data)  # , fontsize=font_size)
+
+    plt.title("Phi")
+
+    plt.show()
 
 
 def main():
@@ -211,7 +264,9 @@ def main():
     np.random.seed(123)
 
     network = Network(tk=Task(t_max=100, n_item=30),
-                      param={"n_neurons": 10000})
+                      param={"n_neurons": 100, "kappa": 13, "t_tot": 0.1})
+
+    plot_phi(network)
 
 
 if __name__ == main():
