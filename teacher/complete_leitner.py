@@ -10,7 +10,7 @@ class TraditionalLeitnerTeacher(GenericTeacher):
     def __init__(self, n_item=20, t_max=200, grades=(1, ),
                  handle_similarities=True,
                  normalize_similarity=False,
-                 taboo=None, delay_factor=2, represent_unseen=0,
+                 taboo=None, delay_factor=2,
                  verbose=False):
         """
         :param normalize_similarity: bool. Normalized description of
