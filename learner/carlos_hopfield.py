@@ -74,7 +74,7 @@ class NetworkParam:
                  # Time ###################
                  t_tot=450,
                  dt=0.001,
-                 # Not classified #########
+                 # Not yet classified #####
                  xi_0=65,
                  r_threshold=15,
                  n_trials=10000,
@@ -156,7 +156,9 @@ class Network:
         self.t_tot_discrete = int(self.pr.t_tot / self.pr.dt)
         self.noise_sigma = math.sqrt(self.pr.xi_0)  # Standard deviation noise
 
-        self.phi_history = np.zeros(self.t_tot_discrete)  # Debugging phi
+        self.phi_history = np.zeros(self.t_tot_discrete)  # Plotting phi
+        self.last_weights = np.zeros_like(self.weights)
+        self.weights_history = None
         self._initialize()
 
     def _update_phi(self, t):
@@ -176,6 +178,7 @@ class Network:
 
         amplitude = (self.pr.phi_max - self.pr.phi_min) / 2
         frequency = 1 / self.pr.tau_0 * self.pr.dt
+        # phase = np.random.choice()
         shift = self.pr.phi_min + amplitude  # Moves the wave in the y-axis
 
         self.phi = amplitude * np.sin(2 * np.pi * t * frequency) + shift
@@ -198,6 +201,8 @@ class Network:
 
                 self.weights[i, j] = \
                     (self.pr.kappa / self.pr.n_neurons) * sum_
+
+        print(np.amax(self.weights - self.last_weights))
 
     def _present_pattern(self):
         # np_question = np.array([question])
@@ -248,26 +253,30 @@ class Network:
             gain = self._update_gain(current)
             gaussian_noise = self._update_gaussian_noise()
 
-            self.activation[iterator] = (-current + np.sum(self.weights[iterator, :]) * gain
-                                          + gaussian_noise) / self.pr.tau
+            self.activation[iterator] *= (-current
+                                          + np.sum(self.weights[iterator, :])
+                                          * gain
+                                          + gaussian_noise)\
+                / (self.pr.tau * self.pr.dt)
 
     def simulate(self):
         print(f"Simulating for {self.t_tot_discrete} time steps...")
         for t in tqdm(range(self.t_tot_discrete)):
             self._update_phi(t)
-            # self.update_weights()
+            # print(self.phi_history)
+            self.update_weights()
             # print("\nweights \n", self.weights)
             # print(np.sum(self.weights))
             # print(self.phi)
-            # self._update_activation()
+            self._update_activation()
             # print("\nactivation \n", self.activation)
 
 
 def plot_phi(network):
     data = network.phi_history
     time = np.arange(0, network.phi_history.size, 1)
-    plt.plot(time, data)  # , fontsize=font_size)
 
+    plt.plot(time, data)
     plt.title("Inhibitory oscillations")
     plt.xlabel("Time")
     plt.ylabel("Phi")
@@ -278,14 +287,29 @@ def plot_phi(network):
     print(np.amin(network.phi_history))
 
 
+def plot_weights(network, time):
+    data = network.weights
+
+    fig, ax = plt.subplots()
+    im = ax.imshow(data)
+
+    plt.title(f"Weights matrix (t = {time})")
+    plt.xlabel("Weights")
+    plt.ylabel("Weights")
+
+    fig.tight_layout()
+
+    plt.show()
+
+
 def main():
 
     np.random.seed(123)
 
     network = Network(tk=Task(t_max=100, n_item=30),
-                      param={"n_neurons": 3, "kappa": 13, "t_tot": 4})
+                      param={"n_neurons": 100, "kappa": 13, "t_tot": 0.1})
 
-    plot_phi(network)
+    # plot_phi(network)
 
 
 if __name__ == main():
