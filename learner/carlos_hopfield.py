@@ -1,10 +1,7 @@
 # import matplotlib.pyplot as plt
 import numpy as np
 from tqdm import tqdm
-import math
 import matplotlib.pyplot as plt
-
-from behavior.data_structure import Task
 
 np.seterr(all='raise')
 
@@ -154,7 +151,7 @@ class Network:
         self.t_tot_discrete = None
 
         self.t_tot_discrete = int(self.pr.t_tot / self.pr.dt)
-        self.noise_sigma = math.sqrt(self.pr.xi_0)  # Standard deviation noise
+        self.noise_sigma = self.pr.xi_0**0.5  # Standard deviation noise
 
         self.phi_history = np.zeros(self.t_tot_discrete)  # Plotting phi
         self.last_weights = np.zeros_like(self.weights)
@@ -201,7 +198,7 @@ class Network:
 
                 self.weights[i, j] = \
                     (self.pr.kappa / self.pr.n_neurons) * sum_
-        print("Done!")
+        print("Done!\n")
         # print(np.amax(self.weights - self.last_weights))
 
     def _present_pattern(self):
@@ -247,41 +244,61 @@ class Network:
 
     def _update_activation(self):
 
-        for i in range(self.activation.shape[0]):
+        order = np.arange(self.activation.shape[0])
+        np.random.shuffle(order)
+        print("order", order)
+        print("\n")
+        print("-" * 5)
+
+        for i in order:
+
+            print(f'updating neuron {i}...')
 
             try:
 
                 current = self.activation[i]
+                noise = self.gaussian_noise()
 
                 sum_ = 0
                 for j in range(self.pr.n_neurons):
                     sum_ += self.weights[i, j] * self.g(self.activation[j])
 
-                multiplier = \
-                    - current + sum_ + self.gaussian_noise()
+                change = - current + sum_ + noise
 
-                self.activation[i] *= multiplier * (self.pr.tau * (1/self.pr.dt))
+                new_current = change / (self.pr.tau * (1/self.pr.dt))
+
+                print('old current', current)
+                print("noise", noise)
+                print("sum inputs", sum_)
+                print("new current", new_current)
+
+                print("-" * 5)
+
+                self.activation[i] = new_current
 
             except FloatingPointError as e:
                 print("current", current)
                 print("sum", sum_)
                 print("i", i)
-                print("multiplier", multiplier)
+                print("change", change)
                 raise e
 
     def simulate(self):
         print(f"Simulating for {self.t_tot_discrete} time steps...\n")
         for t in range(self.t_tot_discrete):
+            print("*" * 10)
+            print("T", t)
+            print("*" * 10)
             self._update_phi(t)
             print("\nphi\n", self.phi)
             self.update_weights()
-            print("\nweights \n", self.weights)
+            # print("\nweights \n", self.weights)
             # print(np.sum(self.weights))
             # print(self.phi)
             self._update_activation()
             print("\nactivation \n", self.activation)
 
-            break
+            # break
 
 
 def plot_phi(network):
@@ -318,12 +335,20 @@ def main():
 
     np.random.seed(123)
 
-    network = Network(param={"n_neurons": 10**5,
-                             'f': 0.1,
-                      'p': 16, "kappa": 13*10**3, "t_tot": 450})
+    factor = 1/10**4
+
+    network = Network(
+        param={
+            "n_neurons": int(10**5*factor),
+            "f": 0.4,
+            "p": 4,
+            "xi_0": 65*factor,
+            "kappa": 13*10**3*factor,
+            "t_tot": 0.01
+        })
 
     # plot_phi(network)
 
 
 if __name__ == main():
-    main()
+    plot_phi()
