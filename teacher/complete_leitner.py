@@ -10,16 +10,16 @@ class TraditionalLeitnerTeacher(GenericTeacher):
     def __init__(self, n_item=20, t_max=200, grades=(1, ),
                  handle_similarities=True,
                  normalize_similarity=False,
-                 taboo=None, delay_factor=2,
+                 delay_factor=2,
                  verbose=False):
         """
         :param normalize_similarity: bool. Normalized description of
         semantic and graphic connections between items
-        :param taboo: integer value in range(0 to n_items). Index of the item
-            shown in previous iteration.
         :param delay_factor:
         :param verbose: displays each question asked and replies at each
         iteration
+        :var self.taboo: integer value in range(0 to n_items). Index of the item
+            shown in previous iteration.
         :var self.learning_progress: array of size n_item representing the box
             number of i^th item at i^th index.
         :var wait_time_arr: array of size n_item representing the waiting time
@@ -31,10 +31,11 @@ class TraditionalLeitnerTeacher(GenericTeacher):
                          normalize_similarity=normalize_similarity,
                          verbose=verbose)
 
-        self.taboo = taboo
         self.delay_factor = delay_factor
         self.learning_progress = np.zeros(n_item)
         self.wait_time_arr = np.zeros(n_item)
+
+        self.taboo = None
 
     def modify_sets(self, successes):
         """

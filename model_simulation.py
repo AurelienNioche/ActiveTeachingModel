@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from learner.act_r_custom import ActRMeaning
 from teacher.random import RandomTeacher
 from teacher.leitner import LeitnerTeacher
+from teacher.complete_leitner import TraditionalLeitnerTeacher
 from teacher.avya import AvyaTeacher
 
 from simulation.memory import p_recall_over_time_after_learning
@@ -100,6 +101,7 @@ def main(t_max=300, n_item=30, teacher_model=None, verbose=False,
 
 if __name__ == "__main__":
 
-    for tm in (AvyaTeacher, LeitnerTeacher, RandomTeacher):
+    for tm in (TraditionalLeitnerTeacher, AvyaTeacher, LeitnerTeacher,
+               RandomTeacher):
         main(teacher_model=tm, t_max=300, n_item=30,
              normalize_similarity=True)
