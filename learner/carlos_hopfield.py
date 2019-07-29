@@ -148,14 +148,18 @@ class Network:
         self.activation = np.zeros(self.pr.n_neurons)
 
         self.phi = None
-        self.t_tot_discrete = None
+        # self.t_tot_discrete = None
 
         self.t_tot_discrete = int(self.pr.t_tot / self.pr.dt)
         self.noise_sigma = self.pr.xi_0**0.5  # Standard deviation noise
 
-        self.phi_history = np.zeros(self.t_tot_discrete)  # Plotting phi
-        self.last_weights = np.zeros_like(self.weights)
+        # self.phi_history = np.zeros(self.t_tot_discrete)  # Plotting phi
+        # self.last_weights = np.zeros_like(self.weights)
+
         self.weights_history = None
+
+        self.average_fr = np.zeros((self.pr.p, self.t_tot_discrete))
+
         self._initialize()
 
     def _update_phi(self, t):
@@ -180,9 +184,9 @@ class Network:
 
         self.phi = amplitude * np.sin(2 * np.pi * t * frequency) + shift
 
-        assert self.pr.phi_max >= self.phi >= self.pr.phi_min
+        # assert self.pr.phi_max >= self.phi >= self.pr.phi_min
 
-        self.phi_history[t] = self.phi
+        # self.phi_history[t] = self.phi
 
     def update_weights(self):
         print("Updating weights...", end=' ', flush=True)
@@ -246,74 +250,80 @@ class Network:
 
         order = np.arange(self.activation.shape[0])
         np.random.shuffle(order)
-        print("order", order)
-        print("\n")
-        print("-" * 5)
+        # print("order", order)
+        # print("\n")
+        # print("-" * 5)
 
         for i in order:
 
-            print(f'updating neuron {i}...')
+            # print(f'updating neuron {i}...')
 
-            try:
+            current = self.activation[i]
+            noise = self.gaussian_noise()
 
-                current = self.activation[i]
-                noise = self.gaussian_noise()
+            sum_ = 0
+            for j in range(self.pr.n_neurons):
+                sum_ += self.weights[i, j] * self.g(self.activation[j])
 
-                sum_ = 0
-                for j in range(self.pr.n_neurons):
-                    sum_ += self.weights[i, j] * self.g(self.activation[j])
+            change = - current + sum_ + noise
 
-                change = - current + sum_ + noise
+            new_current = change / (self.pr.tau * (1/self.pr.dt))
 
-                new_current = change / (self.pr.tau * (1/self.pr.dt))
+            # print('old current', current)
+            # print("noise", noise)
+            # print("sum inputs", sum_)
+            # print("new current", new_current)
+            #
+            # print("-" * 5)
 
-                print('old current', current)
-                print("noise", noise)
-                print("sum inputs", sum_)
-                print("new current", new_current)
+            self.activation[i] = new_current
 
-                print("-" * 5)
+    def _save_fr(self, t):
 
-                self.activation[i] = new_current
+        for mu in range(self.pr.p):
 
-            except FloatingPointError as e:
-                print("current", current)
-                print("sum", sum_)
-                print("i", i)
-                print("change", change)
-                raise e
+            idx = np.nonzero(self.connectivity[mu, :])
+
+            v = np.zeros(len(idx))
+            for i in idx:
+
+                v[i] = self.g(self.activation[i])
+
+            self.average_fr[mu, t] = np.mean(v)
 
     def simulate(self):
         print(f"Simulating for {self.t_tot_discrete} time steps...\n")
-        for t in range(self.t_tot_discrete):
-            print("*" * 10)
-            print("T", t)
-            print("*" * 10)
+        for t in tqdm(range(self.t_tot_discrete)):
+            # print("*" * 10)
+            # print("T", t)
+            # print("*" * 10)
+
             self._update_phi(t)
-            print("\nphi\n", self.phi)
+            # print("\nphi\n", self.phi)
             self.update_weights()
             # print("\nweights \n", self.weights)
-            # print(np.sum(self.weights))
-            # print(self.phi)
+
             self._update_activation()
-            print("\nactivation \n", self.activation)
+            # print("\nactivation \n", self.activation)
+
+            self._save_fr(t)
 
             # break
 
 
-def plot_phi(network):
-    data = network.phi_history
-    time = np.arange(0, network.phi_history.size, 1)
-
-    plt.plot(time, data)
-    plt.title("Inhibitory oscillations")
-    plt.xlabel("Time")
-    plt.ylabel("Phi")
-
-    plt.show()
-
-    print(np.amax(network.phi_history))
-    print(np.amin(network.phi_history))
+# def plot_phi(network):
+#     data = network.phi_history
+#     time = np.arange(0, network.phi_history.size, 1)
+#
+#     plt.plot(time, data)
+#     plt.title("Inhibitory oscillations")
+#     plt.xlabel("Time")
+#     plt.ylabel("Phi")
+#
+#     plt.show()
+#
+#     print(np.amax(network.phi_history))
+#     print(np.amin(network.phi_history))
 
 
 def plot_weights(network, time):
@@ -331,6 +341,11 @@ def plot_weights(network, time):
     plt.show()
 
 
+def plot_average_fr(average_fr):
+
+    fig, ax
+
+
 def main():
 
     np.random.seed(123)
@@ -344,11 +359,13 @@ def main():
             "p": 4,
             "xi_0": 65*factor,
             "kappa": 13*10**3*factor,
-            "t_tot": 0.01
+            "t_tot": 10
         })
+
+
 
     # plot_phi(network)
 
 
 if __name__ == main():
-    plot_phi()
+    main()

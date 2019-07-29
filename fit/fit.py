@@ -92,8 +92,10 @@ class Fit:
             if self.verbose:
                 print(f"{res.message} [best loss: {res.fun}]")
             if not res.success:
-                raise RuntimeError(
-                    f"The fit did not succeed with method {self.method}.")
+                if self.verbose:
+                    print(
+                        f"The fit did not succeed with method {self.method}.")
+                return None
 
         else:
             raise Exception(f"Method {self.method} is not defined")

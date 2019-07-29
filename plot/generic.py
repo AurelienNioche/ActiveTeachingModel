@@ -14,5 +14,5 @@ def save_fig(fig_name):
     os.makedirs(dir_path, exist_ok=True)
     plt.savefig(fname=file_name)
 
-    print(f'Figure "{file_name}" created.')
+    print(f'Figure "{file_name}" created.\n')
     plt.close()

@@ -102,7 +102,7 @@ class TraditionalLeitnerTeacher(GenericTeacher):
         seen_due_items = np.full(len(due_items), -1)
         count = 0
         for item in due_items:
-            if self.seen[item, self.t]:
+            if self.seen[item, self.t-1]:
                 seen_due_items[count] = item
                 count += 1
 
