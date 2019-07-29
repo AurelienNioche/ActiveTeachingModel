@@ -378,7 +378,7 @@ def plot_attractors(average_fr, x_scale=1000):
     plt.show()
 
 
-def main(force=False):
+def main(force=True):
 
     bkp_file = 'hopfield.p'
 
@@ -390,11 +390,11 @@ def main(force=False):
 
         network = Network(
             param={
-                "n_neurons": 50,  #int(10**5*factor),
+                "n_neurons": 1000,  #int(10**5*factor),
                 "f": 0.1,
-                "p": 13,
-                "xi_0": 65, #65*factor,
-                "kappa": 13000, #13*10**3*factor,
+                "p": 16,
+                "xi_0": 65,  # 65*factor,
+                "kappa": 13000,  # 13*10**3*factor,
                 "t_tot": 2,
                 "tau_0": 1
             })
@@ -403,6 +403,7 @@ def main(force=False):
 
         pickle.dump(average_fr, open(bkp_file, 'wb'))
     else:
+        print('Loading from pickle file...')
         average_fr = pickle.load(open(bkp_file, 'rb'))
 
     plot_average_fr(average_fr)
