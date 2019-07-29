@@ -390,7 +390,7 @@ def main(force=True):
 
         network = Network(
             param={
-                "n_neurons": 1000,  #int(10**5*factor),
+                "n_neurons": 500,  #int(10**5*factor),
                 "f": 0.1,
                 "p": 16,
                 "xi_0": 65,  # 65*factor,
