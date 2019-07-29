@@ -161,20 +161,27 @@ class Network:
 
     def _update_phi(self, t):
         """
-        Phi is a sinusoid function related to neuron inhibition. In order to
-        adapt to the phi_min and phi_max parameters the amplitude and an
-        additive shift term have to change.
-        :param t:
-        :return:
+        Phi is a sinusoid function related to neuron inhibition.
+        It follows the general sine wave function:
+            f(x) = amplitude * (2 * pi * frequency * time)
+        In order to adapt to the phi_min and phi_max parameters the amplitude
+        and an additive shift term have to change.
+        Frequency in discrete time has to be adapted from the given tau_0
+        period in continuous time.
+
+        :param t: int discrete time step.
         """
         # phi = np.sin(2 * np.pi * self.pr.tau_0 * t + (np.pi / 2))\
         #            * np.cos(np.pi * t + (np.pi / 2))
 
         amplitude = (self.pr.phi_max - self.pr.phi_min) / 2
+        frequency = 1 / self.pr.tau_0 * self.pr.dt
         shift = self.pr.phi_min + amplitude  # Moves the wave in the y-axis
-        phi = amplitude * np.sin(np.pi * t * 0.1) + shift
-        assert self.pr.phi_max >= phi >= self.pr.phi_min
-        self.phi = phi
+
+        self.phi = amplitude * np.sin(2 * np.pi * t * frequency) + shift
+
+        assert self.pr.phi_max >= self.phi >= self.pr.phi_min
+
         self.phi_history[t] = self.phi
 
     def update_weights(self):
@@ -208,8 +215,9 @@ class Network:
         """
         Performs the following initial operations:
         * Update the inhibition parameter for time step 0.
+        * Updates weights according using the previous connectivity matrix
         * Gives a random seeded pattern as the initial activation vector.
-        TODO document
+        * Updates the network for the total discrete time steps.
         """
         self._update_phi(0)
 
@@ -269,12 +277,13 @@ def plot_phi(network):
     print(np.amax(network.phi_history))
     print(np.amin(network.phi_history))
 
+
 def main():
 
     np.random.seed(123)
 
     network = Network(tk=Task(t_max=100, n_item=30),
-                      param={"n_neurons": 100, "kappa": 13, "t_tot": 0.1})
+                      param={"n_neurons": 3, "kappa": 13, "t_tot": 4})
 
     plot_phi(network)
 
