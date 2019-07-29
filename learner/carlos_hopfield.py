@@ -161,18 +161,20 @@ class Network:
 
     def _update_phi(self, t):
         """
-        Phi is a sinusoid function related to neuron inhibition.
+        Phi is a sinusoid function related to neuron inhibition. In order to
+        adapt to the phi_min and phi_max parameters the amplitude and an
+        additive shift term have to change.
         :param t:
         :return:
         """
         # phi = np.sin(2 * np.pi * self.pr.tau_0 * t + (np.pi / 2))\
         #            * np.cos(np.pi * t + (np.pi / 2))
-        amplitude = ((self.pr.phi_max - self.pr.phi_min) / 2)
-        self.phi = amplitude * np.sin(np.pi * t * 0.1) +((self.pr.phi_min + amplitude) * 1) #(self.pr.phi_max - (self.pr.phi_max - self.pr.phi_min))#((self.pr.phi_max - self.pr.phi_min) / 2) * np.sin(2 * np.pi * (1 / self.pr.tau_0) * t + self.pr.phi_min)
-        # if phi < self.pr.phi_min:
-        #     self.phi = self.pr.phi_min
-        # elif phi > self.pr.phi_max:
-        #     self.phi = self.pr.phi_max
+
+        amplitude = (self.pr.phi_max - self.pr.phi_min) / 2
+        shift = self.pr.phi_min + amplitude  # Moves the wave in the y-axis
+        phi = amplitude * np.sin(np.pi * t * 0.1) + shift
+        assert self.pr.phi_max >= phi >= self.pr.phi_min
+        self.phi = phi
         self.phi_history[t] = self.phi
 
     def update_weights(self):
@@ -258,7 +260,9 @@ def plot_phi(network):
     time = np.arange(0, network.phi_history.size, 1)
     plt.plot(time, data)  # , fontsize=font_size)
 
-    plt.title("Phi")
+    plt.title("Inhibitory oscillations")
+    plt.xlabel("Time")
+    plt.ylabel("Phi")
 
     plt.show()
 
