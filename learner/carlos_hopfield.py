@@ -65,7 +65,7 @@ class NetworkParam:
                  kappa=13000,
                  f=0.01,
                  # Inhibition #############
-                 phi_min=0.7,
+                 phi_min=0.70,
                  phi_max=1.06,
                  tau_0=1,
                  # Short term association #
@@ -100,6 +100,7 @@ class NetworkParam:
         # Inhibition
         self.phi_min = phi_min
         self.phi_max = phi_max
+        assert phi_max > phi_min
         self.tau_0 = tau_0
 
         # Short term association
@@ -159,12 +160,15 @@ class Network:
         self._initialize()
 
     def _update_phi(self, t):
+        """
+        Phi is a sinusoid function related to neuron inhibition.
+        :param t:
+        :return:
+        """
         # phi = np.sin(2 * np.pi * self.pr.tau_0 * t + (np.pi / 2))\
         #            * np.cos(np.pi * t + (np.pi / 2))
-
-        self.phi = ((self.pr.phi_max - self.pr.phi_min) / 2.) * np.sin(2. * np.pi * (1 / self.pr.tau_0) * t + self.pr.phi_min)
-        print(((self.pr.phi_max - self.pr.phi_min) / 2) * np.sin(2 * np.pi * (1 / self.pr.tau_0) * t + self.pr.phi_min))
-        print(np.sin(2 * np.pi))
+        amplitude = ((self.pr.phi_max - self.pr.phi_min) / 2)
+        self.phi = amplitude * np.sin(np.pi * t * 0.1) +((self.pr.phi_min + amplitude) * 1) #(self.pr.phi_max - (self.pr.phi_max - self.pr.phi_min))#((self.pr.phi_max - self.pr.phi_min) / 2) * np.sin(2 * np.pi * (1 / self.pr.tau_0) * t + self.pr.phi_min)
         # if phi < self.pr.phi_min:
         #     self.phi = self.pr.phi_min
         # elif phi > self.pr.phi_max:
@@ -251,13 +255,15 @@ class Network:
 
 def plot_phi(network):
     data = network.phi_history
-    time = np.arange(0, network.phi_history.size)
+    time = np.arange(0, network.phi_history.size, 1)
     plt.plot(time, data)  # , fontsize=font_size)
 
     plt.title("Phi")
 
     plt.show()
 
+    print(np.amax(network.phi_history))
+    print(np.amin(network.phi_history))
 
 def main():
 
