@@ -353,16 +353,32 @@ def plot_average_fr(average_fr, x_scale=1000):
 
     fig, ax = plt.subplots()
 
-    for y in average_fr:
+    for i, y in enumerate(average_fr):
         ax.plot(x, y, linewidth=0.5, alpha=0.2)
-        break
+        if i > 1:
+            break
 
-    ax.set_xlabel('Time')
+    ax.set_xlabel('Time (cycles)')
     ax.set_ylabel('Average firing rate')
     plt.show()
 
 
-def main(force=True):
+def plot_attractors(average_fr, x_scale=1000):
+
+    fig, ax = plt.subplots()  #(figsize=(10, 100))
+    im = ax.imshow(average_fr)
+
+    ax.set_xlabel('Time')
+    ax.set_ylabel("Memories")
+
+    ax.set_aspect(aspect=100)
+
+    fig.tight_layout()
+
+    plt.show()
+
+
+def main(force=False):
 
     bkp_file = 'hopfield.p'
 
@@ -370,16 +386,17 @@ def main(force=True):
 
         np.random.seed(123)
 
-        factor = 1/10**4
+        # factor = 1/10**4
 
         network = Network(
             param={
-                "n_neurons": int(10**5*factor),
-                "f": 0.3,
-                "p": 4,
-                "xi_0": 65*factor,
-                "kappa": 13*10**3*factor,
-                "t_tot": 10
+                "n_neurons": 50,  #int(10**5*factor),
+                "f": 0.1,
+                "p": 13,
+                "xi_0": 65, #65*factor,
+                "kappa": 13000, #13*10**3*factor,
+                "t_tot": 2,
+                "tau_0": 1
             })
 
         average_fr = network.average_fr
@@ -389,6 +406,7 @@ def main(force=True):
         average_fr = pickle.load(open(bkp_file, 'rb'))
 
     plot_average_fr(average_fr)
+    plot_attractors(average_fr)
     # plot_phi(network)
 
 

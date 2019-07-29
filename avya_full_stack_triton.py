@@ -106,7 +106,7 @@ def main(force=True):
 
     normalize_similarity = True
 
-    t_max = 3
+    t_max = 1000
     n_item = 30
     grades = (1, )
 
