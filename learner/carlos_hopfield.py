@@ -1,4 +1,6 @@
-# import matplotlib.pyplot as plt
+import pickle
+import os
+
 import numpy as np
 from tqdm import tqdm
 import matplotlib.pyplot as plt
@@ -189,7 +191,7 @@ class Network:
         # self.phi_history[t] = self.phi
 
     def update_weights(self):
-        print("Updating weights...", end=' ', flush=True)
+        # print("Updating weights...", end=' ', flush=True)
         for i in range(self.weights.shape[0]):  # P
             for j in range(self.weights.shape[1]):  # N
 
@@ -202,7 +204,7 @@ class Network:
 
                 self.weights[i, j] = \
                     (self.pr.kappa / self.pr.n_neurons) * sum_
-        print("Done!\n")
+        # print("Done!\n")
         # print(np.amax(self.weights - self.last_weights))
 
     def _present_pattern(self):
@@ -216,7 +218,7 @@ class Network:
         print(f"Chosen pattern number {chosen_pattern_number} of {self.pr.p}")
 
         self.activation[:] = self.connectivity[chosen_pattern_number, :]
-        print('\nactivation\n', self.activation)
+        # print('\nactivation\n', self.activation)
 
     def _initialize(self):
         """
@@ -282,14 +284,18 @@ class Network:
 
         for mu in range(self.pr.p):
 
-            idx = np.nonzero(self.connectivity[mu, :])
+            neurons = self.connectivity[mu, :]
 
-            v = np.zeros(len(idx))
-            for i in idx:
+            encoding = np.nonzero(neurons)[0]
 
-                v[i] = self.g(self.activation[i])
+            v = np.zeros(len(encoding))
+            for i, n in enumerate(encoding):
+                v[i] = self.g(self.activation[n])
 
-            self.average_fr[mu, t] = np.mean(v)
+            try:
+                self.average_fr[mu, t] = np.mean(v)
+            except FloatingPointError:
+                self.average_fr[mu, t] = 0
 
     def simulate(self):
         print(f"Simulating for {self.t_tot_discrete} time steps...\n")
@@ -341,29 +347,48 @@ def plot_weights(network, time):
     plt.show()
 
 
-def plot_average_fr(average_fr):
+def plot_average_fr(average_fr, x_scale=1000):
 
-    fig, ax
+    x = np.arange(average_fr.shape[1], dtype=float) / x_scale
 
+    fig, ax = plt.subplots()
 
-def main():
+    for y in average_fr:
+        ax.plot(x, y, linewidth=0.5, alpha=0.2)
+        break
 
-    np.random.seed(123)
-
-    factor = 1/10**4
-
-    network = Network(
-        param={
-            "n_neurons": int(10**5*factor),
-            "f": 0.4,
-            "p": 4,
-            "xi_0": 65*factor,
-            "kappa": 13*10**3*factor,
-            "t_tot": 10
-        })
+    ax.set_xlabel('Time')
+    ax.set_ylabel('Average firing rate')
+    plt.show()
 
 
+def main(force=True):
 
+    bkp_file = 'hopfield.p'
+
+    if not os.path.exists(bkp_file) or force:
+
+        np.random.seed(123)
+
+        factor = 1/10**4
+
+        network = Network(
+            param={
+                "n_neurons": int(10**5*factor),
+                "f": 0.3,
+                "p": 4,
+                "xi_0": 65*factor,
+                "kappa": 13*10**3*factor,
+                "t_tot": 10
+            })
+
+        average_fr = network.average_fr
+
+        pickle.dump(average_fr, open(bkp_file, 'wb'))
+    else:
+        average_fr = pickle.load(open(bkp_file, 'rb'))
+
+    plot_average_fr(average_fr)
     # plot_phi(network)
 
 

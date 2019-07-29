@@ -138,6 +138,9 @@ bkp/model_evaluation/*
 bkp/fit_fidelity/
 bkp/learning_material/kanji_meaning_n150_g1_2.p
 bkp/teacher_comparison/
+bkp/learning_material/connect_graphic_norm_False_150_ddc1e03d-8541-3b33-89d9-d8ecf7abe250.p
+bkp/learning_material/connect_semantic_norm_False_150_3f4a3364-c942-339d-974a-d12af19e879c.p
+bkp/full_stack/
 
 # Related to use data
 data/user_and_question_tables2.sql
@@ -146,8 +149,9 @@ data/duolingo.csv
 data/db.p
 data/duolingo_user/
 
-% Related to django
+# Related to django
 task/migrations/*
 duolingo/migrations/*
-bkp/learning_material/connect_graphic_norm_False_150_ddc1e03d-8541-3b33-89d9-d8ecf7abe250.p
-bkp/learning_material/connect_semantic_norm_False_150_3f4a3364-c942-339d-974a-d12af19e879c.p
+
+# Trials
+learner/hopfield.p
