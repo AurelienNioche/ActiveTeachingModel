@@ -126,11 +126,11 @@ class Network:
              ('tau', -1, 1), \
              ('s', 0.001, 1)  # TODO change
 
-    def __init__(self, tk, param, verbose=False):
+    def __init__(self, param, verbose=False):
 
         super().__init__()
 
-        self.tk = tk
+        # self.tk = tk
         self.verbose = verbose
 
         if param is None:
@@ -144,7 +144,7 @@ class Network:
                 f"Type {type(param)} is not handled for parameters")
 
         self.connectivity = \
-            np.random.choice([0, 1], p=[self.pr.f, 1 - self.pr.f],
+            np.random.choice([0, 1], p=[1 - self.pr.f, self.pr.f],
                              size=(self.pr.p, self.pr.n_neurons))
 
         self.weights = np.zeros((self.pr.n_neurons, self.pr.n_neurons))
@@ -177,7 +177,7 @@ class Network:
         #            * np.cos(np.pi * t + (np.pi / 2))
 
         amplitude = (self.pr.phi_max - self.pr.phi_min) / 2
-        frequency = 1 / self.pr.tau_0 * self.pr.dt
+        frequency = (1 / self.pr.tau_0) * self.pr.dt
         # phase = np.random.choice()
         shift = self.pr.phi_min + amplitude  # Moves the wave in the y-axis
 
@@ -188,8 +188,8 @@ class Network:
         self.phi_history[t] = self.phi
 
     def update_weights(self):
-        print("Updating weights...")
-        for i in tqdm(range(self.weights.shape[0])):  # P
+        print("Updating weights...", end=' ', flush=True)
+        for i in range(self.weights.shape[0]):  # P
             for j in range(self.weights.shape[1]):  # N
 
                 sum_ = 0
@@ -201,8 +201,8 @@ class Network:
 
                 self.weights[i, j] = \
                     (self.pr.kappa / self.pr.n_neurons) * sum_
-
-        print(np.amax(self.weights - self.last_weights))
+        print("Done!")
+        # print(np.amax(self.weights - self.last_weights))
 
     def _present_pattern(self):
         # np_question = np.array([question])
@@ -215,6 +215,7 @@ class Network:
         print(f"Chosen pattern number {chosen_pattern_number} of {self.pr.p}")
 
         self.activation[:] = self.connectivity[chosen_pattern_number, :]
+        print('\nactivation\n', self.activation)
 
     def _initialize(self):
         """
@@ -232,7 +233,7 @@ class Network:
 
         self.simulate()
 
-    def _update_gain(self, current):
+    def g(self, current):
 
         if current + self.pr.theta > 0:
             gain = (current + self.pr.theta) ** self.pr.gamma
@@ -241,35 +242,46 @@ class Network:
 
         return gain
 
-    def _update_gaussian_noise(self):
-        gaussian_noise = np.random.normal(loc=0, scale=self.noise_sigma)
-        return gaussian_noise
+    def gaussian_noise(self):
+        return np.random.normal(loc=0, scale=self.noise_sigma)
 
     def _update_activation(self):
 
-        for i in enumerate(self.activation):
-            iterator = i[0]
-            current = self.activation[iterator]
-            gain = self._update_gain(current)
-            gaussian_noise = self._update_gaussian_noise()
+        for i in range(self.activation.shape[0]):
 
-            self.activation[iterator] *= (-current
-                                          + np.sum(self.weights[iterator, :])
-                                          * gain
-                                          + gaussian_noise)\
-                / (self.pr.tau * self.pr.dt)
+            try:
+
+                current = self.activation[i]
+
+                sum_ = 0
+                for j in range(self.pr.n_neurons):
+                    sum_ += self.weights[i, j] * self.g(self.activation[j])
+
+                multiplier = \
+                    - current + sum_ + self.gaussian_noise()
+
+                self.activation[i] *= multiplier * (self.pr.tau * (1/self.pr.dt))
+
+            except FloatingPointError as e:
+                print("current", current)
+                print("sum", sum_)
+                print("i", i)
+                print("multiplier", multiplier)
+                raise e
 
     def simulate(self):
-        print(f"Simulating for {self.t_tot_discrete} time steps...")
-        for t in tqdm(range(self.t_tot_discrete)):
+        print(f"Simulating for {self.t_tot_discrete} time steps...\n")
+        for t in range(self.t_tot_discrete):
             self._update_phi(t)
-            # print(self.phi_history)
+            print("\nphi\n", self.phi)
             self.update_weights()
-            # print("\nweights \n", self.weights)
+            print("\nweights \n", self.weights)
             # print(np.sum(self.weights))
             # print(self.phi)
             self._update_activation()
-            # print("\nactivation \n", self.activation)
+            print("\nactivation \n", self.activation)
+
+            break
 
 
 def plot_phi(network):
@@ -306,8 +318,9 @@ def main():
 
     np.random.seed(123)
 
-    network = Network(tk=Task(t_max=100, n_item=30),
-                      param={"n_neurons": 100, "kappa": 13, "t_tot": 0.1})
+    network = Network(param={"n_neurons": 10**5,
+                             'f': 0.1,
+                      'p': 16, "kappa": 13*10**3, "t_tot": 450})
 
     # plot_phi(network)
 
