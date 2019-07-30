@@ -5,11 +5,11 @@ import matplotlib.pyplot as plt
 def phi(phi_min=0.7, phi_max=1.06, t=0, tau_0=1, dt=0.001):
 
     amplitude = (phi_max - phi_min) / 2
-    frequency = (1 / tau_0) * dt
+    frequency = (1 / tau_0)
     # phase = np.random.choice()
     shift = phi_min + amplitude  # Moves the wave in the y-axis
 
-    _phi = amplitude * np.sin(2 * np.pi * t * frequency) + shift
+    _phi = amplitude * np.sin(2 * np.pi * t * frequency * dt) + shift
 
     assert phi_min <= _phi <= phi_max
 
@@ -23,17 +23,14 @@ def plot_phi(phi_history):
     plt.plot(time, phi_history)
     plt.title("Inhibitory oscillations")
     plt.xlabel("Time")
-    plt.ylabel("Phi")
+    plt.ylabel("$\phi$")
 
     plt.show()
-
-    print(np.amax(phi_history))
-    print(np.amin(phi_history))
 
 
 def main():
 
-    t_max = 1000
+    t_max = 2000
 
     phi_history = np.zeros(t_max)
     for t in range(t_max):

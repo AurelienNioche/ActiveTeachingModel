@@ -190,6 +190,31 @@ class Network:
 
         # self.phi_history[t] = self.phi
 
+    def _present_pattern(self):
+        # np_question = np.array([question])
+        # pattern = (((np_question[:, None]
+        #             & (1 << np.arange(8))) > 0).astype(int)) * self.pr.r_ini
+        # assert np.amax(pattern) == self.pr.r_ini
+        # pattern = np.resize(pattern, self.activation.shape)
+        # return pattern
+        chosen_pattern_number = np.random.choice(np.arange(self.pr.p))
+        print(f"Chosen pattern number {chosen_pattern_number} of {self.pr.p}")
+
+        self.activation[:] = self.connectivity[chosen_pattern_number, :]
+        # print('\nactivation\n', self.activation)
+
+    def g(self, current):
+
+        if current + self.pr.theta > 0:
+            gain = (current + self.pr.theta) ** self.pr.gamma
+        else:
+            gain = 0
+
+        return gain
+
+    def gaussian_noise(self):
+        return np.random.normal(loc=0, scale=self.noise_sigma)
+
     def update_weights(self):
         # print("Updating weights...", end=' ', flush=True)
         for i in range(self.weights.shape[0]):  # P
@@ -206,47 +231,6 @@ class Network:
                     (self.pr.kappa / self.pr.n_neurons) * sum_
         # print("Done!\n")
         # print(np.amax(self.weights - self.last_weights))
-
-    def _present_pattern(self):
-        # np_question = np.array([question])
-        # pattern = (((np_question[:, None]
-        #             & (1 << np.arange(8))) > 0).astype(int)) * self.pr.r_ini
-        # assert np.amax(pattern) == self.pr.r_ini
-        # pattern = np.resize(pattern, self.activation.shape)
-        # return pattern
-        chosen_pattern_number = np.random.choice(np.arange(self.pr.p))
-        print(f"Chosen pattern number {chosen_pattern_number} of {self.pr.p}")
-
-        self.activation[:] = self.connectivity[chosen_pattern_number, :]
-        # print('\nactivation\n', self.activation)
-
-    def _initialize(self):
-        """
-        Performs the following initial operations:
-        * Update the inhibition parameter for time step 0.
-        * Updates weights according using the previous connectivity matrix
-        * Gives a random seeded pattern as the initial activation vector.
-        * Updates the network for the total discrete time steps.
-        """
-        self._update_phi(0)
-
-        self.update_weights()
-
-        self._present_pattern()
-
-        self.simulate()
-
-    def g(self, current):
-
-        if current + self.pr.theta > 0:
-            gain = (current + self.pr.theta) ** self.pr.gamma
-        else:
-            gain = 0
-
-        return gain
-
-    def gaussian_noise(self):
-        return np.random.normal(loc=0, scale=self.noise_sigma)
 
     def _update_activation(self):
 
@@ -267,9 +251,11 @@ class Network:
             for j in range(self.pr.n_neurons):
                 sum_ += self.weights[i, j] * self.g(self.activation[j])
 
-            change = - current + sum_ + noise
+            derivative = (- current + sum_ + noise) \
+                / self.pr.tau
 
-            new_current = change / (self.pr.tau * (1/self.pr.dt))
+            new_current = \
+                current + self.pr.dt * derivative
 
             # print('old current', current)
             # print("noise", noise)
@@ -296,6 +282,22 @@ class Network:
                 self.average_fr[mu, t] = np.mean(v)
             except FloatingPointError:
                 self.average_fr[mu, t] = 0
+
+    def _initialize(self):
+        """
+        Performs the following initial operations:
+        * Update the inhibition parameter for time step 0.
+        * Updates weights according using the previous connectivity matrix
+        * Gives a random seeded pattern as the initial activation vector.
+        * Updates the network for the total discrete time steps.
+        """
+        self._update_phi(0)
+
+        self.update_weights()
+
+        self._present_pattern()
+
+        self.simulate()
 
     def simulate(self):
         print(f"Simulating for {self.t_tot_discrete} time steps...\n")
@@ -378,7 +380,7 @@ def plot_attractors(average_fr, x_scale=1000):
     plt.show()
 
 
-def main(force=True):
+def main(force=False):
 
     bkp_file = 'hopfield.p'
 
@@ -390,7 +392,7 @@ def main(force=True):
 
         network = Network(
             param={
-                "n_neurons": 500,  #int(10**5*factor),
+                "n_neurons": 20,  #int(10**5*factor),
                 "f": 0.1,
                 "p": 16,
                 "xi_0": 65,  # 65*factor,
@@ -411,5 +413,5 @@ def main(force=True):
     # plot_phi(network)
 
 
-if __name__ == main():
-    main()
+if __name__ == "__main__":
+    main(force=True)
