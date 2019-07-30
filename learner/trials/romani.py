@@ -25,7 +25,7 @@ class Network:
                  J_0_max=1.2,
                  t_max=1000,
                  f=0.1,
-                 phase_shift=0.5,
+                 phase_shift=0.0,
                  seed=123):
 
         np.random.seed(seed)
@@ -99,9 +99,9 @@ class Network:
         print('Building the connections...')
 
         multiplier = 1 / \
-                     (
-                        self.N *  self.f * (1-self.f)
-                     )
+            (
+                self.N * self.f * (1-self.f)
+            )
 
         for i in tqdm(range(self.J.shape[0])):
             for j in range(self.J.shape[1]):
@@ -112,7 +112,7 @@ class Network:
                         * (self.J[mu, j] - self.f)
 
                 self.J[i, j] = \
-                     multiplier * sum_
+                    multiplier * sum_
         # print("Done!\n")
 
     def _update_threshold(self):
@@ -172,7 +172,7 @@ class Network:
                     (self.xi[mu, i] - self.f) * self.V[i]
 
             self.population_activity[mu, t] = \
-                sum_
+                sum_ * multiplier
 
             # try:
             #     self.population_activity[mu, t] = \
