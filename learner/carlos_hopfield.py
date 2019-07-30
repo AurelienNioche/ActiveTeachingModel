@@ -219,6 +219,8 @@ class Network:
         # print("Updating weights...", end=' ', flush=True)
         for i in range(self.weights.shape[0]):  # P
             for j in range(self.weights.shape[1]):  # N
+                if i == j:
+                    continue
 
                 sum_ = 0
                 for mu in range(self.pr.p):
@@ -251,11 +253,25 @@ class Network:
             for j in range(self.pr.n_neurons):
                 sum_ += self.weights[i, j] * self.g(self.activation[j])
 
-            derivative = (- current + sum_ + noise) \
+            # derivative = (- current + sum_ + noise) \
+            #     / self.pr.tau
+            #
+            # new_current = \
+            #     current + self.pr.dt * derivative
+
+            business = (sum_ + noise) \
                 / self.pr.tau
 
-            new_current = \
-                current + self.pr.dt * derivative
+            second_part = \
+                business * self.pr.dt
+
+            first_part = current * \
+                (
+                     -(1/self.pr.tau) * self.pr.dt
+                     + 1
+                )
+
+            new_current = first_part + second_part
 
             # print('old current', current)
             # print("noise", noise)
@@ -392,7 +408,7 @@ def main(force=False):
 
         network = Network(
             param={
-                "n_neurons": 20,  #int(10**5*factor),
+                "n_neurons": 100,  #int(10**5*factor),
                 "f": 0.1,
                 "p": 16,
                 "xi_0": 65,  # 65*factor,

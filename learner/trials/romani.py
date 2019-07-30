@@ -4,6 +4,8 @@ import os
 import numpy as np
 from tqdm import tqdm
 import matplotlib.pyplot as plt
+import multiprocessing as mp
+import itertools as it
 
 np.seterr(all='raise')
 
@@ -63,6 +65,13 @@ class Network:
         self.population_activity = \
             np.zeros((self.L, self.t_max))
 
+        self.idx_neuron = np.arange(self.N)
+
+        self.n_factor = 1 / \
+            (
+                self.N * self.f * (1-self.f)
+            )
+
     @staticmethod
     def sinusoid(min_, max_, period, t, phase_shift):
 
@@ -71,9 +80,10 @@ class Network:
         # phase = np.random.choice()
         shift = min_ + amplitude  # Moves the wave in the y-axis
 
-        return amplitude \
-               * np.sin(2 * np.pi * (t + phase_shift*period) * frequency) \
-               + shift
+        return \
+            amplitude \
+            * np.sin(2 * np.pi * (t + phase_shift*period) * frequency) \
+            + shift
 
     @staticmethod
     def heaviside(x):
@@ -96,30 +106,51 @@ class Network:
         )
 
     def _build_connections(self):
+
         print('Building the connections...')
 
-        multiplier = 1 / \
-            (
-                self.N * self.f * (1-self.f)
-            )
+        # coordinates = list(it.product(range(self.N), repeat=2))
 
-        for i in tqdm(range(self.J.shape[0])):
-            for j in range(self.J.shape[1]):
+        for i in tqdm(range(self.N)):
+            for j in range(self.N):
+                if i == j:
+                    continue
                 sum_ = 0
                 for mu in range(self.L):
                     sum_ += \
                         (self.J[mu, i] - self.f) \
                         * (self.J[mu, j] - self.f)
 
-                self.J[i, j] = \
-                    multiplier * sum_
-        # print("Done!\n")
+                self.J[i, j] = sum_
+
+        self.J[:] *= self.n_factor
+
+        for i in tqdm(range(self.N)):
+
+            assert self.J[i, i] == 0, "Failed!"
 
     def _update_threshold(self):
 
         self.th[:] -= \
             (self.th[:] - self.first_th[:] - self.D_th*self.previous_V[:]) \
             / self.T_th
+
+    def _update_i(self, i):
+
+        # print(f'updating neuron {i}...')
+        sum_ = 0
+        for j in range(self.N):
+            sum_ += \
+                self.J[i, j] * self.previous_V[j]
+
+        second_sum_ = np.sum(self.previous_V)
+
+        multiplier = self.J_0 / (self.N * self.f)
+
+        inside_parenthesis = \
+            sum_ - multiplier * second_sum_ - self.th[i]
+
+        return self.heaviside(inside_parenthesis)
 
     def _update_activation(self):
 
@@ -132,38 +163,18 @@ class Network:
         # print("-" * 5)
 
         for i in range(self.N):
+        # r = mp.Pool().map(self._update_i, range(self.N))
 
-            # print(f'updating neuron {i}...')
-            sum_ = 0
-            for j in range(self.N):
-                sum_ += \
-                    self.J[i, j] * self.previous_V[j]
+            self.V[i] = self._update_i(i)  # self.heaviside(inside_parenthesis)
 
-            second_sum_ = np.sum(self.previous_V)
+    def _present_pattern(self, i=0):
 
-            multiplier = self.J_0 / (self.N*self.f)
+        # chosen_pattern_number = np.random.choice(np.arange(self.L))
+        # print(f"Chosen pattern number {chosen_pattern_number} of {self.L}")
 
-            inside_parenthesis = \
-                sum_ - multiplier * second_sum_ - self.th[i]
-
-            # print("-" * 5)
-
-            self.V[i] = self.heaviside(inside_parenthesis)
-
-    def _present_pattern(self):
-
-        chosen_pattern_number = np.random.choice(np.arange(self.L))
-        print(f"Chosen pattern number {chosen_pattern_number} of {self.L}")
-
-        self.V[:] = self.xi[chosen_pattern_number, :]
-        # print('\nactivation\n', self.activation)
+        self.V[:] = self.xi[i, :]
 
     def _save_population_activity(self, t):
-
-        multiplier = 1 / \
-                     (
-                             self.N * self.f * (1 - self.f)
-                     )
 
         for mu in range(self.L):
             sum_ = 0
@@ -171,14 +182,9 @@ class Network:
                 sum_ += \
                     (self.xi[mu, i] - self.f) * self.V[i]
 
-            self.population_activity[mu, t] = \
-                sum_ * multiplier
+            self.population_activity[mu, t] = sum_
 
-            # try:
-            #     self.population_activity[mu, t] = \
-            #         np.mean(self.V[self.xi[mu, :] == 1])
-            # except FloatingPointError:
-            #     self.population_activity[mu, t] = 0
+        self.population_activity[:, t] *= self.n_factor
 
     def simulate(self):
 
