@@ -113,8 +113,8 @@ class Network:
 
         for i in tqdm(range(self.N)):
             for j in range(self.N):
-                if i == j:
-                    continue
+                # if i == j:
+                #     continue
                 sum_ = 0
                 for mu in range(self.L):
                     sum_ += \
@@ -124,10 +124,6 @@ class Network:
                 self.J[i, j] = sum_
 
         self.J[:] *= self.n_factor
-
-        for i in tqdm(range(self.N)):
-
-            assert self.J[i, i] == 0, "Failed!"
 
     def _update_threshold(self):
 
