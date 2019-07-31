@@ -79,6 +79,7 @@ class NetworkParam:
                  r_threshold=15,
                  n_trials=10000,
                  r_ini=1,
+                 phase_shift=0.0,
                  verbose=False):
 
         # Architecture
@@ -110,6 +111,8 @@ class NetworkParam:
         # Time
         self.t_tot = t_tot
         self.dt = dt
+
+        self.phase_shift=phase_shift
 
         # Not yet classified
         self.xi_0 = xi_0
@@ -210,7 +213,7 @@ class Network:
             max_=self.pr.phi_max,
             period=self.pr.tau_0,
             t=t,
-            phase_shift=0.25*self.pr.tau_0,
+            phase_shift=self.pr.phase_shift*self.pr.tau_0,
             dt=self.pr.dt
         )
 
@@ -448,10 +451,11 @@ def main(force=False):
                 "f": 0.1,
                 "p": 3,
                 "xi_0": 65, #65,  # 65*factor,
-                "kappa": 13,  # 13*10**3*factor,
+                "kappa": 13000,  # 13*10**3*factor,
                 "t_tot": 4,
                 "tau_0": 1,
-                "gamma": 1.2  # 2/5
+                "gamma": 2/5,
+                "phase_shift": 0.25,
             })
 
         network.simulate()
