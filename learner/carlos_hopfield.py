@@ -124,11 +124,6 @@ class NetworkParam:
 
 class Network:
 
-    version = 0.1
-    bounds = ('d', 0.001, 1.0), \
-             ('tau', -1, 1), \
-             ('s', 0.001, 1)  # TODO change
-
     def __init__(self, param, verbose=False):
 
         super().__init__()
