@@ -23,6 +23,7 @@ class Network:
                  t_max=1000,
                  f=0.1,
                  phase_shift=0.0,
+                 first_p=0,
                  seed=123):
 
         np.random.seed(seed)
@@ -39,6 +40,7 @@ class Network:
 
         self.D_th = 1.9 * T
         self.phase_shift = phase_shift
+        self.first_p = first_p
 
         self.J = np.zeros((self.N, self.N))
         self.V = np.zeros(self.N)
@@ -116,9 +118,7 @@ class Network:
                         (self.J[mu, i] - self.f) \
                         * (self.J[mu, j] - self.f)
 
-                self.J[i, j] = sum_
-
-        self.J[:] *= self.n_factor
+                self.J[i, j] = sum_ * self.n_factor
 
     def _update_threshold(self):
 
@@ -147,23 +147,13 @@ class Network:
 
         self.previous_V = self.V.copy()
 
-        # order = np.arange(self.N)
-        # np.random.shuffle(order)
-        # print("order", order)
-        # print("\n")
-        # print("-" * 5)
-
-        for i in range(self.N):
         # r = mp.Pool().map(self._update_i, range(self.N))
+        for i in range(self.N):
+            self.V[i] = self._update_i(i)
 
-            self.V[i] = self._update_i(i)  # self.heaviside(inside_parenthesis)
+    def _present_pattern(self):
 
-    def _present_pattern(self, i=0):
-
-        # chosen_pattern_number = np.random.choice(np.arange(self.L))
-        # print(f"Chosen pattern number {chosen_pattern_number} of {self.L}")
-
-        self.V[:] = self.xi[i, :]
+        self.V[:] = self.xi[self.first_p, :]
 
     def _save_population_activity(self, t):
 
@@ -180,80 +170,27 @@ class Network:
     def simulate(self):
 
         self._build_connections()
-
         self._present_pattern()
-
         self._save_population_activity(0)
 
         print(f"Simulating for {self.t_max} time steps...\n")
         for t in tqdm(range(1, self.t_max)):
-            # print("*" * 10)
-            # print("T", t)
-            # print("*" * 10)
+
             self._update_J_0(t)
             self._update_activation()
             self._update_threshold()
 
             self._save_population_activity(t)
 
-            # break
 
-
-# def plot_phi(network):
-#     data = network.phi_history
-#     time = np.arange(0, network.phi_history.size, 1)
-#
-#     plt.plot(time, data)
-#     plt.title("Inhibitory oscillations")
-#     plt.xlabel("Time")
-#     plt.ylabel("Phi")
-#
-#     plt.show()
-#
-#     print(np.amax(network.phi_history))
-#     print(np.amin(network.phi_history))
-
-
-def plot_weights(weights, time):
+def plot_attractors(activity):
 
     fig, ax = plt.subplots()
-    im = ax.imshow(weights)
-
-    plt.title(f"Weights matrix (t = {time})")
-    plt.xlabel("Weights")
-    plt.ylabel("Weights")
-
-    fig.tight_layout()
-
-    plt.show()
-
-
-# def plot_average_fr(average_fr, x_scale=1000):
-#
-#     x = np.arange(average_fr.shape[1], dtype=float) / x_scale
-#
-#     fig, ax = plt.subplots()
-#
-#     for i, y in enumerate(average_fr):
-#         ax.plot(x, y, linewidth=0.5, alpha=0.2)
-#         if i > 1:
-#             break
-#
-#     ax.set_xlabel('Time (cycles)')
-#     ax.set_ylabel('Average firing rate')
-#     plt.show()
-
-
-def plot_attractors(activity, x_scale=1000):
-
-    fig, ax = plt.subplots()  #(figsize=(10, 100))
     im = ax.imshow(activity, aspect='auto')
     fig.colorbar(im, ax=ax)
 
     ax.set_xlabel('Time')
     ax.set_ylabel("Memories")
-
-    # ax.set_aspect('equal', 'datalim')
 
     fig.tight_layout()
 
