@@ -50,6 +50,21 @@ class NetworkParam:
 
     Gives the parameters to the network. Default values as listed in Recanatesi
     (2015).
+
+    2019 07 31: Good enough parameters are
+                param={
+                "n_neurons": 150,  #int(10**5*factor),
+                "f": 0.1,
+                "p": 4,
+                "xi_0": 65, #65,  # 65*factor,
+                "kappa": 13000,  # 13*10**3*factor,
+                "t_tot": 10,
+                "tau_0": 1,
+                "gamma": 2/5,
+                "phi_min": 0.7,
+                "phi_max": 1.06,
+                "phase_shift": 0.25,
+            })
     """
     def __init__(self,
                  # Architecture ###########
@@ -411,7 +426,7 @@ def plot_attractors(network):
     average_fr = network.average_fr
 
     fig, ax = plt.subplots()  #(figsize=(10, 100))
-    im = ax.imshow(average_fr,
+    im = ax.imshow(average_fr, cmap="jet",
                    extent=[
                        0, average_fr.shape[1] * network.pr.dt,
                        average_fr.shape[0] - 0.5, -0.5
@@ -436,20 +451,22 @@ def main(force=False):
 
     if not os.path.exists(bkp_file) or force:
 
-        np.random.seed(123)
+        np.random.seed(1234)
 
         # factor = 1/10**4
 
         network = Network(
             param={
-                "n_neurons": 100,  #int(10**5*factor),
+                "n_neurons": 150,  #int(10**5*factor),
                 "f": 0.1,
-                "p": 3,
+                "p": 4,
                 "xi_0": 65, #65,  # 65*factor,
                 "kappa": 13000,  # 13*10**3*factor,
-                "t_tot": 4,
+                "t_tot": 10,
                 "tau_0": 1,
                 "gamma": 2/5,
+                "phi_min": 0.7,
+                "phi_max": 1.06,
                 "phase_shift": 0.25,
             })
 
@@ -467,4 +484,4 @@ def main(force=False):
 
 
 if __name__ == "__main__":
-    main(force=True)
+    main(force=False)
