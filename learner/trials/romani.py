@@ -12,11 +12,6 @@ np.seterr(all='raise')
 
 class Network:
 
-    version = 0.1
-    bounds = ('d', 0.001, 1.0), \
-             ('tau', -1, 1), \
-             ('s', 0.001, 1)  # TODO change
-
     def __init__(self,
                  L=16,
                  N=3000,
@@ -82,7 +77,7 @@ class Network:
 
         return \
             amplitude \
-            * np.sin(2 * np.pi * (t + phase_shift*period) * frequency) \
+            * np.sin(2 * np.pi * (t + phase_shift) * frequency) \
             + shift
 
     @staticmethod
@@ -101,7 +96,7 @@ class Network:
             min_=self.J_0_min,
             max_=self.J_0_max,
             period=self.T_jo,
-            phase_shift=self.phase_shift,
+            phase_shift=self.phase_shift*self.T_jo,
             t=t
         )
 
@@ -287,7 +282,7 @@ def _test_sinusoid():
             min_=0.7,
             max_=1.2,
             period=25,
-            phase_shift=25/2,
+            phase_shift=0.25,
         )
 
     plot(history)

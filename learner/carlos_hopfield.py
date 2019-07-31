@@ -180,6 +180,9 @@ class Network:
         self.weights_constant = np.zeros((self.pr.n_neurons,
                                           self.pr.n_neurons))
 
+        self.delta_weights = np.zeros((self.pr.n_neurons,
+                                       self.pr.n_neurons))
+
     @staticmethod
     def sinusoid(min_, max_, period, t, phase_shift, dt=1.):
 
@@ -270,6 +273,31 @@ class Network:
                 self.weights_constant[i, j] = \
                     self.kappa_over_n * sum_
 
+    def _compute_delta_weights(self):
+
+        print('Computing delta weights...')
+        for i in tqdm(range(self.pr.n_neurons)):
+
+            for j in range(self.pr.n_neurons):
+
+                # sum for positive
+                sum_pos = 0
+                for mu in range(self.pr.p-1):
+                    sum_pos += \
+                        self.connectivity[mu, i] \
+                        * self.connectivity[mu+1, j]
+
+                # Sum for negative
+                sum_neg = 0
+                for mu in range(1, self.pr.p):
+                    sum_neg += \
+                        self.connectivity[mu, i] \
+                        * self.connectivity[mu - 1, j]
+
+                self.delta_weights[i, j] = \
+                    self.pr.j_forward * sum_pos \
+                    + self.pr.j_backward * sum_neg
+
     def _update_activation(self):
 
         # order = np.arange(self.activation.shape[0])
@@ -293,8 +321,11 @@ class Network:
                 #     continue
                 sum_ += \
                     (self.weights_constant[i, j]
-                     - self.kappa_over_n*self.phi) \
+                     - self.kappa_over_n*self.phi
+                     + self.delta_weights[i, j]) \
                     * self.g(self.activation[j])
+
+                # + self.delta_weights[i, j]) \
 
             business = sum_ + noise
 
@@ -344,6 +375,7 @@ class Network:
         """
 
         self._compute_weight_constant()
+        self._compute_delta_weights()
 
         self.update_phi(0)
 
@@ -457,17 +489,19 @@ def main(force=False):
 
         network = Network(
             param={
-                "n_neurons": 150,  #int(10**5*factor),
+                "n_neurons": 100,  #int(10**5*factor),
                 "f": 0.1,
-                "p": 4,
+                "p": 3,
                 "xi_0": 65, #65,  # 65*factor,
                 "kappa": 13000,  # 13*10**3*factor,
-                "t_tot": 10,
+                "t_tot": 15,
                 "tau_0": 1,
                 "gamma": 2/5,
                 "phi_min": 0.7,
                 "phi_max": 1.06,
                 "phase_shift": 0.25,
+                "j_forward": 1.500,
+                "j_backward": 0.400
             })
 
         network.simulate()
@@ -484,4 +518,4 @@ def main(force=False):
 
 
 if __name__ == "__main__":
-    main(force=False)
+    main(force=True)
