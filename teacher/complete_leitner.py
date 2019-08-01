@@ -13,16 +13,21 @@ class TraditionalLeitnerTeacher(GenericTeacher):
                  delay_factor=2,
                  verbose=False):
         """
-        :param normalize_similarity: bool. Normalized description of
-        semantic and graphic connections between items
+        :param normalize_similarity: bool.
+            Normalized description of
+            semantic and graphic connections between items
         :param delay_factor:
-        :param verbose: displays each question asked and replies at each
-        iteration
-        :var self.taboo: integer value in range(0 to n_items). Index of the item
+        :param verbose:
+            displays each question asked and replies at each
+            iteration
+        :var self.taboo:
+            integer value in range(0 to n_items). Index of the item
             shown in previous iteration.
-        :var self.learning_progress: array of size n_item representing the box
+        :var self.learning_progress:
+            array of size n_item representing the box
             number of i^th item at i^th index.
-        :var wait_time_arr: array of size n_item representing the waiting time
+        :var self.wait_time_arr:
+            array of size n_item representing the waiting time
             of i^th item at i^th index.
         """
 

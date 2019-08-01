@@ -380,8 +380,8 @@ def plot_attractors(network):
     fig, ax = plt.subplots()
     im = ax.imshow(average_fr, cmap="jet",
                    extent=[
-                       0, average_fr.shape[1] * network.pr.dt,
-                          average_fr.shape[0] - 0.5, -0.5
+                        0, average_fr.shape[1] * network.pr.dt,
+                        average_fr.shape[0] - 0.5, -0.5
                    ])
 
     ax.set_xlabel('Time (cycles)')
@@ -404,20 +404,20 @@ def main(force=False):
 
         np.random.seed(123)
 
-        factor = 10**(-3)
+        factor = 10**(-2)
 
         network = Network(
             param={
                 "n_neurons": int(10**5*factor),
                 "f": 0.1,
-                "p": 3,
+                "p": 8,
                 "xi_0": 65,
                 "kappa": 13000,
                 "tau_0": 1,
                 "gamma": 2 / 5,
                 "phi_min": 0.7,
                 "phi_max": 1.06,
-                "phase_shift": 0.25,
+                "phase_shift": 0.75,
                 "j_forward": 1500*factor,
                 "j_backward": 400*factor,
                 "first_p": 0,
