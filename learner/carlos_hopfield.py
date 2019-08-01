@@ -325,8 +325,6 @@ class Network:
         self._compute_weight_constant()
         self._compute_delta_weights()
 
-        self.update_phi(0)
-
         self._present_pattern()
 
     def simulate(self):
@@ -398,11 +396,14 @@ def plot_attractors(network):
 
 
 def main(force=False):
-    bkp_file = 'hopfield.p'
+
+    bkp_file = f'bkp/hopfield.p'
+
+    os.makedirs(os.path.dirname(bkp_file), exist_ok=True)
 
     if not os.path.exists(bkp_file) or force:
 
-        np.random.seed(123)
+        np.random.seed(1234)
 
         factor = 10**(-2)
 
@@ -410,7 +411,7 @@ def main(force=False):
             param={
                 "n_neurons": int(10**5*factor),
                 "f": 0.1,
-                "p": 8,
+                "p": 3,
                 "xi_0": 65,
                 "kappa": 13000,
                 "tau_0": 1,
@@ -437,4 +438,4 @@ def main(force=False):
 
 
 if __name__ == "__main__":
-    main(force=True)
+    main(force=False)

@@ -6,6 +6,7 @@ from tqdm import tqdm
 import matplotlib.pyplot as plt
 import multiprocessing as mp
 import itertools as it
+from matplotlib.ticker import MaxNLocator
 
 np.seterr(all='raise')
 
@@ -17,7 +18,7 @@ class Network:
                  N=3000,
                  T=0.015,
                  T_th=45,
-                 T_jo=25,
+                 T_j0=25,
                  J_0_min=0.7,
                  J_0_max=1.2,
                  t_max=1000,
@@ -32,7 +33,7 @@ class Network:
         self.N = N
         self.T = T
         self.T_th = T_th
-        self.T_jo = T_jo
+        self.T_j0 = T_j0
         self.J_0_min = J_0_min
         self.J_0_max = J_0_max
         self.f = f
@@ -97,8 +98,8 @@ class Network:
         self.J_0 = self.sinusoid(
             min_=self.J_0_min,
             max_=self.J_0_max,
-            period=self.T_jo,
-            phase_shift=self.phase_shift*self.T_jo,
+            period=self.T_j0,
+            phase_shift=self.phase_shift*self.T_j0,
             t=t
         )
 
@@ -122,9 +123,11 @@ class Network:
 
     def _update_threshold(self):
 
-        self.th[:] -= \
-            (self.th[:] - self.first_th[:] - self.D_th*self.previous_V[:]) \
-            / self.T_th
+        for i in range(self.N):
+            self.th[i] = self.th[i] - \
+                (self.th[i] - self.first_th[i]
+                 - self.D_th*self.previous_V[i]) \
+                / self.T_th
 
     def _update_i(self, i):
 
@@ -171,10 +174,10 @@ class Network:
 
         self._build_connections()
         self._present_pattern()
-        self._save_population_activity(0)
+        # self._save_population_activity(0)
 
         print(f"Simulating for {self.t_max} time steps...\n")
-        for t in tqdm(range(1, self.t_max)):
+        for t in tqdm(range(self.t_max)):
 
             self._update_J_0(t)
             self._update_activation()
@@ -186,11 +189,14 @@ class Network:
 def plot_attractors(activity):
 
     fig, ax = plt.subplots()
-    im = ax.imshow(activity, aspect='auto')
+    im = ax.imshow(activity, aspect='auto',
+                   cmap='jet')
     fig.colorbar(im, ax=ax)
 
     ax.set_xlabel('Time')
     ax.set_ylabel("Memories")
+
+    ax.yaxis.set_major_locator(MaxNLocator(integer=True))
 
     fig.tight_layout()
 
@@ -219,7 +225,7 @@ def _test_sinusoid():
             min_=0.7,
             max_=1.2,
             period=25,
-            phase_shift=0.25,
+            phase_shift=0.75,
         )
 
     plot(history)
@@ -228,9 +234,10 @@ def _test_sinusoid():
 def main(force=False):
 
     N = 3000
-    t_max = 300
+    t_max = 1000
+    L = 16
 
-    bkp_file = f'bkp/romani_N{N}_tmax{t_max}.p'
+    bkp_file = f'bkp/romani_N{N}_tmax{t_max}_L{L}.p'
 
     os.makedirs(os.path.dirname(bkp_file), exist_ok=True)
 
@@ -239,6 +246,11 @@ def main(force=False):
         network = Network(
             N=N,
             t_max=t_max,
+            L=L,
+            J_0_min=0.7,
+            J_0_max=1.2,
+            T_j0=25,
+            phase_shift=0.0,
         )
         network.simulate()
 
