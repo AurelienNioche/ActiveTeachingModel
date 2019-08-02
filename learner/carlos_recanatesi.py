@@ -71,7 +71,7 @@ class NetworkParam:
             n_neurons=100000,
             p=16,
             # Activation #############
-            simplified_simulation = False,
+            simplified_simulation=False,
             tau=0.01,
             # Gain ###################
             theta=0,
@@ -461,6 +461,7 @@ def main(force=False):
                 "j_backward": 400*factor,
                 "first_p": 0,
                 "t_tot": 4,
+                "simplified_simulation": True
             })
 
         network.simulate()
