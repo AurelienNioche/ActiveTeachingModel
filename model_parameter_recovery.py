@@ -29,7 +29,9 @@ class SimulationAndFit:
 
     def __init__(self, model, t_max=300, n_kanji=30, grades=(1, ),
                  normalize_similarity=False,
-                 verbose=False, method='bayesian', **kwargs):
+                 verbose=False, method='de', **kwargs):
+
+        assert method in ('de', 'bayesian'), "Method not recognized"
 
         self.model = model
 

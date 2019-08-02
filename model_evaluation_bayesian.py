@@ -41,7 +41,7 @@ def main():
     model = ActR
 
     t_max = 300
-    n_item = 79
+    n_item = 30
     grades = (1, )
     normalize_similarity = True
 
