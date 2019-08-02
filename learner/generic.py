@@ -31,7 +31,7 @@ class Learner:
         """Expected return from specific learner: p_r"""
         raise NotImplementedError
 
-    def get_p_choices(self, data, use_p_correct=False):
+    def get_p_choices(self, data, use_p_correct=False, stop_if_zero=True):
 
         t_max = len(data.questions)
 
@@ -63,7 +63,7 @@ class Learner:
                                    possible_replies=possible_rep,
                                    time=time)
 
-            if p == 0:
+            if p == 0 and stop_if_zero:
                 return None
 
             p_choices[t] = p

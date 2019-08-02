@@ -1,6 +1,6 @@
 import numpy as np
 from learner.act_r import ActR
-np.seterr(all='raise')
+# np.seterr(all='raise')
 
 
 class ActRMeaning(ActR):
@@ -32,14 +32,13 @@ class ActRMeaning(ActR):
 
         super().__init__(tk=tk, metaclass=True, **kwargs)
 
-    def p_recall(self, item, time=None, time_index=None):
+    def _get_presentation_effect_i_and_j(self, item, time, time_index):
 
-        # For item i
         pr_effect_i = self._presentation_effect(item,
                                                 time=time,
                                                 time_index=time_index)
         if not pr_effect_i:
-            return 0
+            return 0, None, None
 
         # For connected items
         list_j = self.items[self.items != item]
@@ -48,6 +47,17 @@ class ActRMeaning(ActR):
                                        time=time,
                                        time_index=time_index
                                        ) for j in list_j])
+
+        return pr_effect_i, pr_effect_j, list_j
+
+    def p_recall(self, item, time=None, time_index=None):
+
+        pr_effect_i, pr_effect_j, list_j = \
+             self._get_presentation_effect_i_and_j(item=item, time=time,
+                                                   time_index=time_index)
+        if pr_effect_i == 0:
+            return 0
+
         contrib = (self.c_x[item, list_j] * pr_effect_j).sum() * self.x
 
         _sum = pr_effect_i + contrib
@@ -122,20 +132,12 @@ class ActRPlus(ActRMeaning):
 
     def p_recall(self, item, time=None, time_index=None):
 
-        # For item i
-        pr_effect_i = self._presentation_effect(item,
-                                                time=time,
-                                                time_index=time_index)
-        if not pr_effect_i:
-            return 0
+        pr_effect_i, pr_effect_j, list_j = \
+            self._get_presentation_effect_i_and_j(item=item, time=time,
+                                                  time_index=time_index)
 
-        # For connected items
-        list_j = self.items[self.items != item]
-        pr_effect_j = np.array(
-            [self._presentation_effect(j,
-                                       time=time,
-                                       time_index=time_index
-                                       ) for j in list_j])
+        if pr_effect_i == 0:
+            return 0
 
         semantic_contrib = \
             (self.tk.c_semantic[item, list_j] * pr_effect_j).sum() * self.m

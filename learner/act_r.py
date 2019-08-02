@@ -75,13 +75,18 @@ class ActR(Learner):
     def _presentation_effect(self, i, time=None,
                              time_index=None):
 
+        # # Save it!
+        if time is not None:
+            key_t = time
+
+        elif time_index is not None:
+            key_t = time_index
+
+        else:
+            key_t = self.t
+
         try:
-            if time is not None:
-                return self._bkp_presentation_effect[time][i]
-            elif time_index is not None:
-                return self._bkp_presentation_effect[time_index][i]
-            else:
-                return self._bkp_presentation_effect[self.t][i]
+            return self._bkp_presentation_effect[key_t][i]
         except KeyError:
             pass
 
@@ -124,18 +129,10 @@ class ActR(Learner):
         pe = np.power(time_elapsed, -self.d).sum()
 
         # # Save it!
-        if time is not None:
-            t = time
 
-        elif time_index is not None:
-            t = time_index
-
-        else:
-            t = self.t
-
-        if time not in self._bkp_presentation_effect.keys():
-            self._bkp_presentation_effect[t] = {}
-        self._bkp_presentation_effect[t][i] = pe
+        if key_t not in self._bkp_presentation_effect.keys():
+            self._bkp_presentation_effect[key_t] = {}
+        self._bkp_presentation_effect[key_t][i] = pe
 
         return pe
 
@@ -180,7 +177,7 @@ class ActR(Learner):
                                  time_index=time_index)
 
         # If number of possible replies is defined
-        if self.tk.n_possible_replies is not None:
+        if self.tk.n_possible_replies:  # is not None
             p_correct = self.p_random + p_recall*(1 - self.p_random)
 
             if success:

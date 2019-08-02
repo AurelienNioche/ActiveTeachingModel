@@ -20,6 +20,9 @@ class Fit:
         self.model = model
         self.data = data
 
+        self.best_value = None
+        self.best_param = None
+
         self.verbose = verbose
 
     def _bic(self, lls, k):
@@ -46,47 +49,43 @@ class Fit:
 
         return mean_p, lls, bic
 
-    def evaluate(self, max_iter=1000):
+    def _objective(self, param):
 
-        def objective(param):
+        agent = self.model(param=param, tk=self.tk)
+        p_choices_ = agent.get_p_choices(data=self.data,
+                                         **self.kwargs)
 
-            agent = self.model(param=param, tk=self.tk)
-            p_choices_ = agent.get_p_choices(data=self.data,
-                                             **self.kwargs)
+        if p_choices_ is None or np.any(np.isnan(p_choices_)):
+            # print("WARNING! Objective function returning 'None'")
+            to_return = np.inf
 
-            if p_choices_ is None or np.any(np.isnan(p_choices_)):
-                # print("WARNING! Objective function returning 'None'")
-                to_return = np.inf
+        else:
+            to_return = - self._log_likelihood_sum(p_choices_)
 
-            else:
-                to_return = - self._log_likelihood_sum(p_choices_)
+        return to_return
 
-            return to_return
+    def evaluate(self, max_iter=1000, **kwargs):
 
         if self.method == 'tpe':  # Tree of Parzen Estimators
 
             space = [hp.uniform(*b) for b in self.model.bounds]
-            best_param = fmin(fn=objective, space=space, algo=tpe.suggest,
-                              max_evals=max_iter)
+            best_param = fmin(fn=self._objective, space=space,
+                              algo=tpe.suggest,
+                              max_evals=kwargs['max_evals'])
 
-        elif self.method in \
-                ('de', 'L-BFGS-B', 'TNC', 'COBYLA', 'SLSQP'):
+        else:
 
             bounds_scipy = [b[-2:] for b in self.model.bounds]
 
-            if self.verbose:
-                print("Finding best parameters...", end=' ')
-
             if self.method == 'de':
                 res = scipy.optimize.differential_evolution(
-                    func=objective, bounds=bounds_scipy,
-                    maxiter=max_iter
+                    func=self._objective, bounds=bounds_scipy,
+                    maxiter=kwargs['maxiter'], workers=kwargs['workers']
                 )
             else:
                 x0 = np.zeros(len(self.model.bounds)) * 0.5
-                res = scipy.optimize.minimize(fun=objective,
-                                              bounds=bounds_scipy, x0=x0,
-                                              maxiter=max_iter)
+                res = scipy.optimize.minimize(fun=self._objective,
+                                              bounds=bounds_scipy, x0=x0)
 
             best_param = {b[0]: v for b, v in zip(self.model.bounds, res.x)}
             if self.verbose:
@@ -96,9 +95,6 @@ class Fit:
                     print(
                         f"The fit did not succeed with method {self.method}.")
                 return None
-
-        else:
-            raise Exception(f"Method {self.method} is not defined")
 
         # Get probabilities with best param
         learner = self.model(param=best_param, tk=self.tk)
@@ -114,6 +110,27 @@ class Fit:
         return \
             {
                 "best_param": best_param,
+                "mean_p": mean_p,
+                "lls": lls,
+                "bic": bic
+            }
+
+    def get_stats(self):
+
+        # Get probabilities with best param
+        learner = self.model(param=self.best_param, tk=self.tk)
+        p_choices = learner.get_p_choices(data=self.data,
+                                          **self.kwargs)
+
+        # Compute bic, etc.
+        mean_p, lls, bic = self._model_stats(p_choices=p_choices,
+                                             best_param=self.best_param)
+
+        if self.verbose:
+            self._print(self.model.__name__, self.best_param, mean_p, lls, bic)
+        return \
+            {
+                "best_param": self.best_param,
                 "mean_p": mean_p,
                 "lls": lls,
                 "bic": bic

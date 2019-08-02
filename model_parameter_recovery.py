@@ -7,13 +7,15 @@ import matplotlib.pyplot as plt
 import numpy as np
 from tqdm import tqdm
 
-from fit import fit
+from fit.fit import Fit
 from learner.rl import QLearner
 from learner.act_r import ActR
 from learner.act_r_custom import ActRMeaning, ActRGraphic, ActRPlus
 
 from simulation.data import SimulatedData
 from simulation.task import Task
+
+from fit.bayesian_pygpgo import BayesianPYGPGOFit
 
 import plot.parameter_recovery
 
@@ -27,13 +29,15 @@ class SimulationAndFit:
 
     def __init__(self, model, t_max=300, n_kanji=30, grades=(1, ),
                  normalize_similarity=False,
-                 verbose=False, **kwargs):
+                 verbose=False, method='bayesian', **kwargs):
 
         self.model = model
 
         self.tk = Task(t_max=t_max, n_kanji=n_kanji, grades=grades,
                        normalize_similarity=normalize_similarity,
                        verbose=verbose, generate_full_task=True)
+
+        self.method = method
 
         self.verbose = verbose
 
@@ -43,16 +47,18 @@ class SimulationAndFit:
 
         np.random.seed(seed)
 
-        param = {}
-
-        for bound in self.model.bounds:
-            param[bound[0]] = np.random.uniform(bound[1], bound[2])
+        param = self.model.generate_random_parameters()
 
         data = SimulatedData(model=self.model, param=param, tk=self.tk,
                              verbose=self.verbose)
-        f = fit.Fit(model=self.model, tk=self.tk, data=data,
-                    **self.kwargs)
-        fit_r = f.evaluate()
+        if self.method == "bayesian":
+            f = BayesianPYGPGOFit(model=self.model, tk=self.tk, data=data)
+            fit_r = f.evaluate(**self.kwargs)
+
+        else:
+            f = Fit(model=self.model, tk=self.tk, data=data)
+            fit_r = f.evaluate(**self.kwargs)
+
         return \
             {
                 "initial": param,

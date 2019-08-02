@@ -150,9 +150,10 @@ class Network:
 
         self.previous_V = self.V.copy()
 
-        # r = mp.Pool().map(self._update_i, range(self.N))
-        for i in range(self.N):
-            self.V[i] = self._update_i(i)
+        self.V[:] = mp.Pool().map(self._update_i, range(self.N))
+
+        # for i in range(self.N):
+        #     self.V[i] = self._update_i(i)
 
     def _present_pattern(self):
 
@@ -166,9 +167,9 @@ class Network:
                 sum_ += \
                     (self.xi[mu, i] - self.f) * self.V[i]
 
-            self.population_activity[mu, t] = sum_
+            self.population_activity[mu, t] = sum_ * self.n_factor
 
-        self.population_activity[:, t] *= self.n_factor
+        # self.population_activity[:, t] *= self.n_factor
 
     def simulate(self):
 
@@ -236,8 +237,11 @@ def main(force=False):
     N = 3000
     t_max = 1000
     L = 16
+    phase_shift = 0.75
 
-    bkp_file = f'bkp/romani_N{N}_tmax{t_max}_L{L}.p'
+    bkp_file = os.path.join(
+        'bkp',
+        f'romani_N{N}_tmax{t_max}_L{L}_phase_shift{phase_shift}.p')
 
     os.makedirs(os.path.dirname(bkp_file), exist_ok=True)
 
@@ -247,10 +251,7 @@ def main(force=False):
             N=N,
             t_max=t_max,
             L=L,
-            J_0_min=0.7,
-            J_0_max=1.2,
-            T_j0=25,
-            phase_shift=0.0,
+            phase_shift=0.75,
         )
         network.simulate()
 

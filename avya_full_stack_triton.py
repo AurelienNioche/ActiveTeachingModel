@@ -20,6 +20,9 @@ from fit.fit import Fit
 # import plot.n_seen
 # import plot.n_learnt
 
+from datetime import timedelta
+from time import time
+
 from utils.utils import dic2string, dump, load
 
 import warnings
@@ -28,14 +31,13 @@ import warnings
 def run(student_model, teacher_model, student_param,
         n_item, grades, t_max, normalize_similarity,
         max_iter):
-
     teacher = teacher_model(t_max=t_max, n_item=n_item,
                             normalize_similarity=normalize_similarity,
                             grades=grades)
 
     learner = student_model(param=student_param, tk=teacher.tk)
 
-    iterator = tqdm(range(t_max))  # if verbose else range(t_max)
+    # iterator = tqdm(range(t_max))  # if verbose else range(t_max)
 
     param_values = student_model.generate_random_parameters()
 
@@ -46,40 +48,54 @@ def run(student_model, teacher_model, student_param,
 
     hist_param_values = np.zeros((len(student_model.bounds), t_max))
 
-    for t in iterator:
+    for t in range(t_max):
+        print("-" * 10)
+        print(f"T{t}")
+        print()
+        tt = time()
 
+        # noinspection DuplicatedCode
         question, possible_replies = teacher.ask(
             agent=model_learner,
             make_learn=False)
 
+        print(f"Teacher asked [{timedelta(seconds=time() - tt)}]")
+
         reply = learner.decide(
             question=question,
             possible_replies=possible_replies)
+
+        print(f"Learner replied [{timedelta(seconds=time() - tt)}]")
 
         learner.learn(question=question)
 
         teacher.register_question_and_reply(question=question, reply=reply,
                                             possible_replies=possible_replies)
 
-        # Update the model of the learner
         data_view = Data(n_items=n_item,
-                         questions=teacher.questions[:t+1],
-                         replies=teacher.replies[:t+1],
-                         possible_replies=teacher.possible_replies[:t+1, :])
+                         questions=teacher.questions[:t + 1],
+                         replies=teacher.replies[:t + 1],
+                         possible_replies=teacher.possible_replies[:t + 1, :])
 
+        print(f"Fit begins [{timedelta(seconds=time() - tt)}]")
         f = Fit(model=student_model, tk=teacher.tk,
                 data=data_view)
-        fit_r = f.evaluate(max_iter=max_iter)
+        fit_r = f.evaluate(maxiter=max_iter,
+                           workers=-1)
         if fit_r is not None:
             param_values = fit_r['best_param']
             model_learner.set_parameters(param_values)
         else:
             warnings.warn("Fit did not end up successfully :/")
 
+        print(f"Fit ends up [{timedelta(seconds=time() - tt)}]")
+
         model_learner.learn(question=question)
 
         hist_param_values[:, t] = [param_values[tup[0]]
                                    for tup in student_model.bounds]
+
+        print(f"End of turn [{timedelta(seconds=time() - tt)}]")
 
     p_recall = p_recall_over_time_after_learning(
         agent=learner,
@@ -98,7 +114,6 @@ def run(student_model, teacher_model, student_param,
 
 
 def main(force=True):
-
     student_model = ActRMeaning
     teacher_model = AvyaTeacher
 
@@ -108,13 +123,14 @@ def main(force=True):
 
     t_max = 1000
     n_item = 30
-    grades = (1, )
+    grades = (1,)
 
-    max_iter = 50
+    max_iter = 10
 
     extension = f'{teacher_model.__name__}_{student_model.__name__}_' \
-        f'{dic2string(student_param)}_' \
-        f'ni_{n_item}_grade_{grades}_tmax_{t_max}_norm_{normalize_similarity}'
+                f'{dic2string(student_param)}_' \
+                f'ni_{n_item}_grade_{grades}_tmax_{t_max}_' \
+                f'norm_{normalize_similarity}'
 
     bkp_file = os.path.join('bkp', 'full_stack', f'{extension}.p')
 

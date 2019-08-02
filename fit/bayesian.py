@@ -14,11 +14,6 @@ class BayesianFit(Fit):
                          method='Bayesian',
                          **kwargs)
 
-        self.best_value = None
-        self.best_param = None
-
-        # self.optimizer = BayesianOptimization()
-
     def _objective(self, **param):
 
         agent = self.model(param=param, tk=self.tk)
@@ -26,16 +21,14 @@ class BayesianFit(Fit):
                                          **self.kwargs)
 
         if p_choices_ is None or np.any(np.isnan(p_choices_)):
-            # print("WARNING! Objective function returning 'None'")
-            to_return = -np.inf
+            to_return = 0
 
         else:
-            to_return = self._log_likelihood_sum(p_choices_)
+            to_return = np.mean(p_choices_)
 
-        print(to_return)
-        return to_return  # * 10**100
+        return to_return
 
-    def evaluate(self, init_points=20, n_iter=20, verbose=2):
+    def evaluate(self, **kwargs):
 
         pbounds = {tup[0]: (tup[1], tup[2]) for tup in self.model.bounds}
 
@@ -43,7 +36,7 @@ class BayesianFit(Fit):
             f=self._objective,
             pbounds=pbounds,
             random_state=1,
-            verbose=verbose
+            verbose=kwargs['verbose']
         )
 
         if self.best_param is not None:
@@ -51,38 +44,12 @@ class BayesianFit(Fit):
                 params=self.best_param,
                 lazy=True
             )
-        # try:
-        res = optimizer.maximize(init_points=init_points, n_iter=n_iter)
-        # except (StopIteration, FloatingPointError, ValueError):
-        #     return
 
-        self.best_param = res.max['params']
+        optimizer.maximize(init_points=kwargs['init_points'],
+                           n_iter=kwargs['n_iter'])
 
-        self.best_value = res.max['target']
-        if self.verbose:
-            print(f"Best value: {self.best_value}")
+        self.best_param = optimizer.max['params']
 
-        return {
-            'best_param': self.best_param
-        }
+        self.best_value = optimizer.max['target']
 
-    def get_stats(self):
-
-        # Get probabilities with best param
-        learner = self.model(param=self.best_param, tk=self.tk)
-        p_choices = learner.get_p_choices(data=self.data,
-                                          **self.kwargs)
-
-        # Compute bic, etc.
-        mean_p, lls, bic = self._model_stats(p_choices=p_choices,
-                                             best_param=self.best_param)
-
-        if self.verbose:
-            self._print(self.model.__name__, self.best_param, mean_p, lls, bic)
-        return \
-            {
-                "best_param": self.best_param,
-                "mean_p": mean_p,
-                "lls": lls,
-                "bic": bic
-            }
+        return self.get_stats()
