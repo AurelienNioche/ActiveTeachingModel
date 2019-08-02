@@ -71,6 +71,7 @@ class NetworkParam:
             n_neurons=100000,
             p=16,
             # Activation #############
+            simplified_simulation = False,
             tau=0.01,
             # Gain ###################
             theta=0,
@@ -105,6 +106,7 @@ class NetworkParam:
         self.p = p
 
         # Activation function
+        self.simplified_simulation = simplified_simulation
         self.tau = tau
 
         # Gain function
@@ -268,6 +270,7 @@ class Network:
                     + self.pr.j_backward * sum_neg
 
     def _update_activation(self):
+        assert self.pr.simplified_simulation is False
 
         new_current = np.zeros(self.activation.shape)
 
@@ -291,6 +294,38 @@ class Network:
 
             first_part = current * \
                 (1 - (self.pr.dt / self.pr.tau))
+
+            new_current[i] = first_part + second_part
+
+        self.activation[:] = new_current
+
+    def _simplified_update_activation(self):
+        assert self.pr.simplified_simulation is True
+
+        new_current = np.zeros(self.activation.shape)
+
+        for i in range(self.pr.n_neurons):
+
+            current = self.activation[i]
+            noise = self.gaussian_noise()
+            fraction_neurons = 1 / self.pr.n_neurons \
+                * np.unique(self.connectivity, axis=1).shape[1]
+
+            sum_ = 0
+            for j in range(self.pr.n_neurons):
+                sum_ += \
+                    (self.weights_constant[i, j]
+                     - self.kappa_over_n * self.phi
+                     + self.delta_weights[i, j]) \
+                    * self.g(self.activation[j]) \
+                    * fraction_neurons
+
+            business = sum_ + noise
+
+            second_part = business * self.pr.dt  # done
+
+            first_part = current * \
+                (1 - self.pr.dt)  # done
 
             new_current[i] = first_part + second_part
 
@@ -333,7 +368,10 @@ class Network:
         print(f"Simulating for {self.t_tot_discrete} time steps...\n")
         for t in tqdm(range(self.t_tot_discrete)):
             self.update_phi(t)
-            self._update_activation()
+            if self.pr.simplified_simulation:
+                self._simplified_update_activation()
+            else:
+                self._update_activation()
             self._save_fr(t)
 
 
@@ -405,7 +443,7 @@ def main(force=False):
 
         np.random.seed(1234)
 
-        factor = 10**(-2)
+        factor = 10**(-4)
 
         network = Network(
             param={
@@ -438,4 +476,4 @@ def main(force=False):
 
 
 if __name__ == "__main__":
-    main(force=False)
+    main(force=True)
