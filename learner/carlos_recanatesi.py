@@ -365,7 +365,7 @@ class Network:
     def simulate(self):
         self._initialize()
 
-        print(f"Simulating for {self.t_tot_discrete} time steps...\n")
+        print(f"Simulating for {self.t_tot_discrete} time steps...\n") #
         for t in tqdm(range(self.t_tot_discrete)):
             self.update_phi(t)
             if self.pr.simplified_simulation:
