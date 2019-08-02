@@ -229,6 +229,12 @@ class Network:
     def gaussian_noise(self):
         return np.random.normal(loc=0, scale=self.pr.xi_0 ** 0.5)
 
+    def simplified_gaussian_noise(self):
+        return np.random.normal(loc=0, scale=(self.pr.xi_0
+                                              * np.unique(self.connectivity,
+                                                          axis=1).shape[1])
+                                ** 0.5)
+
     def _compute_weight_constant(self):
 
         print("Computing weight constants...")
@@ -307,7 +313,7 @@ class Network:
         for i in range(self.pr.n_neurons):
 
             current = self.activation[i]
-            noise = self.gaussian_noise()
+            noise = self.simplified_gaussian_noise()
             fraction_neurons = 1 / self.pr.n_neurons \
                 * np.unique(self.connectivity, axis=1).shape[1]
 
