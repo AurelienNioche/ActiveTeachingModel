@@ -11,7 +11,8 @@ IDX_ARGUMENTS = 2
 
 class Fit:
 
-    def __init__(self, tk, model, data, verbose=False, method='de', **kwargs):
+    def __init__(self, tk, model, data=None,
+                 verbose=False, method='de', **kwargs):
 
         self.kwargs = kwargs
         self.method = method
@@ -22,6 +23,9 @@ class Fit:
 
         self.best_value = None
         self.best_param = None
+
+        self.history = []
+        self.obj_values = []
 
         self.verbose = verbose
 
@@ -49,7 +53,7 @@ class Fit:
 
         return mean_p, lls, bic
 
-    def _objective(self, param):
+    def objective(self, param, keep_in_history=True):
 
         agent = self.model(param=param, tk=self.tk)
         p_choices_ = agent.get_p_choices(data=self.data,
@@ -57,19 +61,25 @@ class Fit:
 
         if p_choices_ is None or np.any(np.isnan(p_choices_)):
             # print("WARNING! Objective function returning 'None'")
-            to_return = np.inf
+            value = np.inf
 
         else:
-            to_return = - self._log_likelihood_sum(p_choices_)
+            value = - self._log_likelihood_sum(p_choices_)
 
-        return to_return
+        if keep_in_history:
+            self.obj_values.append(value)
+            self.history.append(param)
+        return value
 
-    def evaluate(self, max_iter=1000, **kwargs):
+    def evaluate(self, max_iter=1000, data=None, **kwargs):
+
+        if data is not None:
+            self.data = data
 
         if self.method == 'tpe':  # Tree of Parzen Estimators
 
             space = [hp.uniform(*b) for b in self.model.bounds]
-            best_param = fmin(fn=self._objective, space=space,
+            best_param = fmin(fn=self.objective, space=space,
                               algo=tpe.suggest,
                               max_evals=kwargs['max_evals'])
 
@@ -79,12 +89,12 @@ class Fit:
 
             if self.method == 'de':
                 res = scipy.optimize.differential_evolution(
-                    func=self._objective, bounds=bounds_scipy,
+                    func=self.objective, bounds=bounds_scipy,
                     maxiter=kwargs['maxiter'], workers=kwargs['workers']
                 )
             else:
                 x0 = np.zeros(len(self.model.bounds)) * 0.5
-                res = scipy.optimize.minimize(fun=self._objective,
+                res = scipy.optimize.minimize(fun=self.objective,
                                               bounds=bounds_scipy, x0=x0)
 
             best_param = {b[0]: v for b, v in zip(self.model.bounds, res.x)}

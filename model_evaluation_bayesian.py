@@ -5,8 +5,8 @@ import os
 # import pickle
 # import scipy.stats
 #
-# import matplotlib.pyplot as plt
-# import numpy as np
+import matplotlib.pyplot as plt
+import numpy as np
 # from tqdm import tqdm
 #
 from fit.fit import Fit
@@ -40,8 +40,8 @@ def main():
     param = {"d": 0.5, "tau": 0.01, "s": 0.06}  # , "m": 0.02}
     model = ActR
 
-    t_max = 300
-    n_item = 30
+    t_max = 500
+    n_item = 79
     grades = (1, )
     normalize_similarity = True
 
@@ -65,12 +65,58 @@ def main():
     # print()
     t0 = time()
     print("BayesianPYGPGO")
-    f = BayesianPYGPGOFit(model=model, tk=tk, data=data,
-                          use_p_correct=True,
-                          stop_if_zero=False)
-    print(f.evaluate(max_iter=100,))
+    f = BayesianPYGPGOFit(model=model, tk=tk, data=data)
+
+    obj_with_true_param = f.objective(keep_in_history=False, **param)
+    print('obj with true param', obj_with_true_param)
+
+    init_evals = 3
+    max_iter = 200 - init_evals
+
+    f.evaluate(max_iter=max_iter, init_evals=init_evals)
+
+    # print(f.evaluate(n_iter=max_iter, init_points=init_evals))
 
     print("Time:", timedelta(seconds=time() - t0))
+
+    n_param = len(param)
+
+    param_key = sorted(list(param.keys()))
+
+    history = f.history
+    objective = f.obj_values
+    fig, axes = plt.subplots(nrows=n_param+1)
+
+    x = np.arange(len(history))
+
+    i = 0
+    for i in range(n_param):
+        ax = axes[i]
+
+        key = param_key[i]
+
+        y = [v[key] for v in history]
+        ax.plot(x, y, color=f"C{i}")
+        ax.axhline(param[key], linestyle='--', color="black", alpha=0.5,
+                   zorder=-1)
+        ax.set_ylabel(key)
+
+        ax.set_xlim(min(x), max(x))
+
+        ax.set_xticks([])
+
+    ax = axes[-1]
+
+    ax.set_xlim(min(x), max(x))
+    ax.plot(x, objective)
+    ax.set_xlabel("Iterations")
+    ax.set_ylabel("Objective")
+
+    ax.axhline(obj_with_true_param, linestyle='--', color="black", alpha=0.5,
+               zorder=-1)
+
+    plt.tight_layout()
+    plt.show()
 
 
 if __name__ == "__main__":

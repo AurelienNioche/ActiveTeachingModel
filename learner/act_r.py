@@ -146,15 +146,14 @@ class ActR(Learner):
 
         x = (self.tau - a) / self.temp
 
-        try:
+        if x < -10 ** 2:  # 1 / (1+exp(-1000)) equals approx 1.
+            return 1
+
+        elif x > 700:  # 1 / (1+exp(700)) equals approx 0.
+            return 0
+
+        else:
             return 1 / (1 + np.exp(x))
-
-        except FloatingPointError:
-            if x < -10**2:  # 1 / (1+exp(-1000)) equals approx 1.
-                return 1
-
-            elif x > 700:  # 1 / (1+exp(700)) equals approx 0.
-                return 0
 
     def p_recall(self, item, time=None, time_index=None):
 

@@ -36,7 +36,10 @@ class BayesianGPyOptFit(Fit):
     #
     #     return to_return  # * 10**100
 
-    def evaluate(self, **kwargs):
+    def evaluate(self, data=None, **kwargs):
+
+        if data is not None:
+            self.data = data
 
         domain = [
             {'name': f'{b[0]}',
@@ -45,7 +48,7 @@ class BayesianGPyOptFit(Fit):
              } for b in self.model.bounds
         ]
 
-        myBopt = BayesianOptimization(f=self._objective,
+        myBopt = BayesianOptimization(f=self.objective,
                                       domain=domain)
         myBopt.run_optimization(max_iter=kwargs['max_iter'])
 

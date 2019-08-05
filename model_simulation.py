@@ -15,21 +15,30 @@ import plot.success
 
 from plot.generic import save_fig
 
+from utils.utils import dic2string
 
-def main(t_max=300, n_item=30, teacher_model=None, verbose=False,
+
+def main(t_max=300, n_item=30, grades=(1, ),
+         student_model=None,
+         student_param=None,
+         teacher_model=None, verbose=False,
          normalize_similarity=True):
+
+    if student_model is None:
+        student_model = ActRMeaning
 
     if teacher_model is None:
         teacher_model = RandomTeacher
 
     teacher = teacher_model(
-        t_max=t_max, n_item=n_item,
+        t_max=t_max, n_item=n_item, grades=grades,
         handle_similarities=True,
         normalize_similarity=normalize_similarity,
         verbose=verbose)
 
-    learner = ActRMeaning(param={"d": 0.5, "tau": 0.01, "s": 0.06, "m": 0.02},
-                          tk=teacher.tk)
+    learner = student_model(
+        param=student_param,
+        tk=teacher.tk)
 
     questions, replies, successes = teacher.teach(agent=learner)
 
@@ -96,14 +105,24 @@ def main(t_max=300, n_item=30, teacher_model=None, verbose=False,
         line_width=line_width * 2
     )
 
-    save_fig(f"demo_simulation_{teacher_model.__name__}.pdf")
+    extension = f'{teacher_model.__name__}_{student_model.__name__}_' \
+                f'{dic2string(student_param)}_' \
+                f'ni_{n_item}_grade_{grades}_tmax_{t_max}_' \
+                f'norm_{normalize_similarity}'
+
+    save_fig(f"simulation_{extension}.pdf")
 
 
 if __name__ == "__main__":
 
-    for tm in (TraditionalLeitnerTeacher,
-               LeitnerTeacher,
-               RandomTeacher,
-               AvyaTeacher):
-        main(teacher_model=tm, t_max=1000, n_item=30,
-             normalize_similarity=True)
+    # for tm in (TraditionalLeitnerTeacher,
+    #            LeitnerTeacher,
+    #            RandomTeacher,
+    #            AvyaTeacher):
+    #     main(teacher_model=tm, t_max=1000, n_item=30,
+    #          normalize_similarity=True)
+    main(
+        student_model=ActRMeaning,
+        student_param={"d": 0.5, "tau": 0.01, "s": 0.06, "m": 0.02},
+        teacher_model=TraditionalLeitnerTeacher,
+        t_max=2000, n_item=60, normalize_similarity=True)

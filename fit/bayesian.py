@@ -14,30 +14,41 @@ class BayesianFit(Fit):
                          method='Bayesian',
                          **kwargs)
 
-    def _objective(self, **param):
+    def objective(self, keep_in_history=True, **param):
 
         agent = self.model(param=param, tk=self.tk)
         p_choices_ = agent.get_p_choices(data=self.data,
+                                         stop_if_zero=False,
+                                         use_p_correct=True,
                                          **self.kwargs)
 
-        if p_choices_ is None or np.any(np.isnan(p_choices_)):
-            to_return = 0
+        value = np.sum(p_choices_)
 
-        else:
-            to_return = np.mean(p_choices_)
+        if keep_in_history:
+            self.obj_values.append(value)
+            self.history.append(param)
+        return value
 
-        return to_return
+    def evaluate(self, data=None, verbose=2, **kwargs):
 
-    def evaluate(self, **kwargs):
+        """
+        :param verbose:
+        :param kwargs:
+            - init_points
+            - n_iter
+        :return:
+        """
+
+        if data is not None:
+            self.data = data
 
         pbounds = {tup[0]: (tup[1], tup[2]) for tup in self.model.bounds}
 
         optimizer = BayesianOptimization(
-            f=self._objective,
+            f=self.objective,
             pbounds=pbounds,
             random_state=1,
-            verbose=kwargs['verbose']
-        )
+            verbose=verbose)
 
         if self.best_param is not None:
             optimizer.probe(
@@ -45,8 +56,7 @@ class BayesianFit(Fit):
                 lazy=True
             )
 
-        optimizer.maximize(init_points=kwargs['init_points'],
-                           n_iter=kwargs['n_iter'])
+        optimizer.maximize(**kwargs)
 
         self.best_param = optimizer.max['params']
 

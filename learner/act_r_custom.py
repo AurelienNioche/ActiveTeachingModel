@@ -6,7 +6,9 @@ from learner.act_r import ActR
 class ActRMeaning(ActR):
 
     version = 3.1
-    bounds = ('d', 0.0000001, 1.0), ('tau', -1, 1), ('s', 0.0000001, 1), \
+    bounds = ('d', 0.0000001, 1.0), \
+             ('tau', -1, 1), \
+             ('s', 0.0000001, 1), \
              ('m', -0.1, 0.1)
 
     def __init__(self, tk, param=None, metaclass=False, **kwargs):
