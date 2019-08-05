@@ -68,7 +68,7 @@ def main():
     f = BayesianPYGPGOFit(model=model, tk=tk, data=data,
                           use_p_correct=True,
                           stop_if_zero=False)
-    print(f.evaluate(max_iter=50,))
+    print(f.evaluate(max_iter=100,))
 
     print("Time:", timedelta(seconds=time() - t0))
 

@@ -31,7 +31,12 @@ class Learner:
         """Expected return from specific learner: p_r"""
         raise NotImplementedError
 
-    def get_p_choices(self, data, use_p_correct=False, stop_if_zero=True):
+    def get_p_choices(self, data,
+                      # use_p_recall=False,
+                      use_p_correct=False,
+                      stop_if_zero=True):
+
+        # assert not use_p_recall * use_p_correct, "Choose one of the two!"
 
         t_max = len(data.questions)
 

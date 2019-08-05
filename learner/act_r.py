@@ -7,7 +7,7 @@ class ActR(Learner):
 
     version = 2.2
     bounds = ('d', 0.001, 1.0), \
-             ('tau', -1, 1), \
+             ('tau', 0, 1), \
              ('s', 0.001, 1)
 
     def __init__(self, tk, param=None, metaclass=False, verbose=False):
@@ -28,6 +28,8 @@ class ActR(Learner):
             self.p_random = 1/self.tk.n_possible_replies
         else:
             self.p_random = 0
+
+        self.temp = self.s*np.square(2)
 
         # History of presentation
         self.hist = np.ones(tk.t_max) * -99
@@ -142,20 +144,17 @@ class ActR(Learner):
         some retrieval threshold τ is
         """
 
-        x = (self.tau - a) / (self.s*np.square(2))
-
-        # Avoid overflow
-        if x < -10**2:  # 1 / (1+exp(-1000)) equals approx 1.
-            return 1
-
-        elif x > 700:  # 1 / (1+exp(700)) equals approx 0.
-            return 0
+        x = (self.tau - a) / self.temp
 
         try:
             return 1 / (1 + np.exp(x))
-        except FloatingPointError as e:
-            print(f'x={x}, tau = {self.tau}, a = {a}, s = {self.s}')
-            raise e
+
+        except FloatingPointError:
+            if x < -10**2:  # 1 / (1+exp(-1000)) equals approx 1.
+                return 1
+
+            elif x > 700:  # 1 / (1+exp(700)) equals approx 0.
+                return 0
 
     def p_recall(self, item, time=None, time_index=None):
 
@@ -240,12 +239,6 @@ class ActR(Learner):
             self.t += 1
 
     def unlearn(self, time_index=None):
-
-        # try:
-        #     last_question = self.questions.pop()
-        # except IndexError:
-        #     raise AssertionError("I can not unlearn something
-        #     that has not been learned!")
 
         if time_index is not None:
             self.hist[time_index] = -99

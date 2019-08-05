@@ -27,7 +27,7 @@ class BayesianPYGPGOFit(Fit):
         p_choices_ = agent.get_p_choices(data=self.data,
                                          **self.kwargs)
         assert None not in p_choices_
-        return np.mean(p_choices_)
+        return np.sum(p_choices_)
 
     def evaluate(self, **kwargs):
 
