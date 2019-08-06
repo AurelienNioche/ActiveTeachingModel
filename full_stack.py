@@ -199,11 +199,9 @@ if __name__ == '__main__':
                         dest='no_fig',
                         help='Do not create fig')
 
-    parser.add_argument('--n_cpu', '-c', action='append_const',
-                        const=int,
-                        default=mp.cpu_count()-1,
+    parser.add_argument('--n_cpu', '-c', default=mp.cpu_count()-1,
                         dest='n_cpu',
-                        help='Number of cpu to use')
+                        help='Number of cpu to use', type=int)
 
     args = parser.parse_args()
     main(plot_fig=not args.no_fig, n_cpu=args.n_cpu)
