@@ -18,7 +18,8 @@ class MyGPGO(GPGO):
 
         super().__init__(surrogate, acquisition, f, parameter_dict, n_jobs)
 
-    def run(self, max_iter=10, init_evals=3, resume=False, init_param=None):
+    def run(self, max_iter=10, init_evals=3, resume=False, init_param=None,
+            verbose=True):
         """
         Runs the Bayesian Optimization procedure.
 
@@ -30,15 +31,18 @@ class MyGPGO(GPGO):
             Initial function evaluations before fitting a GP. Default is 3.
         resume: bool
             Whether to resume the optimization procedure from the last evaluation. Default is `False`.
+
         """
         if not resume:
             self.init_evals = init_evals
             self._firstRun(n_eval=self.init_evals, init_param=init_param)
-            self.logger._printInit(self)
+            if verbose:
+                self.logger._printInit(self)
         for iteration in range(max_iter):
             self._optimizeAcq()
             self.updateGP()
-            self.logger._printCurrent(self)
+            if verbose:
+                self.logger._printCurrent(self)
 
     def _firstRun(self, n_eval=3, init_param=None):
         """

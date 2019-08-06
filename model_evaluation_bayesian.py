@@ -45,6 +45,8 @@ def main():
     grades = (1, )
     normalize_similarity = True
 
+    verbose = True
+
     tk = Task(t_max=t_max, n_kanji=n_item, grades=grades,
               normalize_similarity=normalize_similarity,
               generate_full_task=True)
@@ -73,7 +75,7 @@ def main():
     init_evals = 3
     max_iter = 200 - init_evals
 
-    f.evaluate(max_iter=max_iter, init_evals=init_evals)
+    f.evaluate(max_iter=max_iter, init_evals=init_evals, verbose=verbose)
 
     # print(f.evaluate(n_iter=max_iter, init_points=init_evals))
 

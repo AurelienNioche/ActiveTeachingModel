@@ -67,7 +67,7 @@ def run(student_model, teacher_model, student_param,
                          replies=teacher.replies[:t+1],
                          possible_replies=teacher.possible_replies[:t+1, :])
 
-        f.evaluate(max_iter=max_iter, data=data_view)
+        f.evaluate(max_iter=max_iter, data=data_view, verbose=False)
 
         model_learner.set_parameters(f.best_param)
 
