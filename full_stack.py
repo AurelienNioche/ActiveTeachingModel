@@ -23,6 +23,8 @@ from fit.bayesian_pygpgo import BayesianPYGPGOFit
 
 from utils.utils import dic2string, dump, load
 
+import argparse
+
 
 def run(student_model, teacher_model, student_param,
         n_item, grades, t_max, normalize_similarity,
@@ -191,4 +193,11 @@ def main(student_model=None, teacher_model=None,
 
 
 if __name__ == '__main__':
-    main()
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--no_fig', '-n', action='store_true', default=True,
+                        dest='no_fig',
+                        help='Do not create fig')
+
+    args = parser.parse_args()
+    main(plot_fig=not args.no_fig)
