@@ -1,16 +1,13 @@
 from pyGPGO.covfunc import squaredExponential
 from pyGPGO.acquisition import Acquisition
 from pyGPGO.surrogates.GaussianProcess import GaussianProcess
-from pyGPGO.surrogates.BoostedTrees import BoostedTrees
-from pyGPGO.GPGO import GPGO, EventLogger
+from pyGPGO.GPGO import GPGO
 
 import multiprocessing as mp
 
 import numpy as np
-from fit.fit import Fit
 
 import queue
-import sys
 
 
 def objective(model, tk, data, param):
