@@ -9,8 +9,6 @@ import multiprocessing as mp
 import numpy as np
 from fit.fit import Fit
 
-import sys
-
 
 class MyGPGO(GPGO):
 
@@ -37,8 +35,7 @@ class MyGPGO(GPGO):
         if verbose:
             self.logger = EventLogger(self)
 
-    def run(self, max_iter=10, init_evals=3, resume=False,
-            init_param=None):
+    def run(self, max_iter=10, init_evals=3, resume=False, init_param=None):
         """
         Runs the Bayesian Optimization procedure.
 
@@ -107,17 +104,25 @@ class BayesianPYGPGOFit(Fit):
         super().__init__(tk=tk, model=model, data=data, verbose=verbose,
                          method='BayesianGPyOpt',
                          **kwargs)
-        # self.best_value = None
+
+        self.best_value = None
         self.best_param = None
 
-        self.history = []
+        self.history_eval_param = []
         self.obj_values = []
 
         self.n_jobs = n_jobs
 
-        np.random.seed(seed)
+        self.history_best_fit_param = []
+        self.history_best_fit_value = []
 
-        # self.optimizer = BayesianOptimization()
+        self.time_out = None
+
+        self.verbose = verbose
+
+        self.opt = None
+
+        np.random.seed(seed)
 
     def objective(self, keep_in_history=True, **param):
 
@@ -132,13 +137,15 @@ class BayesianPYGPGOFit(Fit):
         # assert None not in p_choices_
         if keep_in_history:
             self.obj_values.append(value)
-            self.history.append(param)
+            self.history_eval_param.append(param)
         return value
 
-    def evaluate(self, data=None, verbose=True, **kwargs):
+    def evaluate(self, data=None, **kwargs):
 
         if data is not None:
             self.data = data
+
+        self.history_eval_param = []
 
         param = {
             f'{b[0]}': ('cont', [b[1], b[2]])
@@ -155,18 +162,22 @@ class BayesianPYGPGOFit(Fit):
 
         opt = MyGPGO(gp, acq, f, param,
                      n_jobs=self.n_jobs,
-                     verbose=verbose)
+                     verbose=self.verbose)
         if self.best_param is None:
-            if verbose:
+            if self.verbose:
                 print("No previous best param for now")
             self.best_param = {}
             opt.run(**kwargs)
 
         else:
-            if verbose:
+            if self.verbose:
                 print(f"Best param is {self.best_param}")
             opt.run(init_param=self.best_param, **kwargs)
 
         r = opt.getResult()
 
-        self.best_param.update(r[0])
+        self.best_param = dict(r[0])
+        self.best_value = r[1]
+
+        self.history_best_fit_param.append(self.best_param)
+        self.history_best_fit_value.append(self.best_value)

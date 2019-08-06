@@ -85,7 +85,7 @@ def main():
 
     param_key = sorted(list(param.keys()))
 
-    history = f.history
+    history = f.history_eval_param
     objective = f.obj_values
     fig, axes = plt.subplots(nrows=n_param+1)
 

@@ -26,7 +26,7 @@ class BayesianFit(Fit):
 
         if keep_in_history:
             self.obj_values.append(value)
-            self.history.append(param)
+            self.history_eval_param.append(param)
         return value
 
     def evaluate(self, data=None, verbose=2, **kwargs):

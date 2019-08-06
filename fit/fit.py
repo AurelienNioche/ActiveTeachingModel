@@ -24,7 +24,7 @@ class Fit:
         self.best_value = None
         self.best_param = None
 
-        self.history = []
+        self.history_eval_param = []
         self.obj_values = []
 
         self.verbose = verbose
@@ -68,7 +68,7 @@ class Fit:
 
         if keep_in_history:
             self.obj_values.append(value)
-            self.history.append(param)
+            self.history_eval_param.append(param)
         return value
 
     def evaluate(self, max_iter=1000, data=None, **kwargs):

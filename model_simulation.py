@@ -1,4 +1,4 @@
-import matplotlib.pyplot as plt
+import os
 
 from learner.act_r_custom import ActRMeaning
 from teacher.random import RandomTeacher
@@ -6,32 +6,19 @@ from teacher.leitner import LeitnerTeacher
 from teacher.complete_leitner import TraditionalLeitnerTeacher
 from teacher.avya import AvyaTeacher
 
+import plot.simulation
+
 from simulation.memory import p_recall_over_time_after_learning
 
-import plot.memory_trace
-import plot.n_seen
-import plot.n_learnt
-import plot.success
-
-from plot.generic import save_fig
-
-from utils.utils import dic2string
+from utils.utils import dic2string, load, dump
 
 
-def main(t_max=300, n_item=30, grades=(1, ),
-         student_model=None,
-         student_param=None,
-         teacher_model=None, verbose=False,
-         normalize_similarity=True):
-
-    if student_model is None:
-        student_model = ActRMeaning
-
-    if student_param is None:
-        student_param = {"d": 0.5, "tau": 0.01, "s": 0.06, "m": 0.02}
-
-    if teacher_model is None:
-        teacher_model = RandomTeacher
+def _run(
+        teacher_model,
+        t_max, grades, n_item, normalize_similarity,
+        student_model,
+        student_param,
+        verbose):
 
     teacher = teacher_model(
         t_max=t_max, n_item=n_item, grades=grades,
@@ -53,67 +40,57 @@ def main(t_max=300, n_item=30, grades=(1, ),
         t_max=t_max,
         n_item=n_item)
 
-    # Plot...
-    font_size = 10
-    label_size = 8
-    line_width = 1
+    return {
+        'p_recall': p_recall,
+        'seen': seen,
+        'successes': successes
+    }
 
-    n_rows, n_cols = 5, 1
 
-    fig, axes = plt.subplots(nrows=n_rows, ncols=n_cols, figsize=(6, 14))
+def main(t_max=300, n_item=30, grades=(1, ),
+         student_model=None,
+         student_param=None,
+         teacher_model=None, verbose=False,
+         normalize_similarity=True,
+         force=False):
 
-    ax1 = axes[0]
-    plot.memory_trace.summarize(
-        p_recall=p_recall,
-        ax=ax1,
-        font_size=font_size,
-        label_size=label_size,
-        line_width=line_width,
-    )
+    if student_model is None:
+        student_model = ActRMeaning
 
-    ax2 = axes[1]
-    plot.memory_trace.summarize_over_seen(
-        p_recall=p_recall,
-        seen=seen,
-        ax=ax2,
-        font_size=font_size,
-        label_size=label_size,
-        line_width=line_width
-    )
+    if student_param is None:
+        student_param = {"d": 0.5, "tau": 0.01, "s": 0.06, "m": 0.02}
 
-    ax3 = axes[2]
-    plot.n_learnt.curve(
-        p_recall=p_recall,
-        ax=ax3,
-        font_size=font_size,
-        label_size=label_size,
-        line_width=line_width
-    )
-
-    ax4 = axes[3]
-    plot.n_seen.curve(
-        seen=seen,
-        ax=ax4,
-        font_size=font_size,
-        label_size=label_size,
-        line_width=line_width * 2
-    )
-
-    ax5 = axes[4]
-    plot.success.curve(
-        successes=successes,
-        ax=ax5,
-        font_size=font_size,
-        label_size=label_size,
-        line_width=line_width * 2
-    )
+    if teacher_model is None:
+        teacher_model = RandomTeacher
 
     extension = f'{teacher_model.__name__}_{student_model.__name__}_' \
                 f'{dic2string(student_param)}_' \
                 f'ni_{n_item}_grade_{grades}_tmax_{t_max}_' \
                 f'norm_{normalize_similarity}'
 
-    save_fig(f"simulation_{extension}.pdf")
+    bkp_file = os.path.join('bkp', 'simulation', f'{extension}.p')
+
+    r = load(bkp_file)
+    if r is None or force:
+        r = _run(
+            student_model=student_model,
+            teacher_model=teacher_model,
+            student_param=student_param,
+            n_item=n_item,
+            grades=grades,
+            t_max=t_max,
+            normalize_similarity=normalize_similarity,
+            verbose=verbose
+        )
+
+        dump(r, bkp_file)
+
+    plot.simulation.summary(
+        p_recall=r['p_recall'],
+        seen=r['seen'],
+        successes=r['successes'],
+        extension=extension
+    )
 
 
 if __name__ == "__main__":
