@@ -85,7 +85,7 @@ def run(student_model, teacher_model, student_param,
     }
 
 
-def _plot(r):
+def _plot(r, extension):
 
     seen = r['seen']
     p_recall = r['p_recall']
@@ -187,7 +187,7 @@ def main(student_model=None, teacher_model=None,
         dump(r, bkp_file)
 
     if plot_fig:
-        _plot(r)
+        _plot(r, extension)
 
 
 if __name__ == '__main__':
