@@ -2,7 +2,7 @@ from pyGPGO.covfunc import squaredExponential
 from pyGPGO.acquisition import Acquisition
 from pyGPGO.surrogates.GaussianProcess import GaussianProcess
 from pyGPGO.surrogates.BoostedTrees import BoostedTrees
-from pyGPGO.GPGO import GPGO
+from pyGPGO.GPGO import GPGO, EventLogger
 
 import multiprocessing as mp
 
@@ -14,12 +14,31 @@ import sys
 
 class MyGPGO(GPGO):
 
-    def __init__(self, surrogate, acquisition, f, parameter_dict, n_jobs=1):
+    # noinspection PyMissingConstructor
+    def __init__(self, surrogate, acquisition, f, parameter_dict, n_jobs=1,
+                 verbose=True):
 
-        super().__init__(surrogate, acquisition, f, parameter_dict, n_jobs)
+        # super().__init__(surrogate, acquisition, f, parameter_dict, n_jobs)
 
-    def run(self, max_iter=10, init_evals=3, resume=False, init_param=None,
-            verbose=True):
+        self.GP = surrogate
+        self.A = acquisition
+        self.f = f
+        self.parameters = parameter_dict
+        self.n_jobs = n_jobs
+
+        self.parameter_key = list(parameter_dict.keys())
+        self.parameter_value = list(parameter_dict.values())
+        self.parameter_type = [p[0] for p in self.parameter_value]
+        self.parameter_range = [p[1] for p in self.parameter_value]
+
+        self.history = []
+
+        self.verbose = verbose
+        if verbose:
+            self.logger = EventLogger(self)
+
+    def run(self, max_iter=10, init_evals=3, resume=False,
+            init_param=None):
         """
         Runs the Bayesian Optimization procedure.
 
@@ -36,12 +55,12 @@ class MyGPGO(GPGO):
         if not resume:
             self.init_evals = init_evals
             self._firstRun(n_eval=self.init_evals, init_param=init_param)
-            if verbose:
+            if self.verbose:
                 self.logger._printInit(self)
         for iteration in range(max_iter):
             self._optimizeAcq()
             self.updateGP()
-            if verbose:
+            if self.verbose:
                 self.logger._printCurrent(self)
 
     def _firstRun(self, n_eval=3, init_param=None):
@@ -116,7 +135,7 @@ class BayesianPYGPGOFit(Fit):
             self.history.append(param)
         return value
 
-    def evaluate(self, data=None, **kwargs):
+    def evaluate(self, data=None, verbose=True, **kwargs):
 
         if data is not None:
             self.data = data
@@ -135,14 +154,17 @@ class BayesianPYGPGOFit(Fit):
         acq = Acquisition(mode='ExpectedImprovement')
 
         opt = MyGPGO(gp, acq, f, param,
-                     n_jobs=self.n_jobs)
+                     n_jobs=self.n_jobs,
+                     verbose=verbose)
         if self.best_param is None:
-            print("No previous best param for now")
+            if verbose:
+                print("No previous best param for now")
             self.best_param = {}
             opt.run(**kwargs)
 
         else:
-            print(f"Best param is {self.best_param}")
+            if verbose:
+                print(f"Best param is {self.best_param}")
             opt.run(init_param=self.best_param, **kwargs)
 
         r = opt.getResult()

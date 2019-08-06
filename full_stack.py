@@ -13,6 +13,8 @@ from teacher.avya import AvyaTeacher
 
 import matplotlib.pyplot as plt
 
+import multiprocessing as mp
+
 from plot.generic import save_fig
 from simulation.data import Data
 # from fit.bayesian import BayesianFit
@@ -28,7 +30,7 @@ import argparse
 
 def run(student_model, teacher_model, student_param,
         n_item, grades, t_max, normalize_similarity,
-        max_iter):
+        max_iter, n_cpu):
 
     teacher = teacher_model(t_max=t_max, n_item=n_item,
                             normalize_similarity=normalize_similarity,
@@ -45,7 +47,8 @@ def run(student_model, teacher_model, student_param,
 
     f = BayesianPYGPGOFit(
         model=student_model, tk=teacher.tk,
-        data=None)
+        data=None, n_jobs=n_cpu
+    )
 
     for t in iterator:
 
@@ -87,16 +90,11 @@ def run(student_model, teacher_model, student_param,
     }
 
 
-def _plot(r, extension):
+def _plot(r, extension,  font_size=10, label_size=8, line_width=1):
 
     seen = r['seen']
     p_recall = r['p_recall']
     successes = r['successes']
-
-    # Plot...
-    font_size = 10
-    label_size = 8
-    line_width = 1
 
     n_rows, n_cols = 5, 1
 
@@ -154,7 +152,7 @@ def _plot(r, extension):
 def main(student_model=None, teacher_model=None,
          student_param=None,
          n_item=60, grades=(1, ), t_max=2000,
-         max_iter=10,
+         max_iter=10, n_cpu=mp.cpu_count()-1,
          normalize_similarity=True, force=False, plot_fig=True):
 
     if student_model is None:
@@ -184,7 +182,9 @@ def main(student_model=None, teacher_model=None,
             grades=grades,
             t_max=t_max,
             normalize_similarity=normalize_similarity,
-            max_iter=max_iter)
+            max_iter=max_iter,
+            n_cpu=n_cpu
+        )
 
         dump(r, bkp_file)
 
@@ -199,5 +199,11 @@ if __name__ == '__main__':
                         dest='no_fig',
                         help='Do not create fig')
 
+    parser.add_argument('--n_cpu', '-c', action='append_const',
+                        const=int,
+                        default=mp.cpu_count()-1,
+                        dest='n_cpu',
+                        help='Number of cpu to use')
+
     args = parser.parse_args()
-    main(plot_fig=not args.no_fig)
+    main(plot_fig=not args.no_fig, n_cpu=args.n_cpu)
