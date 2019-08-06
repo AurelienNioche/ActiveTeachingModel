@@ -34,16 +34,19 @@ os.makedirs(FIG_FOLDER, exist_ok=True)
 
 def main():
 
-    # param = {"d": 0.5, "tau": 0.01, "s": 0.06, "m": 0.02}
-    # model = ActRMeaning
+    param = {"d": 0.5, "tau": 0.01, "s": 0.06, "m": 0.02}
+    model = ActRMeaning
 
-    param = {"d": 0.5, "tau": 0.01, "s": 0.06}  # , "m": 0.02}
-    model = ActR
+    # param = {"d": 0.5, "tau": 0.01, "s": 0.06}
+    # model = ActR
 
     t_max = 500
     n_item = 79
     grades = (1, )
     normalize_similarity = True
+
+    init_evals = 3
+    max_iter = 50 - init_evals
 
     verbose = True
 
@@ -72,9 +75,6 @@ def main():
     obj_with_true_param = f.objective(keep_in_history=False, **param)
     print('obj with true param', obj_with_true_param)
 
-    init_evals = 3
-    max_iter = 200 - init_evals
-
     f.evaluate(max_iter=max_iter, init_evals=init_evals, verbose=verbose)
 
     # print(f.evaluate(n_iter=max_iter, init_points=init_evals))
@@ -91,7 +91,6 @@ def main():
 
     x = np.arange(len(history))
 
-    i = 0
     for i in range(n_param):
         ax = axes[i]
 

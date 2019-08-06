@@ -27,6 +27,9 @@ def main(t_max=300, n_item=30, grades=(1, ),
     if student_model is None:
         student_model = ActRMeaning
 
+    if student_param is None:
+        student_param = {"d": 0.5, "tau": 0.01, "s": 0.06, "m": 0.02}
+
     if teacher_model is None:
         teacher_model = RandomTeacher
 

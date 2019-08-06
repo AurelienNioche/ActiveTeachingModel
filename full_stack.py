@@ -199,7 +199,7 @@ if __name__ == '__main__':
                         dest='no_fig',
                         help='Do not create fig')
 
-    parser.add_argument('--n_cpu', '-c', default=mp.cpu_count()-1,
+    parser.add_argument('--n_cpu', '-c', default=mp.cpu_count(),
                         dest='n_cpu',
                         help='Number of cpu to use', type=int)
 

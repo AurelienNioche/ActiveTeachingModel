@@ -101,7 +101,7 @@ class MyGPGO(GPGO):
 class BayesianPYGPGOFit(Fit):
 
     def __init__(self, tk, model, data, verbose=False, seed=123,
-                 n_jobs=mp.cpu_count() - 1,
+                 n_jobs=mp.cpu_count(),
                  **kwargs):
 
         super().__init__(tk=tk, model=model, data=data, verbose=verbose,
@@ -170,5 +170,3 @@ class BayesianPYGPGOFit(Fit):
         r = opt.getResult()
 
         self.best_param.update(r[0])
-
-        # return self.get_stats()
