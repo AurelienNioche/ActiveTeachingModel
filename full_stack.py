@@ -17,10 +17,10 @@ import argparse
 
 def main(student_model=None, teacher_model=None,
          student_param=None,
-         n_item=60, grades=(1, ), t_max=2000,
+         n_item=30, grades=(1, ), t_max=2000,
          max_iter=10, n_cpu=mp.cpu_count()-1,
          normalize_similarity=True, force=False, plot_fig=True,
-         init_eval=3, verbose=True
+         init_eval=20, verbose=True
          ):
 
     if student_model is None:
@@ -71,7 +71,7 @@ def main(student_model=None, teacher_model=None,
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--no_fig', '-n', action='store_true', default=True,
+    parser.add_argument('--no_fig', '-n', action='store_true', default=False,
                         dest='no_fig',
                         help='Do not create fig')
 
@@ -79,5 +79,9 @@ if __name__ == '__main__':
                         dest='n_cpu',
                         help='Number of cpu to use', type=int)
 
+    parser.add_argument('--verbose', '-v', action='store_true', default=False,
+                        dest='verbose',
+                        help='Verbose')
+
     args = parser.parse_args()
-    main(plot_fig=not args.no_fig, n_cpu=args.n_cpu)
+    main(plot_fig=not args.no_fig, n_cpu=args.n_cpu, verbose=args.verbose)

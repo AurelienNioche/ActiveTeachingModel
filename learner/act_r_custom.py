@@ -7,11 +7,13 @@ class ActRMeaning(ActR):
 
     version = 3.1
     bounds = ('d', 0.0000001, 1.0), \
-             ('tau', -1, 1), \
+             ('tau', 0, 1), \
              ('s', 0.0000001, 1), \
-             ('m', -0.1, 0.1)
+             ('m', 0.0, 0.1)
 
     def __init__(self, tk, param=None, metaclass=False, **kwargs):
+
+        super().__init__(tk=tk, metaclass=True, **kwargs)
 
         if not metaclass:
             # Decay parameter
@@ -24,15 +26,14 @@ class ActRMeaning(ActR):
             # Helping from items with close meaning
             self.m = None
 
+            # For easiness
+            self.temp = None
+            self.x = None
+            self.c_x = None
+
             self.set_parameters(param)
 
-            # Aliases for easiness of computation
-            self.x = self.m
-            self.c_x = tk.c_semantic
-
         self.items = np.arange(tk.n_item)
-
-        super().__init__(tk=tk, metaclass=True, **kwargs)
 
     def _get_presentation_effect_i_and_j(self, item, time, time_index):
 
@@ -75,6 +76,15 @@ class ActRMeaning(ActR):
 
         return self._sigmoid_function(base_activation)
 
+    def init(self):
+
+        # Short cut
+        self.temp = self.s * np.square(2)
+
+        # Aliases for easiness of computation
+        self.x = self.m
+        self.c_x = self.tk.c_semantic
+
 # ========================================================================== #
 
 
@@ -84,6 +94,8 @@ class ActRGraphic(ActRMeaning):
              ('g', -0.1, 0.1)
 
     def __init__(self, param, tk, **kwargs):
+
+        super().__init__(tk=tk, metaclass=True, **kwargs)
 
         # Decay parameter
         self.d = None
@@ -97,13 +109,21 @@ class ActRGraphic(ActRMeaning):
         # Graphic 'help'
         self.g = None
 
+        # For easiness
+        self.temp = None
+        self.c_x = None
+        self.x = None
+
         self.set_parameters(param)
+
+    def init(self):
+
+        # Short cut
+        self.temp = self.s * np.square(2)
 
         # Aliases for the easiness of computation
         self.c_x = self.tk.c_graphic
         self.x = self.g
-
-        super().__init__(tk=tk, metaclass=True, **kwargs)
 
 
 # ========================================================================== #
@@ -116,6 +136,8 @@ class ActRPlus(ActRMeaning):
 
     def __init__(self, tk, param, **kwargs):
 
+        super().__init__(tk=tk, metaclass=True, **kwargs)
+
         # Decay parameter
         self.d = None
         # Retrieval threshold
@@ -127,10 +149,6 @@ class ActRPlus(ActRMeaning):
         self.m = None
 
         self.set_parameters(param)
-
-        super().__init__(tk=tk, metaclass=True, **kwargs)
-
-        self.items = np.arange(self.tk.n_item)
 
     def p_recall(self, item, time=None, time_index=None):
 

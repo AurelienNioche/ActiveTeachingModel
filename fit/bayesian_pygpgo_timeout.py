@@ -205,5 +205,9 @@ class BayesianPYGPGOTimeoutFit:
 
         self.best_param, self.best_value = queue_out.get()
 
+        # if self.verbose:
+        #     print(f'Best param: {}', self.best_param)
+        #     print('Best value', self.best_value)
+
         self.history_best_fit_param.append(self.best_param)
         self.history_best_fit_value.append(self.best_value)

@@ -12,6 +12,8 @@ class ActR(Learner):
 
     def __init__(self, tk, param=None, metaclass=False, verbose=False):
 
+        super().__init__()
+
         if not metaclass:
             # Decay parameter
             self.d = None
@@ -22,14 +24,15 @@ class ActR(Learner):
 
             self.set_parameters(param)
 
+            # Short cut
+            self.temp = self.s * np.square(2)
+
         self.tk = tk
 
         if self.tk.n_possible_replies is not None:
             self.p_random = 1/self.tk.n_possible_replies
         else:
             self.p_random = 0
-
-        self.temp = self.s*np.square(2)
 
         # History of presentation
         self.hist = np.ones(tk.t_max) * -99
@@ -44,8 +47,6 @@ class ActR(Learner):
         self.times = np.zeros(self.tk.t_max)
 
         self._bkp_presentation_effect = {}
-
-        super().__init__()
 
     def _activation_function(self, i, time=None,
                              time_index=None):

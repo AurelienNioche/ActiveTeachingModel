@@ -48,7 +48,6 @@ class GenericTeacher:
         possible_replies = self._get_possible_replies(question)
 
         if make_learn:
-
             reply = agent.decide(question=question,
                                  possible_replies=possible_replies)
             agent.learn(question=question)
