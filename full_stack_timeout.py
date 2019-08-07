@@ -20,7 +20,7 @@ def _run(
         teacher_model,
         t_max, grades, n_item,
         normalize_similarity, student_model,
-        student_param, n_cpu,
+        student_param,
         init_eval,
         time_out,
         verbose):
@@ -73,6 +73,8 @@ def _run(
 
         model_learner.learn(question=question)
 
+    f.stop(queue_in=queue_in)
+
     p_recall = p_recall_over_time_after_learning(
         agent=learner,
         t_max=t_max,
@@ -91,9 +93,8 @@ def _run(
 
 def main(student_model=None, teacher_model=None,
          student_param=None,
-         n_item=60, grades=(1, ), t_max=2000,
+         n_item=60, grades=(1, ), t_max=3,
          time_out=5,
-         n_cpu=mp.cpu_count()-1,
          normalize_similarity=True, force=False, plot_fig=True,
          init_eval=3, verbose=True
          ):
@@ -127,7 +128,6 @@ def main(student_model=None, teacher_model=None,
             grades=grades,
             t_max=t_max,
             normalize_similarity=normalize_similarity,
-            n_cpu=n_cpu,
             init_eval=init_eval,
             time_out=time_out,
             verbose=verbose
@@ -150,9 +150,5 @@ if __name__ == '__main__':
                         dest='no_fig',
                         help='Do not create fig')
 
-    parser.add_argument('--n_cpu', '-c', default=mp.cpu_count(),
-                        dest='n_cpu',
-                        help='Number of cpu to use', type=int)
-
     args = parser.parse_args()
-    main(plot_fig=not args.no_fig, n_cpu=args.n_cpu)
+    main(plot_fig=not args.no_fig)

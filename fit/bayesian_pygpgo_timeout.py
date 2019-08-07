@@ -207,3 +207,8 @@ class BayesianPYGPGOTimeoutFit:
 
         self.history_best_fit_param.append(self.best_param)
         self.history_best_fit_value.append(self.best_value)
+
+    @staticmethod
+    def stop(queue_in):
+
+        queue_in.put('stop')
