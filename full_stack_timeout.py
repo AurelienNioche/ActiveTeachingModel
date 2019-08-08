@@ -62,13 +62,23 @@ def _run(
                                             possible_replies=possible_replies)
 
         if verbose:
-            print(f'Question: {question}; Success: {question == reply}')
+            success = question == reply
+            learnt_model = \
+                np.sum(teacher.learning_progress == teacher.represent_learnt)
+
+            seen = sum(teacher.seen[:, t])
+
+            p_recall = np.zeros(n_item)
+            for i in range(n_item):
+                p_recall[i] = learner.p_recall(i)
+
+            print(f'Question: {question}; Success: {success}')
             print(
-                f'P recall: {learner.p_recall(item=question):.2f}, '
+                f'P recall: {p_recall[question]:.2f}, '
                 f'P recall model: {model_learner.p_recall(item=question):.2f}')
-            print('N seen', sum(teacher.seen[:, t]))
-            print('Learnt:',
-                  np.sum(teacher.learning_progress == teacher.represent_learnt))
+
+            print(f'N seen: {seen}')
+            print(f'Learnt model: {learnt_model}')
 
         learner.learn(question=question)
 
@@ -109,8 +119,8 @@ def main(student_model=None, teacher_model=None,
          student_param=None,
          n_item=30, grades=(1, ), t_max=1000,
          normalize_similarity=True, force=False, plot_fig=True,
-         init_eval=5, verbose=True,
-         time_out=5,
+         init_eval=10, verbose=True,
+         time_out=10,
          ):
 
     if student_model is None:
