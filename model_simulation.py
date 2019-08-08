@@ -105,6 +105,6 @@ if __name__ == "__main__":
         student_model=ActRMeaning,
         student_param={"d": 0.5, "tau": 0.01, "s": 0.06, "m": 0.02},
         teacher_model=AvyaTeacher,
-        t_max=2000, n_item=40, normalize_similarity=True,
+        t_max=2000, n_item=30, normalize_similarity=True,
         force=True
     )

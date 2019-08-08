@@ -183,7 +183,8 @@ class AvyaTeacher(GenericTeacher):
                 print('Teacher rule: Useful NEW rule')
             return new_question
 
-        print("Teacher rule: The smallest probability of recall")
+        if self.verbose:
+            print("Teacher rule: The smallest probability of recall")
         poss = \
             np.where(self.p_recall == self.p_recall[self.not_taboo].min())[0]
         new_question = np.random.choice(poss)

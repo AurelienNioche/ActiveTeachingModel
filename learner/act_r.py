@@ -46,7 +46,8 @@ class ActR(Learner):
         # For continuous time
         self.times = np.zeros(self.tk.t_max)
 
-        self._bkp_presentation_effect = {}
+        # # For fastening the computation
+        # self._bkp_presentation_effect = {}
 
     def _activation_function(self, i, time=None,
                              time_index=None):
@@ -78,20 +79,21 @@ class ActR(Learner):
     def _presentation_effect(self, i, time=None,
                              time_index=None):
 
-        # # Save it!
-        if time is not None:
-            key_t = time
-
-        elif time_index is not None:
-            key_t = time_index
-
-        else:
-            key_t = self.t
-
-        try:
-            return self._bkp_presentation_effect[key_t][i]
-        except KeyError:
-            pass
+        # # # Save it! --------------------------------------
+        # if time is not None:
+        #     key_t = time
+        #
+        # elif time_index is not None:
+        #     key_t = time_index
+        #
+        # else:
+        #     key_t = self.t
+        #
+        # try:
+        #     return self._bkp_presentation_effect[key_t][i]
+        # except KeyError:
+        #     pass
+        # # --------------------------------------------------
 
         i_presented = self.hist == i
 
@@ -131,11 +133,11 @@ class ActR(Learner):
         # Presentation effect
         pe = np.power(time_elapsed, -self.d).sum()
 
-        # # Save it!
-
-        if key_t not in self._bkp_presentation_effect.keys():
-            self._bkp_presentation_effect[key_t] = {}
-        self._bkp_presentation_effect[key_t][i] = pe
+        # # # Save it! ------------------------------
+        # if key_t not in self._bkp_presentation_effect.keys():
+        #     self._bkp_presentation_effect[key_t] = {}
+        # self._bkp_presentation_effect[key_t][i] = pe
+        # # -----------------------------------------
 
         return pe
 
@@ -244,10 +246,10 @@ class ActR(Learner):
             self.hist[time_index] = -99
             self.times[time_index] = -1
 
-            try:
-                del self._bkp_presentation_effect[time_index]
-            except KeyError:
-                pass
+            # try:
+            #     del self._bkp_presentation_effect[time_index]
+            # except KeyError:
+            #     pass
 
         else:
             self.t -= 1
@@ -255,11 +257,15 @@ class ActR(Learner):
             self.hist[self.t] = -99
             self.times[self.t] = -1
 
-            try:
-                del self._bkp_presentation_effect[self.t]
-            except KeyError:
-                pass
-
+            # try:
+            #     del self._bkp_presentation_effect[self.t]
+            # except KeyError:
+            #     pass
+            #
+            # try:
+            #     del self._bkp_presentation_effect[self.t + 1]
+            # except KeyError:
+            #     pass
 
 # class ActROriginal(ActR):
 # #

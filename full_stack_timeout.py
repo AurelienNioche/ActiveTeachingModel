@@ -43,12 +43,19 @@ def _run(
         param=student_model.generate_random_parameters()
     )
 
-    f = BayesianPYGPGOTimeoutFit(verbose=False)
+    f = BayesianPYGPGOTimeoutFit(verbose=True)
+
+    # seen = None
+    # learnt = None
+    # learnt_model = None
+    # which_learnt = None
+    # which_learnt_model = None
 
     for t in iterator:
 
+        seen = None
         if verbose:
-            print(f'\n ----- T{t} -----')
+            seen = sum(teacher.seen[:, t])
 
         question, possible_replies = teacher.ask(
             agent=model_learner,
@@ -62,25 +69,32 @@ def _run(
                                             possible_replies=possible_replies)
 
         if verbose:
-            success = question == reply
-            learnt_model = np.sum(teacher.p_recall > 0.95)
-            # np.sum(teacher.learning_progress == teacher.represent_learnt)
 
-            seen = sum(teacher.seen[:, t])
+            learnt_model = np.sum(teacher.p_recall >= 0.95)
+            which_learnt_model = np.where(teacher.p_recall >= 0.95)[0]
 
             p_recall = np.zeros(n_item)
+            p_recall_model = np.zeros(n_item)
             for i in range(n_item):
                 p_recall[i] = learner.p_recall(i)
+                p_recall_model[i] = model_learner.p_recall(i)
+                assert p_recall_model[i] == teacher.p_recall[i]
 
-            learnt = np.sum(p_recall > 0.95)
+            learnt = np.sum(p_recall >= 0.95)
+            which_learnt = np.where(p_recall >= 0.95)[0]
+
+            print(f'N seen: {seen}')
+            print(f'Learnt: {learnt} {list(which_learnt)}; Learnt model: {learnt_model} {list(which_learnt_model)}')
+
+            print(f'\n ----- T{t} -----')
+
+            success = question == reply
+            # np.sum(teacher.learning_progress == teacher.represent_learnt)
 
             print(f'Question: {question}; Success: {success}')
             print(
                 f'P recall: {p_recall[question]:.2f}; '
                 f'P recall model: {model_learner.p_recall(item=question):.2f}')
-
-            print(f'N seen: {seen}')
-            print(f'Learnt: {learnt}; Learnt model: {learnt_model}')
 
         learner.learn(question=question)
 
@@ -89,15 +103,26 @@ def _run(
                          replies=teacher.replies[:t + 1],
                          possible_replies=teacher.possible_replies[:t + 1, :])
 
-        f.evaluate(data=data_view,
-                   model=student_model,
-                   tk=teacher.tk,
-                   time_out=time_out, init_evals=init_eval,
-                   queue_in=queue_in, queue_out=queue_out)
+        best_param = f.evaluate(
+            data=data_view,
+            model=student_model,
+            tk=teacher.tk,
+            time_out=time_out, init_evals=init_eval,
+            queue_in=queue_in, queue_out=queue_out)
 
-        model_learner.set_parameters(f.best_param)
+        model_learner.set_parameters(best_param)
 
         model_learner.learn(question=question)
+
+        if verbose:
+            print()
+            for k in sorted(list(best_param.keys())):
+                print(f'{k}: {best_param[k]-student_param[k]:.3f}')
+            print()
+            new_p_recall = learner.p_recall(item=question)
+            new_p_recall_model = model_learner.p_recall(item=question)
+            print(f'New p recall: {new_p_recall:.2f}; '
+                  f'New p recall model: {new_p_recall_model:.2f}')
 
     queue_in.put('stop')
 

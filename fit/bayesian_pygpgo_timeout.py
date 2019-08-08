@@ -1,7 +1,7 @@
 from pyGPGO.covfunc import squaredExponential
 from pyGPGO.acquisition import Acquisition
 from pyGPGO.surrogates.GaussianProcess import GaussianProcess
-from pyGPGO.GPGO import GPGO
+from pyGPGO.GPGO import GPGO, EventLogger
 
 import multiprocessing as mp
 
@@ -29,7 +29,7 @@ class TimeOutGPGO(mp.Process, GPGO):
                  init_evals):
 
         mp.Process.__init__(self)
-        GPGO.__init__(self, gp, acq, self.objective, param, n_jobs=1)
+        # GPGO.__init__(self, gp, acq, self.objective, param, n_jobs=1)
 
         self.verbose = verbose
 
@@ -44,6 +44,25 @@ class TimeOutGPGO(mp.Process, GPGO):
         self.model, self.tk, self.data = None, None, None
 
         self.init_evals = init_evals
+
+        # super().__init__(surrogate, acquisition, f, parameter_dict, n_jobs)
+
+        self.GP = gp  # surrogate
+        self.A = acq  # acquisition
+        # self.f = self.objective
+        self.parameters = param  # parameter_dict
+        self.n_jobs = 1
+
+        self.parameter_key = list(param.keys())
+        self.parameter_value = list(param.values())
+        self.parameter_type = [p[0] for p in self.parameter_value]
+        self.parameter_range = [p[1] for p in self.parameter_value]
+
+        self.history = []
+
+        self.verbose = verbose
+        if verbose:
+            self.logger = EventLogger(self)
 
     def run(self):
         """
@@ -141,7 +160,7 @@ class TimeOutGPGO(mp.Process, GPGO):
         self.best_param = dict(r[0])
         self.best_value = r[1]
 
-    def objective(self, **param):
+    def f(self, **param):
 
         value = objective(model=self.model, tk=self.tk, data=self.data,
                           param=param)
@@ -211,3 +230,5 @@ class BayesianPYGPGOTimeoutFit:
 
         self.history_best_fit_param.append(self.best_param)
         self.history_best_fit_value.append(self.best_value)
+
+        return self.best_param
