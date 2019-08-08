@@ -6,6 +6,7 @@ from teacher.avya import AvyaTeacher
 from fit.bayesian_pygpgo_timeout import BayesianPYGPGOTimeoutFit
 
 import multiprocessing as mp
+import numpy as np
 
 from simulation.data import Data
 from simulation.memory import p_recall_over_time_after_learning
@@ -42,7 +43,7 @@ def _run(
         param=student_model.generate_random_parameters()
     )
 
-    f = BayesianPYGPGOTimeoutFit(verbose=verbose)
+    f = BayesianPYGPGOTimeoutFit(verbose=False)
 
     for t in iterator:
 
@@ -66,6 +67,8 @@ def _run(
                 f'P recall: {learner.p_recall(item=question):.2f}, '
                 f'P recall model: {model_learner.p_recall(item=question):.2f}')
             print('N seen', sum(teacher.seen[:, t]))
+            print('Learnt:',
+                  np.sum(teacher.learning_progress == teacher.represent_learnt))
 
         learner.learn(question=question)
 
@@ -104,10 +107,10 @@ def _run(
 
 def main(student_model=None, teacher_model=None,
          student_param=None,
-         n_item=40, grades=(1, ), t_max=3000,
-         time_out=10,
+         n_item=30, grades=(1, ), t_max=1000,
          normalize_similarity=True, force=False, plot_fig=True,
-         init_eval=10, verbose=True
+         init_eval=5, verbose=True,
+         time_out=5,
          ):
 
     if student_model is None:

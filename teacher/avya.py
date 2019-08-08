@@ -59,6 +59,7 @@ class AvyaTeacher(GenericTeacher):
         self.items = np.arange(self.tk.n_item)
 
         self.taboo = None
+        self.not_taboo = np.ones(self.tk.n_item, dtype=bool)
 
     def update_sets(self):
         """
@@ -110,97 +111,49 @@ class AvyaTeacher(GenericTeacher):
                     relative = p_recall_i_after_j - p_recall_i
                     self.usefulness[j] += relative
 
+    def _get_selection(self, learning_state, randomize=True):
+
+        cond = self.learning_progress == learning_state
+        selection = self.items[cond * self.not_taboo]
+        if randomize:
+            np.random.shuffle(selection)
+        return selection
+
     def get_slipping(self):
         """
         Rule 1: Find a learnt item whose p_recall slipped below learn_threshold
         """
-        selection = \
-            self.items[self.learning_progress == self.represent_learnt]
-
-        np.random.shuffle(selection)
-
-        for i in selection:
-            if self.p_recall[i] < self.learn_threshold:
-                return i
-
-        # p_recall = self.p_recall[to_look_at]
-        #
-        # min_ = np.min(p_recall)
-        # if min_ < self.learn_threshold:
-        #     return to_look_at[np.argmin(p_recall)]
-        # return None
+        selection = self._get_selection(learning_state=self.represent_learnt)
+        if len(selection):
+            p_recall = self.p_recall[selection]
+            if p_recall.min() < self.learn_threshold:
+                return selection[np.argmin(p_recall)]
         return None
 
-    # def get_almost_learnt(self):
-    #     """
-    #     Rule 2: Find learning item with p_recall above forgot threshold
-    #     """
-    #     to_look_at = \
-    #         self.items[self.learning_progress == self.represent_learning]
-    #
-    #     np.random.shuffle(to_look_at)
-    #
-    #     for i in to_look_at:
-    #         if self.p_recall[i] > self.forgot_threshold:
-    #             return i
-    #     return None
+    def _get_most_useful(self, learning_state):
 
-    # def get_useful(self):
-    #     """
-    #     Rule 3: Find the most useful item.
-    #     """
-    #     to_look_at = \
-    #         self.items[self.learning_progress != self.represent_learnt]
-    #
-    #     np.random.shuffle(to_look_at)
-    #     max_ind = None
-    #     max_val = - np.inf
-    #     for i in to_look_at:
-    #         if self.usefulness[i] > max_val:
-    #             if self.taboo != i:
-    #                 max_val = self.usefulness[i]
-    #                 max_ind = i
-    #     if max_ind is None:
-    #         # print("All items learnt by Learner")
-    #         # find the least learnt item
-    #         max_ind = np.argmin(self.p_recall)
-    #
-    #     return max_ind
-
-    def _get_most_useful(self, selection):
-
-        max_ind = None
-        max_val = - np.inf
-        for i in selection:
-            if self.usefulness[i] > max_val:
-                if self.taboo != i:
-                    max_val = self.usefulness[i]
-                    max_ind = i
-        return max_ind
+        selection = self._get_selection(learning_state)
+        if len(selection):
+            return selection[np.argmax(self.usefulness[selection])]
+        return None
 
     def get_old_useful(self):
         """
         Rule 2: Find the most useful item among the seen items.
         """
-        selection = \
-            self.items[self.learning_progress == self.represent_learning]
-
-        return self._get_most_useful(selection)
+        return self._get_most_useful(self.represent_learning)
 
     def get_new_useful(self):
         """
         Rule 3: Find the most useful item among the new items.
         """
-        selection = \
-            self.items[self.learning_progress == self.represent_unseen]
-
-        return self._get_most_useful(selection)
+        return self._get_most_useful(self.represent_unseen)
 
     def _find_new_question(self):
 
         if self.t > 0:
             new_question = self.get_slipping()
-            if new_question not in (None, self.taboo):
+            if new_question is not None:
                 if self.verbose:
                     print('Teacher rule: Slipping rule')
                 return new_question
@@ -211,18 +164,22 @@ class AvyaTeacher(GenericTeacher):
             #     return new_question
 
             new_question = self.get_old_useful()
-            if new_question not in (None, self.taboo):
+            if new_question is not None:
                 if self.verbose:
                     print('Teacher rule: Useful OLD rule')
                 return new_question
 
         new_question = self.get_new_useful()
-        if new_question not in (None, self.taboo):
+        if new_question is not None:
             if self.verbose:
                 print('Teacher rule: Useful NEW rule')
             return new_question
 
-        return np.argmin(self.p_recall)
+        print("Teacher rule: The smallest probability of recall")
+        poss = \
+            np.where(self.p_recall == self.p_recall[self.not_taboo].min())[0]
+        new_question = np.random.choice(poss)
+        return new_question
 
     def _get_next_node(self, agent=None):
         """
@@ -241,5 +198,43 @@ class AvyaTeacher(GenericTeacher):
         new_question = self._find_new_question()
 
         self.taboo = new_question
+        self.not_taboo[:] = self.items != self.taboo
 
         return new_question
+
+
+# def get_almost_learnt(self):
+#     """
+#     Rule 2: Find learning item with p_recall above forgot threshold
+#     """
+#     to_look_at = \
+#         self.items[self.learning_progress == self.represent_learning]
+#
+#     np.random.shuffle(to_look_at)
+#
+#     for i in to_look_at:
+#         if self.p_recall[i] > self.forgot_threshold:
+#             return i
+#     return None
+
+# def get_useful(self):
+#     """
+#     Rule 3: Find the most useful item.
+#     """
+#     to_look_at = \
+#         self.items[self.learning_progress != self.represent_learnt]
+#
+#     np.random.shuffle(to_look_at)
+#     max_ind = None
+#     max_val = - np.inf
+#     for i in to_look_at:
+#         if self.usefulness[i] > max_val:
+#             if self.taboo != i:
+#                 max_val = self.usefulness[i]
+#                 max_ind = i
+#     if max_ind is None:
+#         # print("All items learnt by Learner")
+#         # find the least learnt item
+#         max_ind = np.argmin(self.p_recall)
+#
+#     return max_ind
