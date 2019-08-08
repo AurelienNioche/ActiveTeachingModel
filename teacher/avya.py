@@ -1,4 +1,4 @@
-import copy
+# import copy
 
 import numpy as np
 
@@ -74,7 +74,15 @@ class AvyaTeacher(GenericTeacher):
              learning_progress array.
         """
 
-        self.learning_progress[self.p_recall >= self.learn_threshold] = \
+        learnt = self.learning_progress == self.represent_learnt
+        under_learnt_threshold = self.p_recall < self.learn_threshold
+
+        # Downgrade items that are not above the threshold anymore
+        self.learning_progress[learnt*under_learnt_threshold] = \
+            self.represent_learning
+
+        # Upgrade items that are above
+        self.learning_progress[np.invert(under_learnt_threshold)] = \
             self.represent_learnt
 
         if self.t > 0 and \
@@ -119,16 +127,16 @@ class AvyaTeacher(GenericTeacher):
             np.random.shuffle(selection)
         return selection
 
-    def get_slipping(self):
-        """
-        Rule 1: Find a learnt item whose p_recall slipped below learn_threshold
-        """
-        selection = self._get_selection(learning_state=self.represent_learnt)
-        if len(selection):
-            p_recall = self.p_recall[selection]
-            if p_recall.min() < self.learn_threshold:
-                return selection[np.argmin(p_recall)]
-        return None
+    # def get_slipping(self):
+    #     """
+    #     Rule 1: Find a learnt item whose p_recall slipped below learn_threshold
+    #     """
+    #     selection = self._get_selection(learning_state=self.represent_learnt)
+    #     if len(selection):
+    #         p_recall = self.p_recall[selection]
+    #         if p_recall.min() < self.learn_threshold:
+    #             return selection[np.argmin(p_recall)]
+    #     return None
 
     def _get_most_useful(self, learning_state):
 
@@ -152,11 +160,11 @@ class AvyaTeacher(GenericTeacher):
     def _find_new_question(self):
 
         if self.t > 0:
-            new_question = self.get_slipping()
-            if new_question is not None:
-                if self.verbose:
-                    print('Teacher rule: Slipping rule')
-                return new_question
+            # new_question = self.get_slipping()
+            # if new_question is not None:
+            #     if self.verbose:
+            #         print('Teacher rule: Slipping rule')
+            #     return new_question
 
             # new_question = self.get_almost_learnt()
             # if new_question not in (None, self.taboo):

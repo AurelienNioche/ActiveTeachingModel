@@ -63,8 +63,8 @@ def _run(
 
         if verbose:
             success = question == reply
-            learnt_model = \
-                np.sum(teacher.learning_progress == teacher.represent_learnt)
+            learnt_model = np.sum(teacher.p_recall > 0.95)
+            # np.sum(teacher.learning_progress == teacher.represent_learnt)
 
             seen = sum(teacher.seen[:, t])
 
@@ -72,13 +72,15 @@ def _run(
             for i in range(n_item):
                 p_recall[i] = learner.p_recall(i)
 
+            learnt = np.sum(p_recall > 0.95)
+
             print(f'Question: {question}; Success: {success}')
             print(
-                f'P recall: {p_recall[question]:.2f}, '
+                f'P recall: {p_recall[question]:.2f}; '
                 f'P recall model: {model_learner.p_recall(item=question):.2f}')
 
             print(f'N seen: {seen}')
-            print(f'Learnt model: {learnt_model}')
+            print(f'Learnt: {learnt}; Learnt model: {learnt_model}')
 
         learner.learn(question=question)
 
