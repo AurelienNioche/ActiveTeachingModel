@@ -3,6 +3,7 @@ from tqdm import tqdm
 
 from learner.act_r_custom import ActRMeaning
 from teacher.avya import AvyaTeacher
+from fit.bayesian_pygpgo import BayesianPYGPGOFit, objective
 from fit.bayesian_pygpgo_timeout import BayesianPYGPGOTimeoutFit
 
 import multiprocessing as mp
@@ -32,7 +33,7 @@ def _run(
     teacher = teacher_model(t_max=t_max, n_item=n_item,
                             normalize_similarity=normalize_similarity,
                             grades=grades,
-                            verbose=verbose)
+                            verbose=False)
 
     learner = student_model(param=student_param, tk=teacher.tk)
 
@@ -43,27 +44,36 @@ def _run(
         param=student_model.generate_random_parameters()
     )
 
-    f = BayesianPYGPGOTimeoutFit(verbose=True)
-
+    # f = BayesianPYGPGOTimeoutFit(verbose=False)
+    f = BayesianPYGPGOFit(verbose=False, n_jobs=4, max_evals=3)
     # seen = None
     # learnt = None
     # learnt_model = None
     # which_learnt = None
-    # which_learnt_model = None
+    # which_learnt_model = Non
+
+    # import copy
+
+    # model_learner.set_parameters(learner.param)
+
+    best_value, obj_value = None, None
 
     for t in iterator:
-
-        seen = None
-        if verbose:
-            seen = sum(teacher.seen[:, t])
 
         question, possible_replies = teacher.ask(
             agent=model_learner,
             make_learn=False)
 
-        reply = learner.decide(
-            question=question,
-            possible_replies=possible_replies)
+        # reply = learner.decide(
+        #     question=question,
+        #     possible_replies=possible_replies)
+
+        p_r = learner.p_recall(item=question)
+
+        if p_r > np.random.random():
+            reply = question
+        else:
+            reply=-1
 
         teacher.register_question_and_reply(question=question, reply=reply,
                                             possible_replies=possible_replies)
@@ -83,22 +93,43 @@ def _run(
             learnt = np.sum(p_recall >= 0.95)
             which_learnt = np.where(p_recall >= 0.95)[0]
 
-            print(f'N seen: {seen}')
-            print(f'Learnt: {learnt} {list(which_learnt)}; Learnt model: {learnt_model} {list(which_learnt_model)}')
+            if t > 0:
+
+                print()
+                discrepancy = 'Param disc.'
+                for k in sorted(list(model_learner.param.keys())):
+                    discrepancy += f'{k}: {model_learner.param[k] - student_param[k]:.3f}; '
+
+                print(discrepancy, '\n')
+                print(f"Obj value: {obj_value:.2f}; Best value: {best_value:.2f}")
+                print()
+
+                new_p_recall = learner.p_recall(item=teacher.taboo)
+                new_p_recall_model = model_learner.p_recall(item=teacher.taboo)
+                print(
+                    f'New p recall: {new_p_recall:.3f}; '
+                    f'New p recall model: {new_p_recall_model:.3f}')
+
+                print()
+
+                seen = sum(teacher.seen[:, t-1])
+                print(f'N seen: {seen}')
+                print(f'Learnt: {learnt} {list(which_learnt)}; '
+                      f'Learnt model: {learnt_model} '
+                      f'{list(which_learnt_model)}')
 
             print(f'\n ----- T{t} -----')
 
             success = question == reply
             # np.sum(teacher.learning_progress == teacher.represent_learnt)
-
-            print(f'Question: {question}; Success: {success}')
+            print(f'Rule: {teacher.rule}')
+            print(f'Question: {question}; Success: {int(success)}')
+            print()
             print(
-                f'P recall: {p_recall[question]:.2f}; '
-                f'P recall model: {model_learner.p_recall(item=question):.2f}')
+                f'P recall: {p_recall[question]:.3}; '
+                f'P recall model: {model_learner.p_recall(item=question):.3f}')
 
-        learner.learn(question=question)
-
-        data_view = Data(n_items=n_item,
+        data_view = Data(n_item=n_item,
                          questions=teacher.questions[:t + 1],
                          replies=teacher.replies[:t + 1],
                          possible_replies=teacher.possible_replies[:t + 1, :])
@@ -107,33 +138,43 @@ def _run(
             data=data_view,
             model=student_model,
             tk=teacher.tk,
-            time_out=time_out, init_evals=init_eval,
-            queue_in=queue_in, queue_out=queue_out)
+            init_evals=init_eval,
+            max_iter=10,
+        )
+            # time_out=time_out,
+            # queue_in=queue_in, queue_out=queue_out)
+        model_learner.set_parameters(best_param.copy())
 
-        model_learner.set_parameters(best_param)
+        obj_value = objective(
+            data=data_view,
+            model=student_model,
+            tk=teacher.tk,
+            param=student_param,
+            show=False
+        )
 
+        best_value = objective(
+            data=data_view,
+            model=student_model,
+            tk=teacher.tk,
+            param=best_param,
+            show=False
+        )
+
+        learner.learn(question=question)
         model_learner.learn(question=question)
-
-        if verbose:
-            print()
-            for k in sorted(list(best_param.keys())):
-                print(f'{k}: {best_param[k]-student_param[k]:.3f}')
-            print()
-            new_p_recall = learner.p_recall(item=question)
-            new_p_recall_model = model_learner.p_recall(item=question)
-            print(f'New p recall: {new_p_recall:.2f}; '
-                  f'New p recall model: {new_p_recall_model:.2f}')
 
     queue_in.put('stop')
 
-    p_recall = p_recall_over_time_after_learning(
+    p_recall_hist = p_recall_over_time_after_learning(
         agent=learner,
         t_max=t_max,
-        n_item=n_item)
+        n_item=n_item,
+    )
 
     return {
         'seen': teacher.seen,
-        'p_recall': p_recall,
+        'p_recall': p_recall_hist,
         'questions': teacher.questions,
         'replies': teacher.replies,
         'successes': teacher.successes,
@@ -146,7 +187,7 @@ def main(student_model=None, teacher_model=None,
          student_param=None,
          n_item=30, grades=(1, ), t_max=1000,
          normalize_similarity=True, force=False, plot_fig=True,
-         init_eval=10, verbose=True,
+         init_eval=3, verbose=True,
          time_out=10,
          ):
 

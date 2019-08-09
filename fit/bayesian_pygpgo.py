@@ -10,6 +10,46 @@ import numpy as np
 from fit.fit import Fit
 
 
+def objective(model, tk, data, param, show=False):
+
+    if show:
+        print('\n')
+
+    agent = model(param=param, tk=tk)
+    t_max = data.t_max
+    out = np.zeros(t_max)
+    # p_choices_ = agent.get_p_choices(data=data,
+    #                                  stop_if_zero=False,
+    #                                  use_p_correct=True)
+
+    for t in range(t_max):
+        item = data.questions[t]
+        if show:
+            print("Item", item)
+        p_r = agent.p_recall(item=item)
+        if show:
+            print('p_recall: ', p_r)
+        s = data.success[t]
+        if show:
+            print("success: ", s)
+        # if s:
+        #     p_choice = p_r
+        # else:
+        #     p_choice = 1-p_r
+
+        # if show:
+        #     print('p_model:', p_choice)
+        out[t] = (s - p_r) ** 2
+
+        agent.learn(item)
+
+    value = - np.sum(out)
+    if show:
+        print("total value", value)
+        print()
+    return value
+
+
 class MyGPGO(GPGO):
 
     # noinspection PyMissingConstructor
@@ -95,15 +135,15 @@ class MyGPGO(GPGO):
         self.history.append(self.tau)
 
 
-class BayesianPYGPGOFit(Fit):
+class BayesianPYGPGOFit:
 
-    def __init__(self, tk, model, data, verbose=False, seed=123,
+    def __init__(self, verbose=False, seed=123,
                  n_jobs=mp.cpu_count(),
                  **kwargs):
 
-        super().__init__(tk=tk, model=model, data=data, verbose=verbose,
-                         method='BayesianGPyOpt',
-                         **kwargs)
+        # super().__init__(tk=tk, model=model, data=data, verbose=verbose,
+        #                  method='BayesianGPyOpt',
+        #                  **kwargs)
 
         self.best_value = None
         self.best_param = None
@@ -124,26 +164,20 @@ class BayesianPYGPGOFit(Fit):
 
         np.random.seed(seed)
 
-    def objective(self, keep_in_history=True, **param):
+        self.model = None
+        self.tk = None
+        self.data = None
 
-        agent = self.model(param=param, tk=self.tk)
-        p_choices_ = agent.get_p_choices(data=self.data,
-                                         stop_if_zero=False,
-                                         use_p_correct=True,
-                                         **self.kwargs)
+    def objective(self, **param):
 
-        value = np.sum(p_choices_)
+        return objective(model=self.model, data=self.data, tk=self.tk,
+                         param=param)
 
-        # assert None not in p_choices_
-        if keep_in_history:
-            self.obj_values.append(value)
-            self.history_eval_param.append(param)
-        return value
+    def evaluate(self, model, tk, data, **kwargs):
 
-    def evaluate(self, data=None, **kwargs):
-
-        if data is not None:
-            self.data = data
+        self.model = model
+        self.tk = tk
+        self.data = data
 
         self.history_eval_param = []
 
@@ -181,3 +215,5 @@ class BayesianPYGPGOFit(Fit):
 
         self.history_best_fit_param.append(self.best_param)
         self.history_best_fit_value.append(self.best_value)
+
+        return self.best_param

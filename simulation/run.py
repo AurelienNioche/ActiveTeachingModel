@@ -5,8 +5,6 @@ from simulation.data import Data
 
 from fit.bayesian_pygpgo import BayesianPYGPGOFit
 
-import numpy as np
-
 
 def with_bayesian_opt(teacher_model, t_max, grades, n_item,
                       normalize_similarity, student_model,
@@ -21,28 +19,20 @@ def with_bayesian_opt(teacher_model, t_max, grades, n_item,
 
     learner = student_model(param=student_param, tk=teacher.tk)
 
-    iterator = tqdm(range(t_max)) if verbose else range(t_max)
-
     model_learner = student_model(
         tk=teacher.tk,
         param=student_model.generate_random_parameters()
     )
 
-    f = BayesianPYGPGOFit(
-        model=student_model, tk=teacher.tk,
-        data=None, n_jobs=n_cpu, verbose=False
-    )
+    f = BayesianPYGPGOFit(n_jobs=n_cpu, verbose=False)
 
-    # model_learner.set_parameters({"d": 0.5, "tau": 0.01, "s": 0.06, "m": 0.02})
-
-    for t in iterator:
-
-        if verbose:
-            print(f'\n ----- T{t} -----')
+    for t in tqdm(range(t_max)):
 
         question, possible_replies = teacher.ask(
             agent=model_learner,
-            make_learn=False)
+            make_learn=False,
+            possible_replies=None
+        )
 
         reply = learner.decide(
             question=question,
@@ -51,25 +41,16 @@ def with_bayesian_opt(teacher_model, t_max, grades, n_item,
         teacher.register_question_and_reply(question=question, reply=reply,
                                             possible_replies=possible_replies)
 
-        if verbose:
-            print('question:', question)
-            print('success:', reply == question)
-            print('p recall:', learner.p_recall(item=question))
-            print('p recall model:', model_learner.p_recall(item=question))
-            print('n_seen', sum(teacher.seen[:, t]))
-            print('estimated best param:', {k: float(f'{v:.2f}') for k, v in model_learner.param.items()})
-            print('param', learner.param)
-            print('teacher questions', teacher.questions[:t + 1])
-
         learner.learn(question=question)
         model_learner.learn(question=question)
 
-        data_view = Data(n_items=n_item,
+        data_view = Data(n_item=n_item,
                          questions=teacher.questions[:t + 1],
                          replies=teacher.replies[:t + 1],
                          possible_replies=teacher.possible_replies[:t + 1, :])
 
         f.evaluate(max_iter=max_iter, init_evals=init_eval,
+                   model=student_model, tk=teacher.tk,
                    data=data_view)
 
         model_learner.set_parameters(f.best_param)

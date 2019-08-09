@@ -71,7 +71,7 @@ class FitFidelity:
 
             self._simulate_data(seed=seeds[i])
 
-            data_view = Data(n_items=self.n_kanji,
+            data_view = Data(n_item=self.n_kanji,
                              questions=self.data.questions[:self.t_min],
                              replies=self.data.replies[:self.t_min],
                              possible_replies=
@@ -88,7 +88,7 @@ class FitFidelity:
 
             for t in tqdm(range(self.t_min+1, self.t_max)):
 
-                data_view = Data(n_items=self.n_kanji,
+                data_view = Data(n_item=self.n_kanji,
                                  questions=self.data.questions[:t],
                                  replies=self.data.replies[:t],
                                  possible_replies=

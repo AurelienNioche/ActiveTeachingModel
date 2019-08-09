@@ -4,20 +4,20 @@ from tqdm import tqdm
 
 class Data:
 
-    def __init__(self, n_items, questions, replies, times=None,
+    def __init__(self, n_item, questions, replies, times=None,
                  possible_replies=None):
 
-        self.n_items = n_items
+        self.n_item = n_item
 
         self.questions = questions
         self.replies = replies
 
         self.success = self.questions[:] == self.replies[:]
 
-        t_max = len(self.questions)
+        self.t_max = len(self.questions)
 
         if times is None:
-            self.times = [None for _ in range(t_max)]
+            self.times = [None for _ in range(self.t_max)]
         else:
             self.times = times
 
@@ -61,7 +61,7 @@ class SimulatedData(Data):
         times = [None for _ in range(t_max)]
 
         super().__init__(
-            n_items=n_item,
+            n_item=n_item,
             questions=questions,
             replies=replies,
             times=times,

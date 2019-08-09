@@ -38,14 +38,18 @@ class GenericTeacher:
 
         self.t = 0
 
-    def ask(self, agent=None, make_learn=True):
+    def ask(self, agent=None, make_learn=True, possible_replies=True):
 
         # print("___ Question ___")
         # print(self.questions)
         # print(agent.questions)
 
         question = self._get_next_node(agent=agent)
-        possible_replies = self._get_possible_replies(question)
+
+        if possible_replies:
+            poss_rep = self._get_possible_replies(question)
+        else:
+            poss_rep = None
 
         if make_learn:
             reply = agent.decide(question=question,
@@ -57,7 +61,7 @@ class GenericTeacher:
                 question=question,
                 possible_replies=possible_replies)
 
-        return question, possible_replies
+        return question, poss_rep
 
     def register_question_and_reply(self, reply, question, possible_replies):
 

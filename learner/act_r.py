@@ -32,6 +32,7 @@ class ActR(Learner):
         if self.tk.n_possible_replies is not None:
             self.p_random = 1/self.tk.n_possible_replies
         else:
+            # raise Exception
             self.p_random = 0
 
         # History of presentation

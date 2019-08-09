@@ -58,8 +58,11 @@ class AvyaTeacher(GenericTeacher):
 
         self.items = np.arange(self.tk.n_item)
 
+        self.question = None
         self.taboo = None
         self.not_taboo = np.ones(self.tk.n_item, dtype=bool)
+
+        self.rule = None
 
     def update_sets(self):
         """
@@ -145,17 +148,23 @@ class AvyaTeacher(GenericTeacher):
             return selection[np.argmax(self.usefulness[selection])]
         return None
 
-    def get_old_useful(self):
+    def rule_old_useful(self):
         """
         Rule 2: Find the most useful item among the seen items.
         """
-        return self._get_most_useful(self.represent_learning)
+        self.question = self._get_most_useful(self.represent_learning)
 
-    def get_new_useful(self):
+    def rule_smallest_p(self):
+
+        poss = \
+            np.where(self.p_recall == self.p_recall[self.not_taboo].min())[0]
+        self.question = np.random.choice(poss)
+
+    def rule_new_useful(self):
         """
         Rule 3: Find the most useful item among the new items.
         """
-        return self._get_most_useful(self.represent_unseen)
+        self.question = self._get_most_useful(self.represent_unseen)
 
     def _find_new_question(self):
 
@@ -171,24 +180,24 @@ class AvyaTeacher(GenericTeacher):
             #     print('Almost learnt rule')
             #     return new_question
 
-            new_question = self.get_old_useful()
-            if new_question is not None:
+            self.rule_old_useful()
+            if self.question is not None:
+                self.rule = 'OLD useful'
                 if self.verbose:
                     print('Teacher rule: Useful OLD rule')
-                return new_question
+                return
 
-        new_question = self.get_new_useful()
-        if new_question is not None:
+        self.rule_new_useful()
+        if self.question is not None:
+            self.rule = 'NEW useful'
             if self.verbose:
                 print('Teacher rule: Useful NEW rule')
-            return new_question
+            return
 
+        self.rule = 'Smallest probability'
         if self.verbose:
             print("Teacher rule: The smallest probability of recall")
-        poss = \
-            np.where(self.p_recall == self.p_recall[self.not_taboo].min())[0]
-        new_question = np.random.choice(poss)
-        return new_question
+        self.rule_smallest_p()
 
     def _get_next_node(self, agent=None):
         """
@@ -202,14 +211,14 @@ class AvyaTeacher(GenericTeacher):
         self._get_parameters(agent)
 
         if self.t > 0:
+            self.taboo = self.question
+            self.question = None
+            self.not_taboo[:] = self.items != self.taboo
             self.update_sets()
 
-        new_question = self._find_new_question()
+        self._find_new_question()
 
-        self.taboo = new_question
-        self.not_taboo[:] = self.items != self.taboo
-
-        return new_question
+        return self.question
 
 
 # def get_almost_learnt(self):
