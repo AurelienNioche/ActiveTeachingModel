@@ -148,7 +148,13 @@ class Network:
             np.random.choice([0, 1], p=[1 - self.f, self.f],
                              size=(self.p, self.n_neurons))
 
+        self.simplified_connectivity = None
+
         self.activation = np.zeros(self.n_neurons)
+
+        self.neuron_populations = None
+
+        self.simplified_activation = None
 
         self.t_tot_discrete = int(self.t_tot / self.dt)
 
@@ -212,7 +218,7 @@ class Network:
         return gain
 
     def gaussian_noise(self):
-        """ Variance has to be transformed into standard deviation (sqrt). """
+        """ Variance has to be transformed into standard deviation. """
         return np.random.normal(loc=0, scale=self.xi_0 ** 0.5)
 
     def simplified_gaussian_noise(self):
@@ -300,15 +306,15 @@ class Network:
 
         new_current = np.zeros(self.activation.shape)
 
-        for i in range(self.n_neurons):
+        for i in range(self.neuron_populations):
 
-            current = self.activation[i]
-            noise = self.simplified_gaussian_noise()
-            fraction_neurons = 1 / self.n_neurons \
-                * np.unique(self.connectivity, axis=1).shape[1]
+            current = self.simplified_activation[i]
+            noise = self.simplified_gaussian_noise()  # correct
+            fraction_neurons = self.neuron_populations / self.n_neurons
+            # correct
 
             sum_ = 0
-            for j in range(self.n_neurons):
+            for j in range(self.neuron_populations):
                 sum_ += \
                     (self.weights_constant[i, j]
                      - self.kappa_over_n * self.phi
@@ -357,6 +363,10 @@ class Network:
         self._compute_delta_weights()
 
         self._present_pattern()
+        if self.simplified_simulation:
+            self.simplified_connectivity = np.unique(self.connectivity, axis=1)
+            self.neuron_populations = self.simplified_connectivity.shape[1]
+            self.simplified_activation = np.zeros(self.neuron_populations)
 
     def simulate(self):
         self._initialize()
@@ -439,7 +449,7 @@ def main(force=False):
 
         np.random.seed(1234)
 
-        factor = 10**(-2)
+        factor = 10**(-3)
 
         network = Network(
                 n_neurons=int(10**5*factor),
