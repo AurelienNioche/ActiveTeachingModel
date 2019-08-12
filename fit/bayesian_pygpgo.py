@@ -17,7 +17,7 @@ def objective(model, tk, data, param, show=False):
 
     agent = model(param=param, tk=tk)
     t_max = data.t_max
-    out = np.zeros(t_max)
+    diff = np.zeros(t_max)
     # p_choices_ = agent.get_p_choices(data=data,
     #                                  stop_if_zero=False,
     #                                  use_p_correct=True)
@@ -39,11 +39,13 @@ def objective(model, tk, data, param, show=False):
 
         # if show:
         #     print('p_model:', p_choice)
-        out[t] = (s - p_r) ** 2
+        diff[t] = (s - p_r)
 
         agent.learn(item)
 
-    value = - np.sum(out)
+    # diff[diff < 0] *= 1.1
+    diff = np.power(diff, 2)
+    value = -np.sum(diff)
     if show:
         print("total value", value)
         print()

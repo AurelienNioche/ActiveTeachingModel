@@ -33,7 +33,9 @@ def _run(
     teacher = teacher_model(t_max=t_max, n_item=n_item,
                             normalize_similarity=normalize_similarity,
                             grades=grades,
-                            verbose=False)
+                            verbose=False,
+                            # learnt_threshold=0.975,
+                            )
 
     learner = student_model(param=student_param, tk=teacher.tk)
 
@@ -73,7 +75,7 @@ def _run(
         if p_r > np.random.random():
             reply = question
         else:
-            reply=-1
+            reply = -1
 
         teacher.register_question_and_reply(question=question, reply=reply,
                                             possible_replies=possible_replies)
@@ -88,7 +90,6 @@ def _run(
             for i in range(n_item):
                 p_recall[i] = learner.p_recall(i)
                 p_recall_model[i] = model_learner.p_recall(i)
-                assert p_recall_model[i] == teacher.p_recall[i]
 
             learnt = np.sum(p_recall >= 0.95)
             which_learnt = np.where(p_recall >= 0.95)[0]
@@ -98,14 +99,17 @@ def _run(
                 print()
                 discrepancy = 'Param disc.'
                 for k in sorted(list(model_learner.param.keys())):
-                    discrepancy += f'{k}: {model_learner.param[k] - student_param[k]:.3f}; '
+                    discrepancy += \
+                        f'{k}: ' \
+                        f'{model_learner.param[k] - student_param[k]:.3f}; '
 
                 print(discrepancy, '\n')
-                print(f"Obj value: {obj_value:.2f}; Best value: {best_value:.2f}")
+                print(f"Obj value: {obj_value:.2f}; "
+                      f"Best value: {best_value:.2f}")
                 print()
 
-                new_p_recall = learner.p_recall(item=teacher.taboo)
-                new_p_recall_model = model_learner.p_recall(item=teacher.taboo)
+                new_p_recall = p_recall[teacher.taboo]
+                new_p_recall_model = p_recall_model[teacher.taboo]
                 print(
                     f'New p recall: {new_p_recall:.3f}; '
                     f'New p recall model: {new_p_recall_model:.3f}')
@@ -122,12 +126,12 @@ def _run(
 
             success = question == reply
             # np.sum(teacher.learning_progress == teacher.represent_learnt)
-            print(f'Rule: {teacher.rule}')
+            # print(f'Rule: {teacher.rule}')
             print(f'Question: {question}; Success: {int(success)}')
             print()
             print(
                 f'P recall: {p_recall[question]:.3}; '
-                f'P recall model: {model_learner.p_recall(item=question):.3f}')
+                f'P recall model: {p_recall_model[question]:.3f}')
 
         data_view = Data(n_item=n_item,
                          questions=teacher.questions[:t + 1],

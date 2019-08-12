@@ -1,4 +1,4 @@
-import copy
+# import copy
 
 import numpy as np
 
@@ -44,12 +44,19 @@ class AvyaTeacher(GenericTeacher):
                          normalize_similarity=normalize_similarity,
                          verbose=verbose)
 
+        self.learn_threshold = learnt_threshold
+        # self.forgot_threshold = forgot_threshold
+
+        self.seen_items = np.zeros(n_item, dtype=bool)
+
+        self.p_recall = np.zeros(self.tk.n_item)
         self.usefulness = np.zeros(self.tk.n_item)
 
         self.items = np.arange(self.tk.n_item)
 
         self.question = None
         self.taboo = None
+        self.not_taboo = np.ones(self.tk.n_item, dtype=bool)
 
         self.rule = None
 
@@ -60,7 +67,7 @@ class AvyaTeacher(GenericTeacher):
             return v
         return v / norm
 
-    def _update_usefulness(self, agent):
+    def _update_usefulness_and_p_recall(self, agent):
         """
         :param agent: agent object (RL, ACT-R, ...) that implements at least
             the following methods:
@@ -78,12 +85,61 @@ class AvyaTeacher(GenericTeacher):
         self.usefulness[:] = 0
 
         for i in range(self.tk.n_item):
-            usefulness = 0
-            agent.learn(i)
+            self.p_recall[i] = agent.p_recall(i)
+            p_recall_i_next_it = agent.p_recall(i, time_index=self.t+1)
             for j in range(self.tk.n_item):
-                usefulness += agent.p_recall(j)**2
-            agent.unlearn()
-            self.usefulness[i] = usefulness
+                if j != i:
+                    agent.learn(j)
+                    p_recall_i_after_j = agent.p_recall(i)
+                    agent.unlearn()
+
+                    relative = p_recall_i_after_j - p_recall_i_next_it
+                    self.usefulness[j] += relative
+
+    @staticmethod
+    def _p_recall_influence(x):
+
+        # return 1/(1+np.exp((x-0.98)/0.005))
+        return 1/(1+np.exp((x-0.7)/0.1))
+
+    def check_for_new_item(self):
+
+        if np.sum(self.seen_items)\
+                == np.sum(self.p_recall > self.learn_threshold) or \
+                (np.sum(self.seen_items) == 1 and
+                 self.seen_items[self.taboo] == 1):
+            selection = self.items[self.seen_items == 0]
+            if len(selection):
+                np.random.shuffle(selection)
+                self.question = \
+                    selection[np.argmax(self.usefulness[selection])]
+                self.rule = 'New'
+
+    def pickup_already_seen(self):
+
+        self.rule = 'Already seen'
+
+        already_seen = self.seen_items == 1
+        selection = self.items[already_seen * self.not_taboo]
+        if len(selection) == 1:
+            self.question = self.items[selection[0]]
+            return
+
+        p_recall_inf = self._p_recall_influence(self.p_recall[selection])
+        norm_p_recall_inf = self.normalize(p_recall_inf)
+        norm_useful = self.normalize(self.usefulness[selection])
+        v = norm_p_recall_inf + norm_useful
+        p = v / np.sum(v)
+
+        if self.verbose:
+            print("p recall", self.p_recall[selection])
+            print('p recall influence', p_recall_inf)
+            print('p recall influence NORM', norm_p_recall_inf)
+            print('usefulness', self.usefulness[selection])
+            print('usefulness NORM', norm_useful)
+            print('p', p)
+
+        self.question = np.random.choice(self.items[selection], p=p)
 
     def _get_next_node(self, agent=None):
         """
@@ -94,13 +150,18 @@ class AvyaTeacher(GenericTeacher):
         """
 
         # agent = copy.deepcopy(agent)
-        self._update_usefulness(agent)
+        self._update_usefulness_and_p_recall(agent)
 
         if self.t > 0:
             self.taboo = self.question
             self.question = None
+            self.not_taboo[:] = self.items != self.taboo
 
-        self.question = np.argmax(self.usefulness)
+        self.check_for_new_item()
+        if self.question is None:
+            self.pickup_already_seen()
+
+        self.seen_items[self.question] = True
 
         if self.verbose:
             print(f'Teacher rule: {self.rule}')
