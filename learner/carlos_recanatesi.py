@@ -9,7 +9,7 @@ from matplotlib.ticker import MaxNLocator
 np.seterr(all='raise')
 
 
-class NetworkParam:
+class Network:
     """
     # Architecture
     :param n_neurons: int total number of neurons. "N" in the original article.
@@ -144,38 +144,23 @@ class NetworkParam:
         # self.r_threshold = r_threshold
         # self.n_trials = n_trials
 
-
-class Network:
-
-    def __init__(self, param):
-
-        if param is None:
-            pass
-        elif type(param) == dict:
-            self.pr = NetworkParam(**param)
-        elif type(param) in (tuple, list, np.ndarray):
-            self.pr = NetworkParam(*param)
-        else:
-            raise Exception(
-                f"Type {type(param)} is not handled for parameters")
-
         self.connectivity = \
-            np.random.choice([0, 1], p=[1 - self.pr.f, self.pr.f],
-                             size=(self.pr.p, self.pr.n_neurons))
+            np.random.choice([0, 1], p=[1 - self.f, self.f],
+                             size=(self.p, self.n_neurons))
 
-        self.activation = np.zeros(self.pr.n_neurons)
+        self.activation = np.zeros(self.n_neurons)
 
-        self.t_tot_discrete = int(self.pr.t_tot / self.pr.dt)
+        self.t_tot_discrete = int(self.t_tot / self.dt)
 
-        self.average_firing_rate = np.zeros((self.pr.p, self.t_tot_discrete))
+        self.average_firing_rate = np.zeros((self.p, self.t_tot_discrete))
 
-        self.kappa_over_n = self.pr.kappa / self.pr.n_neurons
+        self.kappa_over_n = self.kappa / self.n_neurons
 
-        self.weights_constant = np.zeros((self.pr.n_neurons,
-                                          self.pr.n_neurons))
+        self.weights_constant = np.zeros((self.n_neurons,
+                                          self.n_neurons))
 
-        self.delta_weights = np.zeros((self.pr.n_neurons,
-                                       self.pr.n_neurons))
+        self.delta_weights = np.zeros((self.n_neurons,
+                                       self.n_neurons))
 
         self.phi = None
 
@@ -204,33 +189,38 @@ class Network:
         :param t: int discrete time step.
         """
         self.phi = self.sinusoid(
-            min_=self.pr.phi_min,
-            max_=self.pr.phi_max,
-            period=self.pr.tau_0,
+            min_=self.phi_min,
+            max_=self.phi_max,
+            period=self.tau_0,
             t=t,
-            phase_shift=self.pr.phase_shift * self.pr.tau_0,
-            dt=self.pr.dt
+            phase_shift=self.phase_shift * self.tau_0,
+            dt=self.dt
         )
 
     def _present_pattern(self):
 
-        self.activation[:] = self.connectivity[self.pr.first_p, :] \
-                             * self.pr.r_ini
+        self.activation[:] = self.connectivity[self.first_p, :] \
+                             * self.r_ini
 
     def g(self, current):
 
-        if current + self.pr.theta > 0:
-            gain = (current + self.pr.theta) ** self.pr.gamma
+        if current + self.theta > 0:
+            gain = (current + self.theta) ** self.gamma
         else:
             gain = 0
 
         return gain
 
     def gaussian_noise(self):
-        return np.random.normal(loc=0, scale=self.pr.xi_0 ** 0.5)
+        """ Variance has to be transformed into standard deviation (sqrt). """
+        return np.random.normal(loc=0, scale=self.xi_0 ** 0.5)
 
     def simplified_gaussian_noise(self):
-        return np.random.normal(loc=0, scale=(self.pr.xi_0
+        """
+        Formula simplified from paper as N gets cancelled from when xi_v and
+        S_v equations are put together.
+        """
+        return np.random.normal(loc=0, scale=(self.xi_0
                                               * np.unique(self.connectivity,
                                                           axis=1).shape[1])
                                 ** 0.5)
@@ -238,14 +228,14 @@ class Network:
     def _compute_weight_constant(self):
 
         print("Computing weight constants...")
-        for i in tqdm(range(self.pr.n_neurons)):
-            for j in range(self.pr.n_neurons):
+        for i in tqdm(range(self.n_neurons)):
+            for j in range(self.n_neurons):
 
                 sum_ = 0
-                for mu in range(self.pr.p):
+                for mu in range(self.p):
                     sum_ += \
-                        (self.connectivity[mu, i] - self.pr.f) \
-                        * (self.connectivity[mu, j] - self.pr.f)
+                        (self.connectivity[mu, i] - self.f) \
+                        * (self.connectivity[mu, j] - self.f)
 
                 self.weights_constant[i, j] = \
                     self.kappa_over_n * sum_
@@ -253,40 +243,40 @@ class Network:
     def _compute_delta_weights(self):
 
         print('Computing delta weights...')
-        for i in tqdm(range(self.pr.n_neurons)):
+        for i in tqdm(range(self.n_neurons)):
 
-            for j in range(self.pr.n_neurons):
+            for j in range(self.n_neurons):
 
                 # Sum for positive
                 sum_pos = 0
-                for mu in range(self.pr.p - 1):
+                for mu in range(self.p - 1):
                     sum_pos += \
                         self.connectivity[mu, i] \
                         * self.connectivity[mu + 1, j]
 
                 # Sum for negative
                 sum_neg = 0
-                for mu in range(1, self.pr.p):
+                for mu in range(1, self.p):
                     sum_neg += \
                         self.connectivity[mu, i] \
                         * self.connectivity[mu - 1, j]
 
                 self.delta_weights[i, j] = \
-                    self.pr.j_forward * sum_pos \
-                    + self.pr.j_backward * sum_neg
+                    self.j_forward * sum_pos \
+                    + self.j_backward * sum_neg
 
     def _update_activation(self):
-        assert self.pr.simplified_simulation is False
+        assert self.simplified_simulation is False
 
         new_current = np.zeros(self.activation.shape)
 
-        for i in range(self.pr.n_neurons):
+        for i in range(self.n_neurons):
 
             current = self.activation[i]
             noise = self.gaussian_noise()
 
             sum_ = 0
-            for j in range(self.pr.n_neurons):
+            for j in range(self.n_neurons):
                 sum_ += \
                     (self.weights_constant[i, j]
                      - self.kappa_over_n * self.phi
@@ -296,29 +286,29 @@ class Network:
             business = sum_ + noise
 
             second_part = business * \
-                (self.pr.dt / self.pr.tau)
+                (self.dt / self.tau)
 
             first_part = current * \
-                (1 - (self.pr.dt / self.pr.tau))
+                (1 - (self.dt / self.tau))
 
             new_current[i] = first_part + second_part
 
         self.activation[:] = new_current
 
     def _simplified_update_activation(self):
-        assert self.pr.simplified_simulation is True
+        assert self.simplified_simulation is True
 
         new_current = np.zeros(self.activation.shape)
 
-        for i in range(self.pr.n_neurons):
+        for i in range(self.n_neurons):
 
             current = self.activation[i]
             noise = self.simplified_gaussian_noise()
-            fraction_neurons = 1 / self.pr.n_neurons \
+            fraction_neurons = 1 / self.n_neurons \
                 * np.unique(self.connectivity, axis=1).shape[1]
 
             sum_ = 0
-            for j in range(self.pr.n_neurons):
+            for j in range(self.n_neurons):
                 sum_ += \
                     (self.weights_constant[i, j]
                      - self.kappa_over_n * self.phi
@@ -328,10 +318,10 @@ class Network:
 
             business = sum_ + noise
 
-            second_part = business * self.pr.dt  # done
+            second_part = business * self.dt  # done
 
             first_part = current * \
-                (1 - self.pr.dt)  # done
+                (1 - self.dt)  # done
 
             new_current[i] = first_part + second_part
 
@@ -339,7 +329,7 @@ class Network:
 
     def _save_fr(self, t):
 
-        for mu in range(self.pr.p):
+        for mu in range(self.p):
 
             neurons = self.connectivity[mu, :]
 
@@ -371,10 +361,10 @@ class Network:
     def simulate(self):
         self._initialize()
 
-        print(f"Simulating for {self.t_tot_discrete} time steps...\n") #
+        print(f"Simulating for {self.t_tot_discrete} time steps...\n")
         for t in tqdm(range(self.t_tot_discrete)):
             self.update_phi(t)
-            if self.pr.simplified_simulation:
+            if self.simplified_simulation:
                 self._simplified_update_activation()
             else:
                 self._update_activation()
@@ -382,7 +372,7 @@ class Network:
 
 
 def plot_phi(network):
-    x = np.arange(network.t_tot_discrete) * network.pr.dt
+    x = np.arange(network.t_tot_discrete) * network.dt
     y = np.zeros(network.t_tot_discrete)
 
     for t in range(network.t_tot_discrete):
@@ -402,7 +392,7 @@ def plot_average_firing_rate(network):
     average_fr = network.average_firing_rate
 
     x = np.arange(average_fr.shape[1], dtype=float) * \
-        network.pr.dt
+        network.dt
 
     fig, ax = plt.subplots()
 
@@ -422,7 +412,7 @@ def plot_attractors(network):
     fig, ax = plt.subplots()
     im = ax.imshow(average_fr, cmap="jet",
                    extent=[
-                        0, average_fr.shape[1] * network.pr.dt,
+                        0, average_fr.shape[1] * network.dt,
                         average_fr.shape[0] - 0.5, -0.5
                    ])
 
@@ -452,23 +442,22 @@ def main(force=False):
         factor = 10**(-2)
 
         network = Network(
-            param={
-                "n_neurons": int(10**5*factor),
-                "f": 0.1,
-                "p": 16,
-                "xi_0": 65,
-                "kappa": 13000,
-                "tau_0": 1,
-                "gamma": 2 / 5,
-                "phi_min": 0.7,
-                "phi_max": 1.06,
-                "phase_shift": 0.75,
-                "j_forward": 1500*factor,
-                "j_backward": 400*factor,
-                "first_p": 0,
-                "t_tot": 4,
-                "simplified_simulation": True
-            })
+                n_neurons=int(10**5*factor),
+                f=0.1,
+                p=16,
+                xi_0=65,
+                kappa=13000,
+                tau_0=1,
+                gamma=2 / 5,
+                phi_min=0.7,
+                phi_max=1.06,
+                phase_shift=0.75,
+                j_forward=1500*factor,
+                j_backward=400*factor,
+                first_p=0,
+                t_tot=4,
+                simplified_simulation=True
+            )
 
         network.simulate()
 
