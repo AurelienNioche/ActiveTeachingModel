@@ -67,7 +67,6 @@ class Network:
     def __init__(
             self,
             # Architecture ###########
-            n_epoch=3,
             n_neurons=100000,
             p=16,
             # Activation #############
@@ -100,7 +99,6 @@ class Network:
         # r_ini=1,):
 
         # Architecture
-        self.n_epoch = n_epoch
         self.n_neurons = n_neurons
         self.p = p
 
@@ -230,7 +228,7 @@ class Network:
 
     def _compute_delta_weights(self):
 
-        print('Computing delta weights...')
+        print("Computing delta weights...")
         for i in tqdm(range(self.n_neurons)):
 
             for j in range(self.n_neurons):
