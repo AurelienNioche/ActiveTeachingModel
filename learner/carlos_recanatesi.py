@@ -1,10 +1,10 @@
-import pickle
 import os
+import pickle
 
 import numpy as np
 from tqdm import tqdm
-import matplotlib.pyplot as plt
-from matplotlib.ticker import MaxNLocator
+
+import plot.attractor_networks
 
 np.seterr(all='raise')
 
@@ -71,7 +71,6 @@ class Network:
             n_neurons=100000,
             p=16,
             # Activation #############
-            simplified_simulation=False,
             tau=0.01,
             # Gain ###################
             theta=0,
@@ -106,7 +105,6 @@ class Network:
         self.p = p
 
         # Activation function
-        self.simplified_simulation = simplified_simulation
         self.tau = tau
 
         # Gain function
@@ -148,13 +146,7 @@ class Network:
             np.random.choice([0, 1], p=[1 - self.f, self.f],
                              size=(self.p, self.n_neurons))
 
-        self.simplified_connectivity = None
-
         self.activation = np.zeros(self.n_neurons)
-
-        self.neuron_populations = None
-
-        self.simplified_activation = None
 
         self.t_tot_discrete = int(self.t_tot / self.dt)
 
@@ -171,7 +163,7 @@ class Network:
         self.phi = None
 
     @staticmethod
-    def sinusoid(min_, max_, period, t, phase_shift, dt=1.):
+    def _sinusoid(min_, max_, period, t, phase_shift, dt=1.):
 
         amplitude = (max_ - min_) / 2
         frequency = (1 / period) * dt
@@ -182,7 +174,7 @@ class Network:
             * np.sin(2 * np.pi * (t + phase_shift / dt) * frequency) \
             + shift
 
-    def update_phi(self, t):
+    def _update_phi(self, t):
         """
         Phi is a sinusoid function related to neuron inhibition.
         It follows the general sine wave function:
@@ -194,7 +186,7 @@ class Network:
 
         :param t: int discrete time step.
         """
-        self.phi = self.sinusoid(
+        self.phi = self._sinusoid(
             min_=self.phi_min,
             max_=self.phi_max,
             period=self.tau_0,
@@ -208,7 +200,7 @@ class Network:
         self.activation[:] = self.connectivity[self.first_p, :] \
                              * self.r_ini
 
-    def g(self, current):
+    def _g(self, current):
 
         if current + self.theta > 0:
             gain = (current + self.theta) ** self.gamma
@@ -217,21 +209,11 @@ class Network:
 
         return gain
 
-    def gaussian_noise(self):
+    def _gaussian_noise(self):
         """ Variance has to be transformed into standard deviation. """
         return np.random.normal(loc=0, scale=self.xi_0 ** 0.5)
 
-    def simplified_gaussian_noise(self):
-        """
-        Formula simplified from paper as N gets cancelled from when xi_v and
-        S_v equations are put together.
-        """
-        return np.random.normal(loc=0, scale=(self.xi_0
-                                              * np.unique(self.connectivity,
-                                                          axis=1).shape[1])
-                                ** 0.5)
-
-    def _compute_weight_constant(self):
+    def _compute_weight_constants(self):
 
         print("Computing weight constants...")
         for i in tqdm(range(self.n_neurons)):
@@ -272,14 +254,13 @@ class Network:
                     + self.j_backward * sum_neg
 
     def _update_activation(self):
-        assert self.simplified_simulation is False
 
         new_current = np.zeros(self.activation.shape)
 
         for i in range(self.n_neurons):
 
             current = self.activation[i]
-            noise = self.gaussian_noise()
+            noise = self._gaussian_noise()
 
             sum_ = 0
             for j in range(self.n_neurons):
@@ -287,7 +268,7 @@ class Network:
                     (self.weights_constant[i, j]
                      - self.kappa_over_n * self.phi
                      + self.delta_weights[i, j]) \
-                    * self.g(self.activation[j])
+                    * self._g(self.activation[j])
 
             business = sum_ + noise
 
@@ -296,38 +277,6 @@ class Network:
 
             first_part = current * \
                 (1 - (self.dt / self.tau))
-
-            new_current[i] = first_part + second_part
-
-        self.activation[:] = new_current
-
-    def _simplified_update_activation(self):
-        assert self.simplified_simulation is True
-
-        new_current = np.zeros(self.activation.shape)
-
-        for i in range(self.neuron_populations):
-
-            current = self.simplified_activation[i]
-            noise = self.simplified_gaussian_noise()  # correct
-            fraction_neurons = self.neuron_populations / self.n_neurons
-            # correct
-
-            sum_ = 0
-            for j in range(self.neuron_populations):
-                sum_ += \
-                    (self.weights_constant[i, j]
-                     - self.kappa_over_n * self.phi
-                     + self.delta_weights[i, j]) \
-                    * self.g(self.activation[j]) \
-                    * fraction_neurons
-
-            business = sum_ + noise
-
-            second_part = business * self.dt  # done
-
-            first_part = current * \
-                (1 - self.dt)  # done
 
             new_current[i] = first_part + second_part
 
@@ -343,7 +292,7 @@ class Network:
 
             v = np.zeros(len(encoding))
             for i, n in enumerate(encoding):
-                v[i] = self.g(self.activation[n])
+                v[i] = self._g(self.activation[n])
 
             try:
                 self.average_firing_rate[mu, t] = np.mean(v)
@@ -359,84 +308,18 @@ class Network:
         * Updates the network for the total discrete time steps.
         """
 
-        self._compute_weight_constant()
+        self._compute_weight_constants()
         self._compute_delta_weights()
-
         self._present_pattern()
-        if self.simplified_simulation:
-            self.simplified_connectivity = np.unique(self.connectivity, axis=1)
-            self.neuron_populations = self.simplified_connectivity.shape[1]
-            self.simplified_activation = np.zeros(self.neuron_populations)
 
     def simulate(self):
         self._initialize()
 
         print(f"Simulating for {self.t_tot_discrete} time steps...\n")
         for t in tqdm(range(self.t_tot_discrete)):
-            self.update_phi(t)
-            if self.simplified_simulation:
-                self._simplified_update_activation()
-            else:
-                self._update_activation()
+            self._update_phi(t)
+            self._update_activation()
             self._save_fr(t)
-
-
-def plot_phi(network):
-    x = np.arange(network.t_tot_discrete) * network.dt
-    y = np.zeros(network.t_tot_discrete)
-
-    for t in range(network.t_tot_discrete):
-        network.update_phi(t)
-        y[t] = network.phi
-
-    plt.plot(x, y)
-    plt.title("Inhibitory oscillations")
-    plt.xlabel("Time (cycles)")
-    plt.ylabel("$\phi$")
-    plt.xlim(min(x), max(x))
-
-    plt.show()
-
-
-def plot_average_firing_rate(network):
-    average_fr = network.average_firing_rate
-
-    x = np.arange(average_fr.shape[1], dtype=float) * \
-        network.dt
-
-    fig, ax = plt.subplots()
-
-    for i, y in enumerate(average_fr):
-        ax.plot(x, y, linewidth=0.5, alpha=1)
-        if i > 1:
-            break
-
-    ax.set_xlabel('Time (cycles)')
-    ax.set_ylabel('Average firing rate')
-    plt.show()
-
-
-def plot_attractors(network):
-    average_fr = network.average_firing_rate
-
-    fig, ax = plt.subplots()
-    im = ax.imshow(average_fr, cmap="jet",
-                   extent=[
-                        0, average_fr.shape[1] * network.dt,
-                        average_fr.shape[0] - 0.5, -0.5
-                   ])
-
-    ax.set_xlabel('Time (cycles)')
-    ax.set_ylabel("Attractor number")
-
-    fig.colorbar(im, ax=ax)
-
-    ax.set_aspect(aspect='auto')
-    ax.yaxis.set_major_locator(MaxNLocator(integer=True))
-
-    fig.tight_layout()
-
-    plt.show()
 
 
 def main(force=False):
@@ -466,7 +349,6 @@ def main(force=False):
                 j_backward=400*factor,
                 first_p=0,
                 t_tot=4,
-                simplified_simulation=True
             )
 
         network.simulate()
@@ -476,9 +358,9 @@ def main(force=False):
         print('Loading from pickle file...')
         network = pickle.load(open(bkp_file, 'rb'))
 
-    plot_phi(network)
-    plot_average_firing_rate(network)
-    plot_attractors(network)
+    plot.attractor_networks.plot_phi(network)
+    plot.attractor_networks.plot_average_firing_rate(network)
+    plot.attractor_networks.plot_attractors(network)
 
 
 if __name__ == "__main__":
