@@ -1,43 +1,16 @@
-# import copy
+import matplotlib.pyplot as plt
 
 import numpy as np
 
 from teacher.metaclass import GenericTeacher
 
 
-class AvyaTeacher(GenericTeacher):
-
-    represent_unseen = 0
-    represent_learning = 1
-    represent_learnt = 2
+class SoftmaxTradeoff(GenericTeacher):
 
     def __init__(self, n_item=20, t_max=200, grades=(1, ),
                  handle_similarities=True, normalize_similarity=False,
                  learnt_threshold=0.95,
-                 # forgot_threshold=0.85,
                  verbose=False):
-
-        """
-        :param n_item: task attribute
-        :param t_max: task attribute
-        :param grades: task attribute
-        :param handle_similarities: task attribute
-        :param normalize_similarity: task attribute
-        :param learnt_threshold: p_recall(probability of recall) threshold after
-        which an item is learnt.
-        :param forgot_threshold: As learn_threshold but on the verge of being
-        learnt.
-        :param verbose: be talkative (or not)
-
-        :var self.taboo: Integer value from range(0 to n_item)
-        is the item shown in last iteration.
-        :var self.p_recall: array of float of size n_item
-        (ith index has current probability of recall of ith item).
-        :var self.usefulness: array of floats that stores the usefulness of
-                teaching the ith item in current iteration.
-        :var self.recall_arr: array of integers size n_item ( i^th index has
-            the probability of recall of i^th item).
-        """
 
         super().__init__(n_item=n_item, t_max=t_max, grades=grades,
                          handle_similarities=handle_similarities,
@@ -45,7 +18,6 @@ class AvyaTeacher(GenericTeacher):
                          verbose=verbose)
 
         self.learn_threshold = learnt_threshold
-        # self.forgot_threshold = forgot_threshold
 
         self.seen_items = np.zeros(n_item, dtype=bool)
 
@@ -97,10 +69,10 @@ class AvyaTeacher(GenericTeacher):
                     self.usefulness[j] += relative
 
     @staticmethod
-    def _p_recall_influence(x):
+    def p_recall_influence(x):
 
-        # return 1/(1+np.exp((x-0.98)/0.005))
-        return 1/(1+np.exp((x-0.7)/0.1))
+        return 1/(1+np.exp((x-0.98)/0.005))
+        # return 1/(1+np.exp((x-0.7)/0.1))
 
     def check_for_new_item(self):
 
@@ -125,7 +97,7 @@ class AvyaTeacher(GenericTeacher):
             self.question = self.items[selection[0]]
             return
 
-        p_recall_inf = self._p_recall_influence(self.p_recall[selection])
+        p_recall_inf = self.p_recall_influence(self.p_recall[selection])
         norm_p_recall_inf = self.normalize(p_recall_inf)
         norm_useful = self.normalize(self.usefulness[selection])
         v = norm_p_recall_inf + norm_useful
@@ -167,3 +139,14 @@ class AvyaTeacher(GenericTeacher):
             print(f'Teacher rule: {self.rule}')
 
         return self.question
+
+
+def draw_softmax():
+
+    x = np.linspace(0, 1, 100)
+    y = SoftmaxTradeoff.p_recall_influence(x)
+    plt.plot(x, y)
+    plt.xlim((-0.01, 1.01))
+    plt.ylim((-0.01, 1.01))
+    plt.axvline(0.95, linestyle='dashed', alpha=0.5)
+    plt.show()

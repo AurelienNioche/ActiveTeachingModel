@@ -6,7 +6,7 @@ from learner.act_r import ActR
 from learner.act_r_custom import ActRMeaning, ActRGraphic, ActRPlus
 from learner.rl import QLearner
 from simulation.memory import p_recall_over_time_after_learning
-from teacher.avya import AvyaTeacher
+from teacher.active import Active
 # from teacher.avya_leitner import AvyaLeitTeacher
 from teacher.leitner import LeitnerTeacher
 from teacher.random import RandomTeacher
@@ -124,7 +124,7 @@ def run(student_model, teacher_model,
         (ActR, ActRMeaning, ActRGraphic, ActRPlus, QLearner), \
         "Student model not recognized."
     assert teacher_model in \
-        (AvyaTeacher,
+        (Active,
          RandomTeacher, LeitnerTeacher), \
         "Teacher model not recognized."
 
@@ -166,7 +166,7 @@ def main(force=False):
     student_model = ActRMeaning
 
     # Teacher
-    teacher_models = (RandomTeacher, LeitnerTeacher, AvyaTeacher)
+    teacher_models = (RandomTeacher, LeitnerTeacher, Active)
 
     # Plot
     font_size = 8

@@ -4,7 +4,7 @@ from learner.act_r_custom import ActRMeaning
 from teacher.random import RandomTeacher
 from teacher.leitner import LeitnerTeacher
 from teacher.complete_leitner import TraditionalLeitnerTeacher
-from teacher.avya import AvyaTeacher
+from teacher.active import Active, ForceLearning
 
 import plot.simulation
 
@@ -63,7 +63,8 @@ def main(t_max=300, n_item=30, grades=(1, ),
     if teacher_model is None:
         teacher_model = RandomTeacher
 
-    extension = f'{teacher_model.__name__}_{student_model.__name__}_' \
+    extension = f'{teacher_model.__name__}{teacher_model.version}_' \
+                f'{student_model.__name__}_' \
                 f'{dic2string(student_param)}_' \
                 f'ni_{n_item}_grade_{grades}_tmax_{t_max}_' \
                 f'norm_{normalize_similarity}'
@@ -104,7 +105,7 @@ if __name__ == "__main__":
     main(
         student_model=ActRMeaning,
         student_param={"d": 0.5, "tau": 0.01, "s": 0.06, "m": 0.02},
-        teacher_model=AvyaTeacher,
-        t_max=1000, n_item=30, normalize_similarity=True,
+        teacher_model=ForceLearning,
+        t_max=2000, n_item=30, normalize_similarity=True,
         force=True
     )

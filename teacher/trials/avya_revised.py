@@ -1,11 +1,9 @@
-# import copy
-
 import numpy as np
 
 from teacher.metaclass import GenericTeacher
 
 
-class AvyaTeacher(GenericTeacher):
+class AvyaRevised(GenericTeacher):
 
     represent_unseen = 0
     represent_learning = 1
@@ -14,7 +12,6 @@ class AvyaTeacher(GenericTeacher):
     def __init__(self, n_item=20, t_max=200, grades=(1, ),
                  handle_similarities=True, normalize_similarity=False,
                  learnt_threshold=0.95,
-                 # forgot_threshold=0.85,
                  verbose=False):
 
         """
@@ -25,8 +22,6 @@ class AvyaTeacher(GenericTeacher):
         :param normalize_similarity: task attribute
         :param learnt_threshold: p_recall(probability of recall) threshold after
         which an item is learnt.
-        :param forgot_threshold: As learn_threshold but on the verge of being
-        learnt.
         :param verbose: be talkative (or not)
 
         :var self.taboo: Integer value from range(0 to n_item)
@@ -45,14 +40,8 @@ class AvyaTeacher(GenericTeacher):
                          verbose=verbose)
 
         self.learn_threshold = learnt_threshold
-        # self.forgot_threshold = forgot_threshold
 
         self.learning_progress = np.zeros(n_item, dtype=int)
-        # :param learning_progress: will contain:
-        #     * param represent_learnt: at i^th index when i^th item is learnt
-        #     * param represent_learning: at i^th index when i^th item is seen
-        #     at least once but hasn't been learnt
-        #     * param represent_unseen: at i^th index when i^th item is unseen
 
         self.p_recall = np.zeros(self.tk.n_item)
         self.usefulness = np.zeros(self.tk.n_item)
@@ -183,11 +172,8 @@ class AvyaTeacher(GenericTeacher):
         """
         :param agent: as before.
         :return: integer (index of the question to ask).
-
-        Function implements 3 Rules in order.
         """
 
-        # agent = copy.deepcopy(agent)
         self._get_parameters(agent)
 
         if self.t > 0:

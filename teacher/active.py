@@ -5,16 +5,13 @@ import numpy as np
 from teacher.metaclass import GenericTeacher
 
 
-class AvyaTeacher(GenericTeacher):
+class Active(GenericTeacher):
 
-    represent_unseen = 0
-    represent_learning = 1
-    represent_learnt = 2
+    version = 3
 
     def __init__(self, n_item=20, t_max=200, grades=(1, ),
                  handle_similarities=True, normalize_similarity=False,
                  learnt_threshold=0.95,
-                 # forgot_threshold=0.85,
                  verbose=False):
 
         """
@@ -25,8 +22,6 @@ class AvyaTeacher(GenericTeacher):
         :param normalize_similarity: task attribute
         :param learnt_threshold: p_recall(probability of recall) threshold after
         which an item is learnt.
-        :param forgot_threshold: As learn_threshold but on the verge of being
-        learnt.
         :param verbose: be talkative (or not)
 
         :var self.taboo: Integer value from range(0 to n_item)
@@ -43,6 +38,8 @@ class AvyaTeacher(GenericTeacher):
                          handle_similarities=handle_similarities,
                          normalize_similarity=normalize_similarity,
                          verbose=verbose)
+
+        self.learnt_threshold = learnt_threshold
 
         self.usefulness = np.zeros(self.tk.n_item)
 
@@ -81,9 +78,23 @@ class AvyaTeacher(GenericTeacher):
             usefulness = 0
             agent.learn(i)
             for j in range(self.tk.n_item):
-                usefulness += agent.p_recall(j)**2
+                next_p_recall_j_after_i = agent.p_recall(j)
+                usefulness += next_p_recall_j_after_i ** 2
             agent.unlearn()
             self.usefulness[i] = usefulness
+
+        # self.usefulness[:] = 0
+        #
+        # for i in range(self.tk.n_item):
+        #     usefulness = 0
+        #     for j in range(self.tk.n_item):
+        #         next_p_recall_j = agent.p_recall(j, time_index=self.t+1)
+        #         agent.learn(i)
+        #         next_p_recall_j_after_i = agent.p_recall(j)
+        #         agent.unlearn()
+        #
+        #         usefulness += (next_p_recall_j_after_i-next_p_recall_j)**2
+        #     self.usefulness[i] = usefulness
 
     def _get_next_node(self, agent=None):
         """
@@ -93,16 +104,60 @@ class AvyaTeacher(GenericTeacher):
         Function implements 3 Rules in order.
         """
 
-        # agent = copy.deepcopy(agent)
         self._update_usefulness(agent)
 
         if self.t > 0:
             self.taboo = self.question
             self.question = None
 
-        self.question = np.argmax(self.usefulness)
+        self.question = np.random.choice(
+            np.where(self.usefulness == np.max(self.usefulness))[0])
 
         if self.verbose:
             print(f'Teacher rule: {self.rule}')
 
         return self.question
+
+
+class ForceLearning(Active):
+    version = 4
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    def _update_usefulness(self, agent):
+        """
+        :param agent: agent object (RL, ACT-R, ...) that implements at least
+            the following methods:
+            * p_recall(item): takes index of a question and gives the
+                probability of recall for the agent in current state.
+            * learn(item): strengthen the association between a kanji and
+                its meaning.
+            * unlearn(): cancel the effect of the last call of the learn
+                method.
+        :return None
+
+        Calculate Usefulness of items
+        """
+
+        self.usefulness[:] = 0
+
+        sum_p_recall = np.zeros(self.tk.n_item)
+
+        current_p_recall = np.zeros(self.tk.n_item)
+        for i in range(self.tk.n_item):
+            current_p_recall[i] = agent.p_recall(i)
+
+            agent.learn(i)
+
+            p_recall = np.zeros(self.tk.n_item)
+            for j in range(self.tk.n_item):
+                p_recall[j] = agent.p_recall(j)
+
+            agent.unlearn()
+            sum_p_recall[i] = np.sum(np.power(p_recall, 2))
+            self.usefulness[i] = np.sum(p_recall > self.learnt_threshold)
+
+        self.usefulness -= current_p_recall > self.learnt_threshold
+        if max(self.usefulness) <= 0:
+            self.usefulness = sum_p_recall
