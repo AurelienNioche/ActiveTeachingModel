@@ -21,10 +21,12 @@ def plot_phi(network):
 
 
 def plot_average_firing_rate(network):
-    average_fr = network.average_firing_rate
 
-    x = np.arange(average_fr.shape[1], dtype=float) * \
-        network.dt
+    average_fr = network.average_firing_rate
+    n_iteration = average_fr.shape[1]
+    dt = network.dt
+
+    x = np.arange(n_iteration, dtype=float) * dt
 
     fig, ax = plt.subplots()
 
@@ -40,12 +42,14 @@ def plot_average_firing_rate(network):
 
 def plot_attractors(network):
     average_fr = network.average_firing_rate
+    n_memory, n_iteration = average_fr.shape
+    dt = network.dt
 
     fig, ax = plt.subplots()
     im = ax.imshow(average_fr, cmap="jet",
                    extent=[
-                        0, average_fr.shape[1] * network.dt,
-                        average_fr.shape[0] - 0.5, -0.5
+                        0, n_iteration * dt,
+                        n_memory - 0.5, -0.5
                    ])
 
     ax.set_xlabel('Time (cycles)')

@@ -10,7 +10,7 @@ from learner.carlos_recanatesi import Network
 np.seterr(all='raise')
 
 
-class SimplifiedNetwork(Network):
+class SimplifiedNetwork:
     """
     Simplified version of the network by Recanatesi (2015). A dimensionality
     reduction reduces the number of simulated units.
@@ -20,7 +20,7 @@ class SimplifiedNetwork(Network):
             self,
             # Architecture ###########
             n_epoch=3,
-            n_neurons=100000,
+            n_neuron=100000,
             p=16,
             # Activation #############
             tau=0.01,
@@ -53,7 +53,7 @@ class SimplifiedNetwork(Network):
         # r_ini=1,):
 
         # Architecture
-        self.n_neurons = n_neurons
+        self.n_neuron = n_neuron
         self.p = p
 
         # Activation function
@@ -90,35 +90,36 @@ class SimplifiedNetwork(Network):
         self.r_ini = r_ini
         self.first_p = first_p
 
-        self.connectivity = \
+        single_neuron_connectivity = \
             np.random.choice([0, 1], p=[1 - self.f, self.f],
-                             size=(self.p, self.n_neurons))
+                             size=(self.p, self.n_neuron))
+
+        self.connectivity = np.unique(single_neuron_connectivity, axis=1)  # SEPARATE THIS
+        print(self.connectivity)
 
         self.t_tot_discrete = int(self.t_tot / self.dt)
 
         self.average_firing_rate = np.zeros((self.p, self.t_tot_discrete))
 
-        self.connectivity = np.unique(self.connectivity, axis=1)
-        print(self.connectivity)
+        self.n_population = self.connectivity.shape[1]
 
-        self.neuron_populations = self.connectivity.shape[1]
-
-        self.n_neurons = self.neuron_populations  # Reduce the number of
+        # self.n_neurons = self.n_population  # Reduce the number of
         # neurons after computing v, w
 
-        self.kappa_over_n = self.kappa / self.n_neurons
-
         self.weights_constant = np.zeros((
-            self.neuron_populations, self.neuron_populations))
+            self.n_population, self.n_population))
 
-        self.delta_weights = np.zeros((self.neuron_populations,
-                                       self.neuron_populations))
-        self.activation = np.zeros(self.neuron_populations)
+        self.delta_weights = np.zeros((self.n_population,
+                                       self.n_population))
+        self.activation = np.zeros(self.n_population)
+
+        self.kappa_over_n = self.kappa / self.n_neuron
+        self.n_fraction = self.n_population / self.n_neuron
 
     def _present_pattern(self):
 
         self.activation[:] = self.connectivity[self.first_p, :] \
-                             * self.r_ini
+                             * self.r_ini  # CHECK
 
         print(self.activation)
 
@@ -127,16 +128,15 @@ class SimplifiedNetwork(Network):
         Formula simplified from paper as N gets cancelled from when xi_v and
         S_v equations are put together.
         """
-        return np.random.normal(loc=0, scale=(self.xi_0
-                                              * np.unique(self.connectivity,
-                                                          axis=1).shape[1])
-                                ** 0.5)
+        return np.random.normal(
+            loc=0,
+            scale=self.xi_0**0.5 * self.n_population)
 
     def _compute_weight_constants(self):
 
         print("Computing weight constants...")
-        for i in tqdm(range(self.neuron_populations)):
-            for j in range(self.neuron_populations):
+        for i in tqdm(range(self.n_population)):
+            for j in range(self.n_population):
 
                 sum_ = 0
                 for mu in range(self.p):
@@ -153,9 +153,9 @@ class SimplifiedNetwork(Network):
     def _compute_delta_weights(self):
 
         print("Computing delta weights...")
-        for i in tqdm(range(self.neuron_populations)):
+        for i in tqdm(range(self.n_population)):
 
-            for j in range(self.neuron_populations):
+            for j in range(self.n_population):
 
                 # Sum for positive
                 sum_pos = 0
@@ -179,20 +179,21 @@ class SimplifiedNetwork(Network):
 
         new_current = np.zeros(self.activation.shape)
 
-        for i in range(self.neuron_populations):
+        for i in range(self.n_population):
 
             current = self.activation[i]
             noise = self._gaussian_noise()
-            fraction_neurons = self.neuron_populations / self.n_neurons
 
             sum_ = 0
-            for j in range(self.neuron_populations):
+            for j in range(self.n_population):
+                # SEPARATE COMPUTATION OF WEIGHTS
                 sum_ += \
                     (self.weights_constant[i, j]
-                     - self.kappa_over_n * self.phi
+                     - self.kappa_over_n
+                     * self.phi  # MISTAKE
                      + self.delta_weights[i, j]) \
                     * self._g(self.activation[j]) \
-                    * fraction_neurons
+                    * self.n_fraction  # MISTAKE
 
             business = sum_ + noise
 
@@ -209,7 +210,75 @@ class SimplifiedNetwork(Network):
 
         self._compute_weight_constants()
         self._present_pattern()
-        print(self.neuron_populations)
+        print(self.n_population)
+
+    def _save_fr(self, t):
+
+        for mu in range(self.p):
+
+            neurons = self.connectivity[mu, :]
+
+            encoding = np.nonzero(neurons)[0]
+
+            v = np.zeros(len(encoding))
+            for i, n in enumerate(encoding):
+                v[i] = self._g(self.activation[n])
+
+            try:
+                self.average_firing_rate[mu, t] = np.mean(v)
+            except FloatingPointError:
+                self.average_firing_rate[mu, t] = 0
+
+    @staticmethod
+    def _sinusoid(min_, max_, period, t, phase_shift, dt=1.):
+
+        amplitude = (max_ - min_) / 2
+        frequency = (1 / period) * dt
+        shift = min_ + amplitude  # Moves the wave in the y-axis
+
+        return \
+            amplitude \
+            * np.sin(2 * np.pi * (t + phase_shift / dt) * frequency) \
+            + shift
+
+    def _update_phi(self, t):
+        """
+        Phi is a sinusoid function related to neuron inhibition.
+        It follows the general sine wave function:
+            f(x) = amplitude * (2 * pi * frequency * time)
+        In order to adapt to the phi_min and phi_max parameters the amplitude
+        and an additive shift term have to change.
+        Frequency in discrete time has to be adapted from the given tau_0
+        period in continuous time.
+
+        :param t: int discrete time step.
+        """
+        self.phi = self._sinusoid(
+            min_=self.phi_min,
+            max_=self.phi_max,
+            period=self.tau_0,
+            t=t,
+            phase_shift=self.phase_shift * self.tau_0,
+            dt=self.dt
+        )
+
+    def _g(self, current):
+
+        if current + self.theta > 0:
+            gain = (current + self.theta) ** self.gamma
+        else:
+            gain = 0
+
+        return gain
+
+    def simulate(self):
+        self._initialize()
+
+        print(f"Simulating for {self.t_tot_discrete} time steps...\n")
+        for t in tqdm(range(self.t_tot_discrete)):
+            self._update_phi(t)
+            self._update_activation()
+            self._save_fr(t)
 
 
 def main(force=False):
@@ -225,9 +294,9 @@ def main(force=False):
         # factor = 10**(-4)
 
         simplified_network = SimplifiedNetwork(
-                n_neurons=int(10**5),  #*factor),
+                n_neuron=int(10 ** 5),  #*factor),
                 f=0.1,
-                p=3,
+                p=16,
                 xi_0=65,
                 kappa=13000,
                 tau_0=1,
