@@ -5,7 +5,7 @@ import numpy as np
 from tqdm import tqdm
 
 import plot.attractor_networks
-from learner.carlos_recanatesi import Network
+# from learner.carlos_recanatesi import Network
 
 np.seterr(all='raise')
 
@@ -95,13 +95,13 @@ class SimplifiedNetwork:
                              size=(self.p, self.n_neuron))
 
         self.connectivity = np.unique(single_neuron_connectivity, axis=1)  # SEPARATE THIS
-        print(self.connectivity)
 
         self.t_tot_discrete = int(self.t_tot / self.dt)
 
         self.average_firing_rate = np.zeros((self.p, self.t_tot_discrete))
 
         self.n_population = self.connectivity.shape[1]
+        print(self.n_population)
 
         # self.n_neurons = self.n_population  # Reduce the number of
         # neurons after computing v, w
@@ -120,8 +120,6 @@ class SimplifiedNetwork:
 
         self.activation[:] = self.connectivity[self.first_p, :] \
                              * self.r_ini  # CHECK
-
-        print(self.activation)
 
     def _gaussian_noise(self):
         """
@@ -210,7 +208,6 @@ class SimplifiedNetwork:
 
         self._compute_weight_constants()
         self._present_pattern()
-        print(self.n_population)
 
     def _save_fr(self, t):
 
@@ -265,7 +262,7 @@ class SimplifiedNetwork:
     def _g(self, current):
 
         if current + self.theta > 0:
-            gain = (current + self.theta) ** self.gamma
+            gain = (current + self.theta)**self.gamma
         else:
             gain = 0
 
