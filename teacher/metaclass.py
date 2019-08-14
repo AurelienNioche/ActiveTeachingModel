@@ -63,7 +63,8 @@ class GenericTeacher:
 
         return question, poss_rep
 
-    def register_question_and_reply(self, reply, question, possible_replies):
+    def register_question_and_reply(self, reply, question,
+                                    possible_replies=None):
 
         # Update the count of item seen
         if self.t > 0:
@@ -74,7 +75,8 @@ class GenericTeacher:
         self.questions[self.t] = question
         self.replies[self.t] = reply
         self.successes[self.t] = reply == question
-        self.possible_replies[self.t] = possible_replies
+        if possible_replies is not None:
+            self.possible_replies[self.t] = possible_replies
 
         if self.verbose:
             print(f"Question chosen: {self.tk.kanji[question]}; "

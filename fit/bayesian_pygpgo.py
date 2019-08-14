@@ -18,9 +18,6 @@ def objective(model, tk, data, param, show=False):
     agent = model(param=param, tk=tk)
     t_max = data.t_max
     diff = np.zeros(t_max)
-    # p_choices_ = agent.get_p_choices(data=data,
-    #                                  stop_if_zero=False,
-    #                                  use_p_correct=True)
 
     for t in range(t_max):
         item = data.questions[t]
@@ -32,13 +29,7 @@ def objective(model, tk, data, param, show=False):
         s = data.success[t]
         if show:
             print("success: ", s)
-        # if s:
-        #     p_choice = p_r
-        # else:
-        #     p_choice = 1-p_r
 
-        # if show:
-        #     print('p_model:', p_choice)
         diff[t] = (s - p_r)
 
         agent.learn(item)
@@ -136,16 +127,21 @@ class MyGPGO(GPGO):
         self.tau = np.max(self.y)
         self.history.append(self.tau)
 
+    def updateGP(self):
+        """
+        Updates the internal model with the next acquired point and its evaluation.
+        """
+        kw = {param: self.best[i] for i, param in enumerate(self.parameter_key)}
+        f_new = self.f(**kw)
+        self.GP.update(np.atleast_2d(self.best), np.atleast_1d(f_new))
+        self.tau = np.max(self.GP.y)
+        self.history.append(self.tau)
+
 
 class BayesianPYGPGOFit:
 
     def __init__(self, verbose=False, seed=123,
-                 n_jobs=mp.cpu_count(),
-                 **kwargs):
-
-        # super().__init__(tk=tk, model=model, data=data, verbose=verbose,
-        #                  method='BayesianGPyOpt',
-        #                  **kwargs)
+                 n_jobs=mp.cpu_count()):
 
         self.best_value = None
         self.best_param = None
@@ -172,6 +168,7 @@ class BayesianPYGPGOFit:
 
     def objective(self, **param):
 
+        self.history_eval_param.append(param)
         return objective(model=self.model, data=self.data, tk=self.tk,
                          param=param)
 
