@@ -5,7 +5,6 @@ from learner.act_r_custom import ActRMeaning
 from teacher.active import Active
 from fit.pygpgo.classic import PYGPGOFit
 from fit.pygpgo.objective import objective
-from fit.pygpgo.timeout import PYGPGOTimeoutFit
 
 import numpy as np
 
@@ -33,11 +32,14 @@ class Run:
             init_eval,
             max_iter,
             exploration_ratio,
+            testing_period,
             n_jobs=mp.cpu_count(),
             timeout=None,
-            verbose=False):
+            verbose=False,
+    ):
 
         self.exploration_ratio = exploration_ratio
+        self.testing_period = testing_period
         self.t_max = t_max
         self.student_model = student_model
         self.student_param = student_param
@@ -57,44 +59,45 @@ class Run:
             param=student_model.generate_random_parameters()
         )
 
-        if self.timeout is not None:
-            self.opt = PYGPGOTimeoutFit(
-                verbose=False,
-                init_evals=init_eval,
-                timeout=timeout)
-
-        else:
-            self.opt = PYGPGOFit(
-                verbose=False,
-                n_jobs=n_jobs,
-                init_evals=init_eval, max_iter=max_iter)
+        self.opt = PYGPGOFit(
+            verbose=False,
+            n_jobs=n_jobs,
+            init_evals=init_eval, max_iter=max_iter,
+            timeout=timeout)
 
         self.best_value, self.obj_value, self.param_set, self.exploration = \
             None, None, None, None
 
     def run(self):
 
+        np.random.seed(123)
+
         iterator = tqdm(range(self.t_max)) \
             if not self.verbose else range(self.t_max)
 
         for t in iterator:
-            if t > 0:
-                self.exploration = np.random.random() <= self.exploration_ratio
-                if self.exploration:
-                    question = Psychologist.most_informative(
-                        tk=self.teacher.tk,
-                        student_model=self.student_model,
-                        eval_param=self.param_set,
-                        questions=self.teacher.questions,
-                        t_max=t+1
-                    )
-                else:
-                    question, possible_replies = self.teacher.ask(
-                        agent=self.model_learner,
-                        make_learn=False)
+            if t == 0:
+                self.exploration = False
+
+            elif t < self.testing_period:
+                self.exploration = t % 2 == 1
 
             else:
-                question = np.random.randint(self.teacher.tk.n_item)
+                self.exploration = np.random.random() <= self.exploration_ratio
+                print('yeah')
+
+            if self.exploration:
+                question = Psychologist.most_informative(
+                    tk=self.teacher.tk,
+                    student_model=self.student_model,
+                    eval_param=self.param_set,
+                    questions=self.teacher.questions,
+                    t_max=t+1
+                )
+            else:
+                question, possible_replies = self.teacher.ask(
+                    agent=self.model_learner,
+                    make_learn=False)
 
             p_r = self.learner.p_recall(item=question)
 
@@ -133,9 +136,6 @@ class Run:
 
             self.learner.learn(question=question)
             self.model_learner.learn(question=question)
-
-        if self.opt.__class__ == PYGPGOTimeoutFit:
-            self.opt.stop()
 
         p_recall_hist = p_recall_over_time_after_learning(
             agent=self.learner,
@@ -225,9 +225,10 @@ def main(force=False):
     normalize_similarity = True
     init_eval = 3
     verbose = True
-    max_iter = None
+    max_iter = 100
     timeout = 5
-    exploration_ratio = 0.0
+    exploration_ratio = 0.1
+    testing_period = 100
 
     # For fig
     mean_window = 10
@@ -241,7 +242,8 @@ def main(force=False):
         f'init_eval_{init_eval}_' \
         f'max_iter_{max_iter}_' \
         f'time_out_{timeout}_' \
-        f'exploration_ratio_{exploration_ratio}_'
+        f'exploration_ratio_{exploration_ratio}_' \
+        f'testing_period_{testing_period}'
 
     bkp_file = os.path.join('bkp',
                             f'{os.path.basename(__file__).split(".")[0]}',
@@ -261,6 +263,7 @@ def main(force=False):
             max_iter=max_iter,
             timeout=timeout,
             exploration_ratio=exploration_ratio,
+            testing_period=testing_period,
             verbose=verbose
         )
         r = run.run()

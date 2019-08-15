@@ -40,6 +40,8 @@ class MyGPGO(GPGO):
     def run(self, max_iter=10, init_evals=3, timeout=None,
             resume=False, init_param=None):
 
+        start = time.time()
+
         if not resume:
             self.init_evals = init_evals
             # Add init_param argument
@@ -48,21 +50,20 @@ class MyGPGO(GPGO):
                 self.logger._printInit(self)
         for iteration in range(max_iter):
 
-            if timeout is not None and
+            if timeout is not None and time.time() - start > timeout:
+                break
 
             self._optimizeAcq()
             self.updateGP()
             if self.verbose:
                 self.logger._printCurrent(self)
 
-
     def _firstRun(self, n_eval=3, init_param=None):
-
-        self.X = np.empty((n_eval, len(self.parameter_key)))
-        self.y = np.empty((n_eval,))
 
         # Add this block
         if init_param is not None:
+            self.X = np.empty((n_eval+1, len(self.parameter_key)))
+            self.y = np.empty((n_eval+1,))
             s_param = init_param
             s_param_val = [s_param[k] for k in self.parameter_key]
             self.X[0] = s_param_val
@@ -71,6 +72,8 @@ class MyGPGO(GPGO):
             iterator = range(1, n_eval+1)
 
         else:
+            self.X = np.empty((n_eval, len(self.parameter_key)))
+            self.y = np.empty((n_eval,))
             iterator = range(0, n_eval)
 
         for i in iterator:
