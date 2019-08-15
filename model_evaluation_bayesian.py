@@ -9,18 +9,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 # from tqdm import tqdm
 #
-from fit.fit import Fit
-from fit.bayesian import BayesianFit
-from fit.bayesian_gpyopt import BayesianGPyOptFit
-from fit.bayesian_pygpgo import BayesianPYGPGOFit
+from fit.pygpgo.classic import BayesianPYGPGOFit
 # from learner.rl import QLearner
-from learner.act_r import ActR
-from learner.act_r_custom import ActRMeaning, ActRGraphic, ActRPlus
+from learner.act_r_custom import ActRMeaning
 #
 from simulation.data import SimulatedData
 from simulation.task import Task
-
-from fit.demos.bayesian import run_test
 
 from datetime import timedelta
 from time import time

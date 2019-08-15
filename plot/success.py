@@ -19,11 +19,11 @@ def scatter(successes, ax=None, fig_name=None):
 
 
 def curve(successes, fig_name=None, font_size=12, line_width=1,
-          label_size=8, ax=None, color='C0'):
+          label_size=8, ax=None, color='C0', window=np.inf):
 
     y = []
     for i in range(1, len(successes)+1):
-        y.append(np.mean(successes[:i]))
+        y.append(np.mean(successes[max(0, -window):i]))
 
     n_iteration = len(y)
 

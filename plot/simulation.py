@@ -7,13 +7,15 @@ import plot.success
 
 from plot.generic import save_fig
 
-from utils.utils import dic2string
+import numpy as np
 
 
 def summary(
         p_recall, seen, successes,
         font_size=10, label_size=8, line_width=1,
-        extension=''):
+        extension='',
+        window=-np.inf
+):
 
     n_rows, n_cols = 5, 1
 
@@ -62,7 +64,8 @@ def summary(
         ax=ax5,
         font_size=font_size,
         label_size=label_size,
-        line_width=line_width * 2
+        line_width=line_width * 2,
+        window=window
     )
 
     save_fig(f"simulation_{extension}.pdf")

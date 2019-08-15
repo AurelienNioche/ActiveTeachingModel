@@ -17,25 +17,6 @@ class BayesianGPyOptFit(Fit):
         # self.best_value = None
         self.best_param = None
 
-        # self.optimizer = BayesianOptimization()
-
-    # def _objective(self, param):
-    #
-    #     param = param[0]
-    #
-    #     agent = self.model(param=param, tk=self.tk)
-    #     p_choices_ = agent.get_p_choices(data=self.data,
-    #                                      **self.kwargs)
-    #
-    #     if p_choices_ is None or np.any(np.isnan(p_choices_)):
-    #
-    #         to_return = np.inf
-    #
-    #     else:
-    #         to_return = - self._log_likelihood_sum(p_choices_)
-    #
-    #     return to_return  # * 10**100
-
     def evaluate(self, data=None, **kwargs):
 
         if data is not None:

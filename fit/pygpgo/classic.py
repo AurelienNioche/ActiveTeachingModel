@@ -1,46 +1,12 @@
 from pyGPGO.covfunc import squaredExponential
 from pyGPGO.acquisition import Acquisition
 from pyGPGO.surrogates.GaussianProcess import GaussianProcess
-from pyGPGO.surrogates.BoostedTrees import BoostedTrees
 from pyGPGO.GPGO import GPGO, EventLogger
 
 import multiprocessing as mp
 
 import numpy as np
-from fit.fit import Fit
-
-
-def objective(model, tk, data, param, show=False):
-
-    if show:
-        print('\n')
-
-    agent = model(param=param, tk=tk)
-    t_max = data.t_max
-    diff = np.zeros(t_max)
-
-    for t in range(t_max):
-        item = data.questions[t]
-        if show:
-            print("Item", item)
-        p_r = agent.p_recall(item=item)
-        if show:
-            print('p_recall: ', p_r)
-        s = data.success[t]
-        if show:
-            print("success: ", s)
-
-        diff[t] = (s - p_r)
-
-        agent.learn(item)
-
-    # diff[diff < 0] *= 1.1
-    diff = np.power(diff, 2)
-    value = -np.sum(diff)
-    if show:
-        print("total value", value)
-        print()
-    return value
+from fit.pygpgo.objective import objective
 
 
 class MyGPGO(GPGO):
@@ -69,21 +35,10 @@ class MyGPGO(GPGO):
             self.logger = EventLogger(self)
 
     def run(self, max_iter=10, init_evals=3, resume=False, init_param=None):
-        """
-        Runs the Bayesian Optimization procedure.
 
-        Parameters
-        ----------
-        max_iter: int
-            Number of iterations to run. Default is 10.
-        init_evals: int
-            Initial function evaluations before fitting a GP. Default is 3.
-        resume: bool
-            Whether to resume the optimization procedure from the last evaluation. Default is `False`.
-
-        """
         if not resume:
             self.init_evals = init_evals
+            # Add init_param argument
             self._firstRun(n_eval=self.init_evals, init_param=init_param)
             if self.verbose:
                 self.logger._printInit(self)
@@ -94,18 +49,11 @@ class MyGPGO(GPGO):
                 self.logger._printCurrent(self)
 
     def _firstRun(self, n_eval=3, init_param=None):
-        """
-        Performs initial evaluations before fitting GP.
 
-        Parameters
-        ----------
-        n_eval: int
-            Number of initial evaluations to perform. Default is 3.
-
-        """
         self.X = np.empty((n_eval, len(self.parameter_key)))
         self.y = np.empty((n_eval,))
 
+        # Add this block
         if init_param is not None:
             s_param = init_param
             s_param_val = [s_param[k] for k in self.parameter_key]
@@ -138,29 +86,26 @@ class MyGPGO(GPGO):
         self.history.append(self.tau)
 
 
-class BayesianPYGPGOFit:
+class PYGPGOFit:
 
-    def __init__(self, verbose=False, seed=123,
+    def __init__(self, verbose=False,
+                 init_evals=3,
+                 max_iter=10,
                  n_jobs=mp.cpu_count()):
 
         self.best_value = None
         self.best_param = None
 
-        self.history_eval_param = []
-        self.obj_values = []
+        self.eval_param = []
+
+        self.hist_best_param = []
+        self.hist_best_value = []
 
         self.n_jobs = n_jobs
-
-        self.history_best_fit_param = []
-        self.history_best_fit_value = []
-
-        self.time_out = None
+        self.init_evals = init_evals
+        self.max_iter = max_iter
 
         self.verbose = verbose
-
-        self.opt = None
-
-        np.random.seed(seed)
 
         self.model = None
         self.tk = None
@@ -168,51 +113,46 @@ class BayesianPYGPGOFit:
 
     def objective(self, **param):
 
-        self.history_eval_param.append(param)
+        self.eval_param.append(param)
         return objective(model=self.model, data=self.data, tk=self.tk,
                          param=param)
 
-    def evaluate(self, model, tk, data, **kwargs):
+    def evaluate(self, model, tk, data):
 
         self.model = model
         self.tk = tk
         self.data = data
 
-        self.history_eval_param = []
+        self.eval_param = []
 
+        sexp = squaredExponential()
+        gp = GaussianProcess(sexp)
+        acq = Acquisition(mode='ExpectedImprovement')
+        f = self.objective
         param = {
             f'{b[0]}': ('cont', [b[1], b[2]])
             for b in self.model.bounds
         }
 
-        f = self.objective
-
-        sexp = squaredExponential()
-        gp = GaussianProcess(sexp)
-
         # surrogate = BoostedTrees()
-        acq = Acquisition(mode='ExpectedImprovement')
 
         opt = MyGPGO(gp, acq, f, param,
                      n_jobs=self.n_jobs,
                      verbose=self.verbose)
-        if self.best_param is None:
-            if self.verbose:
-                print("No previous best param for now")
-            self.best_param = {}
-            opt.run(**kwargs)
 
-        else:
-            if self.verbose:
-                print(f"Best param is {self.best_param}")
-            opt.run(init_param=self.best_param, **kwargs)
+        opt.run(init_param=self.best_param,
+                init_evals=self.init_evals,
+                max_iter=self.max_iter)
 
         r = opt.getResult()
 
         self.best_param = dict(r[0])
         self.best_value = r[1]
 
-        self.history_best_fit_param.append(self.best_param)
-        self.history_best_fit_value.append(self.best_value)
+        self.hist_best_param.append(self.best_param)
+        self.hist_best_value.append(self.best_value)
 
         return self.best_param
+
+    def stop(self):
+        raise NotImplementedError

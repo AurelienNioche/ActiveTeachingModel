@@ -4,15 +4,15 @@ import numpy as np
 class Psychologist:
 
     @staticmethod
-    def most_informative(tk, student_model, param_set,
+    def most_informative(tk, student_model, eval_param,
                          t_max, questions):
 
-        n_param_set = len(param_set)
+        n_param_set = len(eval_param)
 
         p_recall = np.zeros((tk.n_item, n_param_set))
         for j in range(n_param_set):
 
-            agent = student_model(param=param_set[j], tk=tk)
+            agent = student_model(param=eval_param[j], tk=tk)
 
             for t in range(t_max):
                 agent.learn(questions[t])

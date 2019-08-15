@@ -3,7 +3,7 @@ from tqdm import tqdm
 from simulation.memory import p_recall_over_time_after_learning
 from simulation.data import Data
 
-from fit.bayesian_pygpgo import BayesianPYGPGOFit
+from fit.pygpgo.classic import BayesianPYGPGOFit
 
 
 def with_bayesian_opt(teacher_model, t_max, grades, n_item,

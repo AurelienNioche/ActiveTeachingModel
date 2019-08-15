@@ -3,10 +3,10 @@ from tqdm import tqdm
 
 from learner.act_r_custom import ActRMeaning
 from teacher.active import Active
-from fit.bayesian_pygpgo import BayesianPYGPGOFit, objective
-from fit.bayesian_pygpgo_timeout import BayesianPYGPGOTimeoutFit
+from fit.pygpgo.classic import PYGPGOFit
+from fit.pygpgo.objective import objective
+from fit.pygpgo.timeout import PYGPGOTimeoutFit
 
-import multiprocessing as mp
 import numpy as np
 
 from simulation.data import Data
@@ -17,187 +17,201 @@ from utils.utils import dic2string, dump, load
 
 import argparse
 
+import multiprocessing as mp
+
 from psychologist.psychologist import Psychologist
 
-def _run(
-        teacher_model,
-        t_max, grades, n_item,
-        normalize_similarity, student_model,
-        student_param,
-        init_eval,
-        max_iter,
-        verbose):
 
-    # queue_in = mp.Queue()
-    # queue_out = mp.Queue()
+class Run:
 
-    teacher = teacher_model(t_max=t_max, n_item=n_item,
-                            normalize_similarity=normalize_similarity,
-                            grades=grades,
-                            verbose=False,
-                            # learnt_threshold=0.975,
-                            )
+    def __init__(
+            self,
+            teacher_model,
+            t_max, grades, n_item,
+            normalize_similarity, student_model,
+            student_param,
+            init_eval,
+            max_iter,
+            exploration_ratio,
+            n_jobs=mp.cpu_count(),
+            timeout=None,
+            verbose=False):
 
-    learner = student_model(param=student_param, tk=teacher.tk)
+        self.exploration_ratio = exploration_ratio
+        self.t_max = t_max
+        self.student_model = student_model
+        self.student_param = student_param
+        self.timeout = timeout
+        self.verbose = verbose
 
-    iterator = tqdm(range(t_max)) if not verbose else range(t_max)
+        self.teacher = teacher_model(
+            t_max=t_max, n_item=n_item,
+            normalize_similarity=normalize_similarity,
+            grades=grades,
+            verbose=False)
 
-    model_learner = student_model(
-        tk=teacher.tk,
-        param=student_model.generate_random_parameters()
-    )
+        self.learner = student_model(param=student_param, tk=self.teacher.tk)
 
-    # f = BayesianPYGPGOTimeoutFit(verbose=False)
-    f = BayesianPYGPGOFit(verbose=False, n_jobs=4)
-    # seen = None
-    # learnt = None
-    # learnt_model = None
-    # which_learnt = None
-    # which_learnt_model = Non
+        self.model_learner = student_model(
+            tk=self.teacher.tk,
+            param=student_model.generate_random_parameters()
+        )
 
-    # import copy
-
-    # model_learner.set_parameters(learner.param)
-
-    best_value, obj_value = None, None
-
-    param_set = None
-
-    for t in iterator:
-        if t > 0:
-            r = np.random.random()
-            if r < 0.10:
-                print("EXPLO")
-                question = Psychologist.most_informative(
-                    tk=teacher.tk,
-                    student_model=student_model,
-                    param_set=param_set,
-                    questions=teacher.questions,
-                    t_max=t+1
-                )
-            else:
-                question, possible_replies = teacher.ask(
-                    agent=model_learner,
-                    make_learn=False)
+        if self.timeout is not None:
+            self.opt = PYGPGOTimeoutFit(
+                verbose=False,
+                init_evals=init_eval,
+                timeout=timeout)
 
         else:
-            question = np.random.randint(teacher.tk.n_item)
+            self.opt = PYGPGOFit(
+                verbose=False,
+                n_jobs=n_jobs,
+                init_evals=init_eval, max_iter=max_iter)
 
-        p_r = learner.p_recall(item=question)
+        self.best_value, self.obj_value, self.param_set, self.exploration = \
+            None, None, None, None
 
-        if p_r > np.random.random():
-            reply = question
-        else:
-            reply = -1
+    def run(self):
 
-        teacher.register_question_and_reply(question=question, reply=reply)
+        iterator = tqdm(range(self.t_max)) \
+            if not self.verbose else range(self.t_max)
 
-        if verbose:
-
-            p_recall = np.zeros(n_item)
-            p_recall_model = np.zeros(n_item)
-            for i in range(n_item):
-                p_recall[i] = learner.p_recall(i)
-                p_recall_model[i] = model_learner.p_recall(i)
-
-            learnt = np.sum(p_recall >= 0.95)
-            which_learnt = np.where(p_recall >= 0.95)[0]
-
-            learnt_model = np.sum(p_recall_model >= 0.95)
-            which_learnt_model = np.where(p_recall_model >= 0.95)[0]
-
+        for t in iterator:
             if t > 0:
+                self.exploration = np.random.random() <= self.exploration_ratio
+                if self.exploration:
+                    question = Psychologist.most_informative(
+                        tk=self.teacher.tk,
+                        student_model=self.student_model,
+                        eval_param=self.param_set,
+                        questions=self.teacher.questions,
+                        t_max=t+1
+                    )
+                else:
+                    question, possible_replies = self.teacher.ask(
+                        agent=self.model_learner,
+                        make_learn=False)
 
-                print()
-                discrepancy = 'Param disc.'
-                for k in sorted(list(model_learner.param.keys())):
-                    discrepancy += \
-                        f'{k}: ' \
-                        f'{model_learner.param[k] - student_param[k]:.3f}; '
+            else:
+                question = np.random.randint(self.teacher.tk.n_item)
 
-                print(discrepancy, '\n')
-                print(f"Obj value: {obj_value:.2f}; "
-                      f"Best value: {best_value:.2f}")
-                print()
+            p_r = self.learner.p_recall(item=question)
 
-                new_p_recall = p_recall[teacher.questions[t-1]]
-                new_p_recall_model = p_recall_model[teacher.questions[t-1]]
-                print(
-                    f'New p recall: {new_p_recall:.3f}; '
-                    f'New p recall model: {new_p_recall_model:.3f}')
+            if p_r > np.random.random():
+                reply = question
+            else:
+                reply = -1
 
-                print()
+            self.teacher.register_question_and_reply(
+                question=question, reply=reply)
 
-                seen = sum(teacher.seen[:, t-1])
-                print(f'N seen: {seen}')
-                print(f'Learnt: {learnt} {list(which_learnt)}; '
-                      f'Learnt model: {learnt_model} '
-                      f'{list(which_learnt_model)}')
+            if self.verbose:
+                self.print(t)
 
-            print(f'\n ----- T{t} -----')
+            data_view = Data(
+                n_item=self.teacher.tk.n_item,
+                questions=self.teacher.questions[:t + 1],
+                replies=self.teacher.replies[:t + 1])
 
-            success = question == reply
-            # np.sum(teacher.learning_progress == teacher.represent_learnt)
-            # print(f'Rule: {teacher.rule}')
-            print(f'Question: {question}; Success: {int(success)}')
+            self.opt.evaluate(
+                data=data_view, model=self.student_model, tk=self.teacher.tk)
+
+            self.model_learner.set_parameters(self.opt.best_param.copy())
+
+            if self.verbose:
+                self.obj_value = objective(
+                    data=data_view,
+                    model=self.student_model,
+                    tk=self.teacher.tk,
+                    param=self.student_param,
+                    show=False
+                )
+
+            self.best_value = self.opt.best_value
+            self.param_set = self.opt.eval_param
+
+            self.learner.learn(question=question)
+            self.model_learner.learn(question=question)
+
+        if self.opt.__class__ == PYGPGOTimeoutFit:
+            self.opt.stop()
+
+        p_recall_hist = p_recall_over_time_after_learning(
+            agent=self.learner,
+            t_max=self.teacher.tk.t_max,
+            n_item=self.teacher.tk.n_item,
+        )
+
+        return {
+            'seen': self.teacher.seen,
+            'p_recall': p_recall_hist,
+            'questions': self.teacher.questions,
+            'replies': self.teacher.replies,
+            'successes': self.teacher.successes,
+            'history_best_fit_param': self.opt.hist_best_param,
+            'history_best_fit_value': self.opt.hist_best_value,
+        }
+
+    def print(self, t):
+
+        p_recall = np.zeros(self.teacher.tk.n_item)
+        p_recall_model = np.zeros(self.teacher.tk.n_item)
+        for i in range(self.teacher.tk.n_item):
+            p_recall[i] = self.learner.p_recall(i)
+            p_recall_model[i] = self.model_learner.p_recall(i)
+
+        learnt = \
+            np.sum(p_recall >= self.teacher.learnt_threshold)
+        which_learnt = \
+            np.where(p_recall >= self.teacher.learnt_threshold)[0]
+
+        learnt_model = \
+            np.sum(p_recall_model >= self.teacher.learnt_threshold)
+        which_learnt_model = \
+            np.where(p_recall_model >= self.teacher.learnt_threshold)[0]
+
+        if t > 0:
+
             print()
+            discrepancy = 'Param disc.'
+            for k in sorted(list(self.model_learner.param.keys())):
+                discrepancy += \
+                    f'{k}: ' \
+                    f'{self.model_learner.param[k] - self.student_param[k]:.3f}; '
+
+            print(discrepancy, '\n')
+            print(f"Obj value: {self.obj_value:.2f}; "
+                  f"Best value: {self.best_value:.2f}")
+            print()
+
+            new_p_recall = p_recall[self.teacher.questions[t - 1]]
+            new_p_recall_model = p_recall_model[self.teacher.questions[t - 1]]
             print(
-                f'P recall: {p_recall[question]:.3}; '
-                f'P recall model: {p_recall_model[question]:.3f}')
+                f'New p recall: {new_p_recall:.3f}; '
+                f'New p recall model: {new_p_recall_model:.3f}')
 
-        data_view = Data(n_item=n_item,
-                         questions=teacher.questions[:t + 1],
-                         replies=teacher.replies[:t + 1],
-                         possible_replies=teacher.possible_replies[:t + 1, :])
+            print()
 
-        f.evaluate(
-            data=data_view,
-            model=student_model,
-            tk=teacher.tk,
-            init_evals=init_eval,
-            max_iter=max_iter
-        )
+            seen = sum(self.teacher.seen[:, t - 1])
+            print(f'N seen: {seen}')
+            print(f'Learnt: {learnt} {list(which_learnt)}; '
+                  f'Learnt model: {learnt_model} '
+                  f'{list(which_learnt_model)}')
 
-        model_learner.set_parameters(f.best_param.copy())
+        print(f'\n ----- T{t} -----')
 
-        obj_value = objective(
-            data=data_view,
-            model=student_model,
-            tk=teacher.tk,
-            param=student_param,
-            show=False
-        )
+        print(f'Exploration: {self.exploration}')
 
-        best_value = f.best_value
-        #     objective(
-        #     data=data_view,
-        #     model=student_model,
-        #     tk=teacher.tk,
-        #     param=best_param,
-        #     show=False
-        # )
-        param_set = f.history_eval_param
-
-        learner.learn(question=question)
-        model_learner.learn(question=question)
-
-    # queue_in.put('stop')
-
-    p_recall_hist = p_recall_over_time_after_learning(
-        agent=learner,
-        t_max=t_max,
-        n_item=n_item,
-    )
-
-    return {
-        'seen': teacher.seen,
-        'p_recall': p_recall_hist,
-        'questions': teacher.questions,
-        'replies': teacher.replies,
-        'successes': teacher.successes,
-        'history_best_fit_param': f.history_best_fit_param,
-        'history_best_fit_value': f.history_best_fit_value,
-    }
+        success = self.teacher.questions[t] == self.teacher.replies[t]
+        # np.sum(teacher.learning_progress == teacher.represent_learnt)
+        # print(f'Rule: {teacher.rule}')
+        print(f'Question: {self.teacher.questions[t]}; '
+              f'Success: {int(success)}')
+        print()
+        print(
+            f'P recall: {p_recall[self.teacher.questions[t]]:.3}; '
+            f'P recall model: {p_recall_model[self.teacher.questions[t]]:.3f}')
 
 
 def main(force=False):
@@ -210,25 +224,32 @@ def main(force=False):
     t_max = 1000
     normalize_similarity = True
     init_eval = 3
-    verbose = True,
-    max_iter = 10
+    verbose = True
+    max_iter = None
+    timeout = 5
+    exploration_ratio = 0.25
+
+    # For fig
+    mean_window = 10
 
     extension = \
-        f'{os.path.basename(__file__)}_' \
+        f'{os.path.basename(__file__).split(".")[0]}_' \
         f'{teacher_model.__name__}_{student_model.__name__}_' \
         f'{dic2string(student_param)}_' \
         f'ni_{n_item}_grade_{grades}_tmax_{t_max}_' \
         f'norm_{normalize_similarity}_' \
         f'init_eval_{init_eval}_' \
-        f'max_iter_{max_iter}'
+        f'max_iter_{max_iter}_' \
+        f'time_out_{timeout}_' \
+        f'exploration_ratio_{exploration_ratio}_'
 
     bkp_file = os.path.join('bkp',
-                            f'{os.path.basename(__file__)}',
+                            f'{os.path.basename(__file__).split(".")[0]}',
                             f'{extension}.p')
 
     r = load(bkp_file)
     if r is None or force:
-        r = _run(
+        run = Run(
             student_model=student_model,
             teacher_model=teacher_model,
             student_param=student_param,
@@ -238,8 +259,11 @@ def main(force=False):
             normalize_similarity=normalize_similarity,
             init_eval=init_eval,
             max_iter=max_iter,
+            timeout=timeout,
+            exploration_ratio=exploration_ratio,
             verbose=verbose
         )
+        r = run.run()
 
         dump(r, bkp_file)
 
@@ -247,7 +271,9 @@ def main(force=False):
         p_recall=r['p_recall'],
         seen=r['seen'],
         successes=r['successes'],
-        extension=extension)
+        extension=extension,
+        window=mean_window,
+    )
 
 
 if __name__ == '__main__':

@@ -9,15 +9,8 @@ import numpy as np
 
 import queue
 
-
-def objective(model, tk, data, param):
-    agent = model(param=param, tk=tk)
-    p_choices_ = agent.get_p_choices(data=data,
-                                     stop_if_zero=False,
-                                     use_p_correct=True)
-
-    value = np.sum(p_choices_)
-    return value
+from fit.pygpgo.objective import objective
+from fit.pygpgo.classic import PYGPGOFit
 
 
 class TimeOutGPGO(mp.Process, GPGO):
@@ -40,6 +33,7 @@ class TimeOutGPGO(mp.Process, GPGO):
 
         self.best_param = None
         self.best_value = None
+        self.eval_param = None
 
         self.model, self.tk, self.data = None, None, None
 
@@ -75,6 +69,8 @@ class TimeOutGPGO(mp.Process, GPGO):
         while True:
             if self.stop:
                 break
+
+            self.eval_param = []
 
             self._firstRun(n_eval=self.init_evals, init_param=self.best_param)
 
@@ -145,7 +141,8 @@ class TimeOutGPGO(mp.Process, GPGO):
                 return True
 
             elif e == 'get':
-                self.queue_out.put((self.best_param, self.best_value))
+                self.queue_out.put(
+                    (self.best_param, self.best_value, self.eval_param))
 
             else:
                 print(e)
@@ -164,34 +161,29 @@ class TimeOutGPGO(mp.Process, GPGO):
 
         value = objective(model=self.model, tk=self.tk, data=self.data,
                           param=param)
+        self.eval_param.append(param)
         return value
 
 
-class BayesianPYGPGOTimeoutFit:
+class PYGPGOTimeoutFit(PYGPGOFit):
 
-    def __init__(self, verbose=False, seed=123):
+    def __init__(self, timeout=2, init_evals=3, verbose=False):
 
-        self.best_value = None
-        self.best_param = None
+        super().__init__(init_evals=init_evals,  verbose=verbose)
 
-        self.history_best_fit_param = []
-        self.history_best_fit_value = []
-
-        self.verbose = verbose
+        self.timeout = timeout
 
         self.opt = None
 
-        np.random.seed(seed)
+        self.queue_in = None
+        self.queue_out = None
 
-    def evaluate(self,
-                 data,
-                 model,
-                 tk,
-                 time_out,
-                 queue_in, queue_out,
-                 init_evals):
+    def evaluate(self, data, model, tk):
 
         if self.opt is None:
+
+            self.queue_in = mp.Queue()
+            self.queue_out = mp.Queue()
 
             param = {
                 f'{b[0]}': ('cont', [b[1], b[2]])
@@ -206,29 +198,30 @@ class BayesianPYGPGOTimeoutFit:
 
             self.opt = TimeOutGPGO(
                 gp=gp, acq=acq, param=param,
-                queue_in=queue_in,
-                queue_out=queue_out,
-                init_evals=init_evals,
+                queue_in=self.queue_in,
+                queue_out=self.queue_out,
+                init_evals=self.init_evals,
                 verbose=self.verbose
             )
             self.opt.start()
 
         else:
-            queue_in.put('restart')
+            self.queue_in.put('restart')
 
-        queue_in.put((model, tk, data))
+        self.queue_in.put((model, tk, data))
 
-        mp.Event().wait(timeout=time_out)
+        mp.Event().wait(timeout=self.timeout)
 
-        queue_in.put('get')
+        self.queue_in.put('get')
 
-        self.best_param, self.best_value = queue_out.get()
+        self.best_param, self.best_value, self.eval_param = \
+            self.queue_out.get()
 
-        # if self.verbose:
-        #     print(f'Best param: {}', self.best_param)
-        #     print('Best value', self.best_value)
-
-        self.history_best_fit_param.append(self.best_param)
-        self.history_best_fit_value.append(self.best_value)
+        self.hist_best_param.append(self.best_param)
+        self.hist_best_value.append(self.best_value)
 
         return self.best_param
+
+    def stop(self):
+
+        self.queue_in.put('stop')

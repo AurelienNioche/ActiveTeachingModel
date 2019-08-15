@@ -1,21 +1,17 @@
 import multiprocessing
 import os
 import pickle
-import scipy.stats
 
-import matplotlib.pyplot as plt
 import numpy as np
 from tqdm import tqdm
 
 from fit.fit import Fit
-from learner.rl import QLearner
-from learner.act_r import ActR
-from learner.act_r_custom import ActRMeaning, ActRGraphic, ActRPlus
+from learner.act_r_custom import ActRMeaning
 
 from simulation.data import SimulatedData
 from simulation.task import Task
 
-from fit.bayesian_pygpgo import BayesianPYGPGOFit
+from fit.pygpgo.classic import BayesianPYGPGOFit
 
 import plot.parameter_recovery
 

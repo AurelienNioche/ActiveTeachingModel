@@ -3,8 +3,8 @@ from tqdm import tqdm
 
 from learner.act_r_custom import ActRMeaning
 from teacher.active import Active
-from fit.bayesian_pygpgo import BayesianPYGPGOFit, objective
-from fit.bayesian_pygpgo_timeout import BayesianPYGPGOTimeoutFit
+from fit.pygpgo.classic import BayesianPYGPGOFit
+from fit.pygpgo.objective import objective
 
 import multiprocessing as mp
 import numpy as np
