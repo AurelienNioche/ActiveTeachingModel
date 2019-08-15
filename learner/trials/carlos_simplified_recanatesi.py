@@ -19,7 +19,6 @@ class SimplifiedNetwork:
     def __init__(
             self,
             # Architecture ###########
-            n_epoch=3,
             n_neuron=100000,
             p=16,
             # Activation #############
