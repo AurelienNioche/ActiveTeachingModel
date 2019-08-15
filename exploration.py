@@ -227,7 +227,7 @@ def main(force=False):
     verbose = True
     max_iter = None
     timeout = 5
-    exploration_ratio = 0.25
+    exploration_ratio = 0.0
 
     # For fig
     mean_window = 10

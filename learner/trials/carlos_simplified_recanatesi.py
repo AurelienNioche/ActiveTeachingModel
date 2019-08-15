@@ -19,7 +19,7 @@ class SimplifiedNetwork:
     def __init__(
             self,
             # Architecture ###########
-            n_neurons=100000,
+            n_neuron=100000,
             p=16,
             # Activation #############
             tau=0.01,
@@ -52,7 +52,7 @@ class SimplifiedNetwork:
         # r_ini=1,):
 
         # Architecture
-        self.n_neurons = n_neurons
+        self.n_neuron = n_neuron
         self.p = p
 
         # Activation function
@@ -90,40 +90,38 @@ class SimplifiedNetwork:
 
         # General pre-computations
         self.t_tot_discrete = int(self.t_tot / self.dt)
-        self.relative_excitation = self.kappa / self.n_neurons
+        self.relative_excitation = self.kappa / self.n_neuron
 
         # Unique simplified network attributes
-        self.unique_patterns = np.unique(self._compute_memory_patterns(),
-                                         axis=1)
-        self.n_populations = self.unique_patterns.shape[1]
+        memory_patterns = \
+            np.random.choice([0, 1], p=[1 - self.f, self.f],
+                             size=(self.p, self.n_neuron))
+        self.unique_patterns, self.s = \
+            np.unique(memory_patterns, axis=1, return_counts=True)
 
-        self.s_n = np.zeros(self.n_populations)
+        self.n_population = self.unique_patterns.shape[1]
 
         # self.n_neurons = self.n_population  # Reduce the number of
         # neurons after computing v, w
 
-        self.noise_amplitudes = np.zeros(self.n_populations)
-        self.noise_values = np.zeros((self.n_populations, self.t_tot))
+        self.noise_amplitudes = np.zeros(self.n_population)
+        self.noise_values = np.zeros((self.n_population, self.t_tot))
 
         self.weights = np.zeros((
-            self.n_populations, self.n_populations))
+            self.n_population, self.n_population))
 
-        self.delta_weights = np.zeros((self.n_populations,
-                                       self.n_populations))
-        self.activation = np.zeros(self.n_populations)
+        self.delta_weights = np.zeros((self.n_population,
+                                       self.n_population))
+        self.activation = np.zeros(self.n_population)
 
-        self.n_fraction = self.n_populations / self.n_neurons  # WARNING
+        self.n_fraction = self.n_population / self.n_neuron  # WARNING
 
         # Plotting
         self.average_firing_rate = np.zeros((self.p, self.t_tot_discrete))
 
-    def _compute_memory_patterns(self):
-        return np.random.choice([0, 1], p=[1 - self.f, self.f],
-                                size=(self.p, self.n_neurons))
-
     def _compute_s_n(self):
-        for i in range(self.s_n.size):
-            self.s_n[i] = self.unique_patterns
+        for i in range(self.s.size):
+            self.s[i] = self.unique_patterns
 
     def _present_pattern(self):
         """
@@ -136,12 +134,13 @@ class SimplifiedNetwork:
 
     def _compute_gaussian_noise(self):
         """Amplitude of uncorrelated Gaussian noise is its variance"""
-        self.amplitude = self.xi_0 * self.s_n * self.n_neurons
+        self.amplitude = self.xi_0 * self.s * self.n_neuron
 
-        for population in range(self.noise_values.shape[0]):
-            self.noise_values[population, :] *=\
+        for i in range(self.n_population):
+            # Double check
+            self.noise_values[i] = \
                 np.random.normal(loc=0,
-                                 scale=self.amplitude[population],
+                                 scale=self.amplitude[i],
                                  size=self.t_tot)
 
     def _compute_weights(self):
@@ -151,8 +150,8 @@ class SimplifiedNetwork:
         """
 
         print("Computing weights...")
-        for i in tqdm(range(self.n_populations)):
-            for j in range(self.n_populations):
+        for i in tqdm(range(self.n_population)):
+            for j in range(self.n_population):
 
                 sum_ = 0
                 for mu in range(self.p):
@@ -169,9 +168,9 @@ class SimplifiedNetwork:
     def _compute_delta_weights(self):
 
         print("Computing delta weights...")
-        for i in tqdm(range(self.n_populations)):
+        for i in tqdm(range(self.n_population)):
 
-            for j in range(self.n_populations):
+            for j in range(self.n_population):
 
                 # Sum for positive
                 sum_pos = 0
@@ -198,12 +197,12 @@ class SimplifiedNetwork:
 
         new_current = np.zeros(self.activation.shape)
 
-        for population in range(self.n_populations):
+        for population in range(self.n_population):
 
             current = self.activation[population]
 
             sum_ = 0
-            for j in range(self.n_populations):
+            for j in range(self.n_population):
                 # SEPARATE COMPUTATION OF WEIGHTS
                 sum_ += \
                     (self.weights[population, j]
@@ -311,7 +310,7 @@ def main(force=False):
         # factor = 10**(-4)
 
         simplified_network = SimplifiedNetwork(
-                n_neurons=int(10 ** 5),
+                n_neuron=int(10 ** 5),
                 f=0.1,
                 p=16,
                 xi_0=65,

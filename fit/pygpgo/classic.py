@@ -9,6 +9,9 @@ import numpy as np
 from fit.pygpgo.objective import objective
 
 
+import time
+
+
 class MyGPGO(GPGO):
 
     # noinspection PyMissingConstructor
@@ -34,7 +37,8 @@ class MyGPGO(GPGO):
         if verbose:
             self.logger = EventLogger(self)
 
-    def run(self, max_iter=10, init_evals=3, resume=False, init_param=None):
+    def run(self, max_iter=10, init_evals=3, timeout=None,
+            resume=False, init_param=None):
 
         if not resume:
             self.init_evals = init_evals
@@ -43,10 +47,14 @@ class MyGPGO(GPGO):
             if self.verbose:
                 self.logger._printInit(self)
         for iteration in range(max_iter):
+
+            if timeout is not None and
+
             self._optimizeAcq()
             self.updateGP()
             if self.verbose:
                 self.logger._printCurrent(self)
+
 
     def _firstRun(self, n_eval=3, init_param=None):
 
@@ -60,7 +68,7 @@ class MyGPGO(GPGO):
             self.X[0] = s_param_val
             self.y[0] = self.f(**s_param)
 
-            iterator = range(1, n_eval)
+            iterator = range(1, n_eval+1)
 
         else:
             iterator = range(0, n_eval)
@@ -91,6 +99,7 @@ class PYGPGOFit:
     def __init__(self, verbose=False,
                  init_evals=3,
                  max_iter=10,
+                 timeout=None,
                  n_jobs=mp.cpu_count()):
 
         self.best_value = None
@@ -104,6 +113,7 @@ class PYGPGOFit:
         self.n_jobs = n_jobs
         self.init_evals = init_evals
         self.max_iter = max_iter
+        self.timeout = timeout
 
         self.verbose = verbose
 
@@ -142,7 +152,8 @@ class PYGPGOFit:
 
         opt.run(init_param=self.best_param,
                 init_evals=self.init_evals,
-                max_iter=self.max_iter)
+                max_iter=self.max_iter,
+                timeout=self.timeout)
 
         r = opt.getResult()
 
