@@ -19,7 +19,7 @@ class SimplifiedNetwork:
     def __init__(
             self,
             # Architecture ###########
-            n_neuron=100000,
+            n_neurons=100000,
             p=16,
             # Activation #############
             tau=0.01,
@@ -52,7 +52,7 @@ class SimplifiedNetwork:
         # r_ini=1,):
 
         # Architecture
-        self.n_neuron = n_neuron
+        self.n_neurons = n_neurons
         self.p = p
 
         # Activation function
@@ -71,6 +71,7 @@ class SimplifiedNetwork:
         self.phi_max = phi_max
         assert phi_max > phi_min
         self.tau_0 = tau_0
+        self.phase_shift = phase_shift
 
         # Short term association
         self.j_forward = j_forward
@@ -80,8 +81,6 @@ class SimplifiedNetwork:
         self.t_tot = t_tot
         self.dt = dt
 
-        self.phase_shift = phase_shift
-
         # Noise parameter
         self.xi_0 = xi_0
 
@@ -89,130 +88,152 @@ class SimplifiedNetwork:
         self.r_ini = r_ini
         self.first_p = first_p
 
-        single_neuron_connectivity = \
-            np.random.choice([0, 1], p=[1 - self.f, self.f],
-                             size=(self.p, self.n_neuron))
-
-        self.connectivity = np.unique(single_neuron_connectivity, axis=1)  # SEPARATE THIS
-
+        # General pre-computations
         self.t_tot_discrete = int(self.t_tot / self.dt)
+        self.relative_excitation = self.kappa / self.n_neurons
 
-        self.average_firing_rate = np.zeros((self.p, self.t_tot_discrete))
+        # Unique simplified network attributes
+        self.unique_patterns = np.unique(self._compute_memory_patterns(),
+                                         axis=1)
+        self.n_populations = self.unique_patterns.shape[1]
 
-        self.n_population = self.connectivity.shape[1]
-        print(self.n_population)
+        self.s_n = np.zeros(self.n_populations)
 
         # self.n_neurons = self.n_population  # Reduce the number of
         # neurons after computing v, w
 
-        self.weights_constant = np.zeros((
-            self.n_population, self.n_population))
+        self.noise_amplitudes = np.zeros(self.n_populations)
+        self.noise_values = np.zeros((self.n_populations, self.t_tot))
 
-        self.delta_weights = np.zeros((self.n_population,
-                                       self.n_population))
-        self.activation = np.zeros(self.n_population)
+        self.weights = np.zeros((
+            self.n_populations, self.n_populations))
 
-        self.kappa_over_n = self.kappa / self.n_neuron
-        self.n_fraction = self.n_population / self.n_neuron
+        self.delta_weights = np.zeros((self.n_populations,
+                                       self.n_populations))
+        self.activation = np.zeros(self.n_populations)
+
+        self.n_fraction = self.n_populations / self.n_neurons  # WARNING
+
+        # Plotting
+        self.average_firing_rate = np.zeros((self.p, self.t_tot_discrete))
+
+    def _compute_memory_patterns(self):
+        return np.random.choice([0, 1], p=[1 - self.f, self.f],
+                                size=(self.p, self.n_neurons))
+
+    def _compute_s_n(self):
+        for i in range(self.s_n.size):
+            self.s_n[i] = self.unique_patterns
 
     def _present_pattern(self):
-
-        self.activation[:] = self.connectivity[self.first_p, :] \
-                             * self.r_ini  # CHECK
-
-    def _gaussian_noise(self):
         """
-        Formula simplified from paper as N gets cancelled from when xi_v and
-        S_v equations are put together.
+        Activation vector will be one pattern for one memory multiplied
+        by a parameter whose default value is usually 1.
         """
-        return np.random.normal(
-            loc=0,
-            scale=self.xi_0**0.5 * self.n_population)
 
-    def _compute_weight_constants(self):
+        self.activation[:] = self.unique_patterns[self.first_p, :] \
+            * self.r_ini  # CHECK
 
-        print("Computing weight constants...")
-        for i in tqdm(range(self.n_population)):
-            for j in range(self.n_population):
+    def _compute_gaussian_noise(self):
+        """Amplitude of uncorrelated Gaussian noise is its variance"""
+        self.amplitude = self.xi_0 * self.s_n * self.n_neurons
+
+        for population in range(self.noise_values.shape[0]):
+            self.noise_values[population, :] *=\
+                np.random.normal(loc=0,
+                                 scale=self.amplitude[population],
+                                 size=self.t_tot)
+
+    def _compute_weights(self):
+        """
+        Weights do not change in this network architecture and can therefore
+        be pre-computed.
+        """
+
+        print("Computing weights...")
+        for i in tqdm(range(self.n_populations)):
+            for j in range(self.n_populations):
 
                 sum_ = 0
                 for mu in range(self.p):
                     sum_ += \
-                        (self.connectivity[mu, i] - self.f) \
-                        * (self.connectivity[mu, j] - self.f)
+                        (self.unique_patterns[mu, i] - self.f) \
+                        * (self.unique_patterns[mu, j] - self.f)
 
-                self.weights_constant[i, j] = \
-                    self.kappa_over_n * sum_
+                self.weights[i, j] = \
+                    self.relative_excitation * sum_
 
                 if i == j:
-                    self.weights_constant[i, j] = 0
+                    self.weights[i, j] = 0
 
     def _compute_delta_weights(self):
 
         print("Computing delta weights...")
-        for i in tqdm(range(self.n_population)):
+        for i in tqdm(range(self.n_populations)):
 
-            for j in range(self.n_population):
+            for j in range(self.n_populations):
 
                 # Sum for positive
                 sum_pos = 0
                 for mu in range(self.p - 1):
                     sum_pos += \
-                        self.connectivity[mu, i] \
-                        * self.connectivity[mu + 1, j]
+                        self.unique_patterns[mu, i] \
+                        * self.unique_patterns[mu + 1, j]
 
                 # Sum for negative
                 sum_neg = 0
                 for mu in range(1, self.p):
                     sum_neg += \
-                        self.connectivity[mu, i] \
-                        * self.connectivity[mu - 1, j]
+                        self.unique_patterns[mu, i] \
+                        * self.unique_patterns[mu - 1, j]
 
                 self.delta_weights[i, j] = \
                     self.j_forward * sum_pos \
                     + self.j_backward * sum_neg
 
-    def _update_activation(self):
+    def _update_activation(self, t):
+        """
+        Method is iterated every time step and will compute for every pattern.
+        """
 
         new_current = np.zeros(self.activation.shape)
 
-        for i in range(self.n_population):
+        for population in range(self.n_populations):
 
-            current = self.activation[i]
-            noise = self._gaussian_noise()
+            current = self.activation[population]
 
             sum_ = 0
-            for j in range(self.n_population):
+            for j in range(self.n_populations):
                 # SEPARATE COMPUTATION OF WEIGHTS
                 sum_ += \
-                    (self.weights_constant[i, j]
-                     - self.kappa_over_n
+                    (self.weights[population, j]
+                     - self.relative_excitation
                      * self.phi  # MISTAKE
-                     + self.delta_weights[i, j]) \
+                     + self.delta_weights[population, j]) \
                     * self._g(self.activation[j]) \
                     * self.n_fraction  # MISTAKE
 
-            business = sum_ + noise
+            business = sum_ + self.noise_values[population, t]
 
             second_part = business * self.dt  # done
 
             first_part = current * \
                 (1 - self.dt)
 
-            new_current[i] = first_part + second_part
+            new_current[population] = first_part + second_part
 
         self.activation[:] = new_current
 
     def _initialize(self):
-
-        self._compute_weight_constants()
+        self._compute_weights()
         self._present_pattern()
+        self._compute_gaussian_noise()
 
     def _save_fr(self, t):
 
         for mu in range(self.p):
 
-            neurons = self.connectivity[mu, :]
+            neurons = self.unique_patterns[mu, :]
 
             encoding = np.nonzero(neurons)[0]
 
@@ -273,7 +294,7 @@ class SimplifiedNetwork:
         print(f"Simulating for {self.t_tot_discrete} time steps...\n")
         for t in tqdm(range(self.t_tot_discrete)):
             self._update_phi(t)
-            self._update_activation()
+            self._update_activation(t)
             self._save_fr(t)
 
 
@@ -290,7 +311,7 @@ def main(force=False):
         # factor = 10**(-4)
 
         simplified_network = SimplifiedNetwork(
-                n_neuron=int(10 ** 5),  #*factor),
+                n_neurons=int(10 ** 5),
                 f=0.1,
                 p=16,
                 xi_0=65,
@@ -299,9 +320,9 @@ def main(force=False):
                 gamma=2 / 5,
                 phi_min=0.7,
                 phi_max=1.06,
-                phase_shift=0,  # .75,
-                j_forward=1500,  #*factor,
-                j_backward=400,  #*factor,
+                phase_shift=0,
+                j_forward=1500,
+                j_backward=400,
                 first_p=1,
                 t_tot=12,
             )

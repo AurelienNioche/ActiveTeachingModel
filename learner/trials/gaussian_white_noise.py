@@ -1,6 +1,5 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy import stats
 
 
 class GaussianNoise:
@@ -46,81 +45,48 @@ class GaussianNoise:
         also white. And it has one other interesting property: the spectrum of
         UG noise is also UG noise. More precisely, the real and imaginary parts
         of the spectrum are uncorrelated Gaussian values.
-        :return:
         """
-        # print(self.data)
-        # sigma = 1 #/ ((2 * np.pi)**0.5 * self.amplitude)
-        # for i in range(self.data_size):
-            # self.data[i] = np.random.normal(loc=0, scale=self.xi_0**0.5)
-            # self.data[i] = np.random.normal(loc=0, scale=sigma)
-
-        # print(self.data)
-
-        # self.data *= self.amplitude
-        # print(self.data)
 
         for i in range(self.data_size):
             self.data[i] = np.random.normal(loc=0, scale=self.amplitude)
 
 
-class DeterministicGen(stats.rv_continuous):
-
-    def _cdf(self, x):
-
-        # return np.where(x < 0, 0., 1.)
-
-        return self.amplitude * np.exp(
-            (self.mu - x)**2 / 2 * self.sigma**2
-        )
-
-    def _stats(self):
-        return 0., 0., 0., 0.
-
-
 def plot_noise(noise):
     x = np.arange(0, noise.data.size, 1)
     y = noise.data
-    plt.title("aa")
+    plt.xlabel("time")
+    plt.ylabel("value")
+    plt.title("noise")
     plt.plot(x, y)
+    plt.show()
 
 
 def plot_hist(noise):
     y = noise.data
+    plt.xlabel("value")
+    plt.ylabel("frequency")
+    plt.title("noise")
     plt.hist(y)
     plt.show()
 
 
-def plot_hist2(noise):
-    mu = 0
-    sigma = noise.xi_0**0.5
-    s = noise.data
-    count, bins, ignored = plt.hist(s, 30, density=True)
-    plt.xlabel("value")
-    plt.ylabel("frequency")
-    plt.plot(bins, 1 / (sigma * np.sqrt(2 * np.pi)) *
-             np.exp(- (bins - mu) ** 2 / (2 * sigma ** 2)),
-             linewidth=2, color='r')
-    plt.show()
-
-
 def main():
-    gaussian_noise = GaussianNoise()#n_population=10)
+    np.random.seed(123)
+
+    gaussian_noise = GaussianNoise()
     gaussian_noise.compute_noise()
     # plot_noise(gaussian_noise)
     plot_hist(gaussian_noise)
-    # plot_hist2(gaussian_noise)
-    # deterministic = DeterministicGen(name="deterministic")
-    # print(deterministic.cdf(np.arange(-20, 20, 0.5)))
 
 
 if __name__ == '__main__':
     main()
 
 
-def f(x, a, s, mean=0):
-    return a*np.exp(
-        -((x-mean)**2) / (2*s**2)
-    )
+# def f(x, a, s, mean=0):
+#     return a*np.exp(
+#         -((x-mean)**2) / (2*s**2)
+#     )
 
 # Gaussian white noise
 # amplitude = 251615
