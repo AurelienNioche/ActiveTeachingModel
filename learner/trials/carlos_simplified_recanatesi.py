@@ -40,16 +40,13 @@ class SimplifiedNetwork:
             # Time ###################
             t_tot=450,
             dt=0.001,
+            n_trials=10000,
             # Noise #####
             xi_0=65,
             # Initialization #########
             r_ini=1,
             first_p=1
     ):
-        # super().__init__()
-        # r_threshold=15,
-        # n_trials=10000,
-        # r_ini=1,):
 
         # Architecture
         self.n_neuron = n_neuron
@@ -80,6 +77,7 @@ class SimplifiedNetwork:
         # Time
         self.t_tot = t_tot
         self.dt = dt
+        self.n_trials = n_trials
 
         # Noise parameter
         self.xi_0 = xi_0
@@ -96,8 +94,9 @@ class SimplifiedNetwork:
         memory_patterns = \
             np.random.choice([0, 1], p=[1 - self.f, self.f],
                              size=(self.p, self.n_neuron))
-        self.unique_patterns, self.s = \
+        self.unique_patterns, self.pre_neurons_per_pattern = \
             np.unique(memory_patterns, axis=1, return_counts=True)
+        self.s = self.pre_neurons_per_pattern / self.n_neuron
 
         self.n_population = self.unique_patterns.shape[1]
 
@@ -114,14 +113,8 @@ class SimplifiedNetwork:
                                        self.n_population))
         self.activation = np.zeros(self.n_population)
 
-        self.n_fraction = self.n_population / self.n_neuron  # WARNING
-
         # Plotting
         self.average_firing_rate = np.zeros((self.p, self.t_tot_discrete))
-
-    def _compute_s_n(self):
-        for i in range(self.s.size):
-            self.s[i] = self.unique_patterns
 
     def _present_pattern(self):
         """
@@ -210,7 +203,7 @@ class SimplifiedNetwork:
                      * self.phi  # MISTAKE
                      + self.delta_weights[population, j]) \
                     * self._g(self.activation[j]) \
-                    * self.n_fraction  # MISTAKE
+                    * self.s[j]
 
             business = sum_ + self.noise_values[population, t]
 
@@ -324,6 +317,7 @@ def main(force=False):
                 j_backward=400,
                 first_p=1,
                 t_tot=12,
+                n_trials=3
             )
 
         simplified_network.simulate()
