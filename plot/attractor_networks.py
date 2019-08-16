@@ -8,7 +8,7 @@ def plot_phi(network):
     y = np.zeros(network.t_tot_discrete)
 
     for t in range(network.t_tot_discrete):
-        network._update_phi(t)
+        network._compute_phi(t)
         y[t] = network.phi
 
     plt.plot(x, y)
