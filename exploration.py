@@ -228,7 +228,7 @@ def main(force=False):
     max_iter = 100
     timeout = 5
     exploration_ratio = 0.1
-    testing_period = 100
+    testing_period = 1000
 
     # For fig
     mean_window = 10

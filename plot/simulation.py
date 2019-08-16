@@ -14,7 +14,7 @@ def summary(
         p_recall, seen, successes,
         font_size=10, label_size=8, line_width=1,
         extension='',
-        window=-np.inf
+        window=np.inf
 ):
 
     n_rows, n_cols = 5, 1

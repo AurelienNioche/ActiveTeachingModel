@@ -23,7 +23,8 @@ def curve(successes, fig_name=None, font_size=12, line_width=1,
 
     y = []
     for i in range(1, len(successes)+1):
-        y.append(np.mean(successes[max(0, -window):i]))
+        start = max(0, i-window)
+        y.append(np.mean(successes[start:i]))
 
     n_iteration = len(y)
 

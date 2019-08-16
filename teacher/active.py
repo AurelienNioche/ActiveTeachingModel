@@ -1,6 +1,7 @@
 # import copy
 
 import numpy as np
+import itertools as it
 
 from teacher.metaclass import GenericTeacher
 
@@ -11,7 +12,7 @@ class Active(GenericTeacher):
 
     def __init__(self, n_item=20, t_max=200, grades=(1, ),
                  handle_similarities=True, normalize_similarity=False,
-                 learnt_threshold=0.95,
+                 learnt_threshold=0.95, depth=1,
                  verbose=False):
 
         """
@@ -161,3 +162,49 @@ class ForceLearning(Active):
         self.usefulness -= current_p_recall > self.learnt_threshold
         if max(self.usefulness) <= 0:
             self.usefulness = sum_p_recall
+
+
+class ActivePlus(Active):
+
+    def __init__(self, depth=1, **kwargs):
+
+        super().__init__(**kwargs)
+        self.depth = depth
+
+    def _update_usefulness(self, agent):
+
+        self.usefulness[:] = 0
+
+        current_history = agent.hist.copy()
+        current_t = agent.t
+
+        t_max = len(current_history)
+
+        horizon = min((t_max, current_t+self.depth))
+        n_repeat = horizon - current_t
+
+        possible_future = \
+            it.product(range(self.tk.n_item), repeat=n_repeat)
+
+        # print("current history", current_history)
+        # print("current t", current_t)
+        #
+        # print("tmax", t_max)
+        # print("horizon", horizon)
+        # print("possible futures", list(possible_future))
+
+        for future in possible_future:
+
+            agent.hist[current_t:horizon] = future
+
+            p_recall = np.zeros(self.tk.n_item)
+            for i in range(self.tk.n_item):
+                p_recall[i] = agent.p_recall(i, time_index=horizon)
+
+            score_future = np.sum(np.power(p_recall, 2))
+            self.usefulness[future[0]] = max(
+                (self.usefulness[future[0]],
+                 score_future)
+            )
+
+        agent.hist = current_history
