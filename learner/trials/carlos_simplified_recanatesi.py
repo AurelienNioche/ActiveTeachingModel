@@ -5,7 +5,9 @@ import numpy as np
 from tqdm import tqdm
 
 import plot.attractor_networks
-# from learner.carlos_recanatesi import Network
+# from learner.carlos_recanatesi import Network$
+
+import matplotlib.pyplot as plt
 
 np.seterr(all='raise')
 
@@ -40,7 +42,6 @@ class SimplifiedNetwork:
             # Time ###################
             t_tot=450,
             dt=0.001,
-            n_trials=10000,
             # Noise #####
             xi_0=65,
             # Initialization #########
@@ -77,7 +78,6 @@ class SimplifiedNetwork:
         # Time
         self.t_tot = t_tot
         self.dt = dt
-        self.n_trials = n_trials
 
         # Noise parameter
         self.xi_0 = xi_0
@@ -95,11 +95,17 @@ class SimplifiedNetwork:
         memory_patterns = \
             np.random.choice([0, 1], p=[1 - self.f, self.f],
                              size=(self.p, self.n_neuron))
-        self.unique_patterns, self.pre_neurons_per_pattern = \
+        unique_patterns_T, self.n_neuron_per_pattern = \
             np.unique(memory_patterns, axis=1, return_counts=True)
-        self.s = self.pre_neurons_per_pattern / self.n_neuron
+        self.unique_patterns = unique_patterns_T.T
+        self.s = self.n_neuron_per_pattern / self.n_neuron
 
-        self.n_population = self.unique_patterns.shape[1]
+        # print(self.n_neuron_per_pattern)
+        # print('n pop', len(self.s))
+        # print('s', self.s)
+
+        self.n_population = len(self.unique_patterns)
+        assert self.n_population == len(self.s)
 
         # self.n_neurons = self.n_population  # Reduce the number of
         # neurons after computing v, w
@@ -112,22 +118,20 @@ class SimplifiedNetwork:
 
         self.sam_connectivity = np.zeros((self.n_population,
                                           self.n_population))
-        self.activation = np.zeros(self.n_population)
 
         self.population_currents = np.zeros(self.n_population)
 
         # Plotting
         self.average_firing_rate = np.zeros((self.p, self.t_tot_discrete))
 
-    def _present_pattern(self):
+    def _present_pattern(self, memory):
         """
         Activation vector will be one pattern for one memory multiplied
         by a parameter whose default value is usually 1.
         """
-        memory = np.random.randint(0, self.p)
 
-        self.population_currents[:] =\
-            self.unique_patterns[memory, :] * self.r_ini
+        self.population_currents[:] = \
+            self.unique_patterns[:, memory] * self.r_ini
 
     def _compute_gaussian_noise(self):
         """Amplitude of uncorrelated Gaussian noise is its variance"""
@@ -154,8 +158,8 @@ class SimplifiedNetwork:
                 sum_ = 0
                 for mu in range(self.p):
                     sum_ += \
-                        (self.unique_patterns[mu, v] - self.f) \
-                        * (self.unique_patterns[mu, w] - self.f)
+                        (self.unique_patterns[v, mu] - self.f) \
+                        * (self.unique_patterns[w, mu] - self.f)
 
                 self.connectivity_matrix[v, w] = \
                     self.relative_excitation * sum_
@@ -174,14 +178,14 @@ class SimplifiedNetwork:
                 sum_forward = 0
                 for mu in range(self.p - 1):
                     sum_forward += \
-                        self.unique_patterns[mu, v] \
-                        * self.unique_patterns[mu + 1, w]
+                        self.unique_patterns[v, mu] \
+                        * self.unique_patterns[w, mu + 1]
 
                 sum_backward = 0
                 for mu in range(1, self.p):
                     sum_backward += \
-                        self.unique_patterns[mu, v] \
-                        * self.unique_patterns[mu - 1, w]
+                        self.unique_patterns[v, mu] \
+                        * self.unique_patterns[w, mu - 1]
 
                 self.sam_connectivity[v, w] = \
                     self.j_forward * sum_forward \
@@ -222,7 +226,6 @@ class SimplifiedNetwork:
             # Third
             # print("here", self.noise_values.shape, v, w)
             third_term = self.noise_values[v, t] * self.dt  # YES
-            print(third_term)
 
             self.population_currents[v] =\
                 first_term + second_term + third_term
@@ -230,10 +233,11 @@ class SimplifiedNetwork:
         # self.activation[:] = new_current
         # self.population_currents[v] = new_current
 
-    def _initialize(self):
+    def initialize(self, pattern=0):
+
         self._compute_phi()
         self._compute_connectivity_matrix()
-        self._present_pattern()
+        self._present_pattern(memory=pattern)
         self._compute_gaussian_noise()
 
     def _save_fr(self, t):
@@ -246,12 +250,17 @@ class SimplifiedNetwork:
 
             v = np.zeros(len(encoding))
             for i, n in enumerate(encoding):
-                v[i] = self._g(self.activation[n])
+                v[i] = self._g(self.population_currents[n])
 
             try:
-                self.average_firing_rate[mu, t] = np.mean(v)
+                if len(v):
+                    mean = np.mean(v)
+                else:
+                    mean = 0
             except FloatingPointError:
-                self.average_firing_rate[mu, t] = 0
+                mean = 0
+
+            self.average_firing_rate[mu, t] = mean
 
     @staticmethod
     def _sinusoid(min_, max_, period, t, phase_shift, dt=1.):
@@ -297,15 +306,27 @@ class SimplifiedNetwork:
         return gain
 
     def simulate(self):
-        self._initialize()
 
-        for trial in range(self.n_trials):
-            print(trial)
-            print(f"Trial {trial+1} of {self.n_trials}")
-            print(f"Simulating for {self.t_tot_discrete} time steps...\n")
-            for t in tqdm(range(self.t_tot_discrete)):
-                self._update_activation(t)
-                self._save_fr(t)
+        print(f"Simulating for {self.t_tot_discrete} time steps...\n")
+        for t in tqdm(range(self.t_tot_discrete)):
+            # print(t, self.population_currents)
+            self._update_activation(t)
+            self._save_fr(t)
+
+
+def plot_phi(network):
+
+    plt.plot(network.phi)
+    plt.title("Phi")
+    plt.show()
+
+
+def plot_noise(network):
+
+    for i in range(network.n_population):
+        plt.plot(network.noise_values[i])
+    plt.title("Noise")
+    plt.show()
 
 
 def main(force=False):
@@ -323,7 +344,7 @@ def main(force=False):
         simplified_network = SimplifiedNetwork(
                 n_neuron=int(10 ** 5),
                 f=0.1,
-                p=5,
+                p=16,
                 xi_0=65,
                 kappa=13000,
                 tau_0=1,
@@ -334,10 +355,17 @@ def main(force=False):
                 j_forward=1500,
                 j_backward=400,
                 first_p=1,
-                t_tot=12,
-                n_trials=1
+                t_tot=2
             )
 
+        simplified_network.initialize()
+
+        print("Pattern:", simplified_network.unique_patterns[:, 0])
+        for i in range(simplified_network.n_population):
+            print(simplified_network.unique_patterns[i], simplified_network.n_neuron_per_pattern[i])
+
+        plot_phi(simplified_network)
+        plot_noise(simplified_network)
         simplified_network.simulate()
 
         pickle.dump(simplified_network, open(bkp_file, "wb"))
