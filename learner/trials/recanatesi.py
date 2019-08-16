@@ -439,4 +439,4 @@ def main(force=False):
 
 
 if __name__ == "__main__":
-    main(force=False)
+    main(force=True)

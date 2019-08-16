@@ -105,7 +105,7 @@ class SimplifiedNetwork:
         # neurons after computing v, w
 
         self.noise_amplitudes = np.zeros(self.n_population)
-        self.noise_values = np.zeros((self.n_population, self.t_tot))
+        self.noise_values = np.zeros((self.n_population, self.t_tot_discrete))
 
         self.connectivity_matrix = np.zeros((
             self.n_population, self.n_population))
@@ -124,13 +124,14 @@ class SimplifiedNetwork:
         Activation vector will be one pattern for one memory multiplied
         by a parameter whose default value is usually 1.
         """
+        memory = np.random.randint(0, self.p)
 
-        self.activation[:] = self.unique_patterns[self.first_p, :] \
-            * self.r_ini  # CHECK
+        self.population_currents[:] =\
+            self.unique_patterns[memory, :] * self.r_ini
 
     def _compute_gaussian_noise(self):
         """Amplitude of uncorrelated Gaussian noise is its variance"""
-        # YES
+        print("Computing uncorrelated Gaussian noise...")
         self.amplitude = self.xi_0 * self.s * self.n_neuron
 
         for i in range(self.n_population):
@@ -138,47 +139,44 @@ class SimplifiedNetwork:
             self.noise_values[i] = \
                 np.random.normal(loc=0,
                                  scale=self.amplitude[i],
-                                 size=self.t_tot)
+                                 size=self.t_tot_discrete)
 
-    def _compute_connectivity_matrix(self, t):
+    def _compute_connectivity_matrix(self):
         """
         Weights do not change in this network architecture and can therefore
         be pre-computed.
         """
-        # YES
+        print("Computing connectivity matrix...")
 
-        print("Computing weights...")
-        for i in tqdm(range(self.n_population)):
-            for j in range(self.n_population):
+        for v in tqdm(range(self.n_population)):
+            for w in range(self.n_population):
 
                 sum_ = 0
                 for mu in range(self.p):
                     sum_ += \
-                        (self.unique_patterns[mu, i] - self.f) \
-                        * (self.unique_patterns[mu, j] - self.f) - self.phi[t]
+                        (self.unique_patterns[mu, v] - self.f) \
+                        * (self.unique_patterns[mu, w] - self.f)
 
-                self.connectivity_matrix[i, j] = \
+                self.connectivity_matrix[v, w] = \
                     self.relative_excitation * sum_
 
-                if i == j:
-                    self.connectivity_matrix[i, j] = 0
+                if v == w:
+                    self.connectivity_matrix[v, w] = 0
 
     def _compute_sam_connectivity(self):
-        # YES
 
         print("Computing SAM connectivity...")
+
         for v in tqdm(range(self.n_population)):
 
             for w in range(self.n_population):
 
-                # Sum for forward
                 sum_forward = 0
                 for mu in range(self.p - 1):
                     sum_forward += \
                         self.unique_patterns[mu, v] \
                         * self.unique_patterns[mu + 1, w]
 
-                # Sum for backward
                 sum_backward = 0
                 for mu in range(1, self.p):
                     sum_backward += \
@@ -194,8 +192,6 @@ class SimplifiedNetwork:
         Method is iterated every time step and will compute for every pattern.
         Current of population v at time t+dt results from the addition of the
         three terms 'first_term', 'second_term', 'third_term'.
-        !!!!!! TIME DEPENDENCY INCLUDED IN THE CONNECTIVITY (OR WEIGHTS)
-        CALCULATION, CANNOT BE PRECOMPUTED
         """
 
         # new_current = np.zeros(self.activation.shape)
@@ -207,35 +203,36 @@ class SimplifiedNetwork:
 
             # First
             first_term = current * (1 - self.dt)  # YES
+            # print(first_term)
 
             # Second
-
-
             sum_ = 0
             for w in range(self.n_population):
                 sum_ += \
                     (self.connectivity_matrix[v, w]
-                     - self.relative_excitation
-                     * self.phi  # MISTAKE
+                     - self.phi[t] * self.p
                      + self.sam_connectivity[v, w]) \
-                    * self._g(self.population_currents[w]) \
-                    * self.s[w]
+                    * self.s[w] \
+                    * self._g(self.population_currents[w])
+                # print(self._g(self.population_currents[w]))
+                # print(sum_)
 
             second_term = sum_ * self.dt  # YES
 
             # Third
+            # print("here", self.noise_values.shape, v, w)
             third_term = self.noise_values[v, t] * self.dt  # YES
+            print(third_term)
 
             self.population_currents[v] =\
                 first_term + second_term + third_term
-            # YES
 
         # self.activation[:] = new_current
         # self.population_currents[v] = new_current
 
     def _initialize(self):
         self._compute_phi()
-        # self._compute_connectivity_matrix()
+        self._compute_connectivity_matrix()
         self._present_pattern()
         self._compute_gaussian_noise()
 
@@ -278,7 +275,9 @@ class SimplifiedNetwork:
 
     def _compute_phi(self):
 
-        for t in self.t_tot_discrete:
+        print("Computing oscillatory inhibition values...")
+
+        for t in range(self.t_tot_discrete):
             self.phi[t] = self._sinusoid(
                 min_=self.phi_min,
                 max_=self.phi_max,
@@ -300,15 +299,18 @@ class SimplifiedNetwork:
     def simulate(self):
         self._initialize()
 
-        print(f"Simulating for {self.t_tot_discrete} time steps...\n")
-        for t in tqdm(range(self.t_tot_discrete)):
-            self._update_activation(t)
-            self._save_fr(t)
+        for trial in range(self.n_trials):
+            print(trial)
+            print(f"Trial {trial+1} of {self.n_trials}")
+            print(f"Simulating for {self.t_tot_discrete} time steps...\n")
+            for t in tqdm(range(self.t_tot_discrete)):
+                self._update_activation(t)
+                self._save_fr(t)
 
 
 def main(force=False):
 
-    bkp_file = f'bkp/hopfield.p'
+    bkp_file = f"bkp/hopfield.p"
 
     os.makedirs(os.path.dirname(bkp_file), exist_ok=True)
 
@@ -321,7 +323,7 @@ def main(force=False):
         simplified_network = SimplifiedNetwork(
                 n_neuron=int(10 ** 5),
                 f=0.1,
-                p=16,
+                p=5,
                 xi_0=65,
                 kappa=13000,
                 tau_0=1,
@@ -333,15 +335,15 @@ def main(force=False):
                 j_backward=400,
                 first_p=1,
                 t_tot=12,
-                n_trials=3
+                n_trials=1
             )
 
         simplified_network.simulate()
 
-        pickle.dump(simplified_network, open(bkp_file, 'wb'))
+        pickle.dump(simplified_network, open(bkp_file, "wb"))
     else:
-        print('Loading from pickle file...')
-        simplified_network = pickle.load(open(bkp_file, 'rb'))
+        print("Loading from pickle file...")
+        simplified_network = pickle.load(open(bkp_file, "rb"))
 
     # plot.attractor_networks.plot_phi(simplified_network)
     plot.attractor_networks.plot_average_firing_rate(simplified_network)
