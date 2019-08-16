@@ -88,6 +88,7 @@ class SimplifiedNetwork:
 
         # General pre-computations
         self.t_tot_discrete = int(self.t_tot / self.dt)
+        self.phi = np.zeros(self.t_tot_discrete)
         self.relative_excitation = self.kappa / self.n_neuron
 
         # Unique simplified network attributes
@@ -106,12 +107,14 @@ class SimplifiedNetwork:
         self.noise_amplitudes = np.zeros(self.n_population)
         self.noise_values = np.zeros((self.n_population, self.t_tot))
 
-        self.weights = np.zeros((
+        self.connectivity_matrix = np.zeros((
             self.n_population, self.n_population))
 
-        self.delta_weights = np.zeros((self.n_population,
-                                       self.n_population))
+        self.sam_connectivity = np.zeros((self.n_population,
+                                          self.n_population))
         self.activation = np.zeros(self.n_population)
+
+        self.population_currents = np.zeros(self.n_population)
 
         # Plotting
         self.average_firing_rate = np.zeros((self.p, self.t_tot_discrete))
@@ -127,6 +130,7 @@ class SimplifiedNetwork:
 
     def _compute_gaussian_noise(self):
         """Amplitude of uncorrelated Gaussian noise is its variance"""
+        # YES
         self.amplitude = self.xi_0 * self.s * self.n_neuron
 
         for i in range(self.n_population):
@@ -136,11 +140,12 @@ class SimplifiedNetwork:
                                  scale=self.amplitude[i],
                                  size=self.t_tot)
 
-    def _compute_weights(self):
+    def _compute_connectivity_matrix(self, t):
         """
         Weights do not change in this network architecture and can therefore
         be pre-computed.
         """
+        # YES
 
         print("Computing weights...")
         for i in tqdm(range(self.n_population)):
@@ -150,74 +155,87 @@ class SimplifiedNetwork:
                 for mu in range(self.p):
                     sum_ += \
                         (self.unique_patterns[mu, i] - self.f) \
-                        * (self.unique_patterns[mu, j] - self.f)
+                        * (self.unique_patterns[mu, j] - self.f) - self.phi[t]
 
-                self.weights[i, j] = \
+                self.connectivity_matrix[i, j] = \
                     self.relative_excitation * sum_
 
                 if i == j:
-                    self.weights[i, j] = 0
+                    self.connectivity_matrix[i, j] = 0
 
-    def _compute_delta_weights(self):
+    def _compute_sam_connectivity(self):
+        # YES
 
-        print("Computing delta weights...")
-        for i in tqdm(range(self.n_population)):
+        print("Computing SAM connectivity...")
+        for v in tqdm(range(self.n_population)):
 
-            for j in range(self.n_population):
+            for w in range(self.n_population):
 
-                # Sum for positive
-                sum_pos = 0
+                # Sum for forward
+                sum_forward = 0
                 for mu in range(self.p - 1):
-                    sum_pos += \
-                        self.unique_patterns[mu, i] \
-                        * self.unique_patterns[mu + 1, j]
+                    sum_forward += \
+                        self.unique_patterns[mu, v] \
+                        * self.unique_patterns[mu + 1, w]
 
-                # Sum for negative
-                sum_neg = 0
+                # Sum for backward
+                sum_backward = 0
                 for mu in range(1, self.p):
-                    sum_neg += \
-                        self.unique_patterns[mu, i] \
-                        * self.unique_patterns[mu - 1, j]
+                    sum_backward += \
+                        self.unique_patterns[mu, v] \
+                        * self.unique_patterns[mu - 1, w]
 
-                self.delta_weights[i, j] = \
-                    self.j_forward * sum_pos \
-                    + self.j_backward * sum_neg
+                self.sam_connectivity[v, w] = \
+                    self.j_forward * sum_forward \
+                    + self.j_backward * sum_backward
 
     def _update_activation(self, t):
         """
         Method is iterated every time step and will compute for every pattern.
+        Current of population v at time t+dt results from the addition of the
+        three terms 'first_term', 'second_term', 'third_term'.
+        !!!!!! TIME DEPENDENCY INCLUDED IN THE CONNECTIVITY (OR WEIGHTS)
+        CALCULATION, CANNOT BE PRECOMPUTED
         """
 
-        new_current = np.zeros(self.activation.shape)
+        # new_current = np.zeros(self.activation.shape)
 
-        for population in range(self.n_population):
+        for v in range(self.n_population):
 
-            current = self.activation[population]
+            # current = self.activation[population]
+            current = self.population_currents[v]
+
+            # First
+            first_term = current * (1 - self.dt)  # YES
+
+            # Second
+
 
             sum_ = 0
-            for j in range(self.n_population):
-                # SEPARATE COMPUTATION OF WEIGHTS
+            for w in range(self.n_population):
                 sum_ += \
-                    (self.weights[population, j]
+                    (self.connectivity_matrix[v, w]
                      - self.relative_excitation
                      * self.phi  # MISTAKE
-                     + self.delta_weights[population, j]) \
-                    * self._g(self.activation[j]) \
-                    * self.s[j]
+                     + self.sam_connectivity[v, w]) \
+                    * self._g(self.population_currents[w]) \
+                    * self.s[w]
 
-            business = sum_ + self.noise_values[population, t]
+            second_term = sum_ * self.dt  # YES
 
-            second_part = business * self.dt  # done
+            # Third
+            third_term = self.noise_values[v, t] * self.dt  # YES
 
-            first_part = current * \
-                (1 - self.dt)
+            self.population_currents[v] =\
+                first_term + second_term + third_term
+            # YES
 
-            new_current[population] = first_part + second_part
-
-        self.activation[:] = new_current
+        # self.activation[:] = new_current
+        # self.population_currents[v] = new_current
 
     def _initialize(self):
-        self._compute_weights()
+        self._compute_phi()
+        # self._compute_connectivity_matrix()
         self._present_pattern()
         self._compute_gaussian_noise()
 
@@ -240,7 +258,15 @@ class SimplifiedNetwork:
 
     @staticmethod
     def _sinusoid(min_, max_, period, t, phase_shift, dt=1.):
-
+        """
+        Phi is a sinusoid function related to neuron inhibition.
+        It follows the general sine wave function:
+            f(x) = amplitude * (2 * pi * frequency * time)
+        In order to adapt to the phi_min and phi_max parameters the amplitude
+        and an additive shift term have to change.
+        Frequency in discrete time has to be adapted from the given tau_0
+        period in continuous time.
+        """
         amplitude = (max_ - min_) / 2
         frequency = (1 / period) * dt
         shift = min_ + amplitude  # Moves the wave in the y-axis
@@ -250,26 +276,17 @@ class SimplifiedNetwork:
             * np.sin(2 * np.pi * (t + phase_shift / dt) * frequency) \
             + shift
 
-    def _update_phi(self, t):
-        """
-        Phi is a sinusoid function related to neuron inhibition.
-        It follows the general sine wave function:
-            f(x) = amplitude * (2 * pi * frequency * time)
-        In order to adapt to the phi_min and phi_max parameters the amplitude
-        and an additive shift term have to change.
-        Frequency in discrete time has to be adapted from the given tau_0
-        period in continuous time.
+    def _compute_phi(self):
 
-        :param t: int discrete time step.
-        """
-        self.phi = self._sinusoid(
-            min_=self.phi_min,
-            max_=self.phi_max,
-            period=self.tau_0,
-            t=t,
-            phase_shift=self.phase_shift * self.tau_0,
-            dt=self.dt
-        )
+        for t in self.t_tot_discrete:
+            self.phi[t] = self._sinusoid(
+                min_=self.phi_min,
+                max_=self.phi_max,
+                period=self.tau_0,
+                t=t,
+                phase_shift=self.phase_shift * self.tau_0,
+                dt=self.dt
+            )
 
     def _g(self, current):
 
@@ -285,7 +302,6 @@ class SimplifiedNetwork:
 
         print(f"Simulating for {self.t_tot_discrete} time steps...\n")
         for t in tqdm(range(self.t_tot_discrete)):
-            self._update_phi(t)
             self._update_activation(t)
             self._save_fr(t)
 
