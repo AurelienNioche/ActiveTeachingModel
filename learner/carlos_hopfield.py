@@ -2,9 +2,6 @@ import numpy as np
 
 
 class Network:
-    """
-    web.cs.ucla.edu/~rosen/161/notes/hopfield.html
-    """
     def __init__(self, n_neurons=5):
         self.n_neurons = n_neurons
 

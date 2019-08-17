@@ -3,7 +3,7 @@ import numpy as np
 
 class Network:
     """
-    web.cs.ucla.edu/~rosen/161/notes/hopfield.html
+    Modified from web.cs.ucla.edu/~rosen/161/notes/hopfield.html
     """
     def __init__(self, n_neurons=5):
         self.n_neurons = n_neurons
@@ -16,7 +16,18 @@ class Network:
         self.node_values = self.pattern3
         self.last_node_values = np.array([1, 1, 1, 1, 1])
 
-    def compute_weights(self):
+    def _compute_weights(self):
+        """
+        Weight values are calculated without any training.
+
+        For several patterns, calculate the matrix for the first pattern,
+        then calculate the value for the second matrix and finally add the
+        two matrices together.
+        """
+        print("\nPattern 1:\n", self.pattern1)
+
+        print("\nPattern 1:\n", self.pattern2)
+
         for i in range(self.n_neurons):
             for j in range(self.n_neurons):
                 self.weights[i, j] = (2 * self.pattern1[i] - 1) \
@@ -29,6 +40,16 @@ class Network:
         print("\nWeights after 2 patterns presented:\n", self.weights)
 
     def _update_node(self, node):
+        """
+        If you are updating one node of a Hopfield network, then the values of
+        all the other nodes are input values, and the weights from those nodes
+        to the updated node as the weights.
+
+        In other words, first you do a weighted sum of the inputs from the
+        other nodes, then if that value is greater than or equal to 0, you
+        output 1. Otherwise, you output 0
+        :param node: int node number
+        """
         sum_ = 0
 
         for i in range(self.n_neurons):
@@ -46,17 +67,40 @@ class Network:
         # np.dot(self.weights[initial_node, :], self.pattern3)
         # print(sum_)
 
-    def update_all_nodes(self):
-        """TODO node should be chosen at random"""
+    def _update_all_nodes(self):
+        """
+        There are two approaches:
 
-        for i in range(self.n_neurons):
+        The first is synchronous updating, which means all the nodes get
+        updated at the same time, based on the existing state (i.e. not on
+        the values the nodes are changing to). To update the nodes in this
+        method, you can just multiply the weight matrix by the vector of the
+        current state.
+
+        This is not very realistic in a neural sense, as neurons do not all
+        update at the same rate. They have varying propagation delays, varying
+        firing times, etc. A more realistic assumption would be to update them
+        in random order, which was the method described by Hopfield. Random
+        updating goes on until the system is in a stable state. Note that the
+        full network should be updated before the same node gets updated again.
+        """
+
+        values = np.arange(0, self.n_neurons, 1)
+        order = np.random.choice(values, self.n_neurons, replace=False)
+
+        for i in order:
             self._update_node(i)
 
-    def find_attractor(self):
+    def _find_attractor(self):
+        """
+        Cycling through all the nodes each step is the only way to know when to
+        stop updating. If a complete network update does not change any of the
+        values, then you are at an attractor so you can stop.
+        """
         i = 1
         while np.sum(self.node_values - self.last_node_values) != 0:
             self.last_node_values = self.node_values
-            self.update_all_nodes()
+            self._update_all_nodes()
             i += 1
             print(f"Update {i} finished.")
 
@@ -64,17 +108,15 @@ class Network:
               f"node value updates.")
 
     def simulate(self):
-        self.compute_weights()
-        self.update_all_nodes()
-        self.find_attractor()
+        self._compute_weights()
+        self._update_all_nodes()
+        self._find_attractor()
 
 
 def main():
+    np.random.seed(123)
 
     network = Network()
-    # network.compute_weights()
-    # network.update_all_nodes()
-    # network.find_attractor()
     network.simulate()
 
 
