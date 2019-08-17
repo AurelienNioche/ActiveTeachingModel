@@ -22,13 +22,7 @@ class Sigmoid:
         x_0 = self.midpoint
 
         for i in range(self.x.size):
-            # print(i)
-            self.y[i] = (L / (1 + np.exp(-k * (self.x[i]))))
-            # print(self.x[i])
-            # print(self.y/)
-
-        # for i in self.y:
-        #     self.y[i] = L * np.exp()
+            self.y[i] = (L / (1 + np.exp(-k * (self.x[i] - x_0))))
 
 
 def plot(sigmoid):
@@ -41,7 +35,7 @@ def main():
     sigmoid = Sigmoid(
         x_min=-30,
         x_max=30,
-        maximum=30,
+        maximum=1,
         midpoint=0,
         steepness=0.5
     )

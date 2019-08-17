@@ -5,14 +5,14 @@ class Network:
     """
     Modified from web.cs.ucla.edu/~rosen/161/notes/hopfield.html
     """
-    def __init__(self, n_neurons=5):
-        self.n_neurons = n_neurons
+    def __init__(self, n_neuron=5):
+        self.n_neuron = n_neuron
 
         self.pattern1 = np.array([0, 1, 1, 0, 1])
         self.pattern2 = np.array([1, 0, 1, 0, 1])
         self.pattern3 = np.array([1, 1, 1, 1, 1])
 
-        self.weights = np.zeros((self.n_neurons, self.n_neurons))
+        self.weights = np.zeros((self.n_neuron, self.n_neuron))
         self.node_values = self.pattern3
         self.last_node_values = np.array([1, 1, 1, 1, 1])
 
@@ -28,8 +28,8 @@ class Network:
 
         print("\nPattern 1:\n", self.pattern2)
 
-        for i in range(self.n_neurons):
-            for j in range(self.n_neurons):
+        for i in range(self.n_neuron):
+            for j in range(self.n_neuron):
                 self.weights[i, j] = (2 * self.pattern1[i] - 1) \
                                      * (2 * self.pattern1[j] - 1)\
                                      + (2 * self.pattern2[i] - 1) \
@@ -52,7 +52,7 @@ class Network:
         """
         sum_ = 0
 
-        for i in range(self.n_neurons):
+        for i in range(self.n_neuron):
             sum_ += (self.weights[node, i] * self.last_node_values[i])
 
         if sum_ >= 0:
@@ -85,8 +85,8 @@ class Network:
         full network should be updated before the same node gets updated again.
         """
 
-        values = np.arange(0, self.n_neurons, 1)
-        order = np.random.choice(values, self.n_neurons, replace=False)
+        values = np.arange(0, self.n_neuron, 1)
+        order = np.random.choice(values, self.n_neuron, replace=False)
 
         for i in order:
             self._update_node(i)
@@ -95,7 +95,7 @@ class Network:
         """
         Cycling through all the nodes each step is the only way to know when to
         stop updating. If a complete network update does not change any of the
-        values, then you are at an attractor so you can stop.
+        node values, then you are at an attractor so you can stop.
         """
         i = 1
         while np.sum(self.node_values - self.last_node_values) != 0:
