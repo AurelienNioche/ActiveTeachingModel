@@ -52,9 +52,9 @@ class GenericTeacher:
             poss_rep = None
 
         if make_learn:
-            reply = agent.decide(question=question,
+            reply = agent.decide(item=question,
                                  possible_replies=possible_replies)
-            agent.learn(question=question)
+            agent.learn(item=question)
 
             self.register_question_and_reply(
                 reply=reply,

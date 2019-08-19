@@ -8,28 +8,38 @@ class Learner:
     version = 0.0
     bounds = ('<name of parameter>', 0.0000001, 1.0),
 
-    def __init__(self):
+    def __init__(self, n_item=None, n_iteration=None,
+                 n_possible_replies=None):
+
+        self.n_item = n_item
+        self.n_iteration = n_iteration
+        self.n_possible_replies = n_possible_replies
         self.param = None
 
-    def decide(self, question, possible_replies, time=None):
+    def decide(self, item, possible_replies, time=None):
         """Expected return from specific learner: reply"""
         raise NotImplementedError
 
-    def learn(self, question, time=None):
+    def learn(self, item, time=None):
         raise NotImplementedError
 
     def unlearn(self):
         raise NotImplementedError
 
-    def _p_choice(self, question, reply, possible_replies, time=None):
+    def _p_choice(self, item, reply, possible_replies, time=None):
         raise NotImplementedError
 
-    def _p_correct(self, question, reply, possible_replies, time=None):
+    def _p_correct(self, item, reply, possible_replies, time=None):
         raise NotImplementedError
 
     def p_recall(self, item, time=None):
         """Expected return from specific learner: p_r"""
         raise NotImplementedError
+
+    def recall(self, item, time=None):
+
+        p_r = self.p_recall(item=item, time=time)
+        return p_r > np.random.random()
 
     def get_p_choices(self, data,
                       # use_p_recall=False,
@@ -44,7 +54,7 @@ class Learner:
 
         for t in range(t_max):
 
-            question, reply = data.questions[t], data.replies[t]
+            item, reply = data.questions[t], data.replies[t]
             time = data.times[t]
 
             if hasattr(data, 'possible_replies'):
@@ -56,15 +66,15 @@ class Learner:
             if hasattr(data, 'first_presentation'):
                 first_pr = data.first_presentation[t]
                 if first_pr:
-                    self.learn(question=question, time=time)
+                    self.learn(item=item, time=time)
 
             if use_p_correct:
-                p = self._p_correct(question=question, reply=reply,
+                p = self._p_correct(item=item, reply=reply,
                                     possible_replies=possible_rep,
                                     time=time)
 
             else:
-                p = self._p_choice(question=question, reply=reply,
+                p = self._p_choice(item=item, reply=reply,
                                    possible_replies=possible_rep,
                                    time=time)
 
@@ -72,7 +82,7 @@ class Learner:
                 return None
 
             p_choices[t] = p
-            self.learn(question=question, time=time)
+            self.learn(item=item, time=time)
 
         return p_choices
 

@@ -52,9 +52,9 @@ class SimulatedData(Data):
                 possible_replies[t, i] =\
                     list(tk.meaning).index(tk.possible_replies_list[t][i])
 
-            r = agent.decide(question=q,
+            r = agent.decide(item=q,
                              possible_replies=possible_replies[t])
-            agent.learn(question=q)
+            agent.learn(item=q)
 
             replies[t] = r
 

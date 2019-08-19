@@ -39,7 +39,7 @@ def main_continuous(n_iteration=100, n_item=9):
 
         success[i] = p > r
 
-        agent.learn(question=item, time=t*time_norm)
+        agent.learn(item=item, time=t * time_norm)
 
     time_sampling = np.linspace(start=0, stop=sec, num=100)
 
@@ -78,7 +78,7 @@ def main_discrete(n_iteration=100, n_item=9):
 
         success[t] = p > r
 
-        agent.learn(question=item)
+        agent.learn(item=item)
 
         if t:
             seen[:, t] = seen[:, t-1]

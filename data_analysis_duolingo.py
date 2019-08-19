@@ -324,7 +324,7 @@ def main(model=ActR):
             for i in range(u.t_max):
 
                 item, t = u.questions[i], u.times[i]
-                agent.learn(question=item, time=t)
+                agent.learn(item=item, time=t)
 
             time_sampling = \
                 np.linspace(start=min_u,

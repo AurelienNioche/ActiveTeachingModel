@@ -35,14 +35,14 @@ def with_bayesian_opt(teacher_model, t_max, grades, n_item,
         )
 
         reply = learner.decide(
-            question=question,
+            item=question,
             possible_replies=possible_replies)
 
         teacher.register_question_and_reply(question=question, reply=reply,
                                             possible_replies=possible_replies)
 
-        learner.learn(question=question)
-        model_learner.learn(question=question)
+        learner.learn(item=question)
+        model_learner.learn(item=question)
 
         data_view = Data(n_item=n_item,
                          questions=teacher.questions[:t + 1],

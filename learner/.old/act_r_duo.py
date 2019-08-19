@@ -59,20 +59,20 @@ class ActRDuo(ActR):
             first_pr = data.first_presentation[t]
 
             if first_pr:
-                self.learn(question=question, time=time)
+                self.learn(item=question, time=time)
 
             if use_p_correct:
-                p = self._p_correct(question=question, reply=reply,
+                p = self._p_correct(item=question, reply=reply,
                                     time=time)
 
             else:
-                p = self._p_choice(question=question, reply=reply,
+                p = self._p_choice(item=question, reply=reply,
                                    time=time)
 
             if p == 0:
                 return None
 
             p_choices[t] = p
-            self.learn(question=question, time=time)
+            self.learn(item=question, time=time)
 
         return p_choices

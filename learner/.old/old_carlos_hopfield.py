@@ -222,11 +222,11 @@ class Network(Learner):
         p_recall = 1  # TODO output p_r
         return p_recall
 
-    def _p_choice(self, question, reply, possible_replies=None,
+    def _p_choice(self, item, reply, possible_replies=None,
                   time=None, time_index=None):
         """Modified from ActR"""
 
-        success = question == reply
+        success = item == reply
 
         p_recall = 1  # TODO output p_r
 
@@ -253,27 +253,27 @@ class Network(Learner):
 
         return p_choice
 
-    def _p_correct(self, question, reply, possible_replies=None,
+    def _p_correct(self, item, reply, possible_replies=None,
                    time=None, time_index=None):
 
-        p_correct = self._p_choice(question=question, reply=question,
+        p_correct = self._p_choice(item=item, reply=item,
                                    time=time, time_index=time_index)
 
-        correct = question == reply
+        correct = item == reply
         if correct:
             return p_correct
 
         else:
             return 1-p_correct
 
-    def decide(self, question, possible_replies, time=None,
+    def decide(self, item, possible_replies, time=None,
                time_index=None):
 
         # for j, val in enumerate(self.neurons["input"]):
         #     self.currents_history[time_step, j] = \
         #         self.neurons["hidden"][j].current
 
-        self._update_input_currents(question)
+        self._update_input_currents(item)
         self._train(self.pr.n_epoch)
 
         # p_r = self.neurons["output"][0].current
@@ -283,7 +283,7 @@ class Network(Learner):
         r = np.random.random()
 
         if p_r > r:
-            reply = question
+            reply = item
         else:
             reply = np.random.choice(possible_replies)
 
@@ -293,10 +293,10 @@ class Network(Learner):
             plot(self)
 
         if self.verbose:
-            print(f't={self.t}: question {question}, reply {reply}')
+            print(f't={self.t}: question {item}, reply {reply}')
         return reply
 
-    def learn(self, question, time=None):
+    def learn(self, item, time=None):
         pass
 
     def unlearn(self):

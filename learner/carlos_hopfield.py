@@ -71,12 +71,13 @@ class Network:
         for p in range(len(self.patterns)):
             for i in tqdm(range(self.n_neurons)):
                 for j in range(self.n_neurons):
-                    if i == j:
-                        self.weights[i, j] = 0
-                        continue
-                    if i > j:
-                        self.weights[i, j] = 0
-                        continue
+                    if j >= i:
+                        # self.weights[i, j] = 0
+                        # continue
+                        break
+                    # if i > j:
+                    #     self.weights[i, j] = 0
+                    #     continue
 
                     self.weights[i, j] += (2 * self.patterns[p, i] - 1) \
                         * (2 * self.patterns[p, j] - 1) \
@@ -88,10 +89,11 @@ class Network:
 
     @staticmethod
     def _activation_function(x):
-        if x >= 0:
-            return 1
-        else:
-            return 0
+        return int(x >= 0)
+        # if x >= 0:
+        #     return 1
+        # else:
+        #     return 0
 
     def _update_current(self, neuron):
         """
@@ -153,6 +155,7 @@ class Network:
         """
         # TODO review, always 2 iterations
         i = 1
+        #  (A == B).all()
         assert np.sum(self.currents - self.last_currents) != 0
         while np.sum(self.currents - self.last_currents) != 0:
             self.last_currents = self.currents

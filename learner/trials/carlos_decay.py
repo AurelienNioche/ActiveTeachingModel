@@ -35,18 +35,18 @@ class Decay(Learner):
 
         super().__init__()
 
-    def decide(self, question, possible_replies, time=None):
+    def decide(self, item, possible_replies, time=None):
 
-        p_r = self.p_recall(question)
+        p_r = self.p_recall(item)
         r = np.random.random()
 
         if p_r > r:
-            reply = question
+            reply = item
         else:
             reply = np.random.choice(possible_replies)
 
         if self.verbose:
-            print(f't={self.t}: question {question}, reply {reply}')
+            print(f't={self.t}: question {item}, reply {reply}')
 
         self.last_reply = reply
 
@@ -63,7 +63,7 @@ class Decay(Learner):
 
         return p_r
 
-    def learn(self, question):
-        self.hist[self.t] = question
-        self.success[self.t] = self.last_reply == question
+    def learn(self, item):
+        self.hist[self.t] = item
+        self.success[self.t] = self.last_reply == item
         self.t += 1

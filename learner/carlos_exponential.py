@@ -49,18 +49,18 @@ class Exponential(Learner):
 
         super().__init__()
 
-    def decide(self, question, possible_replies, time=None):
+    def decide(self, item, possible_replies, time=None):
 
-        p_r = self.p_recall(question)
+        p_r = self.p_recall(item)
         r = np.random.random()
 
         if p_r > r:
-            reply = question
+            reply = item
         else:
             reply = np.random.choice(possible_replies)
 
         if self.verbose:
-            print(f't={self.t}: question {question}, reply {reply}')
+            print(f't={self.t}: question {item}, reply {reply}')
 
         self.last_reply = reply
 
@@ -105,17 +105,17 @@ class Exponential(Learner):
 
         return p_r
 
-    def learn(self, question, time=None):
-        self.hist[self.t] = question
-        self.success[self.t] = self.last_reply == question
+    def learn(self, item, time=None):
+        self.hist[self.t] = item
+        self.success[self.t] = self.last_reply == item
         self.t += 1
 
-    def _p_choice(self, question, reply, possible_replies=None, time=None):
+    def _p_choice(self, item, reply, possible_replies=None, time=None):
 
-        p_retrieve = self.p_recall(question)
+        p_retrieve = self.p_recall(item)
         p_correct = self.p_random + p_retrieve*(1 - self.p_random)
 
-        success = question == reply
+        success = item == reply
 
         if success:
             return p_correct
@@ -127,5 +127,5 @@ class Exponential(Learner):
     def unlearn(self):
         pass
 
-    def _p_correct(self, question, reply, possible_replies, time=None):
+    def _p_correct(self, item, reply, possible_replies, time=None):
         pass

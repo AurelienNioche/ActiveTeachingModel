@@ -11,9 +11,9 @@ class ActRMeaning(ActR):
              ('s', 0.0000001, 1), \
              ('m', 0.0, 0.1)
 
-    def __init__(self, tk, param=None, metaclass=False, **kwargs):
+    def __init__(self, param=None, metaclass=False, **kwargs):
 
-        super().__init__(tk=tk, metaclass=True, **kwargs)
+        super().__init__(metaclass=True, **kwargs)
 
         if not metaclass:
             # Decay parameter
@@ -33,7 +33,7 @@ class ActRMeaning(ActR):
 
             self.set_parameters(param)
 
-        self.items = np.arange(tk.n_item)
+        self.items = np.arange(self.n_item)
 
     def _get_presentation_effect_i_and_j(self, item, time, time_index):
 

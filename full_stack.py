@@ -165,8 +165,8 @@ def _run(
             show=False
         )
 
-        learner.learn(question=question)
-        model_learner.learn(question=question)
+        learner.learn(item=question)
+        model_learner.learn(item=question)
 
     queue_in.put('stop')
 

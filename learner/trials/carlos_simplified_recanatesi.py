@@ -139,11 +139,15 @@ class SimplifiedNetwork:
         self.amplitude = self.xi_0 * self.s * self.n_neuron
 
         for i in range(self.n_population):
+
+            std = 1
             # Double check
-            self.noise_values[i] = \
+            v = \
                 np.random.normal(loc=0,
-                                 scale=self.amplitude[i],
+                                 scale=std,
                                  size=self.t_tot_discrete)
+
+            self.noise_values[i] = v * self.amplitude[i]
 
     def _compute_connectivity_matrix(self):
         """

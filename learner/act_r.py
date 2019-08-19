@@ -10,9 +10,9 @@ class ActR(Learner):
              ('tau', 0, 1), \
              ('s', 0.001, 1)
 
-    def __init__(self, tk, param=None, metaclass=False, verbose=False):
+    def __init__(self, param=None, metaclass=False, verbose=False, **kwargs):
 
-        super().__init__()
+        super().__init__(**kwargs)
 
         if not metaclass:
             # Decay parameter
@@ -27,16 +27,14 @@ class ActR(Learner):
             # Short cut
             self.temp = self.s * np.square(2)
 
-        self.tk = tk
-
-        if self.tk.n_possible_replies is not None:
-            self.p_random = 1/self.tk.n_possible_replies
+        if self.n_possible_replies is not None:
+            self.p_random = 1/self.n_possible_replies
         else:
             # raise Exception
             self.p_random = 0
 
         # History of presentation
-        self.hist = np.ones(tk.t_max) * -99
+        self.hist = np.ones(self.n_iteration) * -99
 
         # Time counter
         self.t = 0
@@ -45,7 +43,7 @@ class ActR(Learner):
         self.verbose = verbose
 
         # For continuous time
-        self.times = np.zeros(self.tk.t_max)
+        self.times = np.zeros(self.n_iteration)
 
         # # For fastening the computation
         # self._bkp_presentation_effect = {}
@@ -169,24 +167,24 @@ class ActR(Learner):
             print(f"t={self.t}, a_i: {a:.3f}, p_r: {p_retrieve:.3f}")
         return p_retrieve
 
-    def _p_choice(self, question, reply, possible_replies=None,
+    def _p_choice(self, item, reply, possible_replies=None,
                   time=None, time_index=None):
 
-        success = question == reply
+        success = item == reply
 
-        p_recall = self.p_recall(question,
+        p_recall = self.p_recall(item,
                                  time=time,
                                  time_index=time_index)
 
         # If number of possible replies is defined
-        if self.tk.n_possible_replies:  # is not None
+        if self.n_possible_replies:  # is not None
             p_correct = self.p_random + p_recall*(1 - self.p_random)
 
             if success:
                 p_choice = p_correct
 
             else:
-                p_choice = (1-p_correct) / (self.tk.n_possible_replies - 1)
+                p_choice = (1-p_correct) / (self.n_possible_replies - 1)
 
         else:
             # Ignore in computation of reply the alternatives
@@ -201,43 +199,43 @@ class ActR(Learner):
 
         return p_choice
 
-    def _p_correct(self, question, reply, possible_replies=None,
+    def _p_correct(self, item, reply, possible_replies=None,
                    time=None, time_index=None):
 
-        p_correct = self._p_choice(question=question, reply=question,
+        p_correct = self._p_choice(item=item, reply=item,
                                    time=time, time_index=time_index)
 
-        correct = question == reply
+        correct = item == reply
         if correct:
             return p_correct
 
         else:
             return 1-p_correct
 
-    def decide(self, question, possible_replies, time=None,
+    def decide(self, item, possible_replies, time=None,
                time_index=None):
 
-        p_r = self.p_recall(question,
+        p_r = self.p_recall(item,
                             time=time,
                             time_index=time_index)
         r = np.random.random()
 
         if p_r > r:
-            reply = question
+            reply = item
         else:
             reply = np.random.choice(possible_replies)
 
         if self.verbose:
-            print(f't={self.t}: question {question}, reply {reply}')
+            print(f't={self.t}: question {item}, reply {reply}')
         return reply
 
-    def learn(self, question, time=None, time_index=None):
+    def learn(self, item, time=None, time_index=None):
 
         if time_index is not None:
-            self.hist[time_index] = question
+            self.hist[time_index] = item
             self.times[time_index] = time
         else:
-            self.hist[self.t] = question
+            self.hist[self.t] = item
             self.times[self.t] = time
             self.t += 1
 

@@ -54,40 +54,40 @@ class QLearner(Learner):
 
         return self._softmax_unique(x_i, x)
 
-    def _p_choice(self, question, reply, possible_replies, time=None):
+    def _p_choice(self, item, reply, possible_replies, time=None):
 
-        x_i = self.q[question, reply]
-        x = self.q[question, possible_replies]
+        x_i = self.q[item, reply]
+        x = self.q[item, possible_replies]
 
         return self._softmax_unique(x_i, x)
 
-    def _p_correct(self, question, reply, possible_replies, time=None):
+    def _p_correct(self, item, reply, possible_replies, time=None):
 
-        x_correct = self.q[question, question]
-        x = self.q[question, possible_replies]
+        x_correct = self.q[item, item]
+        x = self.q[item, possible_replies]
 
         p_correct = self._softmax_unique(x_correct, x)
-        if question == reply:
+        if item == reply:
             return p_correct
         else:
             return 1-p_correct
 
-    def decide(self, question, possible_replies, time=None):
+    def decide(self, item, possible_replies, time=None):
 
-        p = self._softmax(x=self.q[question, possible_replies])
+        p = self._softmax(x=self.q[item, possible_replies])
         reply = np.random.choice(possible_replies, p=p)
 
         if self.verbose:
-            print(f'Question is: {question}')
+            print(f'Question is: {item}')
             print(f'P values are: {[f"{p_i:.02f}" for p_i in p]}')
             print(f'Reply is {reply}')
 
         return reply
 
-    def learn(self, question, time=None):
+    def learn(self, item, time=None):
 
-        self.q[question, question] = \
-            self._temporal_difference(v=self.q[question, question])
+        self.q[item, item] = \
+            self._temporal_difference(v=self.q[item, item])
 
     def unlearn(self):
         raise NotImplementedError

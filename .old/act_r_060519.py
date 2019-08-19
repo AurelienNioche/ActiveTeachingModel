@@ -183,12 +183,12 @@ class ActR(Learner):
             print(f"t={self.t}, a_i: {a:.3f}, p_r: {p_retrieve:.3f}")
         return p_retrieve
 
-    def _p_choice(self, question, reply, possible_replies=None):
+    def _p_choice(self, item, reply, possible_replies=None):
 
-        p_retrieve = self.p_recall(question)
+        p_retrieve = self.p_recall(item)
         p_correct = self.p_random + p_retrieve * (1 - self.p_random)
 
-        success = question == reply
+        success = item == reply
 
         if success:
             return p_correct
@@ -197,35 +197,35 @@ class ActR(Learner):
             p_failure = (1 - p_correct) / (self.tk.n_possible_replies - 1)
             return p_failure
 
-    def _p_correct(self, question, reply, possible_replies=None):
+    def _p_correct(self, item, reply, possible_replies=None):
 
-        p_correct = self._p_choice(question=question, reply=question)
+        p_correct = self._p_choice(item=item, reply=item)
 
-        correct = question == reply
+        correct = item == reply
         if correct:
             return p_correct
 
         else:
             return 1 - p_correct
 
-    def decide(self, question, possible_replies):
+    def decide(self, item, possible_replies):
 
-        p_r = self.p_recall(question)
+        p_r = self.p_recall(item)
         r = np.random.random()
 
         if p_r > r:
-            reply = question
+            reply = item
         else:
             reply = np.random.choice(possible_replies)
 
         if self.verbose:
-            print(f't={self.t}: question {question}, reply {reply}')
+            print(f't={self.t}: question {item}, reply {reply}')
         return reply
 
-    def learn(self, question):
+    def learn(self, item):
 
-        self.last_question = question
-        self._update_time_presentation(question)
+        self.last_question = item
+        self._update_time_presentation(item)
 
 
 class ActROriginal(ActR):

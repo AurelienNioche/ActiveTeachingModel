@@ -4,15 +4,15 @@ from tqdm import tqdm
 
 
 class GaussianNoise:
-    def __init__(self, mu=0, sigma=65**0.5, data_size=2000, xi_0=65,
+    def __init__(self, mu=0, sigma=65**0.5, n_iteration=2000, xi_0=65,
                  n_neurons=10**5, n_population=3871):
 
         self.xi_0 = xi_0
         self.mu = mu
         self.sigma = sigma
 
-        self.data_size = data_size
-        self.data = np.zeros(data_size)
+        self.n_iteration = n_iteration
+        self.data = np.zeros(n_iteration)
 
         self.n_population = n_population
         self.n_neurons = n_neurons
@@ -48,39 +48,36 @@ class GaussianNoise:
         of the spectrum are uncorrelated Gaussian values.
         """
 
-        for i in range(self.data_size):
+        for i in range(self.n_iteration):
             self.data[i] = np.random.normal(loc=0, scale=self.amplitude)
 
     def compute_noise_xi_0_var(self):
-        for i in range(self.data_size):
+        for i in range(self.n_iteration):
             self.data[i] = np.random.normal(loc=0, scale=self.xi_0**0.5)
 
     def compute_noise_xi_0_std(self):
-        for i in range(self.data_size):
+        for i in range(self.n_iteration):
             self.data[i] = np.random.normal(loc=0, scale=self.xi_0)
 
     def compute_noise_xi_0_var_n(self):
-        for i in range(self.data_size):
+        for i in range(self.n_iteration):
             self.data[i] = np.random.normal(loc=0, scale=self.xi_0
                                             * self.n_neurons)
 
     def compute_noise_value_amplitude(self):
-        for i in range(self.data_size):
+        for i in range(self.n_iteration):
             self.data[i] = np.random.normal(loc=0, scale=1) * self.amplitude
 
     def compute_noise_sum(self):
-        a = 0
-
-        for i in tqdm(range(self.data_size)):
-            for j in range(self.n_population):
-                a += np.random.normal(loc=0, scale=self.xi_0 ** 0.5)
-            self.data[i] = a
+        self.data = np.sum(
+            np.random.normal(loc=0, scale=self.xi_0**0.5,
+                             size=(self.n_population, self.n_iteration)), axis=0)
 
     def compute_noise_sqrt_xi_0_n(self):
-        for i in range(self.data_size):
-            self.data[i] = np.random.normal(loc=0, scale=(self.xi_0 *
-                                                          self.n_population)
-                                            ** 0.5)
+
+        self.data = np.random.normal(
+            loc=0, scale=(self.xi_0 ** 0.5) * self.n_population,
+            size=self.n_iteration)
 
 
 def plot_noise(noise):
@@ -226,14 +223,36 @@ def plot_sum_vs_population(noise):
 
 
 def main():
-    np.random.seed(123)
+    np.random.seed(np.random.randint(0, 2**10))
 
-    gaussian_noise = GaussianNoise()
-    # gaussian_noise.compute_noise_std_amplitude()
-    # plot_noise(gaussian_noise)
-    # plot_hist(gaussian_noise)
-    plot_all(gaussian_noise)
-    plot_sum_vs_population(gaussian_noise)
+    xi_0 = 65
+    n_neurons = 1000
+    n_iteration = 2000
+
+    data1 = np.sum(
+            np.random.normal(loc=0, scale=xi_0**0.5,
+                             size=(n_neurons, n_iteration)), axis=0)
+
+    data2 = np.random.normal(
+        loc=0, scale=(xi_0 * n_neurons) ** 0.5, size=n_iteration)
+
+    fig, axes = plt.subplots(ncols=2)
+
+    ax1 = axes[0]
+    ax1.plot(data1)
+    ax1.set_title("Single unit")
+
+    ax2 = axes[1]
+    ax2.plot(data2)
+    ax2.set_title("Population")
+
+    plt.show()
+    # gaussian_noise = GaussianNoise()
+    # # gaussian_noise.compute_noise_std_amplitude()
+    # # plot_noise(gaussian_noise)
+    # # plot_hist(gaussian_noise)
+    # plot_all(gaussian_noise)
+    # plot_sum_vs_population(gaussian_noise)
 
 
 if __name__ == '__main__':

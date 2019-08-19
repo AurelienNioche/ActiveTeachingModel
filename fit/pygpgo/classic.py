@@ -130,11 +130,10 @@ class PYGPGOFit:
         return objective(model=self.model, data=self.data, tk=self.tk,
                          param=param)
 
-    def evaluate(self, model, tk, data):
+    def evaluate(self, model, item):
 
         self.model = model
-        self.tk = tk
-        self.data = data
+        self.
 
         self.eval_param = []
 

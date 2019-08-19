@@ -8,7 +8,6 @@ from fit.pygpgo.objective import objective
 
 import numpy as np
 
-from simulation.data import Data
 from simulation.memory import p_recall_over_time_after_learning
 import plot.simulation
 
@@ -26,7 +25,7 @@ class Run:
     def __init__(
             self,
             teacher_model,
-            t_max, grades, n_item,
+            grades, n_item, n_iteration,
             normalize_similarity, student_model,
             student_param,
             init_eval,
@@ -40,30 +39,28 @@ class Run:
 
         self.exploration_ratio = exploration_ratio
         self.testing_period = testing_period
-        self.t_max = t_max
+        self.n_iteration = n_iteration
         self.student_model = student_model
         self.student_param = student_param
         self.timeout = timeout
         self.verbose = verbose
 
+        self.hist_item = np.zeros(n_iteration, dtype=int)
+        self.hist_success = np.zeros(n_iteration, dtype=bool)
+
         self.teacher = teacher_model(
-            t_max=t_max, n_item=n_item,
+            t_max=n_iteration, n_item=n_item,
             normalize_similarity=normalize_similarity,
             grades=grades,
             verbose=False)
 
-        self.learner = student_model(param=student_param, tk=self.teacher.tk)
-
-        self.model_learner = student_model(
-            tk=self.teacher.tk,
-            param=student_model.generate_random_parameters()
+        self.psychologist = Psychologist(
+            student_model=student_model, tk=self.teacher.tk,
+            n_jobs=n_jobs, init_eval=init_eval, max_iter=max_iter,
+            timeout=timeout
         )
 
-        self.opt = PYGPGOFit(
-            verbose=False,
-            n_jobs=n_jobs,
-            init_evals=init_eval, max_iter=max_iter,
-            timeout=timeout)
+        self.learner = student_model(param=student_param, tk=self.teacher.tk)
 
         self.best_value, self.obj_value, self.param_set, self.exploration = \
             None, None, None, None
@@ -72,22 +69,16 @@ class Run:
 
         np.random.seed(123)
 
-        iterator = tqdm(range(self.t_max)) \
-            if not self.verbose else range(self.t_max)
+        iterator = tqdm(range(self.n_iteration)) \
+            if not self.verbose else range(self.n_iteration)
 
         for t in iterator:
-            if t == 0:
-                self.exploration = False
-
-            elif t < self.testing_period:
-                self.exploration = t % 2 == 1
-
-            else:
-                self.exploration = np.random.random() <= self.exploration_ratio
-                print('yeah')
+            self.exploration = self.psychologist.is_time_for_exploration(
+                t
+            )
 
             if self.exploration:
-                question = Psychologist.most_informative(
+                question = self.psychologist.most_informative(
                     tk=self.teacher.tk,
                     student_model=self.student_model,
                     eval_param=self.param_set,
@@ -95,27 +86,17 @@ class Run:
                     t_max=t+1
                 )
             else:
-                question, possible_replies = self.teacher.ask(
-                    agent=self.model_learner,
+                item, possible_replies = self.teacher.ask(
+                    agent=self.psychologist.model_learner,
                     make_learn=False)
 
-            p_r = self.learner.p_recall(item=question)
+            recall = self.learner.recall(item=item)
 
-            if p_r > np.random.random():
-                reply = question
-            else:
-                reply = -1
-
-            self.teacher.register_question_and_reply(
-                question=question, reply=reply)
+            self.hist_item[t] = item
+            self.hist_success[t] = item
 
             if self.verbose:
                 self.print(t)
-
-            data_view = Data(
-                n_item=self.teacher.tk.n_item,
-                questions=self.teacher.questions[:t + 1],
-                replies=self.teacher.replies[:t + 1])
 
             self.opt.evaluate(
                 data=data_view, model=self.student_model, tk=self.teacher.tk)
@@ -134,8 +115,8 @@ class Run:
             self.best_value = self.opt.best_value
             self.param_set = self.opt.eval_param
 
-            self.learner.learn(question=question)
-            self.model_learner.learn(question=question)
+            self.learner.learn(item=question)
+            self.model_learner.learn(item=question)
 
         p_recall_hist = p_recall_over_time_after_learning(
             agent=self.learner,
