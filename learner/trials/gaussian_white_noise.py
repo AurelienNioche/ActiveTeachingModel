@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+from tqdm import tqdm
 
 
 class GaussianNoise:
@@ -66,6 +67,20 @@ class GaussianNoise:
     def compute_noise_value_amplitude(self):
         for i in range(self.data_size):
             self.data[i] = np.random.normal(loc=0, scale=1) * self.amplitude
+
+    def compute_noise_sum(self):
+        a = 0
+
+        for i in tqdm(range(self.data_size)):
+            for j in range(self.n_population):
+                a += np.random.normal(loc=0, scale=self.xi_0 ** 0.5)
+            self.data[i] = a
+
+    def compute_noise_sqrt_xi_0_n(self):
+        for i in range(self.data_size):
+            self.data[i] = np.random.normal(loc=0, scale=(self.xi_0 *
+                                                          self.n_population)
+                                            ** 0.5)
 
 
 def plot_noise(noise):
@@ -186,6 +201,30 @@ def plot_single_vs_population(noise):
     fig_vs.show()
 
 
+def plot_sum_vs_population(noise):
+    x = np.arange(0, noise.data.size, 1)
+
+    noise.compute_noise_sum()
+    y1 = np.copy(noise.data) * noise.n_population
+
+    noise.compute_noise_sqrt_xi_0_n()
+    y2 = np.copy(noise.data)
+
+    fig_vs = plt.figure(1)
+
+    plt.subplot(1, 2, 1)
+    plt.plot(x, y1)
+    plt.title(f"Noise according to {noise.n_population} single neurons")
+    plt.xlabel("step")
+
+    plt.subplot(1, 2, 2)
+    plt.plot(x, y2)
+    plt.title(f"Noise according to population (w/ amplitude)")
+    plt.xlabel("step")
+
+    fig_vs.show()
+
+
 def main():
     np.random.seed(123)
 
@@ -194,7 +233,7 @@ def main():
     # plot_noise(gaussian_noise)
     # plot_hist(gaussian_noise)
     plot_all(gaussian_noise)
-    plot_single_vs_population(gaussian_noise)
+    plot_sum_vs_population(gaussian_noise)
 
 
 if __name__ == '__main__':
