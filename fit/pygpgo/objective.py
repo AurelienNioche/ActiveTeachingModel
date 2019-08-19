@@ -1,23 +1,24 @@
 import numpy as np
 
 
-def objective(model, tk, data, param, show=False):
+def objective(model, hist_item, hist_success,
+              n_item, n_iteration,
+              param, show=False):
 
     if show:
         print('\n')
 
-    agent = model(param=param, tk=tk)
-    t_max = data.t_max
-    diff = np.zeros(t_max)
+    agent = model(param=param, n_iteration=n_iteration, n_item=n_item)
+    diff = np.zeros(n_iteration)
 
-    for t in range(t_max):
-        item = data.questions[t]
+    for t in range(n_iteration):
+        item = hist_item[t]
         if show:
             print("Item", item)
         p_r = agent.p_recall(item=item)
         if show:
             print('p_recall: ', p_r)
-        s = data.success[t]
+        s = hist_success[t]
         if show:
             print("success: ", s)
 

@@ -22,7 +22,7 @@ class ActR(Learner):
             # Noise in the activation levels
             self.s = None
 
-            self.set_parameters(param)
+            self.set_cognitive_parameters(param)
 
             # Short cut
             self.temp = self.s * np.square(2)
@@ -265,6 +265,12 @@ class ActR(Learner):
             #     del self._bkp_presentation_effect[self.t + 1]
             # except KeyError:
             #     pass
+
+    def set_history(self, hist, times=None):
+
+        t = len(hist)
+        self.hist[:t] = hist
+        self.t = t
 
 # class ActROriginal(ActR):
 # #

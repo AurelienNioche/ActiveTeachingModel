@@ -15,7 +15,7 @@ class QLearner(Learner):
         self.alpha = None
         self.tau = None
 
-        self.set_parameters(param)
+        self.set_cognitive_parameters(param)
 
         super().__init__()
 

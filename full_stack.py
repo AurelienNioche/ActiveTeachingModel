@@ -147,7 +147,7 @@ def _run(
         )
             # time_out=time_out,
             # queue_in=queue_in, queue_out=queue_out)
-        model_learner.set_parameters(best_param.copy())
+        model_learner.set_cognitive_parameters(best_param.copy())
 
         obj_value = objective(
             data=data_view,
