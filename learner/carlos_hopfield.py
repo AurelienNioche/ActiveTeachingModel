@@ -1,3 +1,4 @@
+import matplotlib.pyplot as plt
 import numpy as np
 from tqdm import tqdm
 
@@ -22,13 +23,17 @@ class Network:
                              p=[1 - self.active_fraction,
                                 self.active_fraction],
                              size=self.n_neurons)
+        print(self.initial_currents.shape)
+        # print("\nInitial currents:\n", self.initial_currents)
         self.patterns = \
             np.random.choice([0, 1], p=[1 - self.f, self.f],
                              size=(self.p, self.n_neurons))
+        # print("\nPatterns:\n", self.patterns)
 
         self.currents = np.copy(self.initial_currents)
+        # TODO get rid of self.last_currents
         self.last_currents = np.copy(self.initial_currents)
-        self.currents_history = np.zeros(self.n_neurons)
+        self.currents_history = np.copy(self.initial_currents)
 
     # def present_pattern(self, item):
     #     kanji = item["kanji"]
@@ -45,7 +50,7 @@ class Network:
         two matrices together.
         """
 
-        print("Computing weights...")
+        print(f"...Computing weights...")
 
         # for p in range(len(self.patterns)):
         #     for i in tqdm(range(self.n_neurons)):
@@ -72,12 +77,7 @@ class Network:
             for i in tqdm(range(self.n_neurons)):
                 for j in range(self.n_neurons):
                     if j >= i:
-                        # self.weights[i, j] = 0
-                        # continue
                         break
-                    # if i > j:
-                    #     self.weights[i, j] = 0
-                    #     continue
 
                     self.weights[i, j] += (2 * self.patterns[p, i] - 1) \
                         * (2 * self.patterns[p, j] - 1) \
@@ -90,10 +90,6 @@ class Network:
     @staticmethod
     def _activation_function(x):
         return int(x >= 0)
-        # if x >= 0:
-        #     return 1
-        # else:
-        #     return 0
 
     def _update_current(self, neuron):
         """
@@ -111,6 +107,7 @@ class Network:
         #
         # for i in range(self.n_neurons):
         #     sum_ += (self.weights[neuron, i] * self.last_currents[i])
+        # print(self.currents_history)
 
         sum_ = np.dot(self.weights[neuron], self.last_currents)
 
@@ -147,6 +144,9 @@ class Network:
         for i in update_order:
             self._update_current(i)
 
+        self.currents_history = np.vstack((self.currents_history,
+                                           self.currents))
+
     def _find_attractor(self):
         """
         Cycling through all the nodes each step is the only way to know when to
@@ -155,9 +155,9 @@ class Network:
         """
         # TODO review, always 2 iterations
         i = 1
-        #  (A == B).all()
+
         assert np.sum(self.currents - self.last_currents) != 0
-        while np.sum(self.currents - self.last_currents) != 0:
+        while (self.currents != self.last_currents).all():  # np.sum(self.currents - self.last_currents) != 0:
             self.last_currents = self.currents
             self._update_all_neurons()
             i += 1
@@ -176,6 +176,23 @@ class Network:
         self._find_attractor()
 
 
+def plot(network):
+
+    data = network.currents_history
+
+    fig, ax = plt.subplots()
+    im = ax.imshow(data)
+    ax.set_aspect("auto")
+
+    plt.setp(ax.get_xticklabels(), rotation=90, ha="right",
+             rotation_mode="anchor")  # , fontsize=font_size)
+
+    plt.title("Hidden layer currents")
+
+    fig.tight_layout()
+    plt.show()
+
+
 def main():
     np.random.seed(1234)
 
@@ -189,10 +206,10 @@ def main():
            "meaning": np.array([0, 0, 0, 0, 1, 0, 1, 1, 1, 1])}
 
     network = Network(
-                        n_neurons=18750,
+                        n_neurons=6250,
                         f=0.1,
                         # first_p=1
-                        p=3
+                        p=1
                      )
 
     # network.present_pattern(flower)
@@ -200,7 +217,14 @@ def main():
     # network.present_pattern(eye)
 
     network.simulate()
+    plot(network)
 
 
 if __name__ == '__main__':
     main()
+
+# TODO pickle
+# TODO plot y axis reformat
+# TODO plot initial pattern
+# TODO plot attractor
+# TODO plot weights matrix
