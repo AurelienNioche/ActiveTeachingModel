@@ -53,7 +53,7 @@ def with_bayesian_opt(teacher_model, t_max, grades, n_item,
                    model=student_model, tk=teacher.tk,
                    data=data_view)
 
-        model_learner.set_parameters(f.best_param)
+        model_learner.set_cognitive_parameters(f.best_param)
 
     p_recall = p_recall_over_time_after_learning(
         agent=learner,

@@ -40,6 +40,7 @@ class Run:
         self.exploration_ratio = exploration_ratio
         self.testing_period = testing_period
         self.n_iteration = n_iteration
+        self.n_item = n_item
         self.student_model = student_model
         self.student_param = student_param
         self.timeout = timeout
@@ -47,6 +48,7 @@ class Run:
 
         self.hist_item = np.zeros(n_iteration, dtype=int)
         self.hist_success = np.zeros(n_iteration, dtype=bool)
+        self.seen = np.zeros((n_item, n_iteration), dtype=bool)
 
         self.teacher = teacher_model(
             t_max=n_iteration, n_item=n_item,
@@ -55,12 +57,27 @@ class Run:
             verbose=False)
 
         self.psychologist = Psychologist(
-            student_model=student_model, tk=self.teacher.tk,
-            n_jobs=n_jobs, init_eval=init_eval, max_iter=max_iter,
+            student_model=student_model,
+            n_item=n_item,
+            n_iteration=n_iteration,
+            testing_period=testing_period,
+            exploration_ratio=exploration_ratio,
+            n_jobs=n_jobs,
+            init_eval=init_eval,
+            max_iter=max_iter,
             timeout=timeout
         )
 
-        self.learner = student_model(param=student_param, tk=self.teacher.tk)
+        self.learner = student_model(
+            cognitive_param=student_param,
+            task_param=semantic_param)
+
+        if self.verbose:
+            self.model_learner = student_model(
+                n_item=n_item,
+                n_iteration=n_iteration,
+                param=student_model.generate_random_parameters()
+            )
 
         self.best_value, self.obj_value, self.param_set, self.exploration = \
             None, None, None, None
@@ -73,12 +90,10 @@ class Run:
             if not self.verbose else range(self.n_iteration)
 
         for t in iterator:
-            self.exploration = self.psychologist.is_time_for_exploration(
-                t
-            )
+            self.exploration = self.psychologist.is_time_for_exploration(t)
 
             if self.exploration:
-                question = self.psychologist.most_informative(
+                item = self.psychologist.most_informative(
                     tk=self.teacher.tk,
                     student_model=self.student_model,
                     eval_param=self.param_set,
@@ -87,36 +102,42 @@ class Run:
                 )
             else:
                 item, possible_replies = self.teacher.ask(
-                    agent=self.psychologist.model_learner,
-                    make_learn=False)
+                    hist_item=self.hist_item,
+                    student_parameters=self.best_param,
+                    student_model=self.student_model)
 
             recall = self.learner.recall(item=item)
 
             self.hist_item[t] = item
-            self.hist_success[t] = item
+            self.hist_success[t] = recall
+
+            self.seen[item, t:] = 1
 
             if self.verbose:
                 self.print(t)
 
-            self.opt.evaluate(
-                data=data_view, model=self.student_model, tk=self.teacher.tk)
-
-            self.model_learner.set_parameters(self.opt.best_param.copy())
+            self.best_param = self.psychologist.update_estimates(
+                hist_success=self.hist_success,
+                hist_item=self.hist_item)
 
             if self.verbose:
                 self.obj_value = objective(
-                    data=data_view,
+                    hist_success=self.hist_success,
+                    hist_item=self.hist_item,
                     model=self.student_model,
-                    tk=self.teacher.tk,
+                    n_iteration=self.n_iteration,
+                    n_item=self.n_item,
                     param=self.student_param,
                     show=False
                 )
 
-            self.best_value = self.opt.best_value
-            self.param_set = self.opt.eval_param
+            self.best_value = self.psychologist.opt.best_value
+            self.param_set = self.psychologist.opt.eval_param
 
-            self.learner.learn(item=question)
-            self.model_learner.learn(item=question)
+            self.learner.learn(item=item)
+
+            if self.verbose:
+                self.model_learner.learn(item=item)
 
         p_recall_hist = p_recall_over_time_after_learning(
             agent=self.learner,
@@ -125,13 +146,12 @@ class Run:
         )
 
         return {
-            'seen': self.teacher.seen,
+            'seen': self.seen,
             'p_recall': p_recall_hist,
-            'questions': self.teacher.questions,
-            'replies': self.teacher.replies,
-            'successes': self.teacher.successes,
-            'history_best_fit_param': self.opt.hist_best_param,
-            'history_best_fit_value': self.opt.hist_best_value,
+            'questions': self.hist_item,
+            'successes': self.hist_success,
+            'history_best_fit_param': self.psychologist.opt.hist_best_param,
+            'history_best_fit_value': self.psychologist.opt.hist_best_value,
         }
 
     def print(self, t):
@@ -195,14 +215,14 @@ class Run:
             f'P recall model: {p_recall_model[self.teacher.questions[t]]:.3f}')
 
 
-def main(force=False):
+def main(force=True):
 
     student_model = ActRMeaning
     student_param = {"d": 0.5, "tau": 0.01, "s": 0.06, "m": 0.02}
     teacher_model = Active
     n_item = 30
     grades = 1,
-    t_max = 1000
+    n_iteration = 1000
     normalize_similarity = True
     init_eval = 3
     verbose = True
@@ -218,7 +238,7 @@ def main(force=False):
         f'{os.path.basename(__file__).split(".")[0]}_' \
         f'{teacher_model.__name__}_{student_model.__name__}_' \
         f'{dic2string(student_param)}_' \
-        f'ni_{n_item}_grade_{grades}_tmax_{t_max}_' \
+        f'ni_{n_item}_grade_{grades}_n_iteration_{n_iteration}_' \
         f'norm_{normalize_similarity}_' \
         f'init_eval_{init_eval}_' \
         f'max_iter_{max_iter}_' \
@@ -238,7 +258,7 @@ def main(force=False):
             student_param=student_param,
             n_item=n_item,
             grades=grades,
-            t_max=t_max,
+            n_iteration=n_iteration,
             normalize_similarity=normalize_similarity,
             init_eval=init_eval,
             max_iter=max_iter,
@@ -265,7 +285,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--force', '-f',
-                        default=False,
+                        default=True,
                         action='store_true',
                         dest='force',
                         help='Force the execution')

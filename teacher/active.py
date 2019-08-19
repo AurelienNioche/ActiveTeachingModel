@@ -58,7 +58,14 @@ class Active(GenericTeacher):
             return v
         return v / norm
 
-    def _update_usefulness(self, agent):
+    def _update_usefulness(
+            self,
+            n_iteration,
+            n_item,
+            hist_success,
+            hist_item,
+            student_parameters,
+            student_model):
         """
         :param agent: agent object (RL, ACT-R, ...) that implements at least
             the following methods:
@@ -72,6 +79,11 @@ class Active(GenericTeacher):
 
         Calculate Usefulness of items
         """
+
+        agent = student_model(param=student_parameters,
+                              n_iteration=n_iteration,
+                              n_item=n_item)
+        agent.set_history(hist=hist_item)
 
         self.usefulness[:] = 0
 
@@ -97,7 +109,12 @@ class Active(GenericTeacher):
         #         usefulness += (next_p_recall_j_after_i-next_p_recall_j)**2
         #     self.usefulness[i] = usefulness
 
-    def _get_next_node(self, agent=None):
+    def _get_next_node(
+            self,
+            hist_success,
+            hist_item,
+            student_parameters,
+            student_model):
         """
         :param agent: as before.
         :return: integer (index of the question to ask).
@@ -105,7 +122,11 @@ class Active(GenericTeacher):
         Function implements 3 Rules in order.
         """
 
-        self._update_usefulness(agent)
+        self._update_usefulness(
+            hist_success,
+            hist_item,
+            student_parameters,
+            student_model)
 
         if self.t > 0:
             self.taboo = self.question

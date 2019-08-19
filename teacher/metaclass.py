@@ -38,54 +38,65 @@ class GenericTeacher:
 
         self.t = 0
 
-    def ask(self, agent=None, make_learn=True, possible_replies=True):
+    def ask(self, hist_success=None,
+            hist_item=None, student_parameters=None,
+            student_model=None, possible_replies=True):
 
         # print("___ Question ___")
         # print(self.questions)
         # print(agent.questions)
 
-        question = self._get_next_node(agent=agent)
+        question = \
+            self._get_next_node(
+                hist_success=hist_success,
+                hist_item=hist_item,
+                student_parameters=student_parameters,
+                student_model=student_model)
+
+        # if possible_replies:
+        #     poss_rep = self._get_possible_replies(question)
+        # else:
+        #     poss_rep = None
+        #
+        # if make_learn:
+        #     reply = agent.decide(item=question,
+        #                          possible_replies=possible_replies)
+        #     agent.learn(item=question)
+        #
+        #     self.register_question_and_reply(
+        #         reply=reply,
+        #         question=question,
+        #         possible_replies=possible_replies)
 
         if possible_replies:
             poss_rep = self._get_possible_replies(question)
+            return question, poss_rep
         else:
-            poss_rep = None
+            return question
 
-        if make_learn:
-            reply = agent.decide(item=question,
-                                 possible_replies=possible_replies)
-            agent.learn(item=question)
+    # def register_question_and_reply(self, reply, question,
+    #                                 possible_replies=None):
+    #
+    #     # Update the count of item seen
+    #     if self.t > 0:
+    #         self.seen[:, self.t] = self.seen[:, self.t - 1]
+    #     self.seen[question, self.t] = True
+    #
+    #     # For backup
+    #     self.questions[self.t] = question
+    #     self.replies[self.t] = reply
+    #     self.successes[self.t] = reply == question
+    #     if possible_replies is not None:
+    #         self.possible_replies[self.t] = possible_replies
+    #
+    #     if self.verbose:
+    #         print(f"Question chosen: {self.tk.kanji[question]}; "
+    #               f"correct answer: {self.tk.meaning[question]}; "
+    #               f"possible replies: {self.tk.meaning[possible_replies]};")
+    #
+    #     self.t += 1
 
-            self.register_question_and_reply(
-                reply=reply,
-                question=question,
-                possible_replies=possible_replies)
-
-        return question, poss_rep
-
-    def register_question_and_reply(self, reply, question,
-                                    possible_replies=None):
-
-        # Update the count of item seen
-        if self.t > 0:
-            self.seen[:, self.t] = self.seen[:, self.t - 1]
-        self.seen[question, self.t] = True
-
-        # For backup
-        self.questions[self.t] = question
-        self.replies[self.t] = reply
-        self.successes[self.t] = reply == question
-        if possible_replies is not None:
-            self.possible_replies[self.t] = possible_replies
-
-        if self.verbose:
-            print(f"Question chosen: {self.tk.kanji[question]}; "
-                  f"correct answer: {self.tk.meaning[question]}; "
-                  f"possible replies: {self.tk.meaning[possible_replies]};")
-
-        self.t += 1
-
-    def _get_next_node(self, agent=None):
+    def _get_next_node(self, **kwargs):
         raise NotImplementedError(f"{type(self).__name__} is a meta-class."
                                   "This method need to be overridden")
 
@@ -102,14 +113,14 @@ class GenericTeacher:
         np.random.shuffle(possible_replies)
         return possible_replies
 
-    def teach(self, agent=None):
-
-        tqdm.write("Teaching...")
-
-        iterator = tqdm(range(self.tk.t_max)) \
-            if not self.verbose else range(self.tk.t_max)
-
-        for _ in iterator:
-            self.ask(agent=agent)
-
-        return self.questions, self.replies, self.successes
+    # def teach(self, agent=None):
+    #
+    #     tqdm.write("Teaching...")
+    #
+    #     iterator = tqdm(range(self.tk.t_max)) \
+    #         if not self.verbose else range(self.tk.t_max)
+    #
+    #     for _ in iterator:
+    #         self.ask(agent=agent)
+    #
+    #     return self.questions, self.replies, self.successes

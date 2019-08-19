@@ -121,19 +121,25 @@ class PYGPGOFit:
         self.verbose = verbose
 
         self.model = None
-        self.tk = None
-        self.data = None
+        self.hist_item = None
+        self.hist_success = None
+        self.n_item = None
+        self.n_iteration = None
 
     def objective(self, **param):
 
         self.eval_param.append(param)
-        return objective(model=self.model, data=self.data, tk=self.tk,
+        return objective(model=self.model, hist_success=self.hist_success,
+                         hist_item=self.hist_item,
                          param=param)
 
-    def evaluate(self, model, item):
+    def evaluate(self, model, hist_item, hist_success, n_item, n_iteration):
 
         self.model = model
-        self.
+        self.hist_item = hist_item
+        self.hist_success = hist_success
+        self.n_item = n_item
+        self.n_iteration = n_iteration
 
         self.eval_param = []
 
@@ -167,5 +173,3 @@ class PYGPGOFit:
 
         return self.best_param
 
-    def stop(self):
-        raise NotImplementedError

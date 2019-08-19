@@ -11,11 +11,15 @@ class ActRMeaning(ActR):
              ('s', 0.0000001, 1), \
              ('m', 0.0, 0.1)
 
-    def __init__(self, param=None, metaclass=False, **kwargs):
+    def __init__(self, semantic_connections=None, param=None, metaclass=False,
+                 **kwargs):
 
         super().__init__(metaclass=True, **kwargs)
 
         if not metaclass:
+
+            self.semantic_connections = semantic_connections
+
             # Decay parameter
             self.d = None
             # Retrieval threshold
@@ -31,7 +35,7 @@ class ActRMeaning(ActR):
             self.x = None
             self.c_x = None
 
-            self.set_parameters(param)
+            self.set_cognitive_parameters(param)
 
         self.items = np.arange(self.n_item)
 
@@ -83,7 +87,7 @@ class ActRMeaning(ActR):
 
         # Aliases for easiness of computation
         self.x = self.m
-        self.c_x = self.tk.c_semantic
+        self.c_x = self.semantic_connections
 
 # ========================================================================== #
 
@@ -114,7 +118,7 @@ class ActRGraphic(ActRMeaning):
         self.c_x = None
         self.x = None
 
-        self.set_parameters(param)
+        self.set_cognitive_parameters(param)
 
     def init(self):
 
@@ -148,7 +152,7 @@ class ActRPlus(ActRMeaning):
         self.g = None
         self.m = None
 
-        self.set_parameters(param)
+        self.set_cognitive_parameters(param)
 
     def p_recall(self, item, time=None, time_index=None):
 

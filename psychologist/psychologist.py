@@ -10,6 +10,8 @@ class Psychologist:
                  n_jobs, init_eval, max_iter, timeout,
                  testing_period, exploration_ratio):
 
+        self.n_item = n_item
+        self.n_iteration = n_iteration
         self.testing_period = testing_period
         self.exploration_ratio = exploration_ratio
 
@@ -20,12 +22,6 @@ class Psychologist:
             n_jobs=n_jobs,
             init_evals=init_eval, max_iter=max_iter,
             timeout=timeout)
-
-        self.model_learner = student_model(
-            n_item=n_item,
-            n_iteration=n_iteration,
-            param=student_model.generate_random_parameters()
-        )
 
     @staticmethod
     def most_informative(tk, student_model, eval_param,
@@ -69,11 +65,12 @@ class Psychologist:
 
         return exploration
 
-    def update_estimates(self):
+    def update_estimates(self, hist_item, hist_success):
 
-        self.opt.evaluate(
-            data=data_view, model=self.student_model, )
-
-        self.model_learner.set_parameters(self.opt.best_param.copy())
+        return self.opt.evaluate(
+            n_iteration=self.n_iteration, n_item=self.n_item,
+            hist_item=hist_item,
+            hist_success=hist_success,
+            model=self.student_model, )
 
 
