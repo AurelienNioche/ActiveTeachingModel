@@ -30,7 +30,7 @@ class GaussianNoise:
             (self.mu - x)**2 / 2 * self.sigma**2
         )
 
-    def compute_noise(self):
+    def compute_noise_std_amplitude(self):
         """
         Modified from http://greenteapress.com/thinkdsp/html/thinkdsp005.html:
 
@@ -49,6 +49,23 @@ class GaussianNoise:
 
         for i in range(self.data_size):
             self.data[i] = np.random.normal(loc=0, scale=self.amplitude)
+
+    def compute_noise_xi_0_var(self):
+        for i in range(self.data_size):
+            self.data[i] = np.random.normal(loc=0, scale=self.xi_0**0.5)
+
+    def compute_noise_xi_0_std(self):
+        for i in range(self.data_size):
+            self.data[i] = np.random.normal(loc=0, scale=self.xi_0)
+
+    def compute_noise_xi_0_var_n(self):
+        for i in range(self.data_size):
+            self.data[i] = np.random.normal(loc=0, scale=self.xi_0
+                                            * self.n_neurons)
+
+    def compute_noise_value_amplitude(self):
+        for i in range(self.data_size):
+            self.data[i] = np.random.normal(loc=0, scale=1) * self.amplitude
 
 
 def plot_noise(noise):
@@ -70,13 +87,114 @@ def plot_hist(noise):
     plt.show()
 
 
+def plot_all(noise):
+    x = np.arange(0, noise.data.size, 1)
+
+    noise.compute_noise_std_amplitude()
+    y1 = np.copy(noise.data)
+
+    noise.compute_noise_xi_0_var()
+    y2 = np.copy(noise.data)
+
+    noise.compute_noise_xi_0_std()
+    y3 = np.copy(noise.data)
+
+    noise.compute_noise_xi_0_var_n()
+    y4 = np.copy(noise.data)
+
+    noise.compute_noise_value_amplitude()
+    y5 = np.copy(noise.data)
+
+    fig_all = plt.figure(0)
+
+    plt.subplot(5, 1, 1)
+    plt.plot(x, y1)
+    plt.title("Amplitude is the std")
+    plt.tick_params(
+        axis='x',
+        which='both',
+        bottom=False,
+        top=False,
+        labelbottom=False)
+
+    plt.subplot(5, 1, 2)
+    plt.plot(x, y2)
+    plt.title("$\\xi_{0}$ is the variance")
+    plt.tick_params(
+        axis='x',
+        which='both',
+        bottom=False,
+        top=False,
+        labelbottom=False)
+
+    plt.subplot(5, 1, 3)
+    plt.plot(x, y3)
+    plt.ylabel("Noise value")
+    plt.title("$\\xi_{0}$ is the std")
+    plt.tick_params(
+        axis='x',
+        which='both',
+        bottom=False,
+        top=False,
+        labelbottom=False)
+
+    plt.subplot(5, 1, 4)
+    plt.plot(x, y4)
+    plt.title("$\\xi_{0} * N$ is std")
+    plt.tick_params(
+        axis='x',
+        which='both',
+        bottom=False,
+        top=False,
+        labelbottom=False)
+
+    plt.subplot(5, 1, 5)
+    plt.plot(x, y5)
+    plt.title("std $= 1$ and noise value $* N$")
+    plt.xlabel("step")
+    plt.tick_params(
+        axis='x',
+        which='both',
+        bottom=False,
+        top=False,
+        labelbottom=False)
+
+    fig_all.show()
+
+
+def plot_single_vs_population(noise):
+    x = np.arange(0, noise.data.size, 1)
+
+    noise.compute_noise_xi_0_var()
+    y1 = np.copy(noise.data) * noise.n_population
+
+    noise.compute_noise_std_amplitude()
+    y2 = np.copy(noise.data)
+
+    fig_vs = plt.figure(1)
+
+    plt.subplot(1, 2, 1)
+    plt.plot(x, y1)
+    plt.title(f"Noise according to {noise.n_population} single neurons")
+    plt.xlabel("step")
+
+    plt.subplot(1, 2, 2)
+    plt.plot(x, y2)
+    plt.title(f"Noise according to population (w/ amplitude)")
+    plt.xlabel("step")
+
+    fig_vs.show()
+
+
 def main():
     np.random.seed(123)
 
     gaussian_noise = GaussianNoise()
-    gaussian_noise.compute_noise()
+    # gaussian_noise.compute_noise_std_amplitude()
     # plot_noise(gaussian_noise)
-    plot_hist(gaussian_noise)
+    # plot_hist(gaussian_noise)
+    plot_all(gaussian_noise)
+    plot_single_vs_population(gaussian_noise)
 
 
 if __name__ == '__main__':
