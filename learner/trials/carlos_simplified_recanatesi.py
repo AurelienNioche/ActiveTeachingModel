@@ -5,7 +5,7 @@ import numpy as np
 from tqdm import tqdm
 
 import plot.attractor_networks
-# from learner.carlos_recanatesi import Network$
+# from learner.carlos_recanatesi import Network
 
 import matplotlib.pyplot as plt
 
@@ -21,7 +21,7 @@ class SimplifiedNetwork:
     def __init__(
             self,
             # Architecture ###########
-            n_neuron=100000,
+            num_neurons=100000,
             p=16,
             # Activation #############
             tau=0.01,
@@ -50,7 +50,7 @@ class SimplifiedNetwork:
     ):
 
         # Architecture
-        self.n_neuron = n_neuron
+        self.num_neurons = num_neurons
         self.p = p
 
         # Activation function
@@ -89,37 +89,35 @@ class SimplifiedNetwork:
         # General pre-computations
         self.t_tot_discrete = int(self.t_tot / self.dt)
         self.phi = np.zeros(self.t_tot_discrete)
-        self.relative_excitation = self.kappa / self.n_neuron
+        self.relative_excitation = self.kappa / self.num_neurons
 
         # Unique simplified network attributes
         memory_patterns = \
             np.random.choice([0, 1], p=[1 - self.f, self.f],
-                             size=(self.p, self.n_neuron))
-        unique_patterns_T, self.n_neuron_per_pattern = \
+                             size=(self.p, self.num_neurons))
+        unique_patterns_t, self.num_neurons_per_pattern = \
             np.unique(memory_patterns, axis=1, return_counts=True)
-        self.unique_patterns = unique_patterns_T.T
-        self.s = self.n_neuron_per_pattern / self.n_neuron
+        self.unique_patterns = unique_patterns_t.T
+        self.s = self.num_neurons_per_pattern / self.num_neurons
 
-        # print(self.n_neuron_per_pattern)
+        # print(self.num_neurons_per_pattern)
         # print('n pop', len(self.s))
         # print('s', self.s)
 
-        self.n_population = len(self.unique_patterns)
-        assert self.n_population == len(self.s)
+        self.num_populations = len(self.unique_patterns)
+        assert self.num_populations == len(self.s)
 
-        # self.n_neurons = self.n_population  # Reduce the number of
-        # neurons after computing v, w
-
-        self.noise_amplitudes = np.zeros(self.n_population)
-        self.noise_values = np.zeros((self.n_population, self.t_tot_discrete))
+        self.noise_amplitudes = np.zeros(self.num_populations)
+        self.noise_values = np.zeros((self.num_populations,
+                                      self.t_tot_discrete))
 
         self.connectivity_matrix = np.zeros((
-            self.n_population, self.n_population))
+            self.num_populations, self.num_populations))
 
-        self.sam_connectivity = np.zeros((self.n_population,
-                                          self.n_population))
+        self.sam_connectivity = np.zeros((self.num_populations,
+                                          self.num_populations))
 
-        self.population_currents = np.zeros(self.n_population)
+        self.population_currents = np.zeros(self.num_populations)
 
         # Plotting
         self.average_firing_rate = np.zeros((self.p, self.t_tot_discrete))
@@ -136,18 +134,15 @@ class SimplifiedNetwork:
     def _compute_gaussian_noise(self):
         """Amplitude of uncorrelated Gaussian noise is its variance"""
         print("Computing uncorrelated Gaussian noise...")
-        self.amplitude = self.xi_0 * self.s * self.n_neuron
+        self.amplitude = self.xi_0 * self.s * self.num_neurons
 
-        for i in range(self.n_population):
+        for i in range(self.num_populations):
 
-            std = 1
-            # Double check
-            v = \
+            self.noise_values[i] = \
                 np.random.normal(loc=0,
-                                 scale=std,
+                                 scale=(self.xi_0 *
+                                        self.num_neurons_per_pattern)**0.5,
                                  size=self.t_tot_discrete)
-
-            self.noise_values[i] = v * self.amplitude[i]
 
     def _compute_connectivity_matrix(self):
         """
@@ -156,8 +151,8 @@ class SimplifiedNetwork:
         """
         print("Computing connectivity matrix...")
 
-        for v in tqdm(range(self.n_population)):
-            for w in range(self.n_population):
+        for v in tqdm(range(self.num_populations)):
+            for w in range(self.num_populations):
 
                 sum_ = 0
                 for mu in range(self.p):
@@ -175,9 +170,9 @@ class SimplifiedNetwork:
 
         print("Computing SAM connectivity...")
 
-        for v in tqdm(range(self.n_population)):
+        for v in tqdm(range(self.num_populations)):
 
-            for w in range(self.n_population):
+            for w in range(self.num_populations):
 
                 sum_forward = 0
                 for mu in range(self.p - 1):
@@ -204,7 +199,7 @@ class SimplifiedNetwork:
 
         # new_current = np.zeros(self.activation.shape)
 
-        for v in range(self.n_population):
+        for v in range(self.num_populations):
 
             # current = self.activation[population]
             current = self.population_currents[v]
@@ -215,7 +210,7 @@ class SimplifiedNetwork:
 
             # Second
             sum_ = 0
-            for w in range(self.n_population):
+            for w in range(self.num_populations):
                 sum_ += \
                     (self.connectivity_matrix[v, w]
                      - self.phi[t] * self.p
@@ -362,7 +357,7 @@ def main(force=False):
         # factor = 10**(-4)
 
         simplified_network = SimplifiedNetwork(
-                n_neuron=int(10 ** 5),
+                num_neurons=int(10 ** 5),
                 f=0.1,
                 p=16,
                 xi_0=65,
@@ -381,8 +376,8 @@ def main(force=False):
         simplified_network.initialize()
 
         print("Pattern:", simplified_network.unique_patterns[:, 0])
-        for i in range(simplified_network.n_population):
-            print(simplified_network.unique_patterns[i], simplified_network.n_neuron_per_pattern[i])
+        for i in range(simplified_network.num_populations):
+            print(simplified_network.unique_patterns[i], simplified_network.num_neurons_per_pattern[i])
 
         plot_phi(simplified_network)
         plot_noise(simplified_network)
