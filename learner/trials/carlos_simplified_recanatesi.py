@@ -309,7 +309,7 @@ class SimplifiedNetwork:
 
         print(f"Simulating for {self.t_tot_discrete} time steps...\n")
         for t in tqdm(range(self.t_tot_discrete)):
-            # print(t, self.population_currents)
+            # print(t, self.population_currents)..
             self._update_activation(t)
             self._save_fr(t)
 
@@ -326,6 +326,22 @@ def plot_noise(network):
     for i in range(network.n_population):
         plt.plot(network.noise_values[i])
     plt.title("Noise")
+    plt.show()
+
+
+def plot_array(network):
+
+    data = network.hidden_currents_history
+
+    fig, ax = plt.subplots()
+    im = ax.imshow(data)
+
+    plt.setp(ax.get_xticklabels(), rotation=90, ha="right",
+             rotation_mode="anchor")  # , fontsize=font_size)
+
+    plt.title("Hidden layer currents")
+
+    fig.tight_layout()
     plt.show()
 
 

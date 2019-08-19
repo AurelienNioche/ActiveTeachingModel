@@ -1,4 +1,5 @@
 import numpy as np
+from tqdm import tqdm
 
 
 class Network:
@@ -6,33 +7,34 @@ class Network:
     Pattern consists of multiple binary vectors representing both the item and
     its different characteristics that can be recalled.
     """
-    def __init__(self, n_neurons=20, active_fraction=0.3):
+    def __init__(self, n_neurons=100000, p=16, f=0.1, first_p=1):
         self.n_neurons = n_neurons
-
-        self.patterns = []
+        self.p = p
+        self.f = f
+        self.first_p = first_p
 
         self.weights = np.zeros((self.n_neurons, self.n_neurons))
 
-        self.active_fraction = active_fraction
+        self.active_fraction = f
 
         self.initial_currents = \
             np.random.choice([0, 1],
                              p=[1 - self.active_fraction,
                                 self.active_fraction],
                              size=self.n_neurons)
+        self.patterns = \
+            np.random.choice([0, 1], p=[1 - self.f, self.f],
+                             size=(self.p, self.n_neurons))
 
         self.currents = np.copy(self.initial_currents)
         self.last_currents = np.copy(self.initial_currents)
         self.currents_history = np.zeros(self.n_neurons)
 
-    def present_pattern(self, item):
-        kanji = item["kanji"]
-        meaning = item["meaning"]
-
-        self.patterns.append(np.concatenate((kanji, meaning), axis=None))
-
-    # def _initialize(self):
-    #     self.n_neurons = self.patterns[1].size
+    # def present_pattern(self, item):
+    #     kanji = item["kanji"]
+    #     meaning = item["meaning"]
+    #
+    #     self.patterns.append(np.concatenate((kanji, meaning), axis=None))
 
     def _compute_weights(self):
         """
@@ -43,36 +45,46 @@ class Network:
         two matrices together.
         """
 
-        # for i in range(self.n_neurons):
-        #     for j in range(self.n_neurons):
-        #         self.weights[i, j] = (2 * self.pattern1[i] - 1) \
-        #                              * (2 * self.pattern1[j] - 1)\
-        #                              + (2 * self.pattern2[i] - 1) \
-        #                              * (2 * self.pattern2[j] - 1)
-        #         if i == j:
-        #             self.weights[i, j] = 0
+        print("Computing weights...")
 
-        print("Computing connectivity matrix...")
+        # for p in range(len(self.patterns)):
+        #     for i in tqdm(range(self.n_neurons)):
+        #         for j in range(self.n_neurons):
+        #             self.weights[i, j] += (2 * self.patterns[p, i] - 1) \
+        #                                  * (2 * self.patterns[p, j] - 1) \
+        #
+        #             if i == j:
+        #                 self.weights[i, j] = 0
+        #     print(f"Finished computing for pattern {p}")
 
         # for p in range(len(self.patterns)):
         #     for i in range(self.n_neurons):
         #         for j in range(self.n_neurons):
-        #             self.weights[i, j] += (2 * self.patterns[p][i] - 1) \
-        #                                  * (2 * self.patterns[p][j] - 1) \
+        #             self.weights[i, j] += (2*self.patterns[p][i] - self.active_fraction) \
+        #                                  * (2*self.patterns[p][j] - self.active_fraction) \
         #
         #             if i == j:
         #                 self.weights[i, j] = 0
 
-        for p in range(len(self.patterns)):
-            for i in range(self.n_neurons):
-                for j in range(self.n_neurons):
-                    self.weights[i, j] += (2*self.patterns[p][i] - self.active_fraction) \
-                                         * (2*self.patterns[p][j] - self.active_fraction) \
+        # print("\nWeights after patterns presented:\n", self.weights)
 
+        for p in range(len(self.patterns)):
+            for i in tqdm(range(self.n_neurons)):
+                for j in range(self.n_neurons):
                     if i == j:
                         self.weights[i, j] = 0
+                        continue
+                    if i > j:
+                        self.weights[i, j] = 0
+                        continue
 
-        print("\nWeights after patterns presented:\n", self.weights)
+                    self.weights[i, j] += (2 * self.patterns[p, i] - 1) \
+                        * (2 * self.patterns[p, j] - 1) \
+
+            self.weights += self.weights.T
+            print(f"...Finished computing for pattern {p}")
+
+        print("Done!")
 
     @staticmethod
     def _activation_function(x):
@@ -89,7 +101,7 @@ class Network:
 
         In other words, first you do a weighted sum of the inputs from the
         other nodes, then if that value is greater than or equal to 0, you
-        output 1. Otherwise, you output 0.
+        output 1. Otherwise, you output 0
 
         :param neuron: int neuron number
         """
@@ -102,8 +114,8 @@ class Network:
 
         self.currents[neuron] = self._activation_function(sum_)
 
-        print(f"\nNeuron {neuron} updated value: {self.currents[neuron]} (sum "
-              f"was {sum_})")
+        # print(f"\nNeuron {neuron} updated value: {self.currents[neuron]} (sum "
+        #       f"was {sum_})")
 
         # Can also be calculated as:
         # np.dot(self.weights[initial_node, :], self.pattern3)
@@ -139,6 +151,7 @@ class Network:
         stop updating. If a complete network update does not change any of the
         node values, then you are at an attractor so you can stop.
         """
+        # TODO review, always 2 iterations
         i = 1
         assert np.sum(self.currents - self.last_currents) != 0
         while np.sum(self.currents - self.last_currents) != 0:
@@ -151,8 +164,8 @@ class Network:
               f"node value updates.")
 
     def simulate(self):
-        assert self.patterns
-        assert self.n_neurons == self.patterns[0].size
+        # assert self.patterns
+        # assert self.n_neurons == self.patterns[0].size
 
         # self._initialize()
         self._compute_weights()
@@ -173,13 +186,15 @@ def main():
            "meaning": np.array([0, 0, 0, 0, 1, 0, 1, 1, 1, 1])}
 
     network = Network(
-                        n_neurons=20,
-                        active_fraction=0.4
+                        n_neurons=18750,
+                        f=0.1,
+                        # first_p=1
+                        p=3
                      )
 
-    network.present_pattern(flower)
-    network.present_pattern(leg)
-    network.present_pattern(eye)
+    # network.present_pattern(flower)
+    # network.present_pattern(leg)
+    # network.present_pattern(eye)
 
     network.simulate()
 
