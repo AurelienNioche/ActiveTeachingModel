@@ -219,16 +219,17 @@ def plot(network):
     fig, ax = plt.subplots()
     im = ax.imshow(data)
     ax.set_aspect("auto")
+    ax.xaxis.set_major_locator(MaxNLocator(integer=True))
     ax.yaxis.set_major_locator(MaxNLocator(integer=True))
 
     plt.setp(ax.get_xticklabels(), rotation=90, ha="right",
              rotation_mode="anchor")  # , fontsize=font_size)
 
-    plt.title("Network currents history")
-    plt.xlabel("Neuron")
-    plt.ylabel("Iteration")
+    ax.set_title("Network currents history")
+    ax.set_xlabel("Neuron")
+    ax.set_ylabel("Iteration")
 
-    fig.tight_layout()
+    plt.tight_layout()
     plt.show()
 
 
@@ -262,19 +263,19 @@ def main(force=False):
 
         np.random.seed(1234)
 
-        flower = {"kanji": np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]),
-                  "meaning": np.array([1, 1, 1, 0, 0, 0, 0, 0, 0, 1])}
-
-        leg = {"kanji": np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 1]),
-               "meaning": np.array([0, 0, 0, 0, 1, 1, 0, 1, 0, 1])}
-
-        eye = {"kanji": np.array([0, 0, 0, 0, 0, 0, 0, 0, 1, 0]),
-               "meaning": np.array([0, 0, 0, 0, 1, 0, 1, 1, 1, 1])}
+        # flower = {"kanji": np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]),
+        #           "meaning": np.array([1, 1, 1, 0, 0, 0, 0, 0, 0, 1])}
+        #
+        # leg = {"kanji": np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 1]),
+        #        "meaning": np.array([0, 0, 0, 0, 1, 1, 0, 1, 0, 1])}
+        #
+        # eye = {"kanji": np.array([0, 0, 0, 0, 0, 0, 0, 0, 1, 0]),
+        #        "meaning": np.array([0, 0, 0, 0, 1, 0, 1, 1, 1, 1])}
 
         network = Network(
-                            n_neurons=4,
+                            n_neurons=14,
                             f=0.4,
-                            p=1,
+                            p=2,
                             inverted_fraction=0.9
                          )
 
@@ -288,8 +289,8 @@ def main(force=False):
         print("Loading from pickle file...")
         network = pickle.load(open(bkp_file, "rb"))
 
-    # plot(network)
-    plot_average_firing_rate(network)
+    plot(network)
+    # plot_average_firing_rate(network)
 
 
 if __name__ == '__main__':
