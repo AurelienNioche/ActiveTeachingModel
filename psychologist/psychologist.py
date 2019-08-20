@@ -6,12 +6,12 @@ from fit.pygpgo.classic import PYGPGOFit
 class Psychologist:
 
     def __init__(self,
-                 student_model, n_item, n_iteration,
+                 student_model,
+                 task_param,
                  n_jobs, init_eval, max_iter, timeout,
                  testing_period, exploration_ratio):
 
-        self.n_item = n_item
-        self.n_iteration = n_iteration
+        self.task_param = task_param
         self.testing_period = testing_period
         self.exploration_ratio = exploration_ratio
 
@@ -24,20 +24,25 @@ class Psychologist:
             timeout=timeout)
 
     @staticmethod
-    def most_informative(tk, student_model, eval_param,
-                         t_max, questions):
+    def most_informative(
+            n_item,
+            n_iteration,
+            task_param,
+            student_model, eval_param, hist_item,
+            t
+    ):
 
         n_param_set = len(eval_param)
 
-        p_recall = np.zeros((tk.n_item, n_param_set))
+        p_recall = np.zeros((n_item, n_param_set))
         for j in range(n_param_set):
 
-            agent = student_model(param=eval_param[j], tk=tk)
+            agent = student_model(param=eval_param[j],
+                                  n_iteration=n_iteration,
+                                  hist=hist_item, t=t,
+                                  **task_param)
 
-            for t in range(t_max):
-                agent.learn(questions[t])
-
-            for i in range(tk.n_item):
+            for i in range(n_item):
                 p_recall[i, j] = agent.p_recall(i)
 
         std_per_item = np.std(p_recall, axis=1)
@@ -61,14 +66,14 @@ class Psychologist:
 
         else:
             exploration = np.random.random() <= self.exploration_ratio
-            print('yeah')
 
         return exploration
 
-    def update_estimates(self, hist_item, hist_success):
+    def update_estimates(self, hist_item, hist_success, t):
 
         return self.opt.evaluate(
-            n_iteration=self.n_iteration, n_item=self.n_item,
+            t=t,
+            task_param=self.task_param,
             hist_item=hist_item,
             hist_success=hist_success,
             model=self.student_model, )

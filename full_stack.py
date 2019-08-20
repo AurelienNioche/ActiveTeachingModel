@@ -172,7 +172,7 @@ def _run(
 
     p_recall_hist = p_recall_over_time_after_learning(
         agent=learner,
-        t_max=t_max,
+        n_iteration=t_max,
         n_item=n_item,
     )
 

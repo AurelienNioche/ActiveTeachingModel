@@ -123,23 +123,27 @@ class PYGPGOFit:
         self.model = None
         self.hist_item = None
         self.hist_success = None
-        self.n_item = None
-        self.n_iteration = None
+        self.t = None
+        self.task_param = None
 
     def objective(self, **param):
 
         self.eval_param.append(param)
-        return objective(model=self.model, hist_success=self.hist_success,
+        return objective(model=self.model,
+                         t=self.t,
+                         hist_success=self.hist_success,
                          hist_item=self.hist_item,
+                         task_param=self.task_param,
                          param=param)
 
-    def evaluate(self, model, hist_item, hist_success, n_item, n_iteration):
+    def evaluate(self, model, hist_item, hist_success, t,
+                 task_param):
 
         self.model = model
         self.hist_item = hist_item
         self.hist_success = hist_success
-        self.n_item = n_item
-        self.n_iteration = n_iteration
+        self.t = t
+        self.task_param = task_param
 
         self.eval_param = []
 

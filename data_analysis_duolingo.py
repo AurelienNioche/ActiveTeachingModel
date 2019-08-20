@@ -332,7 +332,7 @@ def main(model=ActR):
 
             p_recall = p_recall_over_time_after_learning(
                 agent=agent,
-                t_max=u.t_max,
+                n_iteration=u.t_max,
                 n_item=u.n_item,
                 time_norm=time_norm,
                 time_sampling=time_sampling)

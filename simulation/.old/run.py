@@ -57,7 +57,7 @@ def with_bayesian_opt(teacher_model, t_max, grades, n_item,
 
     p_recall = p_recall_over_time_after_learning(
         agent=learner,
-        t_max=t_max,
+        n_iteration=t_max,
         n_item=n_item)
 
     return {

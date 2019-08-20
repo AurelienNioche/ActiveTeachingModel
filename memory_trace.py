@@ -44,7 +44,7 @@ def main_continuous(n_iteration=100, n_item=9):
     time_sampling = np.linspace(start=0, stop=sec, num=100)
 
     p_recall = p_recall_over_time_after_learning(agent=agent,
-                                                 t_max=n_iteration,
+                                                 n_iteration=n_iteration,
                                                  n_item=n_item,
                                                  time_norm=time_norm,
                                                  time_sampling=time_sampling)
@@ -86,7 +86,7 @@ def main_discrete(n_iteration=100, n_item=9):
         seen[item, t] = 1
 
     p_recall = p_recall_over_time_after_learning(agent=agent,
-                                                 t_max=n_iteration,
+                                                 n_iteration=n_iteration,
                                                  n_item=n_item)
 
     plot.memory_trace.plot(p_recall_value=p_recall,

@@ -41,7 +41,7 @@ def _produce_data(student_model, teacher_model, student_param,
 
     p_recall = p_recall_over_time_after_learning(
         agent=learner,
-        t_max=t_max,
+        n_iteration=t_max,
         n_item=n_item)
 
     return {

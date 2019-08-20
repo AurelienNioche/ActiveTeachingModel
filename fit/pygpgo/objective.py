@@ -1,17 +1,21 @@
 import numpy as np
 
 
-def objective(model, hist_item, hist_success,
-              n_item, n_iteration,
+def objective(model,
+              t,
+              hist_item, hist_success,
+              task_param,
               param, show=False):
 
     if show:
         print('\n')
 
-    agent = model(param=param, n_iteration=n_iteration, n_item=n_item)
-    diff = np.zeros(n_iteration)
+    current_n_iteration = t+1
+    agent = model(param=param, n_iteration=current_n_iteration,
+                  **task_param)
+    diff = np.zeros(current_n_iteration)
 
-    for t in range(n_iteration):
+    for t in range(current_n_iteration):
         item = hist_item[t]
         if show:
             print("Item", item)

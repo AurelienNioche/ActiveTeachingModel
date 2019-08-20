@@ -1,16 +1,5 @@
 import numpy as np
-# import multiprocessing as mlt
 from tqdm import tqdm
-
-# def _run(args):
-#
-#     agent, item, t_idx = args
-#     p = \
-#         agent.p_recall(item=item, time_index=t_idx)
-#
-#     # assert not np.isnan(p), "Error of logic!"
-#
-#     return p
 
 
 def _compute_discrete(agent, n_item, t_max):
@@ -65,7 +54,7 @@ def _compute_continuous(agent, n_item, time_sampling,
 
 
 def p_recall_over_time_after_learning(
-        agent, t_max, n_item,
+        agent, n_iteration, n_item,
         discrete_time=True,
         time_norm=None,
         time_sampling=None):
@@ -81,7 +70,7 @@ def p_recall_over_time_after_learning(
         "'time_norm' and 'time_sampling' have to be defined"
 
     if discrete_time:
-        p_recall = _compute_discrete(agent=agent, n_item=n_item, t_max=t_max)
+        p_recall = _compute_discrete(agent=agent, n_item=n_item, t_max=n_iteration)
 
     else:
         p_recall = _compute_continuous(agent=agent, n_item=n_item,

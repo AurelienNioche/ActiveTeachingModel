@@ -1,57 +1,45 @@
 import numpy as np
 
-from tqdm import tqdm
-
-from task.parameters import N_POSSIBLE_REPLIES
-from simulation.task import Task
-
 
 class GenericTeacher:
 
-    def __init__(self, n_item=20, t_max=100, grades=(1, ), seed=123,
-                 handle_similarities=True, normalize_similarity=False,
-                 verbose=False):
+    def __init__(self, n_item, verbose=False):
 
-        assert n_item >= N_POSSIBLE_REPLIES, \
-            f"The number of items have to be " \
-            f"superior to the number of possible replies " \
-            f"(set to {N_POSSIBLE_REPLIES} in 'task/parameters.py')"
-
-        assert grades != (1, ) or n_item <= 79, \
-            "The number of items has to be inferior to 80 if" \
-            "selected grade is 1."
-
-        self.tk = Task(n_kanji=n_item, t_max=t_max, grades=grades, seed=seed,
-                       compute_similarity=handle_similarities,
-                       normalize_similarity=normalize_similarity,
-                       generate_full_task=False, verbose=verbose)
-
+        self.n_item = n_item
         self.verbose = verbose
 
-        self.questions = np.ones(t_max, dtype=int) * -1
-        self.replies = np.ones(t_max, dtype=int) * -1
-        self.successes = np.zeros(t_max, dtype=bool)
-        self.possible_replies = np.zeros((t_max, self.tk.n_possible_replies),
-                                         dtype=int)
-
-        self.seen = np.zeros((n_item, t_max), dtype=bool)
-
-        self.t = 0
-
-    def ask(self, hist_success=None,
-            hist_item=None, student_parameters=None,
-            student_model=None, possible_replies=True):
+    def ask(self,
+            t=None,
+            hist_success=None,
+            hist_item=None,
+            task_param=None,
+            student_param=None,
+            student_model=None,
+            n_item=None,
+            n_iteration=None,
+            n_possible_replies=None):
 
         # print("___ Question ___")
         # print(self.questions)
         # print(agent.questions)
 
-        question = \
+        item = \
             self._get_next_node(
+                t=t,
+                n_item=n_item,
+                n_iteration=n_iteration,
                 hist_success=hist_success,
                 hist_item=hist_item,
-                student_parameters=student_parameters,
+                task_param=task_param,
+                student_param=student_param,
                 student_model=student_model)
+
+        if n_possible_replies:
+            poss_rep = self._get_possible_replies(
+                item, n_item=n_item, n_possible_replies=n_possible_replies)
+            return item, poss_rep
+        else:
+            return item
 
         # if possible_replies:
         #     poss_rep = self._get_possible_replies(question)
@@ -67,12 +55,6 @@ class GenericTeacher:
         #         reply=reply,
         #         question=question,
         #         possible_replies=possible_replies)
-
-        if possible_replies:
-            poss_rep = self._get_possible_replies(question)
-            return question, poss_rep
-        else:
-            return question
 
     # def register_question_and_reply(self, reply, question,
     #                                 possible_replies=None):
@@ -100,15 +82,16 @@ class GenericTeacher:
         raise NotImplementedError(f"{type(self).__name__} is a meta-class."
                                   "This method need to be overridden")
 
-    def _get_possible_replies(self, question):
+    @staticmethod
+    def _get_possible_replies(item, n_item, n_possible_replies):
 
         # Select randomly possible replies, including the correct one
-        all_replies = list(range(self.tk.n_item))
-        all_replies.remove(question)
+        all_replies = list(range(n_item))
+        all_replies.remove(item)
 
-        possible_replies =\
-            [question, ] + list(np.random.choice(
-                all_replies, size=N_POSSIBLE_REPLIES-1, replace=False))
+        possible_replies = \
+            [item, ] + list(np.random.choice(
+                all_replies, size=n_possible_replies-1, replace=False))
         possible_replies = np.array(possible_replies)
         np.random.shuffle(possible_replies)
         return possible_replies

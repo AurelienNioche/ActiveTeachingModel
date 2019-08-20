@@ -10,7 +10,12 @@ class ActR(Learner):
              ('tau', 0, 1), \
              ('s', 0.001, 1)
 
-    def __init__(self, param=None, metaclass=False, verbose=False, **kwargs):
+    def __init__(
+            self,
+            n_iteration, hist=None, t=None,
+            n_possible_replies=None,
+            param=None, metaclass=False, verbose=False,
+            **kwargs):
 
         super().__init__(**kwargs)
 
@@ -27,17 +32,23 @@ class ActR(Learner):
             # Short cut
             self.temp = self.s * np.square(2)
 
-        if self.n_possible_replies is not None:
-            self.p_random = 1/self.n_possible_replies
+        if n_possible_replies:
+            self.n_possible_replies = self.n_possible_replies
+            self.p_random = 1 / self.n_possible_replies
         else:
             # raise Exception
             self.p_random = 0
 
-        # History of presentation
-        self.hist = np.ones(self.n_iteration) * -99
+        self.n_iteration = n_iteration
 
-        # Time counter
-        self.t = 0
+        if hist is None or t is None:
+            # Time counter
+            self.t = 0
+            # History of presentation
+            self.hist = np.full(self.n_iteration, -99)
+        else:
+            self.hist = hist
+            self.t = t
 
         # Options
         self.verbose = verbose
@@ -96,10 +107,12 @@ class ActR(Learner):
 
         i_presented = self.hist == i
 
+        if np.sum(i_presented) == 0:
+            return 0
+
         if time is not None:
 
             try:
-
                 in_past = self.times <= time
             except FloatingPointError as e:
                 print('time', time)
@@ -107,8 +120,6 @@ class ActR(Learner):
                 raise e
 
             time_presentation = self.times[i_presented * in_past]
-            if not time_presentation.shape[0]:
-                return 0  # This item has never been seen
             time_elapsed = np.asarray(time - time_presentation, dtype=float)
             time_elapsed[time_elapsed == 0] = 0.0001  # To avoid div by 0
 
@@ -125,8 +136,6 @@ class ActR(Learner):
 
         else:
             time_presentation = i_presented[:].nonzero()[0]
-            if not time_presentation.shape[0]:
-                return 0  # This item has never been seen
             time_elapsed = self.t - time_presentation
 
         # Presentation effect
@@ -265,33 +274,3 @@ class ActR(Learner):
             #     del self._bkp_presentation_effect[self.t + 1]
             # except KeyError:
             #     pass
-
-    def set_history(self, hist, times=None):
-
-        t = len(hist)
-        self.hist[:t] = hist
-        self.t = t
-
-# class ActROriginal(ActR):
-# #
-# #     def __init__(self, tk, param=None, verbose=False):
-# #
-# #         super().__init__(tk=tk, param=param, verbose=verbose)
-# #
-# #     def _base_level_learning_activation(self, i):
-# #
-# #         """The base-level activation measures how much time has elapsed
-# #         since the jth use:"""
-# #
-# #         # # noinspection PyTypeChecker
-# #         # sum_a = np.sum([
-# #         #     (self.t - t_presentation)**(-self.pr.d)
-# #         #     for t_presentation in self.time_presentation[i]
-# #         # ])
-# #         #
-# #         # b = np.log(sum_a) if sum_a > 0 else -np.inf
-# #         # return b
-# #         sum_a = np.sum((self.t - np.asarray(self.a == i).nonzero()[0])
-#           ** (-self.pr.d))
-# #         b = np.log(sum_a) if sum_a > 0 else -np.inf
-# #         return b

@@ -11,7 +11,7 @@ class ActRMeaning(ActR):
              ('s', 0.0000001, 1), \
              ('m', 0.0, 0.1)
 
-    def __init__(self, semantic_connections=None, param=None, metaclass=False,
+    def __init__(self, semantic_connections, param=None, metaclass=False,
                  **kwargs):
 
         super().__init__(metaclass=True, **kwargs)
@@ -37,6 +37,7 @@ class ActRMeaning(ActR):
 
             self.set_cognitive_parameters(param)
 
+        self.n_item = len(self.semantic_connections)
         self.items = np.arange(self.n_item)
 
     def _get_presentation_effect_i_and_j(self, item, time, time_index):
@@ -97,9 +98,9 @@ class ActRGraphic(ActRMeaning):
     bounds = ('d', 0.0000001, 1.0), ('tau', -5, 5), ('s', 0.0000001, 1), \
              ('g', -0.1, 0.1)
 
-    def __init__(self, param, tk, **kwargs):
+    def __init__(self, graphic_connections, param, **kwargs):
 
-        super().__init__(tk=tk, metaclass=True, **kwargs)
+        super().__init__(metaclass=True, **kwargs)
 
         # Decay parameter
         self.d = None
@@ -118,6 +119,7 @@ class ActRGraphic(ActRMeaning):
         self.c_x = None
         self.x = None
 
+        self.graphic_connection = graphic_connections
         self.set_cognitive_parameters(param)
 
     def init(self):
@@ -126,7 +128,7 @@ class ActRGraphic(ActRMeaning):
         self.temp = self.s * np.square(2)
 
         # Aliases for the easiness of computation
-        self.c_x = self.tk.c_graphic
+        self.c_x = self.graphic_connection
         self.x = self.g
 
 
@@ -138,9 +140,10 @@ class ActRPlus(ActRMeaning):
     bounds = ('d', 0.0000001, 1.0), ('tau', 0.00, 5), ('s', 0.0000001, 10), \
              ('g', -0.1, 0.1), ('m', -0.1, 0.1)
 
-    def __init__(self, tk, param, **kwargs):
+    def __init__(self, graphic_connections,
+                 semantic_connections, param, **kwargs):
 
-        super().__init__(tk=tk, metaclass=True, **kwargs)
+        super().__init__(metaclass=True, **kwargs)
 
         # Decay parameter
         self.d = None
@@ -151,6 +154,9 @@ class ActRPlus(ActRMeaning):
 
         self.g = None
         self.m = None
+
+        self.graphic_connections = graphic_connections
+        self.semantic_connections = semantic_connections
 
         self.set_cognitive_parameters(param)
 
@@ -164,9 +170,11 @@ class ActRPlus(ActRMeaning):
             return 0
 
         semantic_contrib = \
-            (self.tk.c_semantic[item, list_j] * pr_effect_j).sum() * self.m
+            (self.semantic_connections[item, list_j] * pr_effect_j).sum() \
+            * self.m
         graphic_contrib = \
-            (self.tk.c_graphic[item, list_j] * pr_effect_j).sum() * self.g
+            (self.graphic_connections[item, list_j] * pr_effect_j).sum() \
+            * self.g
 
         _sum = pr_effect_i + semantic_contrib + graphic_contrib
         if _sum <= 0:
@@ -175,73 +183,3 @@ class ActRPlus(ActRMeaning):
         base_activation = np.log(_sum)
 
         return self._sigmoid_function(base_activation)
-
-
-# class ActR2Param:
-#
-#     def __init__(self, d, d2, tau, s):
-#         # Decay parameter
-#         self.d = d
-#         self.d2 = d2  # Scale parameter
-#
-#         # Retrieval threshold
-#         self.tau = tau
-#         # Noise in the activation levels
-#         self.s = s
-
-
-# class ActR2(ActR):
-#
-#     version = 2.2
-#     bounds = ('d', 0.000001, 1.0), ('d2', 0.000001, 1.0), ('tau', -5, 5), \
-#              ('s', 0.0000001, 1)
-#
-#     """
-#     Add some scale parameter for time (d2)
-#     """
-#
-#     def __init__(self, tk, param=None, verbose=False, track_p_recall=False):
-#
-#         if param is None:
-#             pass  # ActR is used as abstract class
-#         elif type(param) == dict:
-#             self.pr = ActR2Param(**param)
-#         elif type(param) in (tuple, list, np.ndarray):
-#             self.pr = ActR2Param(*param)
-#         else:
-#             raise Exception(f"Type {type(param)} "
-#                             f"is not handled for parameters")
-#
-#         super().__init__(tk, verbose=verbose, track_p_recall=track_p_recall)
-#
-#     def _base_level_learning_activation(self, i):
-#
-#         """The base-level activation measures
-#         how much time has elapsed since the jth use:"""
-#
-#         time_presentation = np.asarray(self.hist == i).nonzero()[0]
-#         if not time_presentation.shape[0]:
-#             return -np.inf
-#         time_elapsed = (self.t - time_presentation) * self.pr.d2
-#         return np.log(np.power(time_elapsed, -self.pr.d).sum())
-
-#
-# class ActRPlusPlusParam:
-#
-#     def __init__(self, d, tau, s, g, m, g_mu, g_sigma, m_mu, m_sigma):
-#         # Decay parameter
-#         self.d = d
-#         # Retrieval threshold
-#         self.tau = tau
-#         # Noise in the activation levels
-#         self.s = s
-#
-#         self.g = g
-#         self.m = m
-#
-#         self.g_mu = g_mu
-#         self.g_sigma = g_sigma
-#
-#         self.m_mu = m_mu
-#         self.m_sigma = m_sigma
-

@@ -106,7 +106,7 @@ def run(student_model, teacher_model,
     # Figure combining probability of recall and actual successes
     p_recall = p_recall_over_time_after_learning(
         agent=learner,
-        t_max=t_max,
+        n_iteration=t_max,
         n_item=n_item)
 
     plot.memory_trace.plot(p_recall_value=p_recall,

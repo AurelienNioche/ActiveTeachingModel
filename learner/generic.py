@@ -8,10 +8,9 @@ class Learner:
     version = 0.0
     bounds = ('<name of parameter>', 0.0000001, 1.0),
 
-    def __init__(self, task_param):
+    def __init__(self):
 
-        self.task_param = task_param
-        self.cognitive_param = None
+        self.param = None
 
     def decide(self, item, possible_replies, time=None):
         """Expected return from specific learner: reply"""
@@ -96,7 +95,7 @@ class Learner:
         if param is None:
             return
 
-        self.cognitive_param = param
+        self.param = param
 
         if type(param) == dict:
             for k, v in param.items():
@@ -112,6 +111,6 @@ class Learner:
 
         self.init()
 
-    def set_history(self, hist, times=None):
+    def set_history(self, hist, t, times=None):
 
         raise NotImplementedError
