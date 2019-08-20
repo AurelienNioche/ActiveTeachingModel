@@ -4,7 +4,7 @@ import pickle
 import numpy as np
 from tqdm import tqdm
 
-import plot.attractor_networks
+import plot.oscillating_attractor_networks
 
 np.seterr(all='raise')
 
@@ -356,9 +356,9 @@ def main(force=False):
         print('Loading from pickle file...')
         network = pickle.load(open(bkp_file, 'rb'))
 
-    plot.attractor_networks.plot_phi(network)
-    plot.attractor_networks.plot_average_firing_rate(network)
-    plot.attractor_networks.plot_attractors(network)
+    plot.oscillating_attractor_networks.plot_phi(network)
+    plot.oscillating_attractor_networks.plot_average_firing_rate(network)
+    plot.oscillating_attractor_networks.plot_attractors(network)
 
 
 if __name__ == "__main__":

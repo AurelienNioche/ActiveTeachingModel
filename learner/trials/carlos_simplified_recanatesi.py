@@ -4,7 +4,7 @@ import pickle
 import numpy as np
 from tqdm import tqdm
 
-import plot.attractor_networks
+import plot.oscillating_attractor_networks
 # from learner.carlos_recanatesi import Network
 
 import matplotlib.pyplot as plt
@@ -389,8 +389,8 @@ def main(force=False):
         simplified_network = pickle.load(open(bkp_file, "rb"))
 
     # plot.attractor_networks.plot_phi(simplified_network)
-    plot.attractor_networks.plot_average_firing_rate(simplified_network)
-    plot.attractor_networks.plot_attractors(simplified_network)
+    plot.oscillating_attractor_networks.plot_average_firing_rate(simplified_network)
+    plot.oscillating_attractor_networks.plot_attractors(simplified_network)
 
 
 if __name__ == "__main__":

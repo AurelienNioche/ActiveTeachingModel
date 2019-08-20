@@ -3,8 +3,9 @@ import pickle
 
 import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib.ticker import MaxNLocator
 from tqdm import tqdm
+
+import plot.attractor_networks
 
 
 class Network:
@@ -193,7 +194,19 @@ class Network:
         self._update_all_neurons()
         self._find_attractor()
 
+    def decide(self, item, possible_replies, time=None):
+        """Expected return from specific learner: reply
+        Model will give the most likely item itemid-answer pair, and therefore
+        answer"""
+        raise NotImplementedError
+
+    def learn(self, item, time=None):
+        """Experimental implementations of a learning rate"""
+
+
     def p_recall(self, item, time=None):
+        """after choosing, compare the chosen pattern with the correct pattern
+        to retrieve the probability of recall"""
 
         # bin_question is the partial (distorted) array
         question_array = np.array([item])
@@ -216,42 +229,8 @@ class Network:
         return p_r
 
 
-def plot(network):
-
-    data = network.currents
-
-    fig, ax = plt.subplots()
-    im = ax.imshow(data)
-    ax.set_aspect("auto")
-    ax.xaxis.set_major_locator(MaxNLocator(integer=True))
-    ax.yaxis.set_major_locator(MaxNLocator(integer=True))
-
-    plt.setp(ax.get_xticklabels(), rotation=90, ha="right",
-             rotation_mode="anchor")
-
-    ax.set_title("Network currents history")
-    ax.set_xlabel("Neuron")
-    ax.set_ylabel("Iteration")
-
-    plt.tight_layout()
-    plt.show()
-
-
-def plot_weights(network):
-
-    fig, ax = plt.subplots()
-    plt.contourf(network.weights)
-    ax.set_aspect("auto")
-
-    ax.set_title("Weights matrix")
-    ax.set_xlabel("Neuron id")
-    ax.set_ylabel("Neuron id")
-
-    plt.tight_layout()
-    plt.show()
-
-
 def plot_average_firing_rate(network):
+    """TODO make it work and move it to /plot"""
 
     data = network.patterns_evolution
     n_iteration = network.currents.shape[0] - 1
@@ -309,15 +288,15 @@ def main(force=False):
         # network.present_pattern(eye)
 
         network.simulate()
-        network.p_recall(13)
+        network.p_recall(12)
         pickle.dump(network, open(bkp_file, "wb"))
     else:
         print("Loading from pickle file...")
         network = pickle.load(open(bkp_file, "rb"))
 
-    plot(network)
-    plot_weights(network)
-    plot_average_firing_rate(network)
+    plot.attractor_networks.plot_currents(network)
+    plot.attractor_networks.plot_weights(network)
+    # plot_average_firing_rate(network)
 
 
 if __name__ == '__main__':
