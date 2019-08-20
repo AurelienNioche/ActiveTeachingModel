@@ -36,6 +36,8 @@ class Network:
         self.currents = np.zeros((1, self.n_neurons), dtype=int)
         self.patterns_evolution = None
 
+        self.question_pattern = np.zeros(self.n_neurons)
+
     # def present_pattern(self, item):
     #     kanji = item["kanji"]
     #     meaning = item["meaning"]
@@ -194,15 +196,8 @@ class Network:
         self._update_all_neurons()
         self._find_attractor()
 
-    def decide(self, item, possible_replies, time=None):
-        """Expected return from specific learner: reply
-        Model will give the most likely item itemid-answer pair, and therefore
-        answer"""
-        raise NotImplementedError
-
     def learn(self, item, time=None):
         """Experimental implementations of a learning rate"""
-
 
     def p_recall(self, item, time=None):
         """after choosing, compare the chosen pattern with the correct pattern
