@@ -346,7 +346,7 @@ def plot_array(network):
 
 def main(force=False):
 
-    bkp_file = f"bkp/hopfield.p"
+    bkp_file = f"bkp/s-recanatesi.p"
 
     os.makedirs(os.path.dirname(bkp_file), exist_ok=True)
 

@@ -1,5 +1,9 @@
+import os
+import pickle
+
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.ticker import MaxNLocator
 from tqdm import tqdm
 
 
@@ -183,48 +187,56 @@ def plot(network):
     fig, ax = plt.subplots()
     im = ax.imshow(data)
     ax.set_aspect("auto")
+    ax.yaxis.set_major_locator(MaxNLocator(integer=True))
 
     plt.setp(ax.get_xticklabels(), rotation=90, ha="right",
              rotation_mode="anchor")  # , fontsize=font_size)
 
-    plt.title("Hidden layer currents")
+    plt.title("Network currents history")
+    plt.xlabel("Neuron")
+    plt.ylabel("Iteration")
 
     fig.tight_layout()
     plt.show()
 
 
-def main():
-    np.random.seed(1234)
+def main(force=False):
 
-    flower = {"kanji": np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]),
-              "meaning": np.array([1, 1, 1, 0, 0, 0, 0, 0, 0, 1])}
+    bkp_file = f"bkp/hopfield.p"
 
-    leg = {"kanji": np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 1]),
-           "meaning": np.array([0, 0, 0, 0, 1, 1, 0, 1, 0, 1])}
+    os.makedirs(os.path.dirname(bkp_file), exist_ok=True)
 
-    eye = {"kanji": np.array([0, 0, 0, 0, 0, 0, 0, 0, 1, 0]),
-           "meaning": np.array([0, 0, 0, 0, 1, 0, 1, 1, 1, 1])}
+    if not os.path.exists(bkp_file) or force:
 
-    network = Network(
-                        n_neurons=6250,
-                        f=0.1,
-                        # first_p=1
-                        p=1
-                     )
+        np.random.seed(1234)
 
-    # network.present_pattern(flower)
-    # network.present_pattern(leg)
-    # network.present_pattern(eye)
+        flower = {"kanji": np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]),
+                  "meaning": np.array([1, 1, 1, 0, 0, 0, 0, 0, 0, 1])}
 
-    network.simulate()
+        leg = {"kanji": np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 1]),
+               "meaning": np.array([0, 0, 0, 0, 1, 1, 0, 1, 0, 1])}
+
+        eye = {"kanji": np.array([0, 0, 0, 0, 0, 0, 0, 0, 1, 0]),
+               "meaning": np.array([0, 0, 0, 0, 1, 0, 1, 1, 1, 1])}
+
+        network = Network(
+                            n_neurons=6250,
+                            f=0.1,
+                            p=1
+                         )
+
+        # network.present_pattern(flower)
+        # network.present_pattern(leg)
+        # network.present_pattern(eye)
+
+        network.simulate()
+        pickle.dump(network, open(bkp_file, "wb"))
+    else:
+        print("Loading from pickle file...")
+        network = pickle.load(open(bkp_file, "rb"))
+
     plot(network)
 
 
 if __name__ == '__main__':
-    main()
-
-# TODO pickle
-# TODO plot y axis reformat
-# TODO plot initial pattern
-# TODO plot attractor
-# TODO plot weights matrix
+    main(force=False)
