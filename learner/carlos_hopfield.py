@@ -138,20 +138,9 @@ class Network:
 
     def _update_all_neurons(self):
         """
-        There are two approaches:
-
-        The first is synchronous updating, which means all the nodes get
-        updated at the same time, based on the existing state (i.e. not on
-        the values the nodes are changing to). To update the nodes in this
-        method, you can just multiply the weight matrix by the vector of the
-        current state.
-
-        This is not very realistic in a neural sense, as neurons do not all
-        update at the same rate. They have varying propagation delays, varying
-        firing times, etc. A more realistic assumption would be to update them
-        in random order, which was the method described by Hopfield. Random
-        updating goes on until the system is in a stable state. Note that the
-        full network should be updated before the same node gets updated again.
+        Neurons are updated update in random order as described by Hopfield.
+        The full network should be updated before the same node gets updated
+        again.
         """
         # self.last_currents = self.currents
 
@@ -166,27 +155,26 @@ class Network:
         # self.currents_history = np.vstack((self.currents_history,
         #                                    self.currents))
 
-    # def _compute_patterns_evolution(self):
-    #
-    #     for p in range(self.p):
-    #         similarity = np.sum(self.currents[-1] == self.patterns[p])
-    #         if not self.patterns_evolution:
-    #             self.patterns_evolution = similarity
-    #         else:
-    #             self.patterns_evolution = \
-    #                 np.vstack((self.patterns_evolution, similarity))
+    def _compute_patterns_evolution(self):
+
+        for p in range(self.p):
+            similarity = np.sum(self.currents[-1] == self.patterns[p])
+            self.patterns_evolution = \
+                np.vstack((self.patterns_evolution, similarity))
+
+        self.patterns_evolution = self.patterns_evolution.T
+        self.patterns_evolution = self.patterns_evolution[0, 1:]
 
     def _find_attractor(self):
         """
-        Cycling through all the nodes each step is the only way to know when to
-        stop updating. If a complete network update does not change any of the
-        node values, then you are at an attractor so you can stop.
+        If an update does not change any of the node values, the networks
+        rests at an attractor and updating can stop.
         """
         tot = 1
 
         while (self.currents[-1] != self.currents[-2]).all() or tot < 2:  # np.sum(self.currents - self.last_currents) != 0:
             self._update_all_neurons()
-            # self._compute_patterns_evolution()
+            self._compute_patterns_evolution()
             tot += 1
             print(f"Update {tot} finished.")
 
@@ -216,12 +204,13 @@ class Network:
 
         print("Item given as pattern:", bin_question)
 
-        self.initial_currents = bin_question
+        self.currents = np.vstack((self.currents, bin_question))
         self._update_all_neurons()
 
-        match = np.sum(self.last_currents == self.initial_currents)
+        match = np.sum(self.currents[-1] == bin_question)
         p_r = match / self.n_neurons
-        print("Current after item presentation and one update:", self.currents)
+        print("Current after item presentation and one update:",
+              self.currents[-1])
         print("Probability of recall of the item: ", p_r)
 
         return p_r
@@ -264,18 +253,25 @@ def plot_weights(network):
 
 def plot_average_firing_rate(network):
 
-    average_fr = network.patterns_evolution
-    n_iteration = average_fr.shape[1]
-    dt = network.dt
+    data = network.patterns_evolution
+    n_iteration = network.currents.shape[0] - 1
+    # print(n_iteration)
 
-    x = np.arange(n_iteration, dtype=float) * dt
+    x = np.arange(0, n_iteration, dtype=float)
+    print("x", x.size)
 
     fig, ax = plt.subplots()
 
-    for i, y in enumerate(average_fr):
-        ax.plot(x, y, linewidth=0.5, alpha=1)
-        if i > 1:
-            break
+    ax.plot(x, data, linewidth=0.5, alpha=1)
+
+    try:
+        for i in range(data.shape[0]-1):
+            ax.plot(x, data[i+1], linewidth=0.5, alpha=1)
+            if i > 1:
+                break
+
+    except:
+        print("1")
 
     ax.set_xlabel('Time (cycles)')
     ax.set_ylabel('Average firing rate')
@@ -302,9 +298,9 @@ def main(force=False):
         #        "meaning": np.array([0, 0, 0, 0, 1, 0, 1, 1, 1, 1])}
 
         network = Network(
-                            n_neurons=10,
+                            n_neurons=45,
                             f=0.4,
-                            p=4,
+                            p=5,
                             inverted_fraction=0.3
                          )
 
@@ -313,7 +309,7 @@ def main(force=False):
         # network.present_pattern(eye)
 
         network.simulate()
-        # network.p_recall(22)
+        network.p_recall(13)
         pickle.dump(network, open(bkp_file, "wb"))
     else:
         print("Loading from pickle file...")
@@ -321,7 +317,7 @@ def main(force=False):
 
     plot(network)
     plot_weights(network)
-    # plot_average_firing_rate(network)
+    plot_average_firing_rate(network)
 
 
 if __name__ == '__main__':
