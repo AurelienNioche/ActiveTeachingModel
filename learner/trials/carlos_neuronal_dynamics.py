@@ -1,20 +1,11 @@
-
-import brian2 as b2
-# from neurodynex.hopfield_network.network import HopfieldNetwork
-# from neurodynex.hopfield_network.pattern_tools import PatternFactory
-# import neurodynex.hopfield_network.plot_tools
-
-
-
 """
 https://neuronaldynamics.epfl.ch/online/Ch17.S2.html
 """
 
-
 # %matplotlib inline
 from neurodynex.hopfield_network import network, pattern_tools, plot_tools
 
-pattern_size = 4
+pattern_size = 5
 
 # create an instance of the class HopfieldNetwork
 hopfield_net = network.HopfieldNetwork(nr_neurons=pattern_size**2)
@@ -43,7 +34,8 @@ hopfield_net.set_state_from_pattern(noisy_init_state)
 # from this initial state, let the network dynamics evolve.
 states = hopfield_net.run_with_monitoring(nr_steps=4)
 
-# each network state is a vector. reshape it to the same shape used to create the patterns.
+# each network state is a vector. reshape it to the same shape used to create
+# the patterns.
 states_as_patterns = factory.reshape_patterns(states)
 # plot the states of the network
 plot_tools.plot_state_sequence_and_overlap(states_as_patterns, pattern_list,

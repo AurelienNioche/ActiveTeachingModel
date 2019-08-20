@@ -12,38 +12,70 @@ class Network:
     Pattern consists of multiple binary vectors representing both the item and
     its different characteristics that can be recalled.
     """
-    def __init__(self, n_neurons=100000, p=16, f=0.1, first_p=1):
+    def __init__(self, n_neurons=100000, p=16, f=0.1, inverted_fraction=0.3,
+                 first_p=1):
         self.n_neurons = n_neurons
         self.p = p
         self.f = f
         self.first_p = first_p
+        self.inverted_fraction = inverted_fraction
 
         self.weights = np.zeros((self.n_neurons, self.n_neurons))
 
         self.active_fraction = f
 
-        self.initial_currents = \
-            np.random.choice([0, 1],
-                             p=[1 - self.active_fraction,
-                                self.active_fraction],
-                             size=self.n_neurons)
-        print(self.initial_currents.shape)
-        # print("\nInitial currents:\n", self.initial_currents)
+        self.initial_currents = np.zeros(self.n_neurons)
+            # np.random.choice([0, 1],
+            #                  p=[1 - self.active_fraction,
+            #                     self.active_fraction],
+            #                  size=self.n_neurons)
+
         self.patterns = \
             np.random.choice([0, 1], p=[1 - self.f, self.f],
                              size=(self.p, self.n_neurons))
-        # print("\nPatterns:\n", self.patterns)
+        print("\nPatterns:\n", self.patterns)
 
-        self.currents = np.copy(self.initial_currents)
+        self.currents = np.zeros(self.n_neurons)
         # TODO get rid of self.last_currents
-        self.last_currents = np.copy(self.initial_currents)
-        self.currents_history = np.copy(self.initial_currents)
+        self.last_currents = np.zeros(self.n_neurons)
+        self.currents_history = np.zeros(self.n_neurons)
 
     # def present_pattern(self, item):
     #     kanji = item["kanji"]
     #     meaning = item["meaning"]
     #
     #     self.patterns.append(np.concatenate((kanji, meaning), axis=None))
+
+    @staticmethod
+    def distort_pattern(pattern, proportion):
+        """
+        Inverts the array in random positions proportional to array size.
+
+        :param pattern: array-like binary vector to distort
+        :param proportion: float 0 to 1, 1 being full array inversion
+
+        :return pattern: array-like binary vector with inverted elements
+        """
+
+        num_inversions = int(pattern.size * proportion)
+        assert proportion != 1
+        idx_reassignment = np.random.choice(pattern.size, num_inversions,
+                                            replace=False)
+        pattern[idx_reassignment] = np.invert(pattern[idx_reassignment] - 2)
+        print("\nDistorted pattern...\n", pattern,
+              "\n ...in positions\n", idx_reassignment)
+        return pattern
+
+    def _initialize_currents(self):
+
+        self.initial_currents = self.distort_pattern(self.patterns[0],
+                                                     self.inverted_fraction)
+
+        print("\nInitial currents:\n", self.initial_currents)
+
+        self.currents = np.copy(self.initial_currents)
+        self.last_currents = np.copy(self.initial_currents)
+        self.currents_history = np.copy(self.initial_currents)
 
     def _compute_weights(self):
         """
@@ -93,6 +125,7 @@ class Network:
 
     @staticmethod
     def _activation_function(x):
+        """Heaviside"""
         return int(x >= 0)
 
     def _update_current(self, neuron):
@@ -107,22 +140,9 @@ class Network:
 
         :param neuron: int neuron number
         """
-        # sum_ = 0
-        #
-        # for i in range(self.n_neurons):
-        #     sum_ += (self.weights[neuron, i] * self.last_currents[i])
-        # print(self.currents_history)
+        dot_product = np.dot(self.weights[neuron], self.last_currents)
 
-        sum_ = np.dot(self.weights[neuron], self.last_currents)
-
-        self.currents[neuron] = self._activation_function(sum_)
-
-        # print(f"\nNeuron {neuron} updated value: {self.currents[neuron]} (sum "
-        #       f"was {sum_})")
-
-        # Can also be calculated as:
-        # np.dot(self.weights[initial_node, :], self.pattern3)
-        # print(sum_)
+        self.currents[neuron] = self._activation_function(dot_product)
 
     def _update_all_neurons(self):
         """
@@ -176,6 +196,7 @@ class Network:
 
         # self._initialize()
         self._compute_weights()
+        self._initialize_currents()
         self._update_all_neurons()
         self._find_attractor()
 
@@ -220,9 +241,10 @@ def main(force=False):
                "meaning": np.array([0, 0, 0, 0, 1, 0, 1, 1, 1, 1])}
 
         network = Network(
-                            n_neurons=6250,
-                            f=0.1,
-                            p=1
+                            n_neurons=4,
+                            f=0.4,
+                            p=1,
+                            inverted_fraction=0.9
                          )
 
         # network.present_pattern(flower)
@@ -239,4 +261,4 @@ def main(force=False):
 
 
 if __name__ == '__main__':
-    main(force=False)
+    main(force=True)
