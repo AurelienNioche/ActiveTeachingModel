@@ -39,6 +39,7 @@ class Network:
         # TODO get rid of self.last_currents
         self.last_currents = np.zeros(self.n_neurons)
         self.currents_history = np.zeros(self.n_neurons)
+        self.patterns_evolution = None
 
     # def present_pattern(self, item):
     #     kanji = item["kanji"]
@@ -171,6 +172,15 @@ class Network:
         self.currents_history = np.vstack((self.currents_history,
                                            self.currents))
 
+    def _compute_patterns_evolution(self):
+
+        for p in range(self.p):
+            similarity = np.sum(self.currents == self.patterns[p])
+            if not self.patterns_evolution:
+                self.patterns_evolution = similarity
+            else:
+                np.vstack((self.patterns_evolution, similarity))
+
     def _find_attractor(self):
         """
         Cycling through all the nodes each step is the only way to know when to
@@ -184,6 +194,7 @@ class Network:
         while (self.currents != self.last_currents).all():  # np.sum(self.currents - self.last_currents) != 0:
             self.last_currents = self.currents
             self._update_all_neurons()
+            self._compute_patterns_evolution()
             i += 1
             print(f"Update {i} finished.")
 
@@ -218,6 +229,26 @@ def plot(network):
     plt.ylabel("Iteration")
 
     fig.tight_layout()
+    plt.show()
+
+
+def plot_average_firing_rate(network):
+
+    average_fr = network.patterns_evolution
+    n_iteration = average_fr.shape[1]
+    dt = network.dt
+
+    x = np.arange(n_iteration, dtype=float) * dt
+
+    fig, ax = plt.subplots()
+
+    for i, y in enumerate(average_fr):
+        ax.plot(x, y, linewidth=0.5, alpha=1)
+        if i > 1:
+            break
+
+    ax.set_xlabel('Time (cycles)')
+    ax.set_ylabel('Average firing rate')
     plt.show()
 
 
@@ -257,7 +288,8 @@ def main(force=False):
         print("Loading from pickle file...")
         network = pickle.load(open(bkp_file, "rb"))
 
-    plot(network)
+    # plot(network)
+    plot_average_firing_rate(network)
 
 
 if __name__ == '__main__':
