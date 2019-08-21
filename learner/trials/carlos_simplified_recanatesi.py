@@ -134,14 +134,14 @@ class SimplifiedNetwork:
     def _compute_gaussian_noise(self):
         """Amplitude of uncorrelated Gaussian noise is its variance"""
         print("Computing uncorrelated Gaussian noise...")
-        self.amplitude = self.xi_0 * self.s * self.num_neurons
+        # self.amplitude = self.xi_0 * self.s * self.num_neurons
 
         for i in range(self.num_populations):
 
             self.noise_values[i] = \
                 np.random.normal(loc=0,
                                  scale=(self.xi_0 *
-                                        self.num_neurons_per_pattern)**0.5,
+                                        self.num_neurons_per_pattern[i])**0.5,
                                  size=self.t_tot_discrete)
 
     def _compute_connectivity_matrix(self):
@@ -322,7 +322,7 @@ def plot_phi(network):
 
 def plot_noise(network):
 
-    for i in range(network.n_population):
+    for i in range(network.num_populations):
         plt.plot(network.noise_values[i])
     plt.title("Noise")
     plt.show()
