@@ -243,7 +243,6 @@ def plot_average_firing_rate(network):
             ax.plot(x, data[i+1], linewidth=0.5, alpha=1)
             if i > 1:
                 break
-
     except:
         print("1")
 
@@ -272,9 +271,9 @@ def main(force=False):
         #        "meaning": np.array([0, 0, 0, 0, 1, 0, 1, 1, 1, 1])}
 
         network = Network(
-                            n_neurons=45,
+                            n_neurons=5,
                             f=0.4,
-                            p=5,
+                            p=1,
                             inverted_fraction=0.3
                          )
 
@@ -282,8 +281,19 @@ def main(force=False):
         # network.present_pattern(leg)
         # network.present_pattern(eye)
 
-        network.simulate()
-        network.p_recall(12)
+        # network.simulate()
+        # network.p_recall(12)
+
+        print(network.weights)
+        network._initialize_currents()
+
+
+
+
+
+
+
+
         pickle.dump(network, open(bkp_file, "wb"))
     else:
         print("Loading from pickle file...")
