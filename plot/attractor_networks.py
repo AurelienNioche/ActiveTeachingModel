@@ -27,7 +27,7 @@ def plot_currents(network):
 def plot_weights(network):
 
     fig, ax = plt.subplots()
-    plt.contourf(network.weights)
+    im = ax.contourf(network.weights)
     ax.set_aspect("auto")
 
     ax.set_title("Weights matrix")
@@ -35,4 +35,6 @@ def plot_weights(network):
     ax.set_ylabel("Neuron id")
 
     plt.tight_layout()
+
+    fig.colorbar(im, ax=ax)
     plt.show()

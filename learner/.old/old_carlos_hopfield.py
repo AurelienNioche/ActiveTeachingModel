@@ -327,7 +327,7 @@ def main():
     np.random.seed(1234)
 
     network = Network(tk=Task(t_max=100, n_item=30), param={"n_epoch": 200,
-                                                            "n_neurons": 10})
+                                                            "num_neurons": 10})
 
     # plot(network)
 

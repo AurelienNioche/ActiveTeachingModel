@@ -50,7 +50,7 @@ class Network:
 
     2019 07 31: Good enough parameters are
                 param={
-                "n_neurons": 150,  #int(10**5*factor),
+                "num_neurons": 150,  #int(10**5*factor),
                 "f": 0.1,
                 "p": 4,
                 "xi_0": 65, #65,  # 65*factor,

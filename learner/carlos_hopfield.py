@@ -13,30 +13,31 @@ class Network:
     Pattern consists of multiple binary vectors representing both the item and
     its different characteristics that can be recalled.
     """
-    def __init__(self, n_neurons=100000, p=16, f=0.1, inverted_fraction=0.3,
+    def __init__(self, num_neurons=100000, p=16, f=0.1, inverted_fraction=0.3,
                  noise_variance=65, first_p=1):
-        self.n_neurons = n_neurons
+        self.num_neurons = num_neurons
         self.p = p
         self.f = f
         self.first_p = first_p
         self.inverted_fraction = inverted_fraction
         self.noise_variance = noise_variance
 
-        self.weights = np.zeros((self.n_neurons, self.n_neurons))
+        self.weights = np.zeros((self.num_neurons, self.num_neurons))
+        self.next_weights = np.zeros_like(self.weights)
 
         self.active_fraction = f
 
-        self.initial_currents = np.zeros(self.n_neurons)
+        self.initial_currents = np.zeros(self.num_neurons)
 
         self.patterns = \
             np.random.choice([0, 1], p=[1 - self.f, self.f],
-                             size=(self.p, self.n_neurons))
+                             size=(self.p, self.num_neurons))
         print("\nPatterns:\n", self.patterns)
 
-        self.currents = np.zeros((1, self.n_neurons), dtype=int)
+        self.currents = np.zeros((1, self.num_neurons), dtype=int)
         self.patterns_evolution = None
 
-        self.question_pattern = np.zeros(self.n_neurons)
+        self.question_pattern = np.zeros(self.num_neurons)
 
     # def present_pattern(self, item):
     #     kanji = item["kanji"]
@@ -60,57 +61,42 @@ class Network:
         idx_reassignment = np.random.choice(pattern.size, num_inversions,
                                             replace=False)
         pattern[idx_reassignment] = np.invert(pattern[idx_reassignment] - 2)
-        print("\nDistorted pattern...\n", pattern,
+        print("\nDistorted pattern (i.e. initial currents)...\n", pattern,
               "\n ...in positions\n", idx_reassignment)
         return pattern
 
     def _initialize_currents(self):
+        """Initial currents are set to the distorted pattern."""
 
         self.currents = np.copy(self.distort_pattern(self.patterns[0],
-                                                       self.inverted_fraction))
-        #[1, 1, 1, 1, 1,0, 0, 0,0,0,0,0,0,0,0,0,0,0,0,0]
+                                                     self.inverted_fraction))
 
-        print("\nInitial currents:\n", self.currents)
+        # print("\nInitial currents:\n", self.currents)
 
-    def _compute_weights(self):
+    def calculate_next_weights(self, pattern):
         """
-        Weight values are calculated by adding the matrices of each pattern.
+        Calculate the weights after the presentation of a new pattern but does
+        not change the current weights of the network
         """
+        for i in tqdm(range(self.num_neurons)):
+            for j in range(self.num_neurons):
+                if j >= i:
+                    break
 
-        print(f"...Computing weights...")
+                self.next_weights[i, j] += (2 * pattern[i] - 1) \
+                    * (2 * pattern[j] - 1) \
 
-        # for p in range(len(self.patterns)):
-        #     for i in tqdm(range(self.n_neurons)):
-        #         for j in range(self.n_neurons):
-        #             self.weights[i, j] += (2 * self.patterns[p, i] - 1) \
-        #                                  * (2 * self.patterns[p, j] - 1) \
-        #
-        #             if i == j:
-        #                 self.weights[i, j] = 0
-        #     print(f"Finished computing for pattern {p}")
+        self.next_weights += self.next_weights.T
 
-        # for p in range(len(self.patterns)):
-        #     for i in range(self.n_neurons):
-        #         for j in range(self.n_neurons):
-        #             self.weights[i, j] += (2*self.patterns[p][i] - self.active_fraction) \
-        #                                  * (2*self.patterns[p][j] - self.active_fraction) \
-        #
-        #             if i == j:
-        #                 self.weights[i, j] = 0
+    def store_next_weights(self):
+        self.weights += self.next_weights
 
-        # print("\nWeights after patterns presented:\n", self.weights)
+    def compute_weights_all_patterns(self):
+        print(f"\n...Computing weights for all patterns...\n")
 
-        for p in range(len(self.patterns)):
-            for i in tqdm(range(self.n_neurons)):
-                for j in range(self.n_neurons):
-                    if j >= i:
-                        break
-
-                    self.weights[i, j] += (2 * self.patterns[p, i] - 1) \
-                        * (2 * self.patterns[p, j] - 1) \
-
-            self.weights += self.weights.T
-            print(f"...Finished computing for pattern {p}")
+        for p in tqdm(range(len(self.patterns))):
+            self.calculate_next_weights(self.patterns[p])
+            self.store_next_weights()
 
         print("Done!")
 
@@ -134,7 +120,7 @@ class Network:
         dot_product = np.dot(self.weights[neuron], self.currents[-2])
 
         # Amplitude-modulated Gaussian noise
-        noise = np.random.normal(loc=0, scale=self.noise_variance**0.5) * 0.075
+        noise = np.random.normal(loc=0, scale=self.noise_variance**0.5) * 0.05
 
         self.currents[-1, neuron] = self._activation_function(dot_product
                                                               + noise)
@@ -147,10 +133,10 @@ class Network:
         """
         # self.last_currents = self.currents
 
-        values = np.arange(0, self.n_neurons, 1)
-        update_order = np.random.choice(values, self.n_neurons, replace=False)
+        values = np.arange(0, self.num_neurons, 1)
+        update_order = np.random.choice(values, self.num_neurons, replace=False)
 
-        self.currents = np.vstack((self.currents, np.zeros(self.n_neurons)))
+        self.currents = np.vstack((self.currents, np.zeros(self.num_neurons)))
 
         for i in update_order:
             self._update_current(i)
@@ -179,35 +165,38 @@ class Network:
             self._update_all_neurons()
             self._compute_patterns_evolution()
             tot += 1
-            print(f"Update {tot} finished.")
+            print(f"\nUpdate {tot} finished.\n")
 
         attractor = np.int_(np.copy(self.currents[-1]))
 
         print(f"\nFinished as attractor {attractor} after {tot} "
-              f"node value updates.")
+              f"node value updates.\n")
 
     def simulate(self):
         # assert self.patterns
-        # assert self.n_neurons == self.patterns[0].size
+        # assert self.num_neurons == self.patterns[0].size
 
         # self._initialize()
-        self._compute_weights()
+        self.compute_weights_all_patterns()
         self._initialize_currents()
         self._update_all_neurons()
         self._find_attractor()
 
     def learn(self, item, time=None):
         """Experimental implementations of a learning rate"""
+        self.weights
 
     def p_recall(self, item, time=None):
-        """after choosing, compare the chosen pattern with the correct pattern
-        to retrieve the probability of recall"""
+        """
+        after choosing, compare the chosen pattern with the correct pattern
+        to retrieve the probability of recall
+        """
 
         # bin_question is the partial (distorted) array
         question_array = np.array([item])
         bin_question = ((question_array[:, None]
                          & (1 << np.arange(8))) > 0).astype(int)
-        bin_question = np.append(bin_question, np.zeros(self.n_neurons
+        bin_question = np.append(bin_question, np.zeros(self.num_neurons
                                                         - bin_question.size))
 
         print("Item given as pattern:", bin_question)
@@ -216,10 +205,10 @@ class Network:
         self._update_all_neurons()
 
         match = np.sum(self.currents[-1] == bin_question)
-        p_r = match / self.n_neurons
-        print("Current after item presentation and one update:",
+        p_r = match / self.num_neurons
+        print("\nCurrent after item presentation and one update:\n",
               self.currents[-1])
-        print("Probability of recall of the item: ", p_r)
+        print("\nProbability of recall of the item: ", p_r)
 
         return p_r
 
@@ -246,8 +235,8 @@ def plot_average_firing_rate(network):
     except:
         print("1")
 
-    ax.set_xlabel('Time (cycles)')
-    ax.set_ylabel('Average firing rate')
+    ax.set_xlabel("Time (cycles)")
+    ax.set_ylabel("Average firing rate")
     plt.show()
 
 
@@ -259,7 +248,7 @@ def main(force=False):
 
     if not os.path.exists(bkp_file) or force:
 
-        np.random.seed(12345)
+        np.random.seed(123)
 
         # flower = {"kanji": np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]),
         #           "meaning": np.array([1, 1, 1, 0, 0, 0, 0, 0, 0, 1])}
@@ -271,9 +260,9 @@ def main(force=False):
         #        "meaning": np.array([0, 0, 0, 0, 1, 0, 1, 1, 1, 1])}
 
         network = Network(
-                            n_neurons=5,
+                            num_neurons=10,
                             f=0.4,
-                            p=1,
+                            p=2,
                             inverted_fraction=0.3
                          )
 
@@ -281,18 +270,14 @@ def main(force=False):
         # network.present_pattern(leg)
         # network.present_pattern(eye)
 
-        # network.simulate()
+        network.simulate()
         # network.p_recall(12)
 
-        print(network.weights)
-        network._initialize_currents()
-
-
-
-
-
-
-
+        # print(network.weights)
+        # network._initialize_currents()
+        # network._update_all_neurons()
+        # for i in range(0):
+        #     network._find_attractor()
 
         pickle.dump(network, open(bkp_file, "wb"))
     else:
