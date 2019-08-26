@@ -12,18 +12,27 @@ class Network:
     """
     Pattern consists of multiple binary vectors representing both the item and
     its different characteristics that can be recalled.
+
+    :param learning_rate: float proportion of the theoretical weights learn per
+        time step
     """
     def __init__(self, num_neurons=100000, p=16, f=0.1, inverted_fraction=0.3,
-                 noise_variance=65, first_p=1):
+                 noise_variance=65, first_p=0, learning_rate=0.3):
         self.num_neurons = num_neurons
         self.p = p
         self.f = f
         self.first_p = first_p
         self.inverted_fraction = inverted_fraction
         self.noise_variance = noise_variance
+        self.learning_rate = learning_rate
+        assert self.learning_rate <= 1
 
         self.weights = np.zeros((self.num_neurons, self.num_neurons))
+        self.next_theoretical_weights = np.zeros_like(self.weights)
         self.next_weights = np.zeros_like(self.weights)
+        self.weights_mean = []
+
+        self.p_recall_history = []
 
         self.active_fraction = f
 
@@ -68,8 +77,10 @@ class Network:
     def _initialize_currents(self):
         """Initial currents are set to the distorted pattern."""
 
-        self.currents = np.copy(self.distort_pattern(self.patterns[0],
-                                                     self.inverted_fraction))
+        self.currents = np.copy(self.distort_pattern(
+            self.patterns[self.first_p],
+            self.inverted_fraction)
+        )
 
         # print("\nInitial currents:\n", self.currents)
 
@@ -83,20 +94,20 @@ class Network:
                 if j >= i:
                     break
 
-                self.next_weights[i, j] += (2 * pattern[i] - 1) \
-                    * (2 * pattern[j] - 1) \
+                self.next_theoretical_weights[i, j] += (2 * pattern[i] - 1) \
+                                                       * (2 * pattern[j] - 1) \
 
-        self.next_weights += self.next_weights.T
+        self.next_theoretical_weights += self.next_theoretical_weights.T
 
-    def store_next_weights(self):
-        self.weights += self.next_weights
+    def update_weights(self, weights):
+        self.weights += weights
 
     def compute_weights_all_patterns(self):
         print(f"\n...Computing weights for all patterns...\n")
 
         for p in tqdm(range(len(self.patterns))):
             self.calculate_next_weights(self.patterns[p])
-            self.store_next_weights()
+            self.update_weights(self.next_theoretical_weights)
 
         print("Done!")
 
@@ -134,7 +145,9 @@ class Network:
         # self.last_currents = self.currents
 
         values = np.arange(0, self.num_neurons, 1)
-        update_order = np.random.choice(values, self.num_neurons, replace=False)
+        update_order = np.random.choice(values,
+                                        self.num_neurons,
+                                        replace=False)
 
         self.currents = np.vstack((self.currents, np.zeros(self.num_neurons)))
 
@@ -182,9 +195,36 @@ class Network:
         self._update_all_neurons()
         self._find_attractor()
 
-    def learn(self, item, time=None):
+    def learn(self, item=None, time=None):
         """Experimental implementations of a learning rate"""
-        self.weights
+        # assert (self.weights != self.next_theoretical_weights).all()
+        self.next_weights = (self.next_theoretical_weights - self.weights) \
+            * self.learning_rate
+        print(self.next_weights)
+
+        self.update_weights(self.next_weights)
+
+        self.weights_mean.append(-np.mean(self.next_theoretical_weights)\
+                                 + np.mean(self.weights))
+
+        # plot.attractor_networks.plot_weights(self)
+
+    def fully_learn(self):
+        tot = 1
+
+        while (self.weights[-1] != self.next_theoretical_weights).all():
+            self.learn()
+            tot += 1
+
+        print(f"\nFinished learning after {tot} "
+              f"node weight updates.\n")
+
+    def simulate_learning(self):
+        self.calculate_next_weights(self.patterns[self.first_p])
+        # self._initialize_currents()
+        self.fully_learn()
+        # self._update_all_neurons()
+        # self._find_attractor()
 
     def p_recall(self, item, time=None):
         """
@@ -260,17 +300,19 @@ def main(force=False):
         #        "meaning": np.array([0, 0, 0, 0, 1, 0, 1, 1, 1, 1])}
 
         network = Network(
-                            num_neurons=10,
-                            f=0.4,
-                            p=2,
-                            inverted_fraction=0.3
+                            num_neurons=200,
+                            f=0.7,
+                            p=1,
+                            inverted_fraction=0.2,
+                            learning_rate=0.00075
                          )
 
         # network.present_pattern(flower)
         # network.present_pattern(leg)
         # network.present_pattern(eye)
 
-        network.simulate()
+        # network.simulate()
+
         # network.p_recall(12)
 
         # print(network.weights)
@@ -278,6 +320,26 @@ def main(force=False):
         # network._update_all_neurons()
         # for i in range(0):
         #     network._find_attractor()
+        print(network.weights)
+        print(network.patterns)
+        network.calculate_next_weights(network.patterns[0])
+        network._update_all_neurons()
+        print(network.next_theoretical_weights)
+
+        for i in range(10):
+            print(np.mean(network.weights))
+            network.learn()
+            network._update_all_neurons()
+            match = np.sum(network.currents[-1] == network.patterns[0])
+            p_recall = match / network.num_neurons
+            network.p_recall_history.append(p_recall)
+
+        print(network.weights)
+
+        print(np.mean(network.weights))
+
+        plot.attractor_networks.plot_mean_weights(network)
+        plot.attractor_networks.plot_p_recall(network)
 
         pickle.dump(network, open(bkp_file, "wb"))
     else:
@@ -285,7 +347,7 @@ def main(force=False):
         network = pickle.load(open(bkp_file, "rb"))
 
     plot.attractor_networks.plot_currents(network)
-    plot.attractor_networks.plot_weights(network)
+    # plot.attractor_networks.plot_weights(network)
     # plot_average_firing_rate(network)
 
 

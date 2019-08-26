@@ -38,3 +38,33 @@ def plot_weights(network):
 
     fig.colorbar(im, ax=ax)
     plt.show()
+
+
+def plot_mean_weights(network):
+
+    fig, ax = plt.subplots()
+    im = ax.plot(network.weights_mean)
+    # ax.set_aspect("auto")
+
+    ax.set_title("Weights learning rule")
+    ax.set_xlabel("Iteration")
+    ax.set_ylabel("Difference of means")
+
+    # plt.tight_layout()
+
+    plt.show()
+
+
+def plot_p_recall(network):
+
+    fig, ax = plt.subplots()
+    im = ax.plot(network.p_recall_history)
+    # ax.set_aspect("auto")
+
+    ax.set_title("Probability of recall")
+    ax.set_xlabel("Iteration")
+    ax.set_ylabel("Pattern match")
+
+    # plt.tight_layout()
+
+    plt.show()
