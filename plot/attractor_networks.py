@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.ticker import MaxNLocator
+from mpl_toolkits.mplot3d import Axes3D
 
 
 def plot_currents(network):
@@ -31,8 +32,8 @@ def plot_weights(network):
     ax.set_aspect("auto")
 
     ax.set_title("Weights matrix")
-    ax.set_xlabel("Neuron id")
-    ax.set_ylabel("Neuron id")
+    ax.set_xlabel("Neuron $i$")
+    ax.set_ylabel("Neuron $j$")
 
     plt.tight_layout()
 
@@ -59,12 +60,34 @@ def plot_p_recall(network):
 
     fig, ax = plt.subplots()
     im = ax.plot(network.p_recall_history)
-    # ax.set_aspect("auto")
 
     ax.set_title("Probability of recall")
     ax.set_xlabel("Iteration")
     ax.set_ylabel("Pattern match")
+    ax.set_ylim((-0.1, 1.1))
 
-    # plt.tight_layout()
+    plt.show()
+
+
+def plot_energy(network):
+
+    fig = plt.figure()
+    ax = fig.gca(projection='3d')
+    x = np.arange(0, network.num_neurons, 1)
+    y = np.arange(0, network.num_neurons, 1)
+    x, y = np.meshgrid(x, y)
+    z = np.copy(network.weights)
+
+    for i in range(network.num_neurons):
+        for j in range(network.num_neurons):
+            z[i, j] *= network.currents[-1, j]
+
+    surf = ax.plot_surface(x, y, z, alpha=0.9, cmap="viridis",
+                           antialiased=True)
+
+    ax.set_title("Energy landscape")
+    ax.set_xlabel("Neuron $i$")
+    ax.set_ylabel("Neuron $j$")
+    ax.set_zlabel("Energy")
 
     plt.show()

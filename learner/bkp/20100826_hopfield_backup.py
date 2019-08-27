@@ -12,11 +12,10 @@ class Network:
     """
     Pattern consists of multiple binary vectors representing both the item and
     its different characteristics that can be recalled.
-
     :param learning_rate: float proportion of the theoretical weights learn per
         time step
     """
-    def __init__(self, num_neurons=1000, p=16, f=0.1, inverted_fraction=0.3,
+    def __init__(self, num_neurons=100000, p=16, f=0.1, inverted_fraction=0.3,
                  noise_variance=65, first_p=0, learning_rate=0.3):
         self.num_neurons = num_neurons
         self.p = p
@@ -54,30 +53,12 @@ class Network:
     #
     #     self.patterns.append(np.concatenate((kanji, meaning), axis=None))
 
-    def binarize_item(self, item):
-        """
-        Item number to binary and append zeros according to network size.
-
-        :param item: int item index
-        :return: bin_item binary vector
-        """
-        question_array = np.array([item])
-        bin_item = ((question_array[:, None]
-                         & (1 << np.arange(8))) > 0).astype(int)
-        bin_item = np.append(bin_item, np.zeros(self.num_neurons
-                                                - bin_item.size))
-
-        print("Item given as pattern:", bin_item)
-        return bin_item
-
     @staticmethod
     def distort_pattern(pattern, proportion):
         """
         Inverts the array in random positions proportional to array size.
-
         :param pattern: array-like binary vector to distort
         :param proportion: float 0 to 1, 1 being full array inversion
-
         :return pattern: array-like binary vector with inverted elements
         """
 
@@ -91,7 +72,7 @@ class Network:
         return pattern
 
     def _initialize_currents(self):
-        """Initial currents are set to the first distorted pattern."""
+        """Initial currents are set to the distorted pattern."""
 
         self.currents = np.copy(self.distort_pattern(
             self.patterns[self.first_p],
@@ -137,11 +118,9 @@ class Network:
         If you are updating one node of a Hopfield network, then the values of
         all the other nodes are input values, and the weights from those nodes
         to the updated node as the weights.
-
         In other words, first you do a weighted sum of the inputs from the
         other nodes, then if that value is greater than or equal to 0, you
         output 1. Otherwise, you output 0
-
         :param neuron: int neuron number
         """
         dot_product = np.dot(self.weights[neuron], self.currents[-2])
@@ -152,7 +131,7 @@ class Network:
         self.currents[-1, neuron] = self._activation_function(dot_product
                                                               + noise)
 
-    def update_all_neurons(self):
+    def _update_all_neurons(self):
         """
         Neurons are updated update in random order as described by Hopfield.
         The full network should be updated before the same node gets updated
@@ -173,50 +152,6 @@ class Network:
         # self.currents_history = np.vstack((self.currents_history,
         #                                    self.currents))
 
-    def _update_current_learning(self, neuron):
-        """
-        If you are updating one node of a Hopfield network, then the values of
-        all the other nodes are input values, and the weights from those nodes
-        to the updated node as the weights.
-
-        In other words, first you do a weighted sum of the inputs from the
-        other nodes, then if that value is greater than or equal to 0, you
-        output 1. Otherwise, you output 0
-
-        :param neuron: int neuron number
-        """
-        random_currents = \
-            np.random.choice([0, 1], p=[1 - self.f, self.f],
-                             size=self.num_neurons)
-        dot_product = np.dot(self.weights[neuron], random_currents)
-
-        # Amplitude-modulated Gaussian noise
-        noise = 0#np.random.normal(loc=0, scale=self.noise_variance**0.5) * 0.05
-
-        self.currents[-1, neuron] = self._activation_function(dot_product
-                                                              + noise)
-
-    def update_all_neurons_learning(self):
-        """
-        Neurons are updated update in random order as described by Hopfield.
-        The full network should be updated before the same node gets updated
-        again.
-        """
-        # self.last_currents = self.currents
-
-        values = np.arange(0, self.num_neurons, 1)
-        neuron_update_order = np.random.choice(values,
-                                               self.num_neurons,
-                                               replace=False)
-
-        self.currents = np.vstack((self.currents, np.zeros(self.num_neurons)))
-
-        for neuron in neuron_update_order:
-            self._update_current(neuron)
-
-        # self.currents_history = np.vstack((self.currents_history,
-        #                                    self.currents))
-
     def _compute_patterns_evolution(self):
 
         for p in range(self.p):
@@ -229,13 +164,13 @@ class Network:
 
     def _find_attractor(self):
         """
-        If an update does not change any of the node values, the network
-        rests at an attractor and updating stops.
+        If an update does not change any of the node values, the networks
+        rests at an attractor and updating can stop.
         """
         tot = 1
 
         while (self.currents[-1] != self.currents[-2]).all() or tot < 2:  # np.sum(self.currents - self.last_currents) != 0:
-            self.update_all_neurons()
+            self._update_all_neurons()
             self._compute_patterns_evolution()
             tot += 1
             print(f"\nUpdate {tot} finished.\n")
@@ -252,23 +187,15 @@ class Network:
         # self._initialize()
         self.compute_weights_all_patterns()
         self._initialize_currents()
-        self.update_all_neurons()
+        self._update_all_neurons()
         self._find_attractor()
 
     def learn(self, item=None, time=None):
-        """
-        The normalized difference of means calculated at every time step gives
-        a logarithmic emergent behavior as the weights get closer to the
-        theoretical ones.
-
-        :param item:
-        :param time:
-        :return:
-        """
-
+        """Experimental implementations of a learning rate"""
+        # assert (self.weights != self.next_theoretical_weights).all()
         self.next_weights = (self.next_theoretical_weights - self.weights) \
             * self.learning_rate
-        # print(self.next_weights)
+        print(self.next_weights)
 
         self.update_weights(self.next_weights)
 
@@ -276,67 +203,76 @@ class Network:
                                  + np.mean(self.weights))
 
         # plot.attractor_networks.plot_weights(self)
-        # pass
 
     def fully_learn(self):
-        # tot = 1
-        #
-        # while (self.weights[-1] != self.next_theoretical_weights).all():
-        #     self.learn()
-        #     tot += 1
-        #
-        # print(f"\nFinished learning after {tot} "
-        #       f"node weight updates.\n")
-        pass
+        tot = 1
 
-    def simulate_learning(self, iterations, recalled_pattern):
-
-        if self.p == 1:
-            self.calculate_next_weights(self.patterns[self.first_p])
-            self.update_all_neurons()
-        else:
-            # for p in range(self.p - 2):
-            for p in range(len(self.patterns - 1)):
-                self.calculate_next_weights(self.patterns[p])
-                self.update_weights(self.next_theoretical_weights)
-
-            # self.currents = np.vstack((self.currents,
-                                       # np.zeros(self.num_neurons)))
-            self.calculate_next_weights(self.patterns[self.p - 1])
-            self.update_all_neurons()
-        # self.update_all_neurons()
-
-        self.p_recall(n_pattern=recalled_pattern)
-
-        for i in range(iterations):
+        while (self.weights[-1] != self.next_theoretical_weights).all():
             self.learn()
-            self.update_all_neurons()
-            self.p_recall(n_pattern=recalled_pattern)
+            tot += 1
 
-    def p_recall(self, item=None, n_pattern=None, time=None, verbose=False):
+        print(f"\nFinished learning after {tot} "
+              f"node weight updates.\n")
+
+    def simulate_learning(self):
+        self.calculate_next_weights(self.patterns[self.first_p])
+        # self._initialize_currents()
+        self.fully_learn()
+        # self._update_all_neurons()
+        # self._find_attractor()
+
+    def p_recall(self, item, time=None):
         """
-        After choosing, compare the chosen pattern with the correct pattern
-        to retrieve the probability of recall.
+        after choosing, compare the chosen pattern with the correct pattern
+        to retrieve the probability of recall
         """
-        assert item is not None or n_pattern is not None
-        if item is not None:
-            bin_item = self.binarize_item(item)
-        if n_pattern is not None:
-            bin_item = self.patterns[n_pattern]
 
-        # self.currents = np.vstack((self.currents, bin_item))
-        # self.update_all_neurons()
+        # bin_question is the partial (distorted) array
+        question_array = np.array([item])
+        bin_question = ((question_array[:, None]
+                         & (1 << np.arange(8))) > 0).astype(int)
+        bin_question = np.append(bin_question, np.zeros(self.num_neurons
+                                                        - bin_question.size))
 
-        match = np.sum(self.currents[-1] == bin_item)
+        print("Item given as pattern:", bin_question)
+
+        self.currents = np.vstack((self.currents, bin_question))
+        self._update_all_neurons()
+
+        match = np.sum(self.currents[-1] == bin_question)
         p_r = match / self.num_neurons
-        self.p_recall_history.append(p_r)
-
-        if verbose:
-            print("\nCurrent after item presentation and one update:\n",
-                  self.currents[-1])
-            print("\nProbability of recall of the item: ", p_r)
+        print("\nCurrent after item presentation and one update:\n",
+              self.currents[-1])
+        print("\nProbability of recall of the item: ", p_r)
 
         return p_r
+
+
+def plot_average_firing_rate(network):
+    """TODO make it work and move it to /plot"""
+
+    data = network.patterns_evolution
+    n_iteration = network.currents.shape[0] - 1
+    # print(n_iteration)
+
+    x = np.arange(0, n_iteration, dtype=float)
+    print("x", x.size)
+
+    fig, ax = plt.subplots()
+
+    ax.plot(x, data, linewidth=0.5, alpha=1)
+
+    try:
+        for i in range(data.shape[0]-1):
+            ax.plot(x, data[i+1], linewidth=0.5, alpha=1)
+            if i > 1:
+                break
+    except:
+        print("1")
+
+    ax.set_xlabel("Time (cycles)")
+    ax.set_ylabel("Average firing rate")
+    plt.show()
 
 
 def main(force=False):
@@ -347,7 +283,7 @@ def main(force=False):
 
     if not os.path.exists(bkp_file) or force:
 
-        np.random.seed(12345)
+        np.random.seed(123)
 
         # flower = {"kanji": np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]),
         #           "meaning": np.array([1, 1, 1, 0, 0, 0, 0, 0, 0, 1])}
@@ -359,42 +295,55 @@ def main(force=False):
         #        "meaning": np.array([0, 0, 0, 0, 1, 0, 1, 1, 1, 1])}
 
         network = Network(
-                            num_neurons=20,
-                            f=0.4,
+                            num_neurons=200,
+                            f=0.7,
                             p=1,
-                            first_p=0,
-                            inverted_fraction=0.5,
-                            learning_rate=0.01
+                            inverted_fraction=0.2,
+                            learning_rate=0.00075
                          )
 
         # network.present_pattern(flower)
         # network.present_pattern(leg)
         # network.present_pattern(eye)
 
-        network.calculate_next_weights(network.patterns[0])
-        network.update_weights(network.next_theoretical_weights)
-        network.calculate_next_weights(network.patterns[0])
-        network.update_all_neurons()
+        # network.simulate()
 
-        network.p_recall(n_pattern=0)
+        # network.p_recall(12)
 
-        for i in range(20):
+        # print(network.weights)
+        # network._initialize_currents()
+        # network._update_all_neurons()
+        # for i in range(0):
+        #     network._find_attractor()
+        print(network.weights)
+        print(network.patterns)
+        network.calculate_next_weights(network.patterns[0])
+        network._update_all_neurons()
+        print(network.next_theoretical_weights)
+
+        for i in range(10):
+            print(np.mean(network.weights))
             network.learn()
-            network.update_all_neurons_learning()
-            network.p_recall(n_pattern=0)
+            network._update_all_neurons()
+            match = np.sum(network.currents[-1] == network.patterns[0])
+            p_recall = match / network.num_neurons
+            network.p_recall_history.append(p_recall)
 
-        # network.simulate_learning(iterations=100, recalled_pattern=2)
+        print(network.weights)
+
+        print(np.mean(network.weights))
+
+        plot.attractor_networks.plot_mean_weights(network)
+        plot.attractor_networks.plot_p_recall(network)
 
         pickle.dump(network, open(bkp_file, "wb"))
     else:
         print("Loading from pickle file...")
         network = pickle.load(open(bkp_file, "rb"))
 
-    # plot.attractor_networks.plot_mean_weights(network)
-    plot.attractor_networks.plot_energy(network)
-    plot.attractor_networks.plot_p_recall(network)
     plot.attractor_networks.plot_currents(network)
     # plot.attractor_networks.plot_weights(network)
+    # plot_average_firing_rate(network)
 
 
 if __name__ == '__main__':
