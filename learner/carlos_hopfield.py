@@ -17,7 +17,8 @@ class Network:
         time step
     """
     def __init__(self, num_neurons=1000, p=16, f=0.1, inverted_fraction=0.3,
-                 noise_variance=65, first_p=0, learning_rate=0.3):
+                 noise_variance=65, first_p=0, learning_rate=0.3,
+                 forgetting_rate=0.1):
         self.num_neurons = num_neurons
         self.p = p
         self.f = f
@@ -26,6 +27,7 @@ class Network:
         self.noise_variance = noise_variance
         self.learning_rate = learning_rate
         assert self.learning_rate <= 1
+        self.forgetting_rate = forgetting_rate
 
         self.weights = np.zeros((self.num_neurons, self.num_neurons))
         self.next_theoretical_weights = np.zeros_like(self.weights)
@@ -132,6 +134,10 @@ class Network:
         """Heaviside"""
         return int(x >= 0)
 
+    def noise(self):
+        # Amplitude-modulated Gaussian noise
+        return np.random.normal(loc=0, scale=self.noise_variance**0.5) * 0.05
+
     def _update_current(self, neuron):
         """
         If you are updating one node of a Hopfield network, then the values of
@@ -146,11 +152,8 @@ class Network:
         """
         dot_product = np.dot(self.weights[neuron], self.currents[-2])
 
-        # Amplitude-modulated Gaussian noise
-        noise = np.random.normal(loc=0, scale=self.noise_variance**0.5) * 0.05
-
         self.currents[-1, neuron] = self._activation_function(dot_product
-                                                              + noise)
+                                                              + self.noise())
 
     def update_all_neurons(self):
         """
@@ -190,11 +193,8 @@ class Network:
                              size=self.num_neurons)
         dot_product = np.dot(self.weights[neuron], random_currents)
 
-        # Amplitude-modulated Gaussian noise
-        noise = 0#np.random.normal(loc=0, scale=self.noise_variance**0.5) * 0.05
-
         self.currents[-1, neuron] = self._activation_function(dot_product
-                                                              + noise)
+                                                              + self.noise())
 
     def update_all_neurons_learning(self):
         """
@@ -272,7 +272,7 @@ class Network:
 
         self.update_weights(self.next_weights)
 
-        self.weights_mean.append(-np.mean(self.next_theoretical_weights)\
+        self.weights_mean.append(-np.mean(self.next_theoretical_weights)
                                  + np.mean(self.weights))
 
         # plot.attractor_networks.plot_weights(self)
@@ -288,6 +288,15 @@ class Network:
         # print(f"\nFinished learning after {tot} "
         #       f"node weight updates.\n")
         pass
+
+    def forget(self):
+        self.next_weights = (self.weights + self.noise() * 10000000) \
+            * self.forgetting_rate
+
+        self.update_weights(self.next_weights)
+
+        self.weights_mean.append(-np.mean(self.next_theoretical_weights)
+                                 + np.mean(self.weights))
 
     def simulate_learning(self, iterations, recalled_pattern):
 
@@ -364,22 +373,35 @@ def main(force=False):
                             p=1,
                             first_p=0,
                             inverted_fraction=0.5,
-                            learning_rate=0.01
+                            learning_rate=0.01,
+                            forgetting_rate=0.1
                          )
 
         # network.present_pattern(flower)
         # network.present_pattern(leg)
         # network.present_pattern(eye)
 
+
+        # # learning loop
+        # network.calculate_next_weights(network.patterns[0])
+        # network.update_weights(network.next_theoretical_weights)
+        # network.calculate_next_weights(network.patterns[0])
+        # network.update_all_neurons()
+        #
+        # network.p_recall(n_pattern=0)
+        #
+        # for i in range(20):
+        #     network.learn()
+        #     network.update_all_neurons_learning()
+        #     network.p_recall(n_pattern=0)
+
         network.calculate_next_weights(network.patterns[0])
         network.update_weights(network.next_theoretical_weights)
-        network.calculate_next_weights(network.patterns[0])
         network.update_all_neurons()
-
         network.p_recall(n_pattern=0)
 
-        for i in range(20):
-            network.learn()
+        for i in range(200):
+            network.forget()
             network.update_all_neurons_learning()
             network.p_recall(n_pattern=0)
 
@@ -390,11 +412,11 @@ def main(force=False):
         print("Loading from pickle file...")
         network = pickle.load(open(bkp_file, "rb"))
 
-    # plot.attractor_networks.plot_mean_weights(network)
-    plot.attractor_networks.plot_energy(network)
+    plot.attractor_networks.plot_mean_weights(network)
+    # plot.attractor_networks.plot_energy(network)
     plot.attractor_networks.plot_p_recall(network)
     plot.attractor_networks.plot_currents(network)
-    # plot.attractor_networks.plot_weights(network)
+    plot.attractor_networks.plot_weights(network)
 
 
 if __name__ == '__main__':
