@@ -17,7 +17,8 @@ class Network:
         time step
     """
     def __init__(self, num_neurons=1000, p=16, f=0.1, inverted_fraction=0.3,
-                 noise_variance=65, first_p=0, learning_rate=0.3):
+                 noise_variance=65, first_p=0, learning_rate=0.3,
+                 forgetting_rate=0.1):
         self.num_neurons = num_neurons
         self.p = p
         self.f = f
@@ -26,6 +27,7 @@ class Network:
         self.noise_variance = noise_variance
         self.learning_rate = learning_rate
         assert self.learning_rate <= 1
+        self.forgetting_rate = forgetting_rate
 
         self.weights = np.zeros((self.num_neurons, self.num_neurons))
         self.next_theoretical_weights = np.zeros_like(self.weights)
@@ -124,6 +126,7 @@ class Network:
         for p in tqdm(range(len(self.patterns))):
             self.calculate_next_weights(self.patterns[p])
             self.update_weights(self.next_theoretical_weights)
+            print(self.next_theoretical_weights)
 
         print("Done!")
 
@@ -131,6 +134,10 @@ class Network:
     def _activation_function(x):
         """Heaviside"""
         return int(x >= 0)
+
+    def noise(self):
+        # Amplitude-modulated Gaussian noise
+        return np.random.normal(loc=0, scale=self.noise_variance**0.5) * 0.05
 
     def _update_current(self, neuron):
         """
@@ -146,11 +153,8 @@ class Network:
         """
         dot_product = np.dot(self.weights[neuron], self.currents[-2])
 
-        # Amplitude-modulated Gaussian noise
-        noise = np.random.normal(loc=0, scale=self.noise_variance**0.5) * 0.05
-
         self.currents[-1, neuron] = self._activation_function(dot_product
-                                                              + noise)
+                                                              + self.noise())
 
     def update_all_neurons(self):
         """
@@ -190,11 +194,8 @@ class Network:
                              size=self.num_neurons)
         dot_product = np.dot(self.weights[neuron], random_currents)
 
-        # Amplitude-modulated Gaussian noise
-        noise = 0#np.random.normal(loc=0, scale=self.noise_variance**0.5) * 0.05
-
         self.currents[-1, neuron] = self._activation_function(dot_product
-                                                              + noise)
+                                                              + self.noise())
 
     def update_all_neurons_learning(self):
         """
@@ -272,7 +273,7 @@ class Network:
 
         self.update_weights(self.next_weights)
 
-        self.weights_mean.append(-np.mean(self.next_theoretical_weights)\
+        self.weights_mean.append(-np.mean(self.next_theoretical_weights)
                                  + np.mean(self.weights))
 
         # plot.attractor_networks.plot_weights(self)
@@ -288,6 +289,15 @@ class Network:
         # print(f"\nFinished learning after {tot} "
         #       f"node weight updates.\n")
         pass
+
+    def forget(self):
+        self.next_weights = (self.weights + self.noise() * 10000000) \
+            * self.forgetting_rate
+
+        self.update_weights(self.next_weights)
+
+        self.weights_mean.append(-np.mean(self.next_theoretical_weights)
+                                 + np.mean(self.weights))
 
     def simulate_learning(self, iterations, recalled_pattern):
 
@@ -347,7 +357,7 @@ def main(force=False):
 
     if not os.path.exists(bkp_file) or force:
 
-        np.random.seed(12345)
+        np.random.seed(123)
 
         # flower = {"kanji": np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]),
         #           "meaning": np.array([1, 1, 1, 0, 0, 0, 0, 0, 0, 1])}
@@ -359,38 +369,63 @@ def main(force=False):
         #        "meaning": np.array([0, 0, 0, 0, 1, 0, 1, 1, 1, 1])}
 
         network = Network(
-                            num_neurons=20,
-                            f=0.4,
-                            p=1,
+                            num_neurons=80,
+                            f=0.55,
+                            p=2,
                             first_p=0,
                             inverted_fraction=0.5,
-                            learning_rate=0.01
+                            learning_rate=0.1,
+                            forgetting_rate=0.1
                          )
 
         # network.present_pattern(flower)
         # network.present_pattern(leg)
         # network.present_pattern(eye)
 
+        # # learning loop
+        # network.calculate_next_weights(network.patterns[0])
+        # network.update_weights(network.next_theoretical_weights)
+        # network.calculate_next_weights(network.patterns[0])
+        # network.update_all_neurons()
+        #
+        # network.p_recall(n_pattern=0)
+        #
+        # for i in range(20):
+        #     network.learn()
+        #     network.update_all_neurons_learning()
+        #     network.p_recall(n_pattern=0)
+
         network.calculate_next_weights(network.patterns[0])
         network.update_weights(network.next_theoretical_weights)
-        network.calculate_next_weights(network.patterns[0])
         network.update_all_neurons()
+        plot.attractor_networks.plot_weights(network)
+        network.calculate_next_weights(network.patterns[1])
+        network.p_recall(n_pattern=1)
 
-        network.p_recall(n_pattern=0)
+        print(network.next_theoretical_weights)
 
-        for i in range(20):
+        for i in range(1750):
             network.learn()
             network.update_all_neurons_learning()
-            network.p_recall(n_pattern=0)
+            network.p_recall(n_pattern=1)
+
+        plot.attractor_networks.plot_weights(network)
 
         # network.simulate_learning(iterations=100, recalled_pattern=2)
+
+        network.weights = np.zeros_like(network.next_theoretical_weights)
+        network.next_theoretical_weights = np.zeros_like(network.weights)
+        print(network.weights)
+        network.compute_weights_all_patterns()
+        plot.attractor_networks.plot_weights(network)
+
 
         pickle.dump(network, open(bkp_file, "wb"))
     else:
         print("Loading from pickle file...")
         network = pickle.load(open(bkp_file, "rb"))
 
-    # plot.attractor_networks.plot_mean_weights(network)
+    plot.attractor_networks.plot_mean_weights(network)
     plot.attractor_networks.plot_energy(network)
     plot.attractor_networks.plot_p_recall(network)
     plot.attractor_networks.plot_currents(network)

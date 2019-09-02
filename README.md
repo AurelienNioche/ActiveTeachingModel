@@ -36,6 +36,7 @@ Small changes are expected under Linux and/or Windows.
 #### PostgreSQL
 
 Install postgresql (all commands are given considering the application running under MacOs)
+Please refer to the documentation for details: https://www.postgresql.org/docs/9.1/creating-cluster.html 
 
     brew install postgresql
 
@@ -122,7 +123,14 @@ Remove the db
     dropdb ActiveTeaching
 
 
-## Postgre error management
+## PostgreSQL error management
+
+In case database creation fails because of denied permissions in GNU/Linux refer to https://www.postgresql.org/docs/9.1/creating-cluster.html:
+   
+    root# mkdir /usr/local/pgsql
+    root# chown postgres /usr/local/pgsql
+    root# su postgres
+    postgres$ initdb -D /usr/local/pgsql/data
 
 Be sure that posgre sever is running
 
