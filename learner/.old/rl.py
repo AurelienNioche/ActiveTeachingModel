@@ -26,12 +26,12 @@ class QLearner(Learner):
 
         self.verbose = verbose
 
-    def _softmax(self, x):
-        try:
-            return np.exp(x / self.tau) / np.sum(np.exp(x / self.tau))
-        except (Warning, FloatingPointError) as w:
-            print(x, self.tau)
-            raise Exception(f'{w} [x={x}, temp={self.tau}]')
+    # def _softmax(self, x):
+    #     try:
+    #         return np.exp(x / self.tau) / np.sum(np.exp(x / self.tau))
+    #     except (Warning, FloatingPointError) as w:
+    #         print(x, self.tau)
+    #         raise Exception(f'{w} [x={x}, temp={self.tau}]')
 
     def _temporal_difference(self, v, obs=1):
 
@@ -54,36 +54,6 @@ class QLearner(Learner):
 
         return self._softmax_unique(x_i, x)
 
-    def _p_choice(self, item, reply, possible_replies, time=None):
-
-        x_i = self.q[item, reply]
-        x = self.q[item, possible_replies]
-
-        return self._softmax_unique(x_i, x)
-
-    def _p_correct(self, item, reply, possible_replies, time=None):
-
-        x_correct = self.q[item, item]
-        x = self.q[item, possible_replies]
-
-        p_correct = self._softmax_unique(x_correct, x)
-        if item == reply:
-            return p_correct
-        else:
-            return 1-p_correct
-
-    def decide(self, item, possible_replies, time=None):
-
-        p = self._softmax(x=self.q[item, possible_replies])
-        reply = np.random.choice(possible_replies, p=p)
-
-        if self.verbose:
-            print(f'Question is: {item}')
-            print(f'P values are: {[f"{p_i:.02f}" for p_i in p]}')
-            print(f'Reply is {reply}')
-
-        return reply
-
     def learn(self, item, time=None):
 
         self.q[item, item] = \
@@ -91,6 +61,36 @@ class QLearner(Learner):
 
     def unlearn(self):
         raise NotImplementedError
+
+    # def _p_choice(self, item, reply, possible_replies, time=None):
+    #
+    #     x_i = self.q[item, reply]
+    #     x = self.q[item, possible_replies]
+    #
+    #     return self._softmax_unique(x_i, x)
+    #
+    # def _p_correct(self, item, reply, possible_replies, time=None):
+    #
+    #     x_correct = self.q[item, item]
+    #     x = self.q[item, possible_replies]
+    #
+    #     p_correct = self._softmax_unique(x_correct, x)
+    #     if item == reply:
+    #         return p_correct
+    #     else:
+    #         return 1-p_correct
+    #
+    # def decide(self, item, possible_replies, time=None):
+    #
+    #     p = self._softmax(x=self.q[item, possible_replies])
+    #     reply = np.random.choice(possible_replies, p=p)
+    #
+    #     if self.verbose:
+    #         print(f'Question is: {item}')
+    #         print(f'P values are: {[f"{p_i:.02f}" for p_i in p]}')
+    #         print(f'Reply is {reply}')
+    #
+    #     return reply
 
         # success = question == reply  # We suppose matching (0,0), (1,1) ... (n,n)
         #

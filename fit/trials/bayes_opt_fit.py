@@ -1,5 +1,3 @@
-import sys
-
 from bayes_opt import BayesianOptimization
 
 import numpy as np

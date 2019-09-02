@@ -4,8 +4,6 @@ from tqdm import tqdm
 from learner.act_r_custom import ActRMeaning
 from teacher.active import Active
 
-from fit.pygpgo.objective import objective
-
 import numpy as np
 
 from simulation.compute import p_recall_over_time_after_learning
@@ -20,6 +18,7 @@ import argparse
 import multiprocessing as mp
 
 from psychologist.psychologist import Psychologist
+from psychologist.objective import objective
 
 
 class Run:
@@ -85,8 +84,8 @@ class Run:
             self.learnt_threshold = 0.95
 
         self.best_value, \
-        self.obj_value, self.eval_param, self.exploration = \
-            None, None, None, None
+        self.obj_value, self.exploration = \
+            None, None, None
 
     def run(self):
 
@@ -102,9 +101,8 @@ class Run:
                     n_item=self.n_item,
                     n_iteration=self.n_iteration,
                     task_param=self.task_param,
-                    student_model=self.student_model,
-                    eval_param=self.eval_param,
                     hist_item=self.hist_item,
+                    hist_success=self.hist_success,
                     t=t
                 )
 
@@ -140,16 +138,15 @@ class Run:
                     model=self.student_model,
                     t=t,
                     param=self.student_param,
-                    task_param=self.task_param,
-                    show=False
-                )
+                    task_param=self.task_param)
 
-            self.best_value = self.psychologist.opt.best_value
-            self.eval_param = self.psychologist.opt.eval_param
+            self.best_value = self.psychologist.best_value
 
             self.learner.learn(item=item)
 
             if self.verbose:
+                self.model_learner.set_cognitive_parameters(
+                    param=self.best_param)
                 self.model_learner.learn(item=item)
 
         p_recall_hist = p_recall_over_time_after_learning(
@@ -163,8 +160,8 @@ class Run:
             'p_recall': p_recall_hist,
             'questions': self.hist_item,
             'successes': self.hist_success,
-            'history_best_fit_param': self.psychologist.opt.hist_best_param,
-            'history_best_fit_value': self.psychologist.opt.hist_best_value,
+            'history_best_fit_param': self.psychologist.hist_best_param,
+            'history_best_fit_value': self.psychologist.hist_best_values,
         }
 
     def print(self, t):
@@ -188,7 +185,7 @@ class Run:
         if t > 0:
 
             print()
-            discrepancy = 'Param disc.'
+            discrepancy = 'Param disc.: '
             for k in sorted(list(self.model_learner.param.keys())):
                 discrepancy += \
                     f'{k}: ' \
@@ -240,7 +237,7 @@ def main(force=True):
     max_iter = 100
     timeout = 5
     exploration_ratio = 0.1
-    testing_period = 0
+    testing_period = 100
     seed = 123
 
     np.random.seed(seed)
