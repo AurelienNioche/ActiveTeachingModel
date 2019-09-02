@@ -356,7 +356,7 @@ def main(force=False):
 
     if not os.path.exists(bkp_file) or force:
 
-        np.random.seed(12345)
+        np.random.seed(123)
 
         # flower = {"kanji": np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]),
         #           "meaning": np.array([1, 1, 1, 0, 0, 0, 0, 0, 0, 1])}
@@ -368,12 +368,12 @@ def main(force=False):
         #        "meaning": np.array([0, 0, 0, 0, 1, 0, 1, 1, 1, 1])}
 
         network = Network(
-                            num_neurons=20,
-                            f=0.4,
+                            num_neurons=80,
+                            f=0.55,
                             p=1,
                             first_p=0,
                             inverted_fraction=0.5,
-                            learning_rate=0.01,
+                            learning_rate=0.00025,
                             forgetting_rate=0.1
                          )
 
@@ -396,12 +396,12 @@ def main(force=False):
         #     network.p_recall(n_pattern=0)
 
         network.calculate_next_weights(network.patterns[0])
-        network.update_weights(network.next_theoretical_weights)
+        # network.update_weights(network.next_theoretical_weights)
         network.update_all_neurons()
         network.p_recall(n_pattern=0)
 
-        for i in range(200):
-            network.forget()
+        for i in range(175):
+            network.learn()
             network.update_all_neurons_learning()
             network.p_recall(n_pattern=0)
 
@@ -416,7 +416,7 @@ def main(force=False):
     # plot.attractor_networks.plot_energy(network)
     plot.attractor_networks.plot_p_recall(network)
     plot.attractor_networks.plot_currents(network)
-    plot.attractor_networks.plot_weights(network)
+    # plot.attractor_networks.plot_weights(network)
 
 
 if __name__ == '__main__':
