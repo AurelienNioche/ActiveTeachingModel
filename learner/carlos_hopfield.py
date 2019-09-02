@@ -126,6 +126,7 @@ class Network:
         for p in tqdm(range(len(self.patterns))):
             self.calculate_next_weights(self.patterns[p])
             self.update_weights(self.next_theoretical_weights)
+            print(self.next_theoretical_weights)
 
         print("Done!")
 
@@ -370,17 +371,16 @@ def main(force=False):
         network = Network(
                             num_neurons=80,
                             f=0.55,
-                            p=1,
+                            p=2,
                             first_p=0,
                             inverted_fraction=0.5,
-                            learning_rate=0.00025,
+                            learning_rate=0.1,
                             forgetting_rate=0.1
                          )
 
         # network.present_pattern(flower)
         # network.present_pattern(leg)
         # network.present_pattern(eye)
-
 
         # # learning loop
         # network.calculate_next_weights(network.patterns[0])
@@ -396,16 +396,29 @@ def main(force=False):
         #     network.p_recall(n_pattern=0)
 
         network.calculate_next_weights(network.patterns[0])
-        # network.update_weights(network.next_theoretical_weights)
+        network.update_weights(network.next_theoretical_weights)
         network.update_all_neurons()
-        network.p_recall(n_pattern=0)
+        plot.attractor_networks.plot_weights(network)
+        network.calculate_next_weights(network.patterns[1])
+        network.p_recall(n_pattern=1)
 
-        for i in range(175):
+        print(network.next_theoretical_weights)
+
+        for i in range(1750):
             network.learn()
             network.update_all_neurons_learning()
-            network.p_recall(n_pattern=0)
+            network.p_recall(n_pattern=1)
+
+        plot.attractor_networks.plot_weights(network)
 
         # network.simulate_learning(iterations=100, recalled_pattern=2)
+
+        network.weights = np.zeros_like(network.next_theoretical_weights)
+        network.next_theoretical_weights = np.zeros_like(network.weights)
+        print(network.weights)
+        network.compute_weights_all_patterns()
+        plot.attractor_networks.plot_weights(network)
+
 
         pickle.dump(network, open(bkp_file, "wb"))
     else:
@@ -413,7 +426,7 @@ def main(force=False):
         network = pickle.load(open(bkp_file, "rb"))
 
     plot.attractor_networks.plot_mean_weights(network)
-    # plot.attractor_networks.plot_energy(network)
+    plot.attractor_networks.plot_energy(network)
     plot.attractor_networks.plot_p_recall(network)
     plot.attractor_networks.plot_currents(network)
     # plot.attractor_networks.plot_weights(network)
