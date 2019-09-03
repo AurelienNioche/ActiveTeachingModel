@@ -23,5 +23,6 @@ def objective(model,
 
     # diff[diff < 0] *= 1.1
     diff = np.power(diff, 2)
-    value = np.sum(diff)
+    value = np.mean(diff)
+    assert value >= 0
     return value

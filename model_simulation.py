@@ -1,5 +1,6 @@
 import os
 
+from learner.act_r import ActR
 from learner.act_r_custom import ActRMeaning
 from teacher.random import RandomTeacher
 from teacher.leitner import Leitner
@@ -162,10 +163,10 @@ class Run:
 def main(verbose=False, force=False):
 
     n_iteration = 1000
-    n_item = 30
+    n_item = 200
 
     student_model = ActRMeaning
-    student_param = {"d": 0.5, "tau": 0.01, "s": 0.06, "m": 0.02}
+    student_param = {"d": 0.01, "tau": 0.01, "s": 0.06, "m": 0.1}
 
     teacher_model = Leitner
     teacher_param = {'n_item': n_item}

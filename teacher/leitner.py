@@ -17,7 +17,7 @@ class Leitner(GenericTeacher):
         :var self.taboo:
             integer value in range(0 to n_items). Index of the item
             shown in previous iteration.
-        :var self.learning_progress:
+        :var self.box:
             array of size n_item representing the box
             number of i^th item at i^th index.
         :var self.wait_time_arr:
@@ -28,7 +28,7 @@ class Leitner(GenericTeacher):
         super().__init__(**kwargs)
 
         self.delay_factor = delay_factor
-        self.learning_progress = np.zeros(self.n_item)
+        self.box = np.zeros(self.n_item)
         self.wait_time_arr = np.zeros(self.n_item)
 
         self.taboo = None
@@ -44,12 +44,12 @@ class Leitner(GenericTeacher):
             * Move an item to the previous box for a failure.
         """
         taboo = self.taboo
-        prev_box = self.learning_progress[taboo]
+        prev_box = self.box[taboo]
         if hist_success[t-1]:
-            self.learning_progress[taboo] += 1
+            self.box[taboo] += 1
         else:
             if prev_box > 0:
-                self.learning_progress[taboo] -= 1
+                self.box[taboo] -= 1
 
     def update_wait_time(self):
         """
@@ -63,9 +63,8 @@ class Leitner(GenericTeacher):
             if i != self.taboo:
                 self.wait_time_arr[i] += 1
             else:
-                taboo_box = self.learning_progress[self.taboo]
-                self.wait_time_arr[self.taboo] = -(taboo_box *
-                                                   self.delay_factor)
+                self.wait_time_arr[self.taboo] =\
+                    - self.delay_factor**self.box[self.taboo]
 
     def find_due_items(self):
         """
@@ -136,7 +135,7 @@ class Leitner(GenericTeacher):
         items_arr = []
         min_box = float('inf')
         for item in max_overdue_items:
-            box = self.learning_progress[item]
+            box = self.box[item]
             if box < min_box:
                 items_arr = [item]
                 min_box = box

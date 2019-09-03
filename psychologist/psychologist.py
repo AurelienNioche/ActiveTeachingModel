@@ -10,12 +10,20 @@ class Psychologist:
     def __init__(self,
                  student_model,
                  task_param,
-                 n_jobs, init_eval, max_iter, timeout,
-                 testing_period, exploration_ratio):
+                 testing_period=None, exploration_ratio=None,
+                 exploration_threshold=None,
+                 initial_design_numdata=10, max_iter=1000,
+                 max_time=5):
+
+        self.initial_design_numdata = initial_design_numdata
+        self.max_iter = max_iter
+        self.max_time = max_time
 
         self.task_param = task_param
+
         self.testing_period = testing_period
         self.exploration_ratio = exploration_ratio
+        self.exploration_threshold = exploration_threshold
 
         self.student_model = student_model
 
@@ -31,6 +39,7 @@ class Psychologist:
 
         self.best_param = None
         self.best_value = None
+        self.estimated_var = None
 
     def _objective(self, param, keep_in_history=True):
 
@@ -78,7 +87,9 @@ class Psychologist:
                 **task_param)
 
             for i in range(n_item):
+                agent.learn(i)
                 p_recall[i, j] = agent.p_recall(i)
+                agent.unlearn()
 
         std_per_item = np.std(p_recall, axis=1)
 
@@ -94,13 +105,25 @@ class Psychologist:
     def is_time_for_exploration(self, t):
 
         if t == 0:
-            exploration = False
+            return False
+        elif t == 1:
+            return True
+        elif t == 2:
+            return False
 
-        elif t < self.testing_period:
-            exploration = t % 2 == 1
+        assert self.exploration_ratio is None \
+            or self.exploration_threshold is not None, \
+            "Choose one or the other!"
+        if self.exploration_ratio is not None:
+
+            if t < self.testing_period:
+                exploration = t % 2 == 1
+
+            else:
+                exploration = np.random.random() <= self.exploration_ratio
 
         else:
-            exploration = np.random.random() <= self.exploration_ratio
+            exploration = self.estimated_var >= self.exploration_threshold
 
         return exploration
 
@@ -122,7 +145,7 @@ class Psychologist:
 
         myBopt = GPyOpt.methods.BayesianOptimization(
             f=self._objective, domain=bounds, acquisition_type='EI',
-            exact_feval=False, initial_design_numdata=10, normalize_Y=False)
+            exact_feval=False, initial_design_numdata=self.initial_design_numdata, normalize_Y=False)
         max_iter = np.inf
         max_time = 5
         eps = 10e-6
@@ -138,9 +161,22 @@ class Psychologist:
 
         self.best_value = myBopt.fx_opt
 
-        print("BEST VALUE", self.best_value)
-
+        model = myBopt.model.model
+        eval_points = np.zeros((1, len(self.student_model.bounds)))
+        eval_points[0, :] = myBopt.x_opt
+        m, v = model.predict(eval_points)
+        self.estimated_var = v[0][0]
+        # print(np.array(self.hist_param).shape)
+        # eval_points = np.array(self.hist_param)
+        # m, v = model.predict(eval_points)
+        # for i, m_i, v_i in zip(eval_points, m, v):
+        #
+        #     if (i == myBopt.x_opt).all():
+        #         # print(i, m_i[0], v_i[0])
+        #         print(v_i[0])
         self.hist_best_param.append(self.best_param)
         self.hist_best_values.append(self.best_value)
+
+        print("BEST PARAM", self.best_param)
 
         return self.best_param

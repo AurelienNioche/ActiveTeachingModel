@@ -2,6 +2,7 @@ import os
 from tqdm import tqdm
 
 from learner.act_r_custom import ActRMeaning
+from learner.act_r import ActR
 from teacher.active import Active
 
 import numpy as np
@@ -30,23 +31,16 @@ class Run:
             student_param,
             task_param,
             teacher_model,
-            init_eval,
-            max_iter,
-            exploration_ratio,
-            testing_period,
-            n_jobs=mp.cpu_count(),
-            timeout=None,
+            fit_param,
+            exploration_param,
             verbose=False,
     ):
 
-        self.exploration_ratio = exploration_ratio
-        self.testing_period = testing_period
         self.n_iteration = n_iteration
         self.n_item = n_item
         self.task_param = task_param
         self.student_model = student_model
         self.student_param = student_param
-        self.timeout = timeout
         self.verbose = verbose
 
         self.hist_item = np.full(n_iteration, -99)
@@ -62,12 +56,7 @@ class Run:
         self.psychologist = Psychologist(
             student_model=student_model,
             task_param=task_param,
-            testing_period=testing_period,
-            exploration_ratio=exploration_ratio,
-            n_jobs=n_jobs,
-            init_eval=init_eval,
-            max_iter=max_iter,
-            timeout=timeout
+            **fit_param, **exploration_param
         )
 
         self.learner = student_model(
@@ -172,13 +161,18 @@ class Run:
             p_recall[i] = self.learner.p_recall(i)
             p_recall_model[i] = self.model_learner.p_recall(i)
 
+        #     print(p_recall_model[i])
+        #
+        # print(p_recall_model)
         learnt = \
             np.sum(p_recall >= self.learnt_threshold)
         which_learnt = \
             np.where(p_recall >= self.learnt_threshold)[0]
 
+        # print(p_recall_model >= self.learnt_threshold)
         learnt_model = \
             np.sum(p_recall_model >= self.learnt_threshold)
+        # print(learnt_model)
         which_learnt_model = \
             np.where(p_recall_model >= self.learnt_threshold)[0]
 
@@ -189,9 +183,9 @@ class Run:
             for k in sorted(list(self.model_learner.param.keys())):
                 discrepancy += \
                     f'{k}: ' \
-                    f'{self.model_learner.param[k] - self.student_param[k]:.3f}; '
-
+                    f'{self.model_learner.param[k] - self.student_param[k]:.4f}; '
             print(discrepancy, '\n')
+            print(f"Confidence (x1000): {self.psychologist.estimated_var * 10 ** 9:.4f}\n")
             print(f"Obj value: {self.obj_value:.2f}; "
                   f"Best value: {self.best_value:.2f}")
             print()
@@ -227,17 +221,19 @@ class Run:
 
 def main(force=True):
 
-    student_model = ActRMeaning
-    student_param = {"d": 0.5, "tau": 0.01, "s": 0.06, "m": 0.02}
+    student_model = ActR  # ActRMeaning
+    student_param = {"d": 0.01, "tau": 0.01, "s": 0.06}
+    fit_param = {"max_iter": 1000,
+                 "max_time": 5,
+                 "initial_design_numdata": 10}
+                     #   {"d": 0.5, "tau": 0.01, "s": 0.06, "m": 0.02}
+    exploration_param = {
+        "exploration_threshold": 10**-8
+    }
     teacher_model = Active
-    n_item = 30
-    n_iteration = 1000
-    init_eval = 3
+    n_item = 200
+    n_iteration = 750
     verbose = True
-    max_iter = 100
-    timeout = 5
-    exploration_ratio = 0.1
-    testing_period = 100
     seed = 123
 
     np.random.seed(seed)
@@ -252,11 +248,8 @@ def main(force=True):
         f'{teacher_model.__name__}_{student_model.__name__}_' \
         f'{dic2string(student_param)}_' \
         f'ni_{n_item}_n_iteration_{n_iteration}_' \
-        f'init_eval_{init_eval}_' \
-        f'max_iter_{max_iter}_' \
-        f'time_out_{timeout}_' \
-        f'exploration_ratio_{exploration_ratio}_' \
-        f'testing_period_{testing_period}_' \
+        f'{dic2string(fit_param)}_' \
+        f'{dic2string(exploration_param)}_' \
         f'seed_{seed}'
 
     bkp_file = os.path.join('bkp',
@@ -272,11 +265,8 @@ def main(force=True):
             task_param=task_param,
             n_item=n_item,
             n_iteration=n_iteration,
-            init_eval=init_eval,
-            max_iter=max_iter,
-            timeout=timeout,
-            exploration_ratio=exploration_ratio,
-            testing_period=testing_period,
+            fit_param=fit_param,
+            exploration_param=exploration_param,
             verbose=verbose
         )
         r = run.run()
