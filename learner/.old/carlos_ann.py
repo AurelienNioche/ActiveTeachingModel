@@ -11,14 +11,14 @@ np.seterr(all='raise')
 class NetworkParam:
     """
     :param weight_updates: string in ["random", "hebbian", "recanatesi"]
-    :param t_max: int as in the model_simulation script. None when no
+    :param n_iteration: int as in the model_simulation script. None when no
         simulation script is being used with the model
     """
     def __init__(self, n_hidden=40, n_epoch=3, weight_updates="hebbian",
-                 t_max=None, verbose=False):
+                 n_iteration=None, verbose=False):
         self.n_epoch = n_epoch
         self.n_hidden = n_hidden
-        self.t_max = t_max
+        self.n_iteration = n_iteration
         self.verbose = verbose
 
         weight_updates_methods = ["random", "hebbian", "recanatesi"]
@@ -62,11 +62,11 @@ class Network(Learner):
         self.neuron_id = 0
 
         # Create history array according to simulation or the lack thereof
-        if self.pr.t_max is None:
+        if self.pr.n_iteration is None:
             self.hidden_currents_history = np.zeros((self.pr.n_epoch,
                                                     self.pr.n_hidden))
         else:
-            self.hidden_currents_history = np.zeros((self.pr.t_max,
+            self.hidden_currents_history = np.zeros((self.pr.n_iteration,
                                                      self.pr.n_hidden))
             self.time_step = 0
 
@@ -161,7 +161,7 @@ class Network(Learner):
             for neuron in self.neurons["hidden"]:
                 neuron.compute_gain()
                 neuron.update_current()
-                if self.pr.t_max is None:  # Only when NOT simulating
+                if self.pr.n_iteration is None:  # Only when NOT simulating
                     self._update_hidden_currents_history(i)
 
             for neuron in self.neurons["output"]:
@@ -259,7 +259,7 @@ class Network(Learner):
 
         self._update_hidden_currents_history(self.time_step)
         self.time_step += 1
-        if self.time_step == self.pr.t_max:
+        if self.time_step == self.pr.n_iteration:
             plot(self)
 
         if self.verbose:
@@ -451,7 +451,7 @@ def main():
 
     np.random.seed(1234)
 
-    network = Network(tk=Task(t_max=100, n_item=30), param={"n_epoch": 200,
+    network = Network(tk=Task(n_iteration=100, n_item=30), param={"n_epoch": 200,
                                                             "n_hidden": 10,
                                                             "verbose": False})
 

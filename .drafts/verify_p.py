@@ -18,10 +18,10 @@ def choice():
 
 def main():
 
-    t_max = 100000
+    n_iteration = 100000
 
     c = []
-    for t in range(t_max):
+    for t in range(n_iteration):
         c.append(choice())
 
     for i in range(6):

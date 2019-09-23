@@ -5,9 +5,9 @@ class TeacherMemory:
 
     def __init__(self, task):
 
-        self.questions = np.zeros(task.t_max, dtype=int) * -1
-        self.replies = np.zeros(task.t_max, dtype=int) * -1
-        self.successes = np.zeros(task.t_max, dtype=bool) * -1
+        self.questions = np.zeros(task.n_iteration, dtype=int) * -1
+        self.replies = np.zeros(task.n_iteration, dtype=int) * -1
+        self.successes = np.zeros(task.n_iteration, dtype=bool) * -1
 
 
 class Teacher:
@@ -24,11 +24,11 @@ class Teacher:
 
     def _plan_questions_in_advance(self):
 
-        self.memory.questions[:] = np.random.choice(self.task.questions, size=self.task.t_max)
+        self.memory.questions[:] = np.random.choice(self.task.questions, size=self.task.n_iteration)
 
     def _choose_question(self, t):
 
-        # if t < exercise.t_max:
+        # if t < exercise.n_iteration:
         #     self.question = np.random.randint(int(exercise.n/2))
         #
         # else:

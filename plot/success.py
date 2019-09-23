@@ -69,17 +69,17 @@ def multi_curve(questions, replies, font_size=42, line_width=3,
                 ax=None, fig_name=None):
 
     n_items = len(np.unique(questions))
-    t_max = len(questions)
+    n_iteration = len(questions)
 
     if max_lines is None:
         cumulative_success = np.zeros(n_items)
         cumulative_seen = np.zeros(n_items)
-        data = np.zeros((n_items, t_max))
+        data = np.zeros((n_items, n_iteration))
 
     else:
         cumulative_success = np.zeros(max_lines)
         cumulative_seen = np.zeros(max_lines)
-        data = np.zeros((max_lines, t_max))
+        data = np.zeros((max_lines, n_iteration))
 
     for t, (q, r) in enumerate(zip(questions, replies)):
 

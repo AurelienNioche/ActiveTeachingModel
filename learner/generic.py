@@ -44,11 +44,11 @@ class Learner:
 
         # assert not use_p_recall * use_p_correct, "Choose one of the two!"
 
-        t_max = len(data.questions)
+        n_iteration = len(data.questions)
 
-        p_choices = np.zeros(t_max)
+        p_choices = np.zeros(n_iteration)
 
-        for t in range(t_max):
+        for t in range(n_iteration):
 
             item, reply = data.questions[t], data.replies[t]
             time = data.times[t]

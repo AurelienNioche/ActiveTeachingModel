@@ -47,11 +47,11 @@ class ActRDuo(ActR):
 
     def get_p_choices(self, data, use_p_correct=False):
 
-        t_max = len(data.questions)
+        n_iteration = len(data.questions)
 
-        p_choices = np.zeros(t_max)
+        p_choices = np.zeros(n_iteration)
 
-        for t in range(t_max):
+        for t in range(n_iteration):
 
             question, reply = data.questions[t], data.replies[t]
             # possible_rep = data.possible_replies[t]

@@ -33,7 +33,7 @@ class ActR(Learner):
             self.temp = self.s * np.square(2)
 
         if n_possible_replies:
-            self.n_possible_replies = self.n_possible_replies
+            self.n_possible_replies = n_possible_replies
             self.p_random = 1 / self.n_possible_replies
         else:
             # raise Exception

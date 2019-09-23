@@ -19,10 +19,6 @@ class GenericTeacher:
             n_iteration=None,
             n_possible_replies=None):
 
-        # print("___ Question ___")
-        # print(self.questions)
-        # print(agent.questions)
-
         item = \
             self._get_next_node(
                 t=t,
@@ -40,6 +36,24 @@ class GenericTeacher:
             return item, poss_rep
         else:
             return item
+
+    def _get_next_node(self, **kwargs):
+        raise NotImplementedError(f"{type(self).__name__} is a meta-class."
+                                  "This method need to be overridden")
+
+    @staticmethod
+    def _get_possible_replies(item, n_item, n_possible_replies):
+
+        # Select randomly possible replies, including the correct one
+        all_replies = list(range(n_item))
+        all_replies.remove(item)
+
+        possible_replies = \
+            [item, ] + list(np.random.choice(
+                all_replies, size=n_possible_replies-1, replace=False))
+        possible_replies = np.array(possible_replies)
+        np.random.shuffle(possible_replies)
+        return possible_replies
 
         # if possible_replies:
         #     poss_rep = self._get_possible_replies(question)
@@ -78,30 +92,12 @@ class GenericTeacher:
     #
     #     self.t += 1
 
-    def _get_next_node(self, **kwargs):
-        raise NotImplementedError(f"{type(self).__name__} is a meta-class."
-                                  "This method need to be overridden")
-
-    @staticmethod
-    def _get_possible_replies(item, n_item, n_possible_replies):
-
-        # Select randomly possible replies, including the correct one
-        all_replies = list(range(n_item))
-        all_replies.remove(item)
-
-        possible_replies = \
-            [item, ] + list(np.random.choice(
-                all_replies, size=n_possible_replies-1, replace=False))
-        possible_replies = np.array(possible_replies)
-        np.random.shuffle(possible_replies)
-        return possible_replies
-
     # def teach(self, agent=None):
     #
     #     tqdm.write("Teaching...")
     #
-    #     iterator = tqdm(range(self.tk.t_max)) \
-    #         if not self.verbose else range(self.tk.t_max)
+    #     iterator = tqdm(range(self.tk.n_iteration)) \
+    #         if not self.verbose else range(self.tk.n_iteration)
     #
     #     for _ in iterator:
     #         self.ask(agent=agent)

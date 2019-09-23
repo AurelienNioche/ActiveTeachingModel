@@ -7,7 +7,7 @@ from teacher.active import Active
 
 import numpy as np
 
-from simulation.compute import p_recall_over_time_after_learning
+from simulation.p_recall import p_recall_over_time_after_learning
 from simulation.fake import generate_fake_task_param
 
 import plot.simulation
@@ -16,10 +16,13 @@ from utils.utils import dic2string, dump, load
 
 import argparse
 
-import multiprocessing as mp
+# import multiprocessing as mp
 
 from psychologist.psychologist import Psychologist
 from psychologist.objective import objective
+
+
+SCRIPT_NAME = os.path.basename(__file__).split(".")[0]
 
 
 class Run:
@@ -72,8 +75,7 @@ class Run:
             )
             self.learnt_threshold = 0.95
 
-        self.best_value, \
-        self.obj_value, self.exploration = \
+        self.best_value, self.obj_value, self.exploration = \
             None, None, None
 
     def run(self):
@@ -185,7 +187,8 @@ class Run:
                     f'{k}: ' \
                     f'{self.model_learner.param[k] - self.student_param[k]:.4f}; '
             print(discrepancy, '\n')
-            print(f"Confidence (x1000): {self.psychologist.estimated_var * 10 ** 9:.4f}\n")
+            print(f"Confidence (x1000): "
+                  f"{self.psychologist.estimated_var * 10 ** 9:.4f}\n")
             print(f"Obj value: {self.obj_value:.2f}; "
                   f"Best value: {self.best_value:.2f}")
             print()
@@ -226,7 +229,7 @@ def main(force=True):
     fit_param = {"max_iter": 1000,
                  "max_time": 5,
                  "initial_design_numdata": 10}
-                     #   {"d": 0.5, "tau": 0.01, "s": 0.06, "m": 0.02}
+                #   {"d": 0.5, "tau": 0.01, "s": 0.06, "m": 0.02}
     exploration_param = {
         "exploration_threshold": 10**-8
     }
@@ -244,7 +247,6 @@ def main(force=True):
     mean_window = 10
 
     extension = \
-        f'{os.path.basename(__file__).split(".")[0]}_' \
         f'{teacher_model.__name__}_{student_model.__name__}_' \
         f'{dic2string(student_param)}_' \
         f'ni_{n_item}_n_iteration_{n_iteration}_' \
@@ -253,7 +255,7 @@ def main(force=True):
         f'seed_{seed}'
 
     bkp_file = os.path.join('bkp',
-                            f'{os.path.basename(__file__).split(".")[0]}',
+                            SCRIPT_NAME,
                             f'{extension}.p')
 
     r = load(bkp_file)
@@ -279,6 +281,7 @@ def main(force=True):
         successes=r['successes'],
         extension=extension,
         window=mean_window,
+        sub_folder='exploration',
     )
 
 

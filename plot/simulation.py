@@ -13,6 +13,7 @@ import numpy as np
 def summary(
         p_recall, seen, successes,
         font_size=10, label_size=8, line_width=1,
+        sub_folder='',
         extension='',
         window=np.inf
 ):
@@ -68,4 +69,4 @@ def summary(
         window=window
     )
 
-    save_fig(f"simulation_{extension}.pdf")
+    save_fig(f"simulation_{extension}.pdf", sub_folder=sub_folder)

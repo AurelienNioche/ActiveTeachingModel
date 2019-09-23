@@ -9,14 +9,14 @@ class AvyaRevised(GenericTeacher):
     represent_learning = 1
     represent_learnt = 2
 
-    def __init__(self, n_item=20, t_max=200, grades=(1, ),
+    def __init__(self, n_item=20, n_iteration=200, grades=(1, ),
                  handle_similarities=True, normalize_similarity=False,
                  learnt_threshold=0.95,
                  verbose=False):
 
         """
         :param n_item: task attribute
-        :param t_max: task attribute
+        :param n_iteration: task attribute
         :param grades: task attribute
         :param handle_similarities: task attribute
         :param normalize_similarity: task attribute
@@ -34,7 +34,7 @@ class AvyaRevised(GenericTeacher):
             the probability of recall of i^th item).
         """
 
-        super().__init__(n_item=n_item, t_max=t_max, grades=grades,
+        super().__init__(n_item=n_item, n_iteration=n_iteration, grades=grades,
                          handle_similarities=handle_similarities,
                          normalize_similarity=normalize_similarity,
                          verbose=verbose)

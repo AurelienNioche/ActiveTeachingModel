@@ -38,11 +38,11 @@ class Exponential(Learner):
             raise Exception(
                 f"Type {type(param)} is not handled for parameters")
 
-        self.hist = np.zeros(self.tk.t_max, dtype=int)
-        self.success = np.zeros(self.tk.t_max, dtype=bool)
+        self.hist = np.zeros(self.tk.n_iteration, dtype=int)
+        self.success = np.zeros(self.tk.n_iteration, dtype=bool)
         self.t = 0
         self.time_mode = time_mode
-        self.times = np.zeros(self.tk.t_max)
+        self.times = np.zeros(self.tk.n_iteration)
         self.last_reply = None
         self.last_forgetting_rate = self.pr.n_0
         self.p_random = 1/self.tk.n_possible_replies

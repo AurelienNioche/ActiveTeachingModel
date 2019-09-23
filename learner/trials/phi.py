@@ -30,10 +30,10 @@ def plot_phi(phi_history):
 
 def main():
 
-    t_max = 2000
+    n_iteration = 2000
 
-    phi_history = np.zeros(t_max)
-    for t in range(t_max):
+    phi_history = np.zeros(n_iteration)
+    for t in range(n_iteration):
         phi_history[t] = phi(t=t)
 
     plot_phi(np.asarray(phi_history))

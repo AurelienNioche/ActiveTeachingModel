@@ -145,7 +145,9 @@ class Psychologist:
 
         myBopt = GPyOpt.methods.BayesianOptimization(
             f=self._objective, domain=bounds, acquisition_type='EI',
-            exact_feval=False, initial_design_numdata=self.initial_design_numdata, normalize_Y=False)
+            exact_feval=False,
+            initial_design_numdata=self.initial_design_numdata,
+            normalize_Y=False)
         max_iter = np.inf
         max_time = 5
         eps = 10e-6

@@ -27,8 +27,8 @@ class Decay(Learner):
             raise Exception(
                 f"Type {type(param)} is not handled for parameters")
 
-        self.hist = np.zeros(self.tk.t_max, dtype=int)
-        self.success = np.zeros(self.tk.t_max, dtype=bool)
+        self.hist = np.zeros(self.tk.n_iteration, dtype=int)
+        self.success = np.zeros(self.tk.n_iteration, dtype=bool)
         self.t = 0
         self.last_p_r = 1
         self.last_reply = None

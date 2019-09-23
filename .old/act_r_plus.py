@@ -42,7 +42,7 @@
 #
 #         # noinspection PyTypeChecker
 #         sum_a = np.sum([
-#             ((self.t - t_presentation) / self.tk.t_max)**(-self.pr.d)
+#             ((self.t - t_presentation) / self.tk.n_iteration)**(-self.pr.d)
 #             for t_presentation in self.time_presentation[i]
 #         ])
 #

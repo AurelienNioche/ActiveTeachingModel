@@ -9,7 +9,7 @@ class Task:
 
         self.parameters = self.import_parameters(config_file)
 
-        self.t_max = int(self.parameters['t_max'])
+        self.n_iteration = int(self.parameters['n_iteration'])
         self.n = self.parameters['n']
 
         self.questions = np.arange(self.n)

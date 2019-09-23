@@ -1,8 +1,12 @@
+import os
+
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.stats
 
 from plot.generic import save_fig
+
+SCRIPT_NAME = os.path.basename(__file__).split(".")[0]
 
 
 def plot(data, extension=''):
@@ -40,4 +44,4 @@ def plot(data, extension=''):
         i += 1
 
     f_name = f"parameter_recovery{extension}.pdf"
-    save_fig(fig_name=f_name)
+    save_fig(fig_name=f_name, sub_folder=SCRIPT_NAME)

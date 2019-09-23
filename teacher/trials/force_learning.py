@@ -56,9 +56,9 @@
 #         current_history = agent.hist.copy()
 #         current_t = agent.t
 #
-#         t_max = len(current_history)
+#         n_iteration = len(current_history)
 #
-#         horizon = min((t_max, current_t+self.depth))
+#         horizon = min((n_iteration, current_t+self.depth))
 #         n_repeat = horizon - current_t
 #
 #         possible_future = \
@@ -67,7 +67,7 @@
 #         # print("current history", current_history)
 #         # print("current t", current_t)
 #         #
-#         # print("tmax", t_max)
+#         # print("tmax", n_iteration)
 #         # print("horizon", horizon)
 #         # print("possible futures", list(possible_future))
 #

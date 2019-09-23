@@ -128,7 +128,7 @@ class ActR(Learner):
         ])
 
         if sum_a > 0:
-            max_b = np.log(1 + np.sum([i ** self.pr.d for i in range(self.tk.t_max, 0, -1)]))
+            max_b = np.log(1 + np.sum([i ** self.pr.d for i in range(self.tk.n_iteration, 0, -1)]))
             b = np.log(1 + sum_a) / max_b
         else:
             b = 0

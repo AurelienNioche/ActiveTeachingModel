@@ -91,11 +91,11 @@
 
     <span class="k">def</span> <span class="nf">get_p_choices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">use_p_correct</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 
-        <span class="n">t_max</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">questions</span><span class="p">)</span>
+        <span class="n">n_iteration</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">questions</span><span class="p">)</span>
 
-        <span class="n">p_choices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">t_max</span><span class="p">)</span>
+        <span class="n">p_choices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_iteration</span><span class="p">)</span>
 
-        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">t_max</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_iteration</span><span class="p">):</span>
 
             <span class="n">question</span><span class="p">,</span> <span class="n">reply</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">questions</span><span class="p">[</span><span class="n">t</span><span class="p">],</span> <span class="n">data</span><span class="o">.</span><span class="n">replies</span><span class="p">[</span><span class="n">t</span><span class="p">]</span>
             <span class="n">time</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">times</span><span class="p">[</span><span class="n">t</span><span class="p">]</span>

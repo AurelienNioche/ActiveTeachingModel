@@ -6,13 +6,13 @@ from simulation.data import Data
 from fit.pygpgo.classic import BayesianPYGPGOFit
 
 
-def with_bayesian_opt(teacher_model, t_max, grades, n_item,
+def with_bayesian_opt(teacher_model, n_iteration, grades, n_item,
                       normalize_similarity, student_model,
                       student_param, n_cpu,
                       max_iter, init_eval,
                       verbose):
 
-    teacher = teacher_model(t_max=t_max, n_item=n_item,
+    teacher = teacher_model(n_iteration=n_iteration, n_item=n_item,
                             normalize_similarity=normalize_similarity,
                             grades=grades,
                             verbose=verbose)
@@ -26,7 +26,7 @@ def with_bayesian_opt(teacher_model, t_max, grades, n_item,
 
     f = BayesianPYGPGOFit(n_jobs=n_cpu, verbose=False)
 
-    for t in tqdm(range(t_max)):
+    for t in tqdm(range(n_iteration)):
 
         question, possible_replies = teacher.ask(
             agent=model_learner,
@@ -57,7 +57,7 @@ def with_bayesian_opt(teacher_model, t_max, grades, n_item,
 
     p_recall = p_recall_over_time_after_learning(
         agent=learner,
-        n_iteration=t_max,
+        n_iteration=n_iteration,
         n_item=n_item)
 
     return {

@@ -3,57 +3,48 @@ import numpy as np
 # import scipy.stats
 from tqdm import tqdm
 
-from fit.fit import Fit
+from fit.scipy import Minimize
 from learner.act_r import ActR
-from learner.act_r_custom import ActRMeaning
+from teacher.random import RandomTeacher
+
+from simulation.fake import generate_fake_task_param
+from simulation.run import run
+
 from plot.generic import save_fig
-from simulation.data import SimulatedData, Data
-from simulation.task import Task
 
 from utils.utils import load, dump
 
 import os
 
+SCRIPT_NAME = os.path.basename(__file__).split(".")[0]
+
 
 class FitFidelity:
 
-    def __init__(self, t_min=25, t_max=30, n_kanji=79, grades=(1, ),
-                 model=ActR,
-                 normalize_similarity=False,
+    def __init__(self, t_min=25, n_iteration=30, n_item=79,
+                 student_model=ActR,
+                 fit_class=Minimize,
+                 teacher_model=RandomTeacher,
                  n_agent=3):
 
         self.t_min = t_min
-        self.t_max = t_max
+        self.n_iteration = n_iteration
+        self.n_item = n_item
 
-        if (self.t_max - self.t_min) < 4:
-            raise ValueError("The difference between t_max and t_min must be "
+        if (self.n_iteration - self.t_min) < 4:
+            raise ValueError("The difference between n_iteration "
+                             "and t_min must be "
                              "of at least 4 to compute fidelity")
 
-        self.n_kanji = n_kanji
-        self.grades = grades
-        self.model = model
-        self.normalize_similarity = normalize_similarity
+        self.student_model = student_model
+        self.teacher_model = teacher_model
 
-        self.n_param = len(self.model.bounds)
+        self.fit_class = fit_class
+
+        self.n_param = len(self.student_model.bounds)
         self.param = {}
 
         self.n_agent = n_agent
-
-    def _simulate_data(self, seed):
-
-        np.random.seed(seed)
-
-        for bound in self.model.bounds:
-            self.param[bound[0]] = np.random.uniform(bound[1], bound[2])
-
-        self.tk = Task(t_max=self.t_max, n_kanji=self.n_kanji,
-                       grades=self.grades,
-                       normalize_similarity=self.normalize_similarity,
-                       verbose=False,
-                       generate_full_task=True)
-
-        self.data = SimulatedData(model=self.model, param=self.param,
-                                  tk=self.tk, verbose=False)
 
     def compute_fidelity(self):
         """
@@ -65,39 +56,45 @@ class FitFidelity:
 
         changes = np.zeros((self.n_param,
                             self.n_agent,
-                            self.t_max - self.t_min - 1))
+                            self.n_iteration - self.t_min - 1))
 
         for i in range(self.n_agent):
 
-            self._simulate_data(seed=seeds[i])
+            seed = seeds[i]
 
-            data_view = Data(n_item=self.n_kanji,
-                             questions=self.data.questions[:self.t_min],
-                             replies=self.data.replies[:self.t_min],
-                             possible_replies=
-                             self.data.possible_replies[:self.t_min, :])
+            np.random.seed(seed)
 
-            self.tk.t_max = self.t_min
-            f = Fit(model=self.model, tk=self.tk, data=data_view)
-            fit_r = f.evaluate()
+            param = self.student_model.generate_random_parameters()
+            task_param = generate_fake_task_param(n_item=self.n_item)
+
+            r = run(
+                student_param=param,
+                student_model=self.student_model,
+                teacher_model=self.teacher_model,
+                n_item=self.n_item,
+                n_iteration=self.n_iteration, task_param=task_param)
+
+            questions = r["questions"]
+            successes = r["successes"]
+
+            f = self.fit_class(model=self.student_model)
+            fit_r = f.evaluate(
+                hist_question=questions[:self.t_min],
+                hist_success=successes[:self.t_min],
+                task_param=task_param,
+            )
 
             best_v = {}
             best_v.update(fit_r["best_param"])
 
             t_idx = 0
 
-            for t in tqdm(range(self.t_min+1, self.t_max)):
+            for t in tqdm(range(self.t_min+1, self.n_iteration)):
 
-                data_view = Data(n_item=self.n_kanji,
-                                 questions=self.data.questions[:t],
-                                 replies=self.data.replies[:t],
-                                 possible_replies=
-                                 self.data.possible_replies[:t, :])
-
-                self.tk.t_max = t
-
-                f = Fit(model=self.model, tk=self.tk, data=data_view)
-                fit_r = f.evaluate()
+                fit_r = f.evaluate(
+                     hist_question=questions[:t],
+                     hist_success=successes[:t],
+                     task_param=task_param)
 
                 for p_idx, k in\
                         enumerate(sorted(fit_r["best_param"].keys())):
@@ -161,26 +158,28 @@ def _plot(changes, t_min, fig_name, model):
         axes[-1].set_xlabel('Time')
 
         fig_name_idx = root + f'_{idx_fig}.pdf'
-        save_fig(fig_name_idx)
+        save_fig(fig_name_idx, sub_folder=SCRIPT_NAME)
 
 
-def main(n_agent, t_min, t_max, model, force=False):
+def main(n_agent, t_min, n_iteration, student_model, force=False):
 
-    extension = f"fit-fidelity-{model.__name__}-t_min={t_min}-t_max={t_max}"
+    extension = f"fit-fidelity-{student_model.__name__}-t_min={t_min}" \
+                f"-n_iteration={n_iteration}"
     bkp_file = os.path.join("bkp", "fit_fidelity", f"{extension}.p")
 
     mean_array = load(bkp_file)
     if mean_array is None or force:
         np.random.seed(123)
 
-        ff = FitFidelity(model=model, t_max=t_max, n_agent=n_agent)
+        ff = FitFidelity(student_model=student_model, n_iteration=n_iteration,
+                         n_agent=n_agent)
         mean_array = ff.compute_fidelity()
         dump(mean_array, bkp_file)
 
     _plot(
-        changes=mean_array, model=model, t_min=t_min,
+        changes=mean_array, student_model=student_model, t_min=t_min,
         fig_name=f'{extension}.pdf')
 
 
 if __name__ == "__main__":
-    main(n_agent=10, t_min=25, t_max=300, model=ActR)
+    main(n_agent=10, t_min=25, n_iteration=300, student_model=ActR)

@@ -1,4 +1,4 @@
 {
-  "t_max": 1e4,
+  "n_iteration": 1e4,
   "n": 100
 }

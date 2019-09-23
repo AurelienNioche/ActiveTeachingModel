@@ -80,19 +80,20 @@ class Leitner(GenericTeacher):
             arr = np.delete(complete_arr, self.taboo)
         return arr
 
-    def find_due_seen_items(self, due_items, hist_item):
+    @classmethod
+    def find_due_seen_items(cls, due_items, hist_item):
         """
         :param due_items: array that contains items that are due to be shown
         :param hist_item: historic of presented items
-        :var seen_due_items: integer array with size of due_items
-                * Contains the items that have been seen
-                    at least once and are due to be shown.
         :return: * seen_due_items: as before
                 * count: the count of the number of items in seen__due_items
 
         Finds the items that are seen and are due to be shown.
         """
 
+        # integer array with size of due_items
+        #                 * Contains the items that have been seen
+        #                     at least once and are due to be shown.
         seen_due_items = np.intersect1d(hist_item, due_items)
         count = len(seen_due_items)
 

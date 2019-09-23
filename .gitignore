@@ -127,9 +127,9 @@ data/word2vec/GoogleNews-vectors-negative300.bin
 bkp/similarity_semantic/*
 
 # Related to autoencoder
-similarity_graphic/auto_encoder/image
-similarity_graphic/auto_encoder/backup
-similarity_graphic/auto_encoder/fig
+.old/similarity_graphic/auto_encoder/image
+.old/similarity_graphic/auto_encoder/backup
+.old/similarity_graphic/auto_encoder/fig
 
 # Related to fit and model comparison/evaluation
 log/
@@ -145,15 +145,15 @@ bkp/full_stack/
 learner/trials/bkp/
 
 # Related to use data
-data/user_and_question_tables2.sql
+.old/data/user_and_question_tables2.sql
 data/duolingo.sql
-data/duolingo.csv
+.old/data/duolingo.csv
 data/db.p
-data/duolingo_user/
+.old/data/duolingo_user/
 
 # Related to django
-task/migrations/*
-duolingo/migrations/*
+.old/task/migrations/*
+.old/duolingo/migrations/*
 
 # Trials
 learner/hopfield.p
