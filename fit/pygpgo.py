@@ -11,21 +11,11 @@ class PyGPGO(Fit):
 
     def __init__(self, **kwargs):
 
-        super().__init__(method='de', **kwargs)
+        super().__init__(method='pygpgo', **kwargs)
 
     def objective(self, keep_in_history=True, **param):
 
-        value = objective(
-            model=self.model,
-            hist_success=self.hist_success,
-            hist_question=self.hist_question,
-            task_param=self.task_param,
-            param=param
-        )
-
-        if keep_in_history:
-            self.obj_values.append(value)
-            self.history_eval_param.append(param)
+        value = super().objective(param=param, keep_in_history=keep_in_history)
         return - value
 
     def _run(self, **kwargs):

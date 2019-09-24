@@ -6,21 +6,28 @@ import numpy as np
 from tqdm import tqdm
 
 from fit.scipy import Minimize
+from fit.pygpgo import PyGPGO
 
 from learner.act_r_custom import ActRMeaning
 from learner.act_r import ActR
+from learner.rl import QLearner
 
+from teacher.leitner import Leitner
 from teacher.random import RandomTeacher
+
+from psychologist.psychologist import Psychologist
 
 from simulation.run import run
 from simulation.fake import generate_fake_task_param
 
 import plot.parameter_recovery
 
+
+SCRIPT_NAME = os.path.basename(__file__).split(".")[0]
+
 N_POSSIBLE_REPLIES = 6
 
-
-DATA_FOLDER = os.path.join("bkp", "model_evaluation")
+DATA_FOLDER = os.path.join("bkp", SCRIPT_NAME)
 
 os.makedirs(DATA_FOLDER, exist_ok=True)
 
@@ -48,6 +55,8 @@ class SimulationAndFit:
         np.random.seed(seed)
 
         param = self.student_model.generate_random_parameters()
+
+        print("true param", param)
         task_param = generate_fake_task_param(n_item=self.n_item)
 
         r = run(
@@ -55,7 +64,10 @@ class SimulationAndFit:
             student_model=self.student_model,
             teacher_model=self.teacher_model,
             n_item=self.n_item,
-            n_iteration=self.n_iteration, task_param=task_param)
+            n_iteration=self.n_iteration,
+            task_param=task_param,
+            compute_p_recall_hist=False
+        )
 
         f = self.fit_class(model=self.student_model)
 
@@ -72,7 +84,7 @@ class SimulationAndFit:
 
 
 def main(student_model, teacher_model, fit_class, n_sim=10,
-         n_iteration=300, n_item=30,
+         n_iteration=1000, n_item=30,
          force=False):
 
     extension = \
@@ -85,7 +97,7 @@ def main(student_model, teacher_model, fit_class, n_sim=10,
 
     file_path = os.path.join(
         DATA_FOLDER,
-        f"parameter_recovery_{extension}.p")
+        f"{extension}.p")
 
     if not os.path.exists(file_path) or force:
 
@@ -120,14 +132,17 @@ def main(student_model, teacher_model, fit_class, n_sim=10,
     else:
         data = pickle.load(open(file_path, 'rb'))
 
-    plot.parameter_recovery.plot(data=data,
-                                 extension=extension)
+    plot.parameter_recovery.plot(
+        data=data,
+        extension=extension)
 
 
 if __name__ == "__main__":
 
     main(student_model=ActR,
-         teacher_model=RandomTeacher,
-         fit_class=Minimize,
-         n_sim=100, n_item=79, n_iteration=200,
+         teacher_model=Psychologist,
+         fit_class=PyGPGO,
+         n_sim=1,
+         n_item=300,
+         n_iteration=500,
          force=True)

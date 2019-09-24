@@ -1,7 +1,6 @@
 import os
 from tqdm import tqdm
 
-from learner.act_r_custom import ActRMeaning
 from learner.act_r import ActR
 from teacher.active import Active
 
@@ -57,9 +56,9 @@ class Run:
             verbose=False)
 
         self.psychologist = Psychologist(
-            student_model=student_model,
-            task_param=task_param,
-            **fit_param, **exploration_param
+            n_item=n_item,
+            verbose=False,
+            fit_param=fit_param, **exploration_param
         )
 
         self.learner = student_model(
@@ -88,10 +87,10 @@ class Run:
             self.exploration = self.psychologist.is_time_for_exploration(t)
 
             if self.exploration:
-                item = self.psychologist.most_informative(
-                    n_item=self.n_item,
-                    n_iteration=self.n_iteration,
+                item = self.psychologist.ask(
+                    student_model=self.student_model,
                     task_param=self.task_param,
+                    n_iteration=self.n_iteration,
                     hist_item=self.hist_item,
                     hist_success=self.hist_success,
                     t=t
@@ -119,8 +118,11 @@ class Run:
                 self.print(t)
 
             self.best_param = self.psychologist.update_estimates(
+                student_model=self.student_model,
+                task_param=self.task_param,
                 hist_success=self.hist_success,
-                hist_item=self.hist_item, t=t)
+                hist_item=self.hist_item,
+                t=t)
 
             if self.verbose:
                 self.obj_value = objective(

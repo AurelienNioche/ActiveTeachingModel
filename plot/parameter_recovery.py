@@ -23,10 +23,6 @@ def plot(data, extension=''):
 
         ax.scatter(x, y, alpha=0.5)
 
-        cor, p = scipy.stats.pearsonr(x, y)
-
-        print(f'Pearson corr {title}: $r_pearson={cor:.2f}$, $p={p:.3f}$')
-
         ax.set_title(title)
 
         max_ = max(x+y)
@@ -42,6 +38,14 @@ def plot(data, extension=''):
 
         ax.set_aspect(1)
         i += 1
+
+        try:
+            cor, p = scipy.stats.pearsonr(x, y)
+
+            print(f'Pearson corr {title}: $r_pearson={cor:.2f}$, $p={p:.3f}$')
+
+        except:
+            pass
 
     f_name = f"parameter_recovery{extension}.pdf"
     save_fig(fig_name=f_name, sub_folder=SCRIPT_NAME)

@@ -22,7 +22,6 @@ class GenericTeacher:
         item = \
             self._get_next_node(
                 t=t,
-                n_item=n_item,
                 n_iteration=n_iteration,
                 hist_success=hist_success,
                 hist_item=hist_item,

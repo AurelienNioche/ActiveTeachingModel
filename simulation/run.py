@@ -4,10 +4,15 @@ import numpy as np
 from tqdm import tqdm
 
 from learner.act_r import ActR
-from learner.act_r_custom import ActRMeaning, ActRGraphic, ActRPlus
+from learner.act_r_custom import ActRMeaning, ActRGraphic
+from learner.rl import QLearner
+
 from teacher.active import Active
 from teacher.leitner import Leitner
 from teacher.random import RandomTeacher
+
+from psychologist.psychologist import Psychologist
+
 from utils.utils import dic2string, load, dump
 
 from . p_recall import p_recall_over_time_after_learning
@@ -55,7 +60,7 @@ class Run:
         # Will stock the results
         self.results = None
 
-    def run(self):
+    def run(self, compute_p_recall_hist=True):
 
         iterator = tqdm(range(self.n_iteration)) \
             if not self.verbose else range(self.n_iteration)
@@ -84,11 +89,14 @@ class Run:
 
             self.learner.learn(item=item)
 
-        p_recall_hist = p_recall_over_time_after_learning(
-            agent=self.learner,
-            n_iteration=self.n_iteration,
-            n_item=self.n_item,
-        )
+        if compute_p_recall_hist:
+            p_recall_hist = p_recall_over_time_after_learning(
+                agent=self.learner,
+                n_iteration=self.n_iteration,
+                n_item=self.n_item,
+            )
+        else:
+            p_recall_hist = None
 
         self.results = {
             'seen': self.seen,
@@ -135,10 +143,12 @@ def run(student_model, teacher_model,
         task_param=None,
         n_item=25,
         n_iteration=500,
+        compute_p_recall_hist=True,
         verbose=False,
         force=False):
 
     """
+        :param compute_p_recall_hist: bool
         :param task_param: dictionary containing the parameters of the task
         (i.e., the semantic connections)
         :param teacher_param: dictionary containing the parameters when
@@ -190,10 +200,15 @@ def run(student_model, teacher_model,
             student_param = {"d": 0.5, "tau": 0.01, "s": 0.06,
                              "g": 0.1}
 
-        elif student_model == ActRPlus:
-            student_param = {"d": 0.5, "tau": 0.01, "s": 0.06,
-                             "m": 0.1,
-                             "g": 0.1}
+        # elif student_model == ActRPlus:
+        #     student_param = {"d": 0.5, "tau": 0.01, "s": 0.06,
+        #                      "m": 0.1,
+        #                      "g": 0.1}
+        elif student_model == QLearner:
+            student_param = {
+                "alpha": 0.1,
+                "tau": 0.05
+            }
 
     if task_param is None:
         task_param = generate_fake_task_param(n_item=n_item)
@@ -202,16 +217,17 @@ def run(student_model, teacher_model,
         teacher_param = {'n_item': n_item}
 
     assert student_model in \
-        (ActR, ActRMeaning, ActRGraphic, ActRPlus), \
+        (ActR, ActRMeaning, ActRGraphic, QLearner), \
         "Student model not recognized."
     assert teacher_model in \
-        (Active, RandomTeacher, Leitner), \
+        (Active, RandomTeacher, Leitner, Psychologist), \
         "Teacher model not recognized."
 
     extension = f'{teacher_model.__name__}_{student_model.__name__}_' \
         f'{dic2string(student_param)}_' \
         f'{dic2string(teacher_param)}_' \
-        f'n_item_{n_item}_n_iteration_{n_iteration}'
+        f'n_item_{n_item}_n_iteration_{n_iteration}_' \
+        f'p_recall_hist_{compute_p_recall_hist}'
 
     bkp_file = os.path.join('bkp', 'simulation', f'{extension}.p')
 
@@ -226,7 +242,7 @@ def run(student_model, teacher_model,
             n_iteration=n_iteration,
             n_item=n_item,
             verbose=verbose)
-        r.run()
+        r.run(compute_p_recall_hist=compute_p_recall_hist)
 
         dump(r, bkp_file)
 

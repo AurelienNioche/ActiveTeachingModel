@@ -9,7 +9,7 @@ class ActRMeaning(ActR):
     bounds = ('d', 0.01, 0.99), \
              ('tau', 0, 1), \
              ('s', 0.0000001, 1), \
-             ('m', 0.0, 0.1)
+             ('m', 0.0, 5)
 
     def __init__(self, semantic_connections, param=None, metaclass=False,
                  **kwargs):

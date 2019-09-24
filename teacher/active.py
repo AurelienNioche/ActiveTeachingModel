@@ -21,11 +21,10 @@ class Active(GenericTeacher):
             return v
         return v / norm
 
-    @staticmethod
     def _compute_usefulness(
+            self,
             t,
             n_iteration,
-            n_item,
             hist_item,
             task_param,
             student_param,
@@ -41,12 +40,12 @@ class Active(GenericTeacher):
             hist=hist_item, t=t,
             **task_param)
 
-        usefulness = np.zeros(n_item)
+        usefulness = np.zeros(self.n_item)
 
-        for i in range(n_item):
+        for i in range(self.n_item):
             u_i = 0
             agent.learn(i)
-            for j in range(n_item):
+            for j in range(self.n_item):
                 next_p_recall_j_after_i = agent.p_recall(j)
                 u_i += next_p_recall_j_after_i ** 2
             agent.unlearn()
@@ -57,7 +56,6 @@ class Active(GenericTeacher):
     def _get_next_node(
             self,
             t,
-            n_item,
             n_iteration,
             hist_success,
             hist_item,
@@ -68,7 +66,6 @@ class Active(GenericTeacher):
         usefulness = self._compute_usefulness(
             t=t,
             n_iteration=n_iteration,
-            n_item=n_item,
             hist_item=hist_item,
             student_param=student_param,
             student_model=student_model,

@@ -22,7 +22,8 @@ def generate_fake_task_param(n_item, n_possible_replies=6):
     task_param = {
         "semantic_connections": _fake_connections(n_item=n_item),
         "graphic_connections": _fake_connections(n_item=n_item),
-        "n_possible_replies": n_possible_replies
+        "n_possible_replies": n_possible_replies,
+        "n_item": n_item,
     }
 
     return task_param

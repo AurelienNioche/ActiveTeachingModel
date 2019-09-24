@@ -1,10 +1,12 @@
+from abc import ABC
+
 import numpy as np
 from . abstract_class import Fit
 from . objective import objective
-from bot_client.learning_model.generic import Learner
+from learner.generic import Learner
 
 
-class PerfectStudent(Learner):
+class PerfectStudent(Learner, ABC):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
