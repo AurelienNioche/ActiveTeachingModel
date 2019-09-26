@@ -76,12 +76,16 @@ class Psychologist(GenericTeacher):
                 )
 
             # noinspection PyTypeChecker
-            n_param_set = len(self.hist_param)
+            # n_param_set = len(self.hist_param)
+
+            n_param_set = 30
 
             p_recall = np.zeros((self.n_item, n_param_set))
             for j in range(n_param_set):
 
-                param = self.hist_param[j]
+                # param = self.hist_param[j]
+
+                param = self.student_model.generate_random_parameters()
 
                 agent = self.student_model(
                     param=param,
@@ -171,6 +175,6 @@ class Psychologist(GenericTeacher):
         if self.fit_class == Gpyopt:
             self.estimated_var = f.get_estimated_var()
 
-        print("BEST PARAM", self.best_param)
+        # print("BEST PARAM", self.best_param)
 
         return self.best_param

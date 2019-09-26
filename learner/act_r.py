@@ -7,8 +7,8 @@ class ActR(Learner):
 
     version = 2.2
     bounds = ('d', 0.001, 1.0), \
-             ('tau', 0, 1.0), \
-             ('s', 0.001, 1.0)
+             ('tau', -20, 20), \
+             ('s', 0.001, 5.0)
 
     def __init__(
             self,
@@ -47,7 +47,7 @@ class ActR(Learner):
             # History of presentation
             self.hist = np.full(self.n_iteration, -99)
         else:
-            self.hist = hist
+            self.hist = np.asarray(hist)
             self.t = t
 
         # Options
@@ -244,8 +244,11 @@ class ActR(Learner):
             self.hist[time_index] = item
             self.times[time_index] = time
         else:
-            self.hist[self.t] = item
-            self.times[self.t] = time
+            try:
+                self.hist[self.t] = item
+                self.times[self.t] = time
+            except IndexError:
+                self.hist = np.asarray((list(self.hist) + [item, ]))
             self.t += 1
 
     def unlearn(self, time_index=None):

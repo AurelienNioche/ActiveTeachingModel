@@ -1,15 +1,14 @@
+from abc import ABC
+
 import numpy as np
 from learner.act_r import ActR
 # np.seterr(all='raise')
 
 
-class ActRMeaning(ActR):
+class ActRMeaning(ActR, ABC):
 
     version = 3.1
-    bounds = ('d', 0.01, 0.99), \
-             ('tau', 0, 1), \
-             ('s', 0.0000001, 1), \
-             ('m', 0.0, 5)
+    bounds = ActR.bounds + (('m', 0.0, 5), )
 
     def __init__(self, semantic_connections, param=None, metaclass=False,
                  **kwargs):
@@ -93,10 +92,9 @@ class ActRMeaning(ActR):
 # ========================================================================== #
 
 
-class ActRGraphic(ActRMeaning):
+class ActRGraphic(ActRMeaning, ABC):
 
-    bounds = ('d', 0.0000001, 1.0), ('tau', -5, 5), ('s', 0.0000001, 1), \
-             ('g', -0.1, 0.1)
+    bounds = ActR.bounds + (('g', 0.0, 5.0), )
 
     def __init__(self, graphic_connections, param, **kwargs):
 

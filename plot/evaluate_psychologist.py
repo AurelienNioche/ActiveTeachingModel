@@ -1,6 +1,7 @@
 import os
 
 import matplotlib.pyplot as plt
+import pandas as pd
 
 from . generic import save_fig
 
@@ -8,45 +9,58 @@ from . generic import save_fig
 SCRIPT_NAME = os.path.basename(__file__).split(".")[0]
 
 
-def plot(results, extension):
+def plot(data, true_parameters, extension):
 
-    r_keys = list(results[0].keys())
-    param_names = results[0][r_keys[0]].keys()
+    teacher_names = list(data.keys())
+    teacher_names.sort()
 
-    data = {
-        pn:
-            {
-                k: [] for k in r_keys
-            }
-        for pn in param_names
-    }
+    data_first_teacher = data[teacher_names[0]]
 
-    for r in results:
-        for k in r_keys:
-            for pn in param_names:
-                data[pn][k].append(r[k][pn])
+    param_names = list(data_first_teacher[0].keys())
+    param_names.sort()
+    n_iteration = len(data_first_teacher)
 
-    n_subplot = len(r_keys)
+    data_formatted = {}
+    for tn in teacher_names:
+        data_formatted[tn] = {}
+        for pn in param_names:
 
-    fig, axes = plt.subplots(nrows=n_subplot, figsize=(5, 0.9 * n_subplot))
+            true_value = true_parameters[pn]
+            data_param = data[tn]
 
-    for i in range(n_subplot):
+            data_formatted[tn][pn] = \
+                [(data_param[i][pn] - true_value)**2 for i in range(n_iteration)]
 
-        color = 'black'  # f'C{i}'
+    n_subplot = len(param_names)
+
+    fig, axes = plt.subplots(nrows=n_subplot, figsize=(2 * n_subplot, 10))
+
+    colors = {tn: f'C{i}' for i, tn in enumerate(teacher_names)}
+
+    for i, pn in enumerate(param_names):
+
         ax = axes[i]
 
         ax.set_ylabel('Error')
-        # ax.set_yticks((0, 1))
-        # ax.set_ylim((-0.1, 1.1))
 
-        # ax.scatter(x=success_time[questions == item],
-        #            y=success_value[questions == item],
-        #            alpha=0.2,
-        #            color=color)
+        ax.axhline(0, linestyle='--', color='black', alpha=0.2)
 
-        ax.plot(data[i], alpha=1, color=color)
+        ax.set_title(pn)
+        for tn in teacher_names:
+
+            y = data_formatted[tn][pn]
+
+            smooth_y = pd.Series(y).rolling(window=20).mean()
+
+            ax.plot(y, alpha=0.1, color=colors[tn])
+
+            ax.plot(smooth_y, alpha=0.5, color=colors[tn],
+                    label=tn)
+
         if i != n_subplot - 1:
             ax.set_xticks([])
+
+    plt.legend()
 
     axes[-1].set_xlabel('Time')
 
