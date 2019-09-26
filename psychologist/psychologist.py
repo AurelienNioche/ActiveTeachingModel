@@ -78,7 +78,7 @@ class Psychologist(GenericTeacher):
             # noinspection PyTypeChecker
             # n_param_set = len(self.hist_param)
 
-            n_param_set = 30
+            n_param_set = 100
 
             p_recall = np.zeros((self.n_item, n_param_set))
             for j in range(n_param_set):
@@ -90,7 +90,7 @@ class Psychologist(GenericTeacher):
                 agent = self.student_model(
                     param=param,
                     n_iteration=n_iteration,
-                    hist=self.hist_item,
+                    hist=self.hist_item.copy(),
                     t=t,
                     **task_param)
 
