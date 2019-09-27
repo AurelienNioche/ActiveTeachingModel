@@ -33,14 +33,16 @@ def plot(data, true_parameters, extension):
 
     n_subplot = len(param_names)
 
-    fig, axes = plt.subplots(nrows=n_subplot, figsize=(2 * n_subplot, 10))
+    fig, axes = plt.subplots(nrows=n_subplot, figsize=(10, 2 * n_subplot))
 
     colors = {tn: f'C{i}' for i, tn in enumerate(teacher_names)}
 
     for i, pn in enumerate(param_names):
 
-        ax = axes[i]
-
+        try:
+            ax = axes[i]
+        except TypeError:
+            ax = axes
         ax.set_ylabel('Error')
 
         ax.axhline(0, linestyle='--', color='black', alpha=0.2)
@@ -62,7 +64,10 @@ def plot(data, true_parameters, extension):
 
     plt.legend()
 
-    axes[-1].set_xlabel('Time')
+    try:
+        axes[-1].set_xlabel('Time')
+    except TypeError:
+        axes.set_xlabel('Time')
 
     plt.tight_layout()
 
