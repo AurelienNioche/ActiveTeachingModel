@@ -3,6 +3,8 @@ import numpy as np
 
 class GenericTeacher:
 
+    version = 0.0
+
     def __init__(self, n_item, verbose=False):
 
         self.n_item = n_item

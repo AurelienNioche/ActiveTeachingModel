@@ -12,11 +12,12 @@ from fit.gpyopt import Gpyopt
 from learner.act_r_custom import ActRMeaning
 from learner.act_r import ActR
 from learner.rl import QLearner
+from learner.simplified import ActROneParam
 
 from teacher.leitner import Leitner
 from teacher.random import RandomTeacher
 
-from psychologist.psychologist import Psychologist
+from psychologist.psychologist import SimplePsychologist
 
 from simulation.fake import generate_fake_task_param
 
@@ -47,13 +48,7 @@ def run(
 
     hist_best_param = []
 
-    if teacher_model == Psychologist:
-        teacher = Psychologist(
-            verbose=False, n_item=n_item,
-            fit_class=fit_class)
-
-    else:
-        teacher = teacher_model(verbose=False, n_item=n_item)
+    teacher = teacher_model(verbose=False, n_item=n_item)
 
     learner = student_model(
         param=student_param,
@@ -83,33 +78,21 @@ def run(
 
         learner.learn(item=item)
 
-        if teacher_model != Psychologist:
-            f = fit_class(model=student_model)
-            f.evaluate(
-                hist_question=hist_item,
-                hist_success=hist_success,
-                task_param=task_param
-            )
-            hist_best_param.append(f.best_param)
 
-        else:
-            teacher.update_estimates(
-                student_model=student_model,
-                task_param=task_param,
-                hist_item=hist_item,
-                hist_success=hist_success,
-                t=t
-            )
+        f = fit_class(model=student_model)
+        f.evaluate(
+            hist_question=hist_item,
+            hist_success=hist_success,
+            task_param=task_param
+        )
+        hist_best_param.append(f.best_param)
 
-    if teacher_model == Psychologist:
-        return teacher.hist_best_param
-    else:
-        return hist_best_param
+    return hist_best_param
 
 
 def main():
 
-    student_model = ActR
+    student_model = ActROneParam
     fit_class = Gpyopt
     n_iteration = 250
     n_item = 200
@@ -123,13 +106,17 @@ def main():
     # student_model.generate_random_parameters()
     task_param = generate_fake_task_param(n_item=n_item)
 
+    task_param.update(
+        {'default_param': student_param}
+    )
+
     full_data = {}
 
-    for teacher_model in (Psychologist, RandomTeacher, Leitner):
+    for teacher_model in (SimplePsychologist, RandomTeacher, Leitner):
 
         extension = \
             f'{student_model.__name__}{student_model.version}_' \
-            f'_{teacher_model.__name__}_' \
+            f'_{teacher_model.__name__}{teacher_model.version}_' \
             f'_{fit_class.__name__}_' \
             f'n_item_{n_item}_' \
             f'n_iteration_{n_iteration}_' \

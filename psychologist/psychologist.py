@@ -5,7 +5,64 @@ from fit.gpyopt import Gpyopt
 from teacher.metaclass import GenericTeacher
 
 
-class Psychologist(GenericTeacher):
+class SimplePsychologist(GenericTeacher):
+
+    version = 0.0
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    def _get_next_node(
+            self,
+            student_model,
+            hist_item,
+            hist_success,
+            n_iteration,
+            task_param,
+            t,
+            **kwargs
+    ):
+
+        if t == 0:
+            item = np.random.randint(self.n_item)
+
+        else:
+            n_param_set = 100
+
+            p_recall = np.zeros((self.n_item, n_param_set))
+            for j in range(n_param_set):
+
+                # param = self.hist_param[j]
+
+                param = student_model.generate_random_parameters()
+
+                agent = student_model(
+                    param=param,
+                    n_iteration=n_iteration,
+                    hist=hist_item.copy(),
+                    t=t,
+                    **task_param)
+
+                for i in range(self.n_item):
+                    agent.learn(i)
+                    p_recall[i, j] = agent.p_recall(i)
+                    agent.unlearn()
+
+            std_per_item = np.std(p_recall, axis=1)
+
+            max_std = np.max(std_per_item)
+            if max_std == 0:
+                non_seen_item = np.where(p_recall == 0)[0]
+                item = np.random.choice(non_seen_item)
+
+            else:
+                max_std_items = np.where(std_per_item == max_std)[0]
+                item = np.random.choice(max_std_items)
+
+        return item
+
+
+class Psychologist(SimplePsychologist):
 
     def __init__(self,
                  fit_class=None,
