@@ -7,7 +7,7 @@ from teacher.metaclass import GenericTeacher
 
 class SimplePsychologist(GenericTeacher):
 
-    version = 0.0
+    version = 0.1
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -20,6 +20,7 @@ class SimplePsychologist(GenericTeacher):
             n_iteration,
             task_param,
             t,
+            opt_param=None,
             **kwargs
     ):
 
@@ -27,13 +28,18 @@ class SimplePsychologist(GenericTeacher):
             item = np.random.randint(self.n_item)
 
         else:
-            n_param_set = 100
+            n_param_set = 1000
 
             p_recall = np.zeros((self.n_item, n_param_set))
             for j in range(n_param_set):
 
                 # param = self.hist_param[j]
 
+                # if 'default_param' in task_param:
+                #     param = task_param['default_param']
+                #     param.update(student_model.generate_random_parameters())
+                #
+                # else:
                 param = student_model.generate_random_parameters()
 
                 agent = student_model(

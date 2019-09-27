@@ -25,6 +25,7 @@ def objective(model,
 
         agent.learn(item=item)
 
-    diff = np.power(diff, 2)
-    value = np.sum(diff)
+    # diff = np.power(diff, 2)
+    # value = np.sum(diff)
+    value = np.prod(diff)
     return value

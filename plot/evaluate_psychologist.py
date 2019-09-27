@@ -33,7 +33,7 @@ def plot(data, true_parameters, extension):
 
     n_subplot = len(param_names)
 
-    fig, axes = plt.subplots(nrows=n_subplot, figsize=(10, 2 * n_subplot))
+    fig, axes = plt.subplots(nrows=n_subplot, figsize=(10, 4 * n_subplot))
 
     colors = {tn: f'C{i}' for i, tn in enumerate(teacher_names)}
 

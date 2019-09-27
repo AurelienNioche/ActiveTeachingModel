@@ -94,7 +94,7 @@ def main():
 
     student_model = ActROneParam
     fit_class = Gpyopt
-    n_iteration = 250
+    n_iteration = 150
     n_item = 200
     seed = 123
     force = False
@@ -116,7 +116,7 @@ def main():
 
         extension = \
             f'{student_model.__name__}{student_model.version}_' \
-            f'_{teacher_model.__name__}_' \
+            f'_{teacher_model.__name__}{teacher_model.version}_' \
             f'_{fit_class.__name__}_' \
             f'n_item_{n_item}_' \
             f'n_iteration_{n_iteration}_' \
