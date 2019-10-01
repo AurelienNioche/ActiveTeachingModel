@@ -157,3 +157,14 @@ data/db.p
 
 # Trials
 learner/hopfield.p
+bkp/evaluate_psychologist/
+bkp/model_evaluation/
+bkp/simulation/
+data/duolingo.csv
+data/duolingo_user/
+data/user_and_question_tables2.sql
+docs/_static/
+docs/_templates/
+docs/bkp/
+task/migrations/0001_initial.py
+task/migrations/__init__.py
