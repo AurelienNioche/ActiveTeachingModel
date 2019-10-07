@@ -21,8 +21,8 @@ SCRIPT_NAME = os.path.basename(__file__).split(".")[0]
 def main(force=False):
 
     # Task attributes
-    n_item = 60   # 30, 150
-    n_iteration = 4000  # 4000
+    n_item = 150   # 30, 150
+    n_iteration = 1000  # 4000
 
     # Student
     student_param = {"d": 0.5, "tau": 0.01, "s": 0.06, "m": 0.02}
