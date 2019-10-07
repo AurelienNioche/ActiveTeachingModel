@@ -12,7 +12,7 @@ from fit.gpyopt import Gpyopt
 from learner.act_r_custom import ActRMeaning
 from learner.act_r import ActR
 from learner.rl import QLearner
-from learner.simplified import ActROneParam
+from learner.simplified import ActROneParam, ActRTwoParam
 
 from teacher.leitner import Leitner
 from teacher.random import RandomTeacher
@@ -92,7 +92,7 @@ def run(
 
 def main():
 
-    student_model = ActROneParam
+    student_model = ActRTwoParam #ActROneParam
     fit_class = Gpyopt
     n_iteration = 150
     n_item = 200
