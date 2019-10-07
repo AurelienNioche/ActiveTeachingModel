@@ -26,6 +26,7 @@ def main(force=False):
 
     # Student
     student_param = {"d": 0.5, "tau": 0.01, "s": 0.06, "m": 0.02}
+        # {"d": 0.5, "tau": 0.01, "s": 0.06, "m": 0.1}
     # student_param = {"d": 0.5, "tau": 0.01, "s": 0.06,
     #                  "m": 0.1}
     student_model = ActRMeaning

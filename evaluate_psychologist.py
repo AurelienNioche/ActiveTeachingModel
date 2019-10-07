@@ -23,6 +23,8 @@ from simulation.fake import generate_fake_task_param
 
 import plot.evaluate_psychologist
 
+from utils.utils import dic2string
+
 
 SCRIPT_NAME = os.path.basename(__file__).split(".")[0]
 
@@ -118,6 +120,7 @@ def main():
             f'{student_model.__name__}{student_model.version}_' \
             f'_{teacher_model.__name__}{teacher_model.version}_' \
             f'_{fit_class.__name__}_' \
+            f'{dic2string(student_param)}_' \
             f'n_item_{n_item}_' \
             f'n_iteration_{n_iteration}_' \
             f'seed_{seed}'
