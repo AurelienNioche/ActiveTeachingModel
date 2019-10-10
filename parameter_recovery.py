@@ -5,7 +5,7 @@ import pickle
 import numpy as np
 from tqdm import tqdm
 
-from fit.scipy import Minimize
+from fit.scipy import Minimize, DifferentialEvolution
 from fit.pygpgo import PyGPGO
 
 from learner.act_r_custom import ActRMeaning
@@ -55,8 +55,6 @@ class SimulationAndFit:
         np.random.seed(seed)
 
         param = self.student_model.generate_random_parameters()
-
-        print("true param", param)
         task_param = generate_fake_task_param(n_item=self.n_item)
 
         r = run(
@@ -76,10 +74,12 @@ class SimulationAndFit:
             hist_success=r["successes"],
             task_param=task_param)
 
+        recovered_param = rf["best_param"]
+
         return \
             {
                 "initial": param,
-                "recovered": rf["best_param"],
+                "recovered": recovered_param,
             }
 
 
@@ -111,21 +111,20 @@ def main(student_model, teacher_model, fit_class, n_sim=10,
                              n_iteration=n_iteration, n_item=n_item), seeds
         ), total=n_sim))
 
-        r_keys = list(results[0].keys())
-        param_names = results[0][r_keys[0]].keys()
+        keys = sorted(results[0].keys())
+
+        param_names = sorted(results[0][keys[0]].keys())
 
         data = {
-            pn:
-                {
-                    k: [] for k in r_keys
-                }
-            for pn in param_names
-        }
+                pr:
+                {k: [] for k in keys}
+                for pr in param_names
+            }
 
         for r in results:
-            for k in r_keys:
-                for pn in param_names:
-                    data[pn][k].append(r[k][pn])
+            for key in keys:
+                for pr in param_names:
+                    data[pr][key].append(r[key][pr])
 
         pickle.dump(data, open(file_path, 'wb'))
 
@@ -139,10 +138,15 @@ def main(student_model, teacher_model, fit_class, n_sim=10,
 
 if __name__ == "__main__":
 
+    ActR.bounds = \
+        ('d', 0.001, 1.0), \
+        ('tau', 0.001, 2.0), \
+        ('s', 0.001, 1.0)
+
     main(student_model=ActR,
-         teacher_model=Psychologist,
-         fit_class=PyGPGO,
-         n_sim=1,
-         n_item=300,
-         n_iteration=500,
+         teacher_model=Leitner,
+         fit_class=DifferentialEvolution,
+         n_sim=30,
+         n_item=1000,
+         n_iteration=1000,
          force=True)

@@ -94,7 +94,7 @@ def run(
 
 def main():
 
-    student_model = ActRTwoParam #ActROneParam
+    student_model = ActROneParam
     fit_class = Gpyopt
     n_iteration = 500
     n_item = 200
