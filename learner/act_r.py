@@ -171,6 +171,7 @@ class ActR(Learner):
         a = self._activation_function(item,
                                       time=time,
                                       time_index=time_index)
+
         p_retrieve = self._sigmoid_function(a)
         if self.verbose:
             print(f"t={self.t}, a_i: {a:.3f}, p_r: {p_retrieve:.3f}")
