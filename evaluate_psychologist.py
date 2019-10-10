@@ -12,7 +12,7 @@ from fit.gpyopt import Gpyopt
 from learner.act_r_custom import ActRMeaning
 from learner.act_r import ActR
 from learner.rl import QLearner
-from learner.simplified import ActROneParam
+from learner.simplified import ActROneParam, ActRTwoParam
 
 from teacher.leitner import Leitner
 from teacher.random import RandomTeacher
@@ -22,6 +22,8 @@ from psychologist.psychologist import SimplePsychologist
 from simulation.fake import generate_fake_task_param
 
 import plot.evaluate_psychologist
+
+from utils.utils import dic2string
 
 
 SCRIPT_NAME = os.path.basename(__file__).split(".")[0]
@@ -92,9 +94,9 @@ def run(
 
 def main():
 
-    student_model = ActROneParam
+    student_model = ActRTwoParam #ActROneParam
     fit_class = Gpyopt
-    n_iteration = 150
+    n_iteration = 500
     n_item = 200
     seed = 123
     force = False
@@ -118,6 +120,7 @@ def main():
             f'{student_model.__name__}{student_model.version}_' \
             f'_{teacher_model.__name__}{teacher_model.version}_' \
             f'_{fit_class.__name__}_' \
+            f'{dic2string(student_param)}_' \
             f'n_item_{n_item}_' \
             f'n_iteration_{n_iteration}_' \
             f'seed_{seed}'

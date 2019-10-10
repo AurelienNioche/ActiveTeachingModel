@@ -168,3 +168,6 @@ docs/_templates/
 docs/bkp/
 task/migrations/0001_initial.py
 task/migrations/__init__.py
+bkp/exploration/
+bkp/parameter_recovery/
+learner/bkp/hopfield.p
