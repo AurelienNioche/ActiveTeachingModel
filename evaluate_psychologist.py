@@ -12,7 +12,8 @@ from fit.gpyopt import Gpyopt
 from learner.act_r_custom import ActRMeaning
 from learner.act_r import ActR
 from learner.rl import QLearner
-from learner.simplified import ActROneParam, ActRTwoParam
+from learner.half_life import HalfLife
+# from learner.simplified import ActROneParam, ActRTwoParam
 
 from teacher.leitner import Leitner
 from teacher.random import RandomTeacher
@@ -80,21 +81,23 @@ def run(
 
         learner.learn(item=item)
 
-
         f = fit_class(model=student_model)
         f.evaluate(
             hist_question=hist_item,
             hist_success=hist_success,
             task_param=task_param
         )
-        hist_best_param.append(f.best_param)
+
+        best_param = f.best_param
+        if 'known_param' in task_param:
+            best_param.update(task_param['known_param'])
+        hist_best_param.append(best_param)
 
     return hist_best_param
 
 
 def main():
 
-    student_model = ActROneParam
     fit_class = Gpyopt
     n_iteration = 500
     n_item = 200
@@ -103,14 +106,25 @@ def main():
 
     np.random.seed(seed)
 
-    student_param = {'d': 0.4743865506892237, 'tau': -12.99017100266079,
-                     's': 2.2453482763450543}
+    # student_model = ActROneParam
+    # student_param = {'d': 0.4743865506892237, 'tau': -12.99017100266079,
+    #                  's': 2.2453482763450543}
     # student_model.generate_random_parameters()
+
+    student_model = HalfLife
+    known_param = {
+        "beta": 0.02
+    }
+
+    unknown_param = {
+        "alpha": 0.2
+    }
+
+    student_param = {**known_param, **unknown_param}
     task_param = generate_fake_task_param(n_item=n_item)
 
-    task_param.update(
-        {'default_param': student_param}
-    )
+    task_param['known_param'] = known_param
+    task_param['unknown_param'] = unknown_param
 
     full_data = {}
 
@@ -118,9 +132,10 @@ def main():
 
         extension = \
             f'{student_model.__name__}{student_model.version}_' \
-            f'_{teacher_model.__name__}{teacher_model.version}_' \
-            f'_{fit_class.__name__}_' \
-            f'{dic2string(student_param)}_' \
+            f'{teacher_model.__name__}{teacher_model.version}_' \
+            f'{fit_class.__name__}_' \
+            f'unknown_param_{dic2string(unknown_param)}_' \
+            f'known_param_{dic2string(known_param)}_' \
             f'n_item_{n_item}_' \
             f'n_iteration_{n_iteration}_' \
             f'seed_{seed}'

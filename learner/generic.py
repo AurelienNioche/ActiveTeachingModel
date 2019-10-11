@@ -6,7 +6,9 @@ import numpy as np
 class Learner:
 
     version = 0.0
-    bounds = ('<name of parameter>', 0.0000001, 1.0),
+    bounds = {
+        '<name of parameter>': (0.0, 1.0),
+    }
 
     def __init__(self, **kwargs):
 
@@ -85,24 +87,40 @@ class Learner:
     def init(self):
         pass
 
-    def set_cognitive_parameters(self, param):
+    def set_cognitive_parameters(self,
+                                 param,
+                                 known_param=None):
 
         if param is None:
             return
 
-        self.param = param
+        array_like_param = \
+            isinstance(param, list) or isinstance(param, np.ndarray)
 
-        if type(param) == dict:
-            for k, v in param.items():
-                setattr(self, k, v)
-
-        elif type(param) in (tuple, list, np.ndarray):
-
-            for tup, v in zip(self.bounds, param):
-                setattr(self, tup[0], v)
+        if known_param is None:
+            if array_like_param:
+                f_param = {
+                    param_name: param[i]
+                    for i, param_name in enumerate(self.bounds)
+                }
+            else:
+                f_param = param
         else:
-            raise Exception(f"Type {type(param)} "
-                            f"is not handled for parameters")
+            f_param = known_param.copy()
+
+            if array_like_param:
+                i = 0
+                for param_name in sorted(self.bounds.keys()):
+                    if param_name not in known_param:
+                        f_param[param_name] = param[i]
+                        i += 1
+            else:
+                f_param.update(param)
+
+        self.param = f_param
+
+        for k, v in f_param.items():
+            setattr(self, k, v)
 
         self.init()
 
@@ -121,5 +139,5 @@ class Learner:
     def _p_correct(self, item, reply, possible_replies, time=None):
         raise NotImplementedError
 
-    def p_recall(self, item, time=None):
+    def p_recall(self, item, time_index=None, time=None):
         raise NotImplementedError

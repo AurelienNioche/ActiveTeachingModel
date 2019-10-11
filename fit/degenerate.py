@@ -8,14 +8,13 @@ from learner.generic import Learner
 
 class PerfectStudent(Learner, ABC):
 
+    bounds = ()
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def p_recall(self, item, time=None):
+    def p_recall(self, item, time_index=None, time=None):
         return 1
-
-    def learn(self, **kwargs):
-        pass
 
 
 class Degenerate(Fit):
@@ -24,7 +23,7 @@ class Degenerate(Fit):
 
         super().__init__(model=PerfectStudent, **kwargs)
 
-    def _run(self):
+    def _run(self, bounds, **kwargs):
 
         self.best_value = self.objective(param=None)
         return True

@@ -6,9 +6,11 @@ from learner.generic import Learner
 class ActR(Learner):
 
     version = 2.2
-    bounds = ('d', 0.001, 1.0), \
-             ('tau', -20, 20), \
-             ('s', 0.001, 5.0)
+    bounds = {
+        'd': (0.001, 1.0),
+        'tau': (-20, 20),
+        's':  (0.001, 5.0)
+    }
 
     def __init__(
             self,

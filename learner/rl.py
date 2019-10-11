@@ -8,7 +8,10 @@ from learner.generic import Learner
 class QLearner(Learner, ABC):
 
     version = 1.0
-    bounds = ('alpha', 0, 1), ('tau', 0.002, 0.5)
+    bounds = {
+        'alpha': (0, 1),
+        'tau': (0.002, 0.5)
+    }
 
     def __init__(self, param, n_item, **kwargs):
 

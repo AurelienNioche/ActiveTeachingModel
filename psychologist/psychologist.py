@@ -9,6 +9,8 @@ class SimplePsychologist(GenericTeacher):
 
     version = 0.1
 
+    N_PARAM_SET = 1000
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -28,19 +30,19 @@ class SimplePsychologist(GenericTeacher):
             item = np.random.randint(self.n_item)
 
         else:
-            n_param_set = 1000
 
-            p_recall = np.zeros((self.n_item, n_param_set))
-            for j in range(n_param_set):
+            p_recall = np.zeros((self.n_item, self.N_PARAM_SET))
+            for j in range(self.N_PARAM_SET):
 
-                # param = self.hist_param[j]
-
-                # if 'default_param' in task_param:
-                #     param = task_param['default_param']
-                #     param.update(student_model.generate_random_parameters())
-                #
-                # else:
-                param = student_model.generate_random_parameters()
+                if 'known_param' in task_param and len(task_param['known_param']):
+                    param = {
+                        k: np.random.uniform(
+                            student_model.bounds[k][0],
+                            student_model.bounds[k][1]
+                        ) for k in task_param['unknown_param']
+                    }
+                else:
+                    param = student_model.generate_random_parameters()
 
                 agent = student_model(
                     param=param,

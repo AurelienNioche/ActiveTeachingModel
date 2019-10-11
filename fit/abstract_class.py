@@ -1,11 +1,6 @@
 import numpy as np
-import scipy.optimize
 
 from . objective import objective
-
-IDX_PARAMETERS = 0
-IDX_MODEL = 1
-IDX_ARGUMENTS = 2
 
 
 class Fit:
@@ -52,7 +47,7 @@ class Fit:
 
         mean_p = np.mean(p_choices)
         lls = cls._log_likelihood_sum(p_choices)
-        bic = cls._bic(lls=lls, k=len(best_param))
+        bic = cls._bic(lls=lls, k=len(best_param), n=len(p_choices))
 
         return {"mean_p": mean_p, "lls": lls, "bic": bic}
 
@@ -77,13 +72,33 @@ class Fit:
         self.hist_success = hist_success
         self.task_param = task_param
 
-        success = self._run(**kwargs)
-        if not success:
+        if 'unknown_param' in task_param:
+            param_names = sorted(task_param['unknown_param'].keys())
+
+        else:
+            param_names = sorted(self.model.bounds.keys())
+
+        bounds = [
+            (key, self.model.bounds[key][0], self.model.bounds[key][1])
+            for key in param_names
+        ]
+
+        best_parameter_list = self._run(bounds, **kwargs)
+        if not best_parameter_list:
             if self.verbose:
                 print(
                     f"The fit did not succeed with method {self.method}.")
             return None
+
+        if 'unknown_param' in task_param:
+            param_names = sorted(task_param['unknown_param'].keys())
+        else:
+            param_names = sorted(self.model.bounds.keys())
+
+        self.best_param = {k: v for k, v in zip(param_names,
+                                                best_parameter_list)}
+
         return {"best_param": self.best_param, "best_value": self.best_value}
 
-    def _run(self):
+    def _run(self, bounds, **kwargs):
         raise NotImplementedError

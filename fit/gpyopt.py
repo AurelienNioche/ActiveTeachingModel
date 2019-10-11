@@ -22,6 +22,7 @@ class Gpyopt(Fit):
 
     def _run(
             self,
+            bounds,
             initial_design_numdata=10,
             max_iter=np.inf,
             max_time=5,
@@ -31,7 +32,7 @@ class Gpyopt(Fit):
             {'name': f'{b[0]}',
              'type': 'continuous',
              'domain': (b[1], b[2])
-             } for b in self.model.bounds
+             } for b in bounds
         ]
 
         eps = 10e-6
@@ -47,20 +48,23 @@ class Gpyopt(Fit):
                                 eps=eps)
 
         best_param_list = myBopt.x_opt
-        self.best_param = {b[0]: v for b, v in
-                           zip(self.model.bounds,
-                               best_param_list)}
+        # self.best_param = {b[0]: v for b, v in
+        #                    zip(self.model.bounds,
+        #                        best_param_list)}
 
         self.best_value = myBopt.fx_opt
 
         self.opt = myBopt
 
-        return True
+        return best_param_list
 
-    def get_estimated_var(self):
+    def get_estimated_var(self, n_unknown_param=None):
+
+        if not n_unknown_param:
+            n_unknown_param = len(self.model.bounds)
 
         model = self.opt.model.model
-        eval_points = np.zeros((1, len(self.model.bounds)))
+        eval_points = np.zeros((1, n_unknown_param))
         eval_points[0, :] = self.opt.x_opt
         m, v = model.predict(eval_points)
         estimated_var = v[0][0]

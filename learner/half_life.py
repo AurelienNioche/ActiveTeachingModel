@@ -6,28 +6,25 @@ from learner.generic import Learner
 class HalfLife(Learner):
 
     version = 2.2
-    bounds = (
-        ('alpha', 0.001, 1.0),
-        ('beta', 0.001, 1.0)
-    )
+    bounds = {
+        'alpha': (0.001, 1.0),
+        'beta': (0.001, 1.0),
+    }
 
     def __init__(
             self,
             t=0, hist=None,
             n_possible_replies=None,
             param=None,
+            known_param=None,
             **kwargs):
 
         super().__init__(**kwargs)
 
-        # Decay parameter
         self.alpha = None
-        # Retrieval threshold
         self.beta = None
-        # Noise in the activation levels
-        self.s = None
 
-        self.set_cognitive_parameters(param)
+        self.set_cognitive_parameters(param, known_param)
 
         self.b = {}
         self.t_r = {}
@@ -40,9 +37,19 @@ class HalfLife(Learner):
             self.p_random = 0
 
         if hist is not None:
-            raise NotImplementedError
+            assert t == len(hist)
+            for t, item in enumerate(hist):
+                self.t_r[item] = t
+
+                if item not in self.b:
+                    self.b[item] = self.beta
+                else:
+                    self.b[item] *= (1 - self.alpha)
 
         self.t = t
+
+        self.old_b = None
+        self.old_t_r = None
 
     def p_recall(self, item, time=None, time_index=None):
 
@@ -61,6 +68,9 @@ class HalfLife(Learner):
         if time_index is not None or time is not None:
             raise NotImplementedError
 
+        self.old_b = self.b.copy()
+        self.old_t_r = self.t_r.copy()
+
         self.t_r[item] = self.t
 
         if item not in self.b:
@@ -70,10 +80,11 @@ class HalfLife(Learner):
 
         self.t += 1
 
-    def set_history(self, hist, t, times=None):
-        raise NotImplementedError
-
     def unlearn(self):
+        self.b = self.old_b.copy()
+        self.t_r = self.t_r.copy()
+
+    def set_history(self, hist, t, times=None):
         raise NotImplementedError
 
     def _p_choice(self, item, reply, possible_replies, time=None):

@@ -4,7 +4,6 @@ from pyGPGO.surrogates.GaussianProcess import GaussianProcess
 from pyGPGO.GPGO import GPGO
 
 from . abstract_class import Fit
-from . objective import objective
 
 
 class PyGPGO(Fit):
@@ -18,7 +17,7 @@ class PyGPGO(Fit):
         value = super().objective(param=param, keep_in_history=keep_in_history)
         return - value
 
-    def _run(self, **kwargs):
+    def _run(self, bounds, **kwargs):
 
         """
         kwargs: for GPGO: n_jobs, for run: max_iter, init_evals
@@ -30,7 +29,7 @@ class PyGPGO(Fit):
         f = self.objective
         param = {
             f'{b[0]}': ('cont', [b[1], b[2]])
-            for b in self.model.bounds
+            for b in bounds
         }
 
         # surrogate = BoostedTrees()

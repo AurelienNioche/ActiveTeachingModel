@@ -8,7 +8,7 @@ from learner.act_r import ActR
 class ActRMeaning(ActR, ABC):
 
     version = 3.1
-    bounds = ActR.bounds + (('m', 0.0, 5), )
+    bounds = {**ActR.bounds, **{'m': (0.0, 5)}}
 
     def __init__(self, semantic_connections, param=None, metaclass=False,
                  **kwargs):
@@ -94,7 +94,7 @@ class ActRMeaning(ActR, ABC):
 
 class ActRGraphic(ActRMeaning, ABC):
 
-    bounds = ActR.bounds + (('g', 0.0, 5.0), )
+    bounds = {**ActR.bounds, **{'g': (0.0, 5)}}
 
     def __init__(self, graphic_connections, param, **kwargs):
 
@@ -135,8 +135,7 @@ class ActRGraphic(ActRMeaning, ABC):
 
 class ActRPlus(ActRMeaning):
 
-    bounds = ('d', 0.0000001, 1.0), ('tau', 0.00, 5), ('s', 0.0000001, 10), \
-             ('g', -0.1, 0.1), ('m', -0.1, 0.1)
+    bounds = {**ActR.bounds, **{'m': (0.0, 5)}, **{'g': (0.0, 5)}}
 
     def __init__(self, graphic_connections,
                  semantic_connections, param, **kwargs):

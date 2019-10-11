@@ -10,20 +10,25 @@ class DifferentialEvolution(Fit):
 
         super().__init__(method='de', **kwargs)
 
-    def _run(self, **kwargs):
+    def _run(self, bounds, **kwargs):
 
         """
         kwargs:  maxiter, workers
         """
 
-        bounds_scipy = [b[-2:] for b in self.model.bounds]
+        bounds_scipy = [b[-2:] for b in bounds]
         res = scipy.optimize.differential_evolution(
             func=self.objective,
             bounds=bounds_scipy,
             **kwargs)
-        self.best_param = {b[0]: v for b, v in zip(self.model.bounds, res.x)}
+        best_param_list = res.x
         self.best_value = res.fun
-        return res.success
+
+        success = res.success
+        if not success:
+            return res.success
+        else:
+            return best_param_list
 
 
 class Minimize(Fit):
@@ -31,9 +36,9 @@ class Minimize(Fit):
     def __init__(self, **kwargs):
         super().__init__(method='scipy', **kwargs)
 
-    def _run(self, **kwargs):
+    def _run(self, bounds, **kwargs):
 
-        bounds_scipy = [b[-2:] for b in self.model.bounds]
+        bounds_scipy = [b[-2:] for b in bounds]
 
         # A priori estimations
         x0 = np.zeros(len(bounds_scipy))
