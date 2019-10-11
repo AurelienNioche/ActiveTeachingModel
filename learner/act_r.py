@@ -222,23 +222,6 @@ class ActR(Learner):
         else:
             return 1-p_correct
 
-    def decide(self, item, possible_replies, time=None,
-               time_index=None):
-
-        p_r = self.p_recall(item,
-                            time=time,
-                            time_index=time_index)
-        r = np.random.random()
-
-        if p_r > r:
-            reply = item
-        else:
-            reply = np.random.choice(possible_replies)
-
-        if self.verbose:
-            print(f't={self.t}: question {item}, reply {reply}')
-        return reply
-
     def learn(self, item, time=None, time_index=None):
 
         if time_index is not None:

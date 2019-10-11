@@ -216,9 +216,9 @@ def run(student_model, teacher_model,
     if teacher_param is None:
         teacher_param = {'n_item': n_item}
 
-    assert student_model in \
-        (ActR, ActRMeaning, ActRGraphic, QLearner), \
-        "Student model not recognized."
+    # assert student_model in \
+    #     (ActR, ActRMeaning, ActRGraphic, QLearner), \
+    #     "Student model not recognized."
     assert teacher_model in \
         (Active, RandomTeacher, Leitner, Psychologist), \
         "Teacher model not recognized."

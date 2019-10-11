@@ -12,25 +12,20 @@ class Learner:
 
         self.param = None
 
-    def decide(self, item, possible_replies, time=None):
-        """Expected return from specific learner: reply"""
-        raise NotImplementedError
+    def decide(self, item, possible_replies, time=None, time_index=None):
 
-    def learn(self, item, time=None):
-        raise NotImplementedError
+        p_r = self.p_recall(
+            item,
+            time=time,
+            time_index=time_index)
+        r = np.random.random()
 
-    def unlearn(self):
-        raise NotImplementedError
+        if p_r > r:
+            reply = item
+        else:
+            reply = np.random.choice(possible_replies)
 
-    def _p_choice(self, item, reply, possible_replies, time=None):
-        raise NotImplementedError
-
-    def _p_correct(self, item, reply, possible_replies, time=None):
-        raise NotImplementedError
-
-    def p_recall(self, item, time=None):
-        """Expected return from specific learner: p_r"""
-        raise NotImplementedError
+        return reply
 
     def recall(self, item, time=None):
 
@@ -112,5 +107,19 @@ class Learner:
         self.init()
 
     def set_history(self, hist, t, times=None):
+        raise NotImplementedError
 
+    def learn(self, item, time=None):
+        raise NotImplementedError
+
+    def unlearn(self):
+        raise NotImplementedError
+
+    def _p_choice(self, item, reply, possible_replies, time=None):
+        raise NotImplementedError
+
+    def _p_correct(self, item, reply, possible_replies, time=None):
+        raise NotImplementedError
+
+    def p_recall(self, item, time=None):
         raise NotImplementedError

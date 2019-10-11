@@ -8,17 +8,17 @@ from tqdm import tqdm
 
 def calculate_prob(x1, x2, b0, b1, b2):
     """A function to compute the probability of a positive response."""
-
-    print("x1 shape", x1.shape)
-    print("x2 shape", x2.shape)
-    print("b0 shape", b0.shape)
-    print("b1 shape", b1.shape)
-    print("b2 shape", b2.shape)
+    #
+    # print("x1 shape", x1.shape)
+    # print("x2 shape", x2.shape)
+    # print("b0 shape", b0.shape)
+    # print("b1 shape", b1.shape)
+    # print("b2 shape", b2.shape)
 
     logit = b0 + x1 * b1 + x2 * b2
     p_obs = 1. / (1 + np.exp(-logit))
 
-    print(p_obs.shape)
+    #n print(p_obs.shape)
     return p_obs
 
 

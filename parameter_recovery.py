@@ -11,6 +11,7 @@ from fit.pygpgo import PyGPGO
 from learner.act_r_custom import ActRMeaning
 from learner.act_r import ActR
 from learner.rl import QLearner
+from learner.half_life import HalfLife
 
 from teacher.leitner import Leitner
 from teacher.random import RandomTeacher
@@ -138,15 +139,23 @@ def main(student_model, teacher_model, fit_class, n_sim=10,
 
 if __name__ == "__main__":
 
-    ActR.bounds = \
-        ('d', 0.001, 1.0), \
-        ('tau', 0.001, 2.0), \
-        ('s', 0.001, 1.0)
-
-    main(student_model=ActR,
+    main(student_model=HalfLife,
          teacher_model=Leitner,
-         fit_class=DifferentialEvolution,
+         fit_class=PyGPGO,
          n_sim=30,
          n_item=1000,
          n_iteration=1000,
          force=True)
+
+    # ActR.bounds = \
+    #     ('d', 0.001, 1.0), \
+    #     ('tau', 0.001, 2.0), \
+    #     ('s', 0.001, 1.0)
+    #
+    # main(student_model=ActR,
+    #      teacher_model=Leitner,
+    #      fit_class=DifferentialEvolution,
+    #      n_sim=30,
+    #      n_item=1000,
+    #      n_iteration=1000,
+    #      force=True)
