@@ -26,6 +26,9 @@ class HalfLife(Learner):
 
         self.set_cognitive_parameters(param, known_param)
 
+        assert self.alpha is not None
+        assert self.beta is not None
+
         self.b = {}
         self.t_r = {}
 
@@ -37,9 +40,10 @@ class HalfLife(Learner):
             self.p_random = 0
 
         if hist is not None:
-            assert t == len(hist)
-            for t, item in enumerate(hist):
-                self.t_r[item] = t
+            for t_index in range(t):
+
+                item = hist[t_index]
+                self.t_r[item] = t_index
 
                 if item not in self.b:
                     self.b[item] = self.beta
@@ -58,8 +62,10 @@ class HalfLife(Learner):
 
         if item not in self.t_r:
             return 0
+
         b = self.b[item]
         t_r = self.t_r[item]
+
         p = np.exp(-b * (self.t - t_r))
         return p
 
@@ -81,8 +87,9 @@ class HalfLife(Learner):
         self.t += 1
 
     def unlearn(self):
+
         self.b = self.old_b.copy()
-        self.t_r = self.t_r.copy()
+        self.t_r = self.old_t_r.copy()
 
     def set_history(self, hist, t, times=None):
         raise NotImplementedError
