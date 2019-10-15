@@ -91,8 +91,9 @@ class Run:
 
         if compute_p_recall_hist:
             p_recall_hist = p_recall_over_time_after_learning(
-                agent=self.learner,
-                n_iteration=self.n_iteration,
+                student_model=self.student_model,
+                student_param=self.student_param,
+                hist=self.hist_item,
                 n_item=self.n_item,
             )
         else:

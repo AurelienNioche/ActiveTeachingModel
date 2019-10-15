@@ -2,8 +2,12 @@ import plot.memory_trace
 import plot.success
 import plot.n_seen
 import plot.n_learnt
+
 from learner.act_r_custom import ActRMeaning
+from learner.half_life import HalfLife
+
 from simulation.run import run
+
 from teacher.active import Active
 from teacher.leitner import Leitner
 from teacher.random import RandomTeacher
@@ -22,14 +26,19 @@ def main(force=False):
 
     # Task attributes
     n_item = 150   # 30, 150
-    n_iteration = 1000  # 4000
+    n_iteration = 10  # 4000
 
-    # Student
-    student_param = {"d": 0.5, "tau": 0.01, "s": 0.06, "m": 0.02}
-        # {"d": 0.5, "tau": 0.01, "s": 0.06, "m": 0.1}
-    # student_param = {"d": 0.5, "tau": 0.01, "s": 0.06,
-    #                  "m": 0.1}
-    student_model = ActRMeaning
+    # # Student
+    student_model = HalfLife
+    student_param = {
+        "beta": 0.02,
+        "alpha": 0.2
+    }
+    # student_param = {"d": 0.5, "tau": 0.01, "s": 0.06, "m": 0.02}
+    #     # {"d": 0.5, "tau": 0.01, "s": 0.06, "m": 0.1}
+    # # student_param = {"d": 0.5, "tau": 0.01, "s": 0.06,
+    # #                  "m": 0.1}
+    # student_model = ActRMeaning
 
     # Teacher
     teacher_models = (RandomTeacher, Leitner, Active)

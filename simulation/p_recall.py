@@ -2,21 +2,44 @@ import numpy as np
 from tqdm import tqdm
 
 
-def _compute_discrete(agent, n_item, n_iteration):
+def _compute(student_model,
+             student_param,
+             hist,
+             n_item,
+             time_sampling=None,
+             time_norm=None,
+             ):
+
+    n_iteration = len(hist)
 
     p_recall = np.zeros((n_item, n_iteration))
 
-    # pool = mlt.Pool()
+    learner = student_model(param=student_param)
 
     for t in tqdm(range(n_iteration)):
 
-        for item in range(n_item):
-            p = \
-                agent.p_recall(item=item, time_index=t)
+        item_presented = hist[t]
 
-            # assert not np.isnan(p), "Error of logic!"
+        if time_sampling:
+            time = time_sampling[t] * time_norm
+
+        for item in range(n_item):
+
+            if time_sampling:
+                # noinspection PyUnboundLocalVariable
+                p = \
+                    learner.p_recall(item=item, time=time)
+            else:
+                print(item)
+                p = \
+                    learner.p_recall(item=item)
 
             p_recall[item, t] = p
+
+        if time_sampling:
+            learner.learn(item=item_presented, time=time)
+        else:
+            learner.learn(item=item_presented)
 
         # p_recall[:, i] = pool.map(
         #     _run,
@@ -27,54 +50,28 @@ def _compute_discrete(agent, n_item, n_iteration):
     return p_recall
 
 
-def _compute_continuous(agent, n_item, time_sampling,
-                        time_norm):
-
-    samp_size = time_sampling.shape[0]
-
-    p_recall = np.zeros((n_item, samp_size))
-
-    i = 0
-
-    for t in tqdm(time_sampling):
-
-        for item in range(n_item):
-            p = \
-                agent.p_recall(item=item, time=t * time_norm)
-
-            # assert not np.isnan(p), "Error of logic!"
-
-            p_recall[item, i] = p
-
-        i += 1
-
-    tqdm.write('\n')
-
-    return p_recall
-
-
 def p_recall_over_time_after_learning(
-        agent, n_iteration, n_item,
-        discrete_time=True,
+        student_model,
+        student_param,
+        hist,
+        n_item,
         time_norm=None,
         time_sampling=None):
 
     tqdm.write("Computing the probabilities of recall...")
 
-    if time_sampling is not None:
-        discrete_time = False
-
-    assert discrete_time or \
-        (time_sampling is not None and time_norm is not None), \
-        "If 'discrete_time' is True, then " \
+    assert time_sampling is not None or time_norm is None, \
+        "If continuous time, then " \
         "'time_norm' and 'time_sampling' have to be defined"
 
-    if discrete_time:
-        p_recall = _compute_discrete(agent=agent, n_item=n_item, n_iteration=n_iteration)
+    p_recall = _compute(student_model=student_model,
+                        student_param=student_param,
+                        hist=hist,
+                        n_item=n_item,
+                        time_sampling=time_sampling,
+                        time_norm=time_norm
+                        )
 
-    else:
-        p_recall = _compute_continuous(agent=agent, n_item=n_item,
-                                       time_sampling=time_sampling,
-                                       time_norm=time_norm)
+    tqdm.write('\n')
 
     return p_recall

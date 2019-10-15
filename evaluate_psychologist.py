@@ -99,7 +99,7 @@ def run(
 def main():
 
     fit_class = Gpyopt
-    n_iteration = 500
+    n_iteration = 10
     n_item = 200
     seed = 123
     force = False
