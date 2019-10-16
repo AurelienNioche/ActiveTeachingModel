@@ -25,7 +25,7 @@ class Adaptive:
 
         self.n_design = 10
 
-        self.grid_param =
+        self.post = None
 
         self.space = \
             tuple([self.n_design, self.n_possible_y, ] + [self.grid_size, ] * self.k)
@@ -42,6 +42,31 @@ class Adaptive:
         # p = np.expand_dims(self.p_obs, dim_p_obs)
 
         return  #log_lik_bernoulli(y, p)
+
+    def _update_mutual_info(self):
+
+        self.log_lik = ll = self._compute_log_lik()
+
+        lp = np.ones(self.grid_param.shape[1])
+        self.log_prior = lp - logsumexp(lp)
+        self.log_post = self.log_prior.copy()
+
+        # Calculate the marginal log likelihood.
+        lp = expand_multiple_dims(self.log_post, 1, 1)
+        mll = logsumexp(self.log_lik + lp, axis=1)
+        self.marg_log_lik = mll  # shape (num_design, num_response)
+
+        post = np.exp(self.log_post)
+
+        # Calculate the marginal entropy and conditional entropy.
+        self.ent_obs = -np.multiply(np.exp(ll), ll).sum(-1)
+        self.ent_marg = -np.sum(np.exp(mll) * mll, -1)  # shape (num_designs,)
+        self.ent_cond = np.sum(
+            post * self.ent_obs, axis=1)  # shape (num_designs,)
+
+        # Calculate the mutual information.
+        self.mutual_info = self.ent_marg - \
+                           self.ent_cond  # shape (num_designs,)
 
     def get_design(self, kind='optimal'):
         # type: (str) -> int
@@ -73,48 +98,36 @@ class Adaptive:
                 'The argument kind should be "optimal" or "random".')
         return idx_design
 
+    def update(self, design, response):
+        r"""
+        Update the posterior :math:`p(\theta | y_\text{obs}(t), d^*)` for
+        all discretized values of :math:`\theta`.
 
-    def _update_mutual_info(self):
+        .. math::
+            p(\theta | y_\text{obs}(t), d^*) =
+                \frac{ p( y_\text{obs}(t) | \theta, d^*) p_t(\theta) }
+                    { p( y_\text{obs}(t) | d^* ) }
 
-        self.log_lik = ll = self._compute_log_lik()
+        Parameters
+        ----------
+        design
+            Design vector for given response
+        response
+            Any kinds of observed response
+        """
+        # if not isinstance(design, pd.Series):
+        #     design = pd.Series(design, index=self.task.designs)
+        #
+        # idx_design = get_nearest_grid_index(design, self.grid_design)
+        # idx_response = get_nearest_grid_index(
+        #     pd.Series(response), self.grid_response)
+        idx_design = design
+        idx_response = response
 
-        lp = np.ones(self.grid_param.shape[1])
-        self.log_prior = lp - logsumexp(lp)
-        self.log_post = self.log_prior.copy()
+        self.log_post += self.log_lik[idx_design, :, idx_response].flatten()
+        self.log_post -= logsumexp(self.log_post)
 
-        # Calculate the marginal log likelihood.
-        lp = expand_multiple_dims(self.log_post, 1, 1)
-        mll = logsumexp(self.log_lik + lp, axis=1)
-        self.marg_log_lik = mll  # shape (num_design, num_response)
-
-        # Calculate the marginal entropy and conditional entropy.
-        self.ent_obs = -np.multiply(np.exp(ll), ll).sum(-1)
-        self.ent_marg = -np.sum(np.exp(mll) * mll, -1)  # shape (num_designs,)
-        self.ent_cond = np.sum(
-            self.post * self.ent_obs, axis=1)  # shape (num_designs,)
-
-        # Calculate the mutual information.
-        self.mutual_info = self.ent_marg - \
-                           self.ent_cond  # shape (num_designs,)
-
-    def conditional_entropy(self):
-        pass
-
-    def big_u(self, item):
-        pass
-
-    def small_u(self, d_idx, theta_idx, y_idx):
-
-        dist = self.p_theta[d_idx, y_idx]
-
-        if theta_idx == 0:
-            dist_theta[:, ]
-
-        for i in range(self.k):
-            _sum +=
-
-
-
+        self._update_mutual_info()
 
 
 class MyModel:
