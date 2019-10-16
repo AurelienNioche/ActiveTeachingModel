@@ -12,16 +12,20 @@ from scipy.special import logsumexp
 
 class Adaptive:
 
-    def __init__(self):
+    def __init__(self, student_model):
+
+        self.model = student_model
 
         # n param
-        self.k = 2
+        self.k = len(self.model.bounds)
 
         self.grid_size = 5
 
         self.n_possible_y = 2
 
         self.n_design = 10
+
+        self.grid_param =
 
         self.space = \
             tuple([self.n_design, self.n_possible_y, ] + [self.grid_size, ] * self.k)
@@ -31,12 +35,50 @@ class Adaptive:
     # def p_theta(self):
     #     return np.random.random(self.space)
 
-    def marginal_entropy(self, theta):
+    def _compute_log_lik(self):
+        """Compute the log likelihood."""
+        dim_p_obs = len(self.p_obs.shape)
+        # y = self.y_obs.reshape(make_vector_shape(dim_p_obs + 1, dim_p_obs))
+        # p = np.expand_dims(self.p_obs, dim_p_obs)
 
-        self.p_obs = self._compute_p_obs()
+        return  #log_lik_bernoulli(y, p)
+
+    def get_design(self, kind='optimal'):
+        # type: (str) -> int
+        r"""
+        Choose a design with a given type.
+
+        * ``optimal``: an optimal design :math:`d^*` that maximizes the mutual
+          information.
+        * ``random``: a design randomly chosen.
+
+        Parameters
+        ----------
+        kind : {'optimal', 'random'}, optional
+            Type of a design to choose
+
+        Returns
+        -------
+        design : int
+            A chosen design
+        """
+
+        if kind == 'optimal':
+            self._update_mutual_info()
+            idx_design = np.argmax(self.mutual_info)
+        elif kind == 'random':
+            idx_design = np.random.random(self.n_design)
+        else:
+            raise ValueError(
+                'The argument kind should be "optimal" or "random".')
+        return idx_design
+
+
+    def _update_mutual_info(self):
+
         self.log_lik = ll = self._compute_log_lik()
 
-        lp = np.ones(self.grid_param.shape[0])
+        lp = np.ones(self.grid_param.shape[1])
         self.log_prior = lp - logsumexp(lp)
         self.log_post = self.log_prior.copy()
 
@@ -46,6 +88,7 @@ class Adaptive:
         self.marg_log_lik = mll  # shape (num_design, num_response)
 
         # Calculate the marginal entropy and conditional entropy.
+        self.ent_obs = -np.multiply(np.exp(ll), ll).sum(-1)
         self.ent_marg = -np.sum(np.exp(mll) * mll, -1)  # shape (num_designs,)
         self.ent_cond = np.sum(
             self.post * self.ent_obs, axis=1)  # shape (num_designs,)
