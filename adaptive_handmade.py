@@ -45,6 +45,9 @@ class Adaptive:
 
     def _update_mutual_info(self):
 
+        # self.log_post += self.log_lik[idx_design, :, idx_response].flatten()
+        # self.log_post -= logsumexp(self.log_post)
+
         self.log_lik = ll = self._compute_log_lik()
 
         lp = np.ones(self.grid_param.shape[1])
@@ -98,7 +101,7 @@ class Adaptive:
                 'The argument kind should be "optimal" or "random".')
         return idx_design
 
-    def update(self, design, response):
+    def update(self):
         r"""
         Update the posterior :math:`p(\theta | y_\text{obs}(t), d^*)` for
         all discretized values of :math:`\theta`.
@@ -121,11 +124,6 @@ class Adaptive:
         # idx_design = get_nearest_grid_index(design, self.grid_design)
         # idx_response = get_nearest_grid_index(
         #     pd.Series(response), self.grid_response)
-        idx_design = design
-        idx_response = response
-
-        self.log_post += self.log_lik[idx_design, :, idx_response].flatten()
-        self.log_post -= logsumexp(self.log_post)
 
         self._update_mutual_info()
 
