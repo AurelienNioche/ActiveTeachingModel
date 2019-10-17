@@ -17,7 +17,7 @@ def calculate_prob(x1, b0, b1):
     # print("b1 shape", b1.shape)
     # print("b2 shape", b2.shape)
 
-    logit = b0 + x1 * b1
+    logit = b0 + x1 * b1**2
     p_obs = 1. / (1 + np.exp(-logit))
 
     #n print(p_obs.shape)
@@ -31,17 +31,17 @@ def main():
     np.random.seed(123)
 
     true_param = {
-        'b0': 0.2,
-        'b1': 0.5,
+        'b0': 2.0,
+        'b1': 3.0,
     }
 
     grid_design = {
-        'x1': np.linspace(0, 1, 100),    # grid points within [0, 50]
+        'x1': np.linspace(0, 10, 100),    # grid points within [0, 50]
     }
 
     grid_param = {
-        'b0': np.linspace(0, 1, 100),  # grid points within [-5, 5]
-        'b1': np.linspace(0, 1, 100),  # grid points within [-5, 5]
+        'b0': np.linspace(0, 10, 100),  # grid points within [-5, 5]
+        'b1': np.linspace(0, 10, 100),  # grid points within [-5, 5]
     }
 
     params = sorted(grid_param.keys())
@@ -73,7 +73,7 @@ def main():
 
     design_types = ['optimal', 'random']
 
-    num_trial = 1000  # number of trials
+    num_trial = 200  # 200  # number of trials
 
     post_means = {pr: {d: np.zeros(num_trial) for d in design_types} for pr in params}
     post_sds = {pr: {d: np.zeros(num_trial) for d in design_types} for pr in params}
@@ -82,11 +82,13 @@ def main():
     for design_type in design_types:
 
         print(f"Computing results for design '{design_type}'")
+        print("-"*10)
 
         # Reset the engine as an initial state
         engine.reset()
 
-        for trial in tqdm(range(num_trial)):
+        for trial in range(num_trial):
+            print("trial", trial)
             # Compute an optimal design for the current trial
             design = engine.get_design(design_type)
 
@@ -101,6 +103,10 @@ def main():
                 post_means[pr][design_type][trial] = engine.post_mean[i]
                 post_sds[pr][design_type][trial] = engine.post_sd[i]
 
+            print("-"*10)
+        print("-" *10)
+        print("DONE")
+        print()
     fig, axes = plt.subplots(ncols=len(params), figsize=(12, 6))
 
     colors = [f'C{i}' for i in range(len(params))]

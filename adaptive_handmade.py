@@ -13,6 +13,8 @@ from scipy.special import logsumexp
 
 from itertools import product
 
+EPS = np.finfo(np.float).eps
+
 
 class Adaptive:
 
@@ -27,22 +29,74 @@ class Adaptive:
 
         self.possible_design = possible_design
 
-        self.post = None
+        self._compute_grid_param()
+        self.reset()
+
+    def _compute_grid_param(self):
+
+        # params = sorted(self.learner_model.bounds)
+        # n_param = len(params)
+        # self.grid_param = np.zeros((n_param**self.grid_size, n_param))
+        #
+        # for i, param in enumerate(product(*[
+        #     np.linspace(
+        #         *self.learner_model.bounds[key],
+        #         self.grid_size) for key in sorted(self.learner_model.bounds)])):
+        #     print(param)
+        #     self.grid_param[i, :] = param
 
         self.grid_param = np.asarray(list(
-            product(range(self.grid_size), repeat=self.n_param)))
+            product(*[
+                np.linspace(
+                    *self.learner_model.bounds[key],
+                    self.grid_size) for key in
+                sorted(self.learner_model.bounds)])
+        ))
+
+        # for pr in params:
+        #
+        # self.grid_param = np.asarray(list(
+        #     product(
+        #     np.linspace(
+        #         *self.learner_model.bounds[key],
+        #         self.grid_size) for key in sorted(self.learner_model.bounds)
+        #     )
+        # ))
 
         print(self.grid_param.shape)
 
-        self.hist = []
-
-        self.log_lik = np.zeros((len(possible_design), len(self.grid_param)))
-
-    # def p_theta(self):
-    #     return np.random.random(self.space)
-
     def reset(self):
+        """
+        Reset the engine as in the initial state.
+        """
+
         self.hist = []
+
+        self.log_lik = np.zeros((len(self.possible_design),
+                                 len(self.grid_param), 2))
+
+        self._compute_log_lik()
+
+        lp = np.ones(len(self.grid_param))
+        self.log_prior = lp - logsumexp(lp)
+        self.log_post = self.log_prior.copy()
+
+        self._compute_marg_log_lik()
+
+        # ll = np.stack((self.log_lik, 1-self.log_lik), axis=-1)
+        # print("ll shape", ll.shape)
+        ll = self.log_lik
+
+        self.ent_obs = -np.multiply(np.exp(ll), ll).sum(-1)
+
+        print("self.like_lik", self.log_lik.shape)
+        print("self.ent_obs", self.ent_obs.shape)
+
+        self.ent_marg = None
+        self.ent_cond = None
+        self.mutual_info = None
+
+        self.flag_update_mutual_info = True
 
     def _p_obs(self, item, param):
 
@@ -59,7 +113,23 @@ class Adaptive:
 
         for i, x in enumerate(self.possible_design):
             for j, param in enumerate(self.grid_param):
-                self.log_lik[i, j] = np.log(self._p_obs(x, param))
+                p = self._p_obs(x, param)
+                for y in (0, 1):
+                    self.log_lik[i, j, y] = y * np.log(p + EPS) + (1 - y) * np.log(1 - p + EPS)
+
+    def _compute_marg_log_lik(self):
+
+        """Compute the marginal log likelihood"""
+
+        # Calculate the marginal log likelihood.
+        lp = self.log_post.reshape((1, len(self.log_post), 1))
+
+        print("lp shape", lp.shape)
+        print("log_lik shape", self.log_lik.shape)
+        print("self.log_lik + lp", np.asarray(self.log_lik + lp).shape)
+        mll = logsumexp(self.log_lik + lp, axis=1)
+        self.marg_log_lik = mll  # shape (num_design, num_response)
+
         # dim_p_obs = len(self.p_obs.shape)
         # y = self.y_obs.reshape(make_vector_shape(dim_p_obs + 1, dim_p_obs))
         # p = np.expand_dims(self.p_obs, dim_p_obs)
@@ -68,33 +138,32 @@ class Adaptive:
 
     def _update_mutual_info(self):
 
-        # self.log_post += self.log_lik[idx_design, :, idx_response].flatten()
-        # self.log_post -= logsumexp(self.log_post)
-
-        self._compute_log_lik()
-        ll = self.log_lik
-
-        lp = np.ones(self.grid_param.shape[1])
-        self.log_prior = lp - logsumexp(lp)
-        self.log_post = self.log_prior.copy()
+        # If there is no need to update mutual information, it ends.
+        if not self.flag_update_mutual_info:
+            return
 
         # Calculate the marginal log likelihood.
-        lp = self.log_post
-        # lp = expand_multiple_dims(self.log_post, 1, 1)
-        mll = logsumexp(self.log_lik + lp, axis=1)
-        self.marg_log_lik = mll  # shape (num_design, num_response)
+        self._compute_marg_log_lik()
 
-        post = np.exp(self.log_post)
+        print("self.marg_log_lik shape", self.marg_log_lik.shape)
 
         # Calculate the marginal entropy and conditional entropy.
-        self.ent_obs = -np.multiply(np.exp(ll), ll).sum(-1)
-        self.ent_marg = -np.sum(np.exp(mll) * mll, -1)  # shape (num_designs,)
+        self.ent_marg = -np.sum(
+            np.exp(self.marg_log_lik)
+            * self.marg_log_lik, -1)  # shape (num_designs,)
+
+        print("self.post", self.post.shape)
+        print("self.ent_obs", self.ent_obs.shape)
+
         self.ent_cond = np.sum(
-            post * self.ent_obs, axis=1)  # shape (num_designs,)
+            self.post * self.ent_obs, axis=1)  # shape (num_designs,)
 
         # Calculate the mutual information.
         self.mutual_info = self.ent_marg - \
-                           self.ent_cond  # shape (num_designs,)
+            self.ent_cond  # shape (num_designs,)
+
+        # Flag that there is no need to update mutual information again.
+        self.flag_update_mutual_info = False
 
     def get_design(self, kind='optimal'):
         # type: (str) -> int
@@ -119,14 +188,15 @@ class Adaptive:
         if kind == 'optimal':
             self._update_mutual_info()
             idx_design = np.argmax(self.mutual_info)
+            design = self.possible_design[idx_design]
         elif kind == 'random':
-            idx_design = np.random.random(self.n_design)
+            design = np.random.choice(self.possible_design)
         else:
             raise ValueError(
                 'The argument kind should be "optimal" or "random".')
-        return idx_design
+        return design
 
-    def update(self, idx_design):
+    def update(self, design, response):
         r"""
         Update the posterior :math:`p(\theta | y_\text{obs}(t), d^*)` for
         all discretized values of :math:`\theta`.
@@ -141,7 +211,7 @@ class Adaptive:
         design
             Design vector for given response
         response
-            Any kinds of observed response
+            0 or 1
         """
         # if not isinstance(design, pd.Series):
         #     design = pd.Series(design, index=self.task.designs)
@@ -150,9 +220,19 @@ class Adaptive:
         # idx_response = get_nearest_grid_index(
         #     pd.Series(response), self.grid_response)
 
-        self.hist.append(idx_design)
+        self.hist.append(design)
 
-        self._update_mutual_info()
+        idx_design = list(self.possible_design).index(design)
+
+        self.log_post += self.log_lik[idx_design, :, response].flatten()
+        self.log_post -= logsumexp(self.log_post)
+
+        self.flag_update_mutual_info = True
+
+    @property
+    def post(self) -> np.ndarray:
+        """Posterior distributions of joint parameter space"""
+        return np.exp(self.log_post)
 
     @property
     def post_mean(self) -> np.ndarray:
@@ -216,8 +296,8 @@ def create_fig(param, design_types, post_means, post_sds, true_param,
 class FakeModel:
 
     bounds = {
-        "b0": (-5, 10),
-        "b1": (-5, 10)
+        "b0": (0, 10),
+        "b1": (0, 10)
     }
 
     def __init__(self, param, hist=None):
@@ -233,7 +313,7 @@ class FakeModel:
     def p_recall(self, item):
         """A function to compute the probability of a positive response."""
 
-        logit = self.b0 + item * self.b1
+        logit = self.b0 + item * self.b1**2
         p_obs = 1. / (1 + np.exp(-logit))
 
         return p_obs
@@ -248,7 +328,8 @@ def main():
 
     np.random.seed(123)
 
-    possible_design = np.arange(10)
+    possible_design = np.linspace(0, 10, 100)
+    grid_size = 100
 
     # student_model = HalfLife
     # true_param = {
@@ -257,21 +338,22 @@ def main():
     # }
     learner_model = FakeModel
     true_param = {
-        "b0": 5,
-        "b1": 2,
+        "b0": 2,
+        "b1": 3,
     }
+
+    num_trial = 200
 
     param = sorted(learner_model.bounds.keys())
 
     learner = learner_model(param=true_param)
     engine = Adaptive(learner_model=learner_model,
-                      possible_design=possible_design)
+                      possible_design=possible_design,
+                      grid_size=grid_size)
 
     print("Ready to compute")
 
     design_types = ['optimal', 'random']
-
-    num_trial = 100  # number of trials
 
     post_means = {pr: {d: np.zeros(num_trial)
                        for d in design_types}
