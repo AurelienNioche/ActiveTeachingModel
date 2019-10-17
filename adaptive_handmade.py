@@ -34,17 +34,6 @@ class Adaptive:
 
     def _compute_grid_param(self):
 
-        # params = sorted(self.learner_model.bounds)
-        # n_param = len(params)
-        # self.grid_param = np.zeros((n_param**self.grid_size, n_param))
-        #
-        # for i, param in enumerate(product(*[
-        #     np.linspace(
-        #         *self.learner_model.bounds[key],
-        #         self.grid_size) for key in sorted(self.learner_model.bounds)])):
-        #     print(param)
-        #     self.grid_param[i, :] = param
-
         self.grid_param = np.asarray(list(
             product(*[
                 np.linspace(
@@ -52,18 +41,6 @@ class Adaptive:
                     self.grid_size) for key in
                 sorted(self.learner_model.bounds)])
         ))
-
-        # for pr in params:
-        #
-        # self.grid_param = np.asarray(list(
-        #     product(
-        #     np.linspace(
-        #         *self.learner_model.bounds[key],
-        #         self.grid_size) for key in sorted(self.learner_model.bounds)
-        #     )
-        # ))
-
-        print(self.grid_param.shape)
 
     def reset(self):
         """
@@ -83,15 +60,9 @@ class Adaptive:
 
         self._compute_marg_log_lik()
 
-        # ll = np.stack((self.log_lik, 1-self.log_lik), axis=-1)
-        # print("ll shape", ll.shape)
         ll = self.log_lik
 
         self.ent_obs = -np.multiply(np.exp(ll), ll).sum(-1)
-
-        print("self.like_lik", self.log_lik.shape)
-        print("self.ent_obs", self.ent_obs.shape)
-
         self.ent_marg = None
         self.ent_cond = None
         self.mutual_info = None
@@ -123,18 +94,8 @@ class Adaptive:
 
         # Calculate the marginal log likelihood.
         lp = self.log_post.reshape((1, len(self.log_post), 1))
-
-        print("lp shape", lp.shape)
-        print("log_lik shape", self.log_lik.shape)
-        print("self.log_lik + lp", np.asarray(self.log_lik + lp).shape)
         mll = logsumexp(self.log_lik + lp, axis=1)
         self.marg_log_lik = mll  # shape (num_design, num_response)
-
-        # dim_p_obs = len(self.p_obs.shape)
-        # y = self.y_obs.reshape(make_vector_shape(dim_p_obs + 1, dim_p_obs))
-        # p = np.expand_dims(self.p_obs, dim_p_obs)
-
-        # return  #log_lik_bernoulli(y, p)
 
     def _update_mutual_info(self):
 
@@ -145,15 +106,10 @@ class Adaptive:
         # Calculate the marginal log likelihood.
         self._compute_marg_log_lik()
 
-        print("self.marg_log_lik shape", self.marg_log_lik.shape)
-
         # Calculate the marginal entropy and conditional entropy.
         self.ent_marg = -np.sum(
             np.exp(self.marg_log_lik)
             * self.marg_log_lik, -1)  # shape (num_designs,)
-
-        print("self.post", self.post.shape)
-        print("self.ent_obs", self.ent_obs.shape)
 
         self.ent_cond = np.sum(
             self.post * self.ent_obs, axis=1)  # shape (num_designs,)
@@ -213,12 +169,6 @@ class Adaptive:
         response
             0 or 1
         """
-        # if not isinstance(design, pd.Series):
-        #     design = pd.Series(design, index=self.task.designs)
-        #
-        # idx_design = get_nearest_grid_index(design, self.grid_design)
-        # idx_response = get_nearest_grid_index(
-        #     pd.Series(response), self.grid_response)
 
         self.hist.append(design)
 
@@ -351,8 +301,6 @@ def main():
                       possible_design=possible_design,
                       grid_size=grid_size)
 
-    print("Ready to compute")
-
     design_types = ['optimal', 'random']
 
     post_means = {pr: {d: np.zeros(num_trial)
@@ -364,12 +312,15 @@ def main():
 
     # Run simulations for three designs
     for design_type in design_types:
+
+        print("Resetting the engine...")
+
         # Reset the engine as an initial state
         engine.reset()
 
-        for trial in tqdm(range(num_trial)):
+        print(f"Computing results for design '{design_type}'...")
 
-            print(f"Computing results for design '{design_type}'")
+        for trial in tqdm(range(num_trial)):
 
             # Compute an optimal design for the current trial
             design = engine.get_design(design_type)

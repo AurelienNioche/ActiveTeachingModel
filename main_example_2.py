@@ -10,17 +10,10 @@ from tqdm import tqdm
 
 def calculate_prob(x1, b0, b1):
     """A function to compute the probability of a positive response."""
-    #
-    # print("x1 shape", x1.shape)
-    # print("x2 shape", x2.shape)
-    # print("b0 shape", b0.shape)
-    # print("b1 shape", b1.shape)
-    # print("b2 shape", b2.shape)
 
     logit = b0 + x1 * b1**2
     p_obs = 1. / (1 + np.exp(-logit))
 
-    #n print(p_obs.shape)
     return p_obs
 
 
@@ -48,35 +41,33 @@ def main():
 
     responses = [0, 1]
 
-    task = Task(name='My New Experiment',  # Name of the task (optional)
-                designs=sorted(grid_design.keys()), # Labels of design variables
-                responses=responses)        # Possible responses
+    task = Task(
+        name='My New Experiment',            # Name of the task (optional)
+        designs=sorted(grid_design.keys()),  # Labels of design variables
+        responses=responses)                 # Possible responses
 
-    print('Task object ready!')
-
-    model = Model(name='My Logistic Model',   # Name of the model (optional)
-                params=params,  # Labels of model parameters
-                func=calculate_prob,
-                  task=task
-                  )        # A probability function
-
-    print("Model object ready!")
+    model = Model(
+        name='My Logistic Model',   # Name of the model (optional)
+        params=params,              # Labels of model parameters
+        func=calculate_prob,        # A probability function
+        task=task
+    )
 
     engine = Engine(model=model,              # a Model object
                     task=task,                # a Task object
                     grid_design=grid_design,  # a grid for design variables
                     grid_param=grid_param)    # a grid for model parameters
 
-    print("Engine object ready!")
-
-    print("Ready to compute!")
-
     design_types = ['optimal', 'random']
 
     num_trial = 200  # 200  # number of trials
 
-    post_means = {pr: {d: np.zeros(num_trial) for d in design_types} for pr in params}
-    post_sds = {pr: {d: np.zeros(num_trial) for d in design_types} for pr in params}
+    post_means = {pr: {d: np.zeros(num_trial)
+                       for d in design_types}
+                  for pr in params}
+    post_sds = {pr: {d: np.zeros(num_trial)
+                     for d in design_types}
+                for pr in params}
 
     # Run simulations for three designs
     for design_type in design_types:
@@ -87,8 +78,8 @@ def main():
         # Reset the engine as an initial state
         engine.reset()
 
-        for trial in range(num_trial):
-            print("trial", trial)
+        for trial in tqdm(range(num_trial)):
+
             # Compute an optimal design for the current trial
             design = engine.get_design(design_type)
 
@@ -103,10 +94,9 @@ def main():
                 post_means[pr][design_type][trial] = engine.post_mean[i]
                 post_sds[pr][design_type][trial] = engine.post_sd[i]
 
-            print("-"*10)
         print("-" *10)
-        print("DONE")
         print()
+
     fig, axes = plt.subplots(ncols=len(params), figsize=(12, 6))
 
     colors = [f'C{i}' for i in range(len(params))]
