@@ -1,3 +1,5 @@
+import os
+
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -5,37 +7,21 @@ from adopy import Engine, Model, Task
 
 from tqdm import tqdm
 
-from learner.act_r import ActR
 
+def calculate_prob(x1, b0, b1):
+    """A function to compute the probability of a positive response."""
+    #
+    # print("x1 shape", x1.shape)
+    # print("x2 shape", x2.shape)
+    # print("b0 shape", b0.shape)
+    # print("b1 shape", b1.shape)
+    # print("b2 shape", b2.shape)
 
-class MyModel:
+    logit = b0 + x1 * b1
+    p_obs = 1. / (1 + np.exp(-logit))
 
-    def __init__(self):
-        self.hist = []
-
-    def _p(self, item, d, tau, s):
-
-        hist = self.hist + [item, ]
-
-        learner = ActR(hist=hist, n_iteration=len(hist), param={
-            "d": d, "tau": tau, "s": s})
-        p_obs = learner.p_recall(item=item)
-        return p_obs
-
-    def calculate_prob(self, x, d, tau, s):
-        """A function to compute the probability of a positive response."""
-
-        if type(x) == np.ndarray:
-
-            p_obs = np.zeros((x.shape[0], d.shape[1]))
-
-            for i, x in enumerate(x.flatten()):
-                for j, (d, tau, s) in enumerate(zip(d.flatten(), tau.flatten(), s.flatten())):
-                    p_obs[i, j] = self._p(x, d, tau, s)
-
-        else:
-            p_obs = self._p(x, d, tau, s)
-        return p_obs
+    #n print(p_obs.shape)
+    return p_obs
 
 
 def main():
@@ -44,76 +30,68 @@ def main():
 
     np.random.seed(123)
 
-    params = ['d', 'tau', 's']
-
     true_param = {
-        'd': 0.5354635033901602,
-        'tau': -1.0941799361846622,
-        's': 0.08348823400597494
+        'b0': 0.2,
+        'b1': 0.5,
     }
 
     grid_design = {
-        'x': np.arange(100),    # 100 grid points within [0, 50]
+        'x1': np.linspace(0, 1, 100),    # grid points within [0, 50]
     }
 
-    grid_size = 20
+    grid_param = {
+        'b0': np.linspace(0, 1, 100),  # grid points within [-5, 5]
+        'b1': np.linspace(0, 1, 100),  # grid points within [-5, 5]
+    }
 
-    ActR.bounds = \
-        ('d', 0.001, 1.0), \
-        ('tau', -5, 5), \
-        ('s', 0.001, 5.0)
+    params = sorted(grid_param.keys())
 
-    grid_param = {b[0]: np.linspace(b[1], b[2], grid_size)
-                  for b in ActR.bounds}
+    responses = [0, 1]
 
     task = Task(name='My New Experiment',  # Name of the task (optional)
-                designs=['x'],    # Labels of design variables
-                responses=[0, 1])        # Possible responses
+                designs=sorted(grid_design.keys()), # Labels of design variables
+                responses=responses)        # Possible responses
 
-    print('Task is done')
-
-    my_model = MyModel()
+    print('Task object ready!')
 
     model = Model(name='My Logistic Model',   # Name of the model (optional)
                 params=params,  # Labels of model parameters
-                func=my_model.calculate_prob,
+                func=calculate_prob,
                   task=task
                   )        # A probability function
 
-    print("Model is done")
+    print("Model object ready!")
+
     engine = Engine(model=model,              # a Model object
                     task=task,                # a Task object
                     grid_design=grid_design,  # a grid for design variables
                     grid_param=grid_param)    # a grid for model parameters
 
-    print("Engine is done")
+    print("Engine object ready!")
 
-    print("Ready to compute")
+    print("Ready to compute!")
 
     design_types = ['optimal', 'random']
 
-    num_trial = 100  # number of trials
+    num_trial = 1000  # number of trials
 
     post_means = {pr: {d: np.zeros(num_trial) for d in design_types} for pr in params}
     post_sds = {pr: {d: np.zeros(num_trial) for d in design_types} for pr in params}
 
     # Run simulations for three designs
     for design_type in design_types:
+
+        print(f"Computing results for design '{design_type}'")
+
         # Reset the engine as an initial state
         engine.reset()
 
         for trial in tqdm(range(num_trial)):
-
-            print(f"Computing results for design '{design_type}'")
-
             # Compute an optimal design for the current trial
             design = engine.get_design(design_type)
 
-            print(design['x'])
-            my_model.hist += design['x']
-
             # Get a response using the optimal design
-            p = my_model.calculate_prob(**true_param, **design)
+            p = calculate_prob(**true_param, **design)
             response = int(p > np.random.random())
 
             # Update the engine
@@ -147,7 +125,10 @@ def main():
             ax.set_title(pr)
 
     plt.legend()
-    plt.savefig("fig/fig.pdf")
+
+    FIG_FOLDER = os.path.join("fig", "adaptive")
+    os.makedirs(FIG_FOLDER, exist_ok=True)
+    plt.savefig(os.path.join(FIG_FOLDER, "adaptive_example_2.pdf"))
 
 
 if __name__ == '__main__':
