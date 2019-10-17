@@ -278,19 +278,21 @@ def main():
 
     np.random.seed(123)
 
-    possible_design = np.linspace(0, 10, 100)
     grid_size = 100
 
-    # student_model = HalfLife
-    # true_param = {
-    #     "beta": 0.02,
-    #     "alpha": 0.2
-    # }
-    learner_model = FakeModel
+    possible_design = np.arange(10)
+    learner_model = HalfLife
     true_param = {
-        "b0": 2,
-        "b1": 3,
+        "beta": 0.02,
+        "alpha": 0.2
     }
+
+    # possible_design = np.linspace(0, 10, 100)
+    # learner_model = FakeModel
+    # true_param = {
+    #     "b0": 2,
+    #     "b1": 3,
+    # }
 
     num_trial = 200
 
