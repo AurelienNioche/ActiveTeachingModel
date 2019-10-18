@@ -86,7 +86,8 @@ class Adaptive:
             for j, param in enumerate(self.grid_param):
                 p = self._p_obs(x, param)
                 for y in (0, 1):
-                    self.log_lik[i, j, y] = y * np.log(p + EPS) + (1 - y) * np.log(1 - p + EPS)
+                    self.log_lik[i, j, y] \
+                        = y * np.log(p + EPS) + (1 - y) * np.log(1 - p + EPS)
 
     def _compute_marg_log_lik(self):
 
@@ -94,7 +95,10 @@ class Adaptive:
 
         # Calculate the marginal log likelihood.
         lp = self.log_post.reshape((1, len(self.log_post), 1))
+
+        ## Error ????
         mll = logsumexp(self.log_lik + lp, axis=1)
+
         self.marg_log_lik = mll  # shape (num_design, num_response)
 
     def _update_mutual_info(self):
@@ -107,6 +111,7 @@ class Adaptive:
         self._compute_marg_log_lik()
 
         # Calculate the marginal entropy and conditional entropy.
+        # Should be noted as the posterior, not marginal log likelihood
         self.ent_marg = -np.sum(
             np.exp(self.marg_log_lik)
             * self.marg_log_lik, -1)  # shape (num_designs,)
