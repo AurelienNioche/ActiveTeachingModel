@@ -71,10 +71,9 @@ class Adaptive:
 
     def _p_obs(self, item, param):
 
-        hist = self.hist + [item, ]
-
         learner = self.learner_model(
-            hist=hist,
+            t=len(self.hist),
+            hist=self.hist,
             param=param)
         p_obs = learner.p_recall(item=item)
         return p_obs
@@ -175,12 +174,13 @@ class Adaptive:
             0 or 1
         """
 
-        self.hist.append(design)
-
         idx_design = list(self.possible_design).index(design)
 
         self.log_post += self.log_lik[idx_design, :, response].flatten()
         self.log_post -= logsumexp(self.log_post)
+
+        self.hist.append(design)
+        self._compute_log_lik()
 
         self.flag_update_mutual_info = True
 
@@ -342,6 +342,9 @@ def main():
             for i, pr in enumerate(param):
                 post_means[pr][design_type][trial] = engine.post_mean[i]
                 post_sds[pr][design_type][trial] = engine.post_sd[i]
+
+            # Make the user
+            learner.learn(item=design)
 
     create_fig(param=param, design_types=design_types,
                post_means=post_means, post_sds=post_sds,
