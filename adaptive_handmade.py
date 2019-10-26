@@ -62,7 +62,7 @@ class Adaptive:
 
         ll = self.log_lik
 
-        self.ent_obs = -np.multiply(np.exp(ll), ll).sum(-1)
+        self.ent_obs = None
         self.ent_marg = None
         self.ent_cond = None
         self.mutual_info = None
@@ -108,6 +108,9 @@ class Adaptive:
 
         # Calculate the marginal log likelihood.
         self._compute_marg_log_lik()
+
+        ll = self.log_lik
+        self.ent_obs = -np.multiply(np.exp(ll), ll).sum(-1)
 
         # Calculate the marginal entropy and conditional entropy.
         # Should be noted as the posterior, not marginal log likelihood
