@@ -57,6 +57,8 @@ class Adaptive:
         lp = np.ones(len(self.grid_param))
         self.log_prior = lp - logsumexp(lp)
         self.log_post = self.log_prior.copy()
+        #
+        # self._compute_marg_log_lik()
 
         self.ent_obs = None
         self.ent_marg = None
@@ -90,21 +92,21 @@ class Adaptive:
         if not self.flag_update_mutual_info:
             return
 
-        # Calculate the marginal log likelihood.
-        lp = self.log_post.reshape((1, len(self.log_post), 1))
-        mll = logsumexp(self.log_lik + lp, axis=1)
-        self.marg_log_lik = mll  # shape (num_design, num_response)
+        # Update prior
+        self.log_prior = self.post.copy()  # Shape (len_grid,)
 
         # Calculate the marginal entropy and conditional entropy.
-        # Should be noted as the posterior, not marginal log likelihood
         self.ent_marg = - np.sum(
-            np.exp(self.marg_log_lik)
-            * self.marg_log_lik, -1)  # shape (num_designs,)
+            np.exp(self.log_prior) * self.log_prior)  # shape 1
 
-        ll = self.log_lik
-        self.ent_obs = np.multiply(np.exp(ll), ll).sum(-1)
-        self.ent_cond = - np.sum(
-            self.post * self.ent_obs, axis=1)  # shape (num_designs,)
+        lp = self.log_prior.reshape((1, len(self.log_prior), 1))
+        self.new_log_post = self.log_lik + lp
+        self.new_log_post -= logsumexp(self.new_log_post)
+        # shape (num_designs, num_params, num_replies
+
+        self.ent_cond = - np.sum(np.sum(
+            np.exp(self.new_log_post) * self.new_log_post, axis=1), axis=-1)
+        # shape (num_designs,)
 
         # Calculate the mutual information.
         self.mutual_info = self.ent_marg - \
@@ -205,7 +207,7 @@ class Adaptive:
 
 
 def create_fig(param, design_types, post_means, post_sds, true_param,
-               num_trial):
+               num_trial, fig_name="adaptive.pdf"):
 
     fig, axes = plt.subplots(ncols=len(param), figsize=(12, 6))
 
@@ -233,7 +235,7 @@ def create_fig(param, design_types, post_means, post_sds, true_param,
     plt.legend()
     FIG_FOLDER = os.path.join("fig", "adaptive")
     os.makedirs(FIG_FOLDER, exist_ok=True)
-    plt.savefig(os.path.join(FIG_FOLDER, "adaptive_handmade.pdf"))
+    plt.savefig(os.path.join(FIG_FOLDER, fig_name))
 
 
 class FakeModel:
@@ -337,7 +339,8 @@ def main():
 
     create_fig(param=param, design_types=design_types,
                post_means=post_means, post_sds=post_sds,
-               true_param=true_param, num_trial=num_trial)
+               true_param=true_param, num_trial=num_trial,
+               fig_name="adaptive_handmade_2")
 
 
 if __name__ == '__main__':
