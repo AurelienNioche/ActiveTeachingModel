@@ -12,12 +12,10 @@ class AdaptiveClassic:
     def __init__(self, learner_model, possible_design, grid_size=5):
 
         self.learner_model = learner_model
-
         self.n_param = len(self.learner_model.bounds)
-
-        self.grid_size = grid_size
-
         self.possible_design = possible_design
+
+        self.grid_param = self._compute_grid_param(grid_size)
 
         self.log_lik = np.zeros((len(self.possible_design),
                                  len(self.grid_param), 2))
@@ -25,20 +23,19 @@ class AdaptiveClassic:
         self.hist = []
 
         # Post <= prior
+        # shape (num_params, )
         lp = np.ones(len(self.grid_param))
         self.log_post = lp - logsumexp(lp)
 
         self.mutual_info = None
 
-        self._compute_grid_param()
+    def _compute_grid_param(self, grid_size):
 
-    def _compute_grid_param(self):
-
-        self.grid_param = np.asarray(list(
+        return np.asarray(list(
             product(*[
                 np.linspace(
                     *self.learner_model.bounds[key],
-                    self.grid_size) for key in
+                    grid_size) for key in
                 sorted(self.learner_model.bounds)])
         ))
 
@@ -81,33 +78,31 @@ class AdaptiveClassic:
 
     def _update_mutual_info(self):
 
-        # If there is no need to update mutual information, it ends.
-        if not self.flag_update_mutual_info:
-            return
-
         # Calculate the marginal log likelihood.
-        # shape (num_design, num_response)
+        # shape (num_designs, num_responses, )
         lp = self.log_post.reshape((1, len(self.log_post), 1))
         mll = logsumexp(self.log_lik + lp, axis=1)
 
         # Calculate the marginal entropy and conditional entropy.
-        # Should be noted as the posterior, not marginal log likelihood
         # shape (num_designs,)
         ent_mrg = - np.sum(np.exp(mll) * mll, -1)
 
-        # Compute conditional entropy
-        # shape (num_designs,)
+        # Compute entropy obs -------------------------
+
+        # shape (num_designs, num_params, num_responses, )
         ll = self.log_lik
-        ent_obs = np.multiply(np.exp(ll), ll).sum(-1)
-        ent_cond = - np.sum(
+        # shape (num_designs, num_params, )
+        ent_obs = - np.multiply(np.exp(ll), ll).sum(-1)
+
+        # Compute conditional entropy -----------------
+
+        # shape (num_designs,)
+        ent_cond = np.sum(
             self.post * ent_obs, axis=1)
 
-        # Calculate the mutual information.
+        # Calculate the mutual information. -----------
         # shape (num_designs,)
         self.mutual_info = ent_mrg - ent_cond
-
-        # Flag that there is no need to update mutual information again.
-        self.flag_update_mutual_info = False
 
     def get_design(self, kind='optimal'):
         # type: (str) -> int
