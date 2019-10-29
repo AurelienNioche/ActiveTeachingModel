@@ -69,5 +69,6 @@ def main():
     ax.set_xlim(0, n_iteration)
     plt.show()
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     main()
