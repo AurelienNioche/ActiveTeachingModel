@@ -17,7 +17,7 @@ def main():
     alpha = 1 + np.log(success_rate) / (2*b)
     print(b, alpha)
 
-    pres = np.array([0, ] + [(2**n) for n in range(1, 10)])
+    pres = np.array([0, 1, ] + [(2**n) for n in range(1, 10)])
     print("pres", pres)
 
     for i, delta in enumerate(pres):
@@ -44,19 +44,21 @@ def main():
         if delta == pres[current_idx]:
             print("delta == pres", t)
             print("delta", delta)
-
-            b *= (1 - alpha)
             flag = True
 
         p = np.exp(-b*delta)
-        print(f"t={t}; p={p:.3f}")
+        print(f"t={t}; delta={delta}; p={p:.3f}")
 
         y.append(p)
         delta += 1
 
         if flag is True:
+            if t == 0:
+                pass
+            else:
+                b *= (1 - alpha)
+                delta = 0
 
-            delta = 0
             current_idx += 1
             flag = False
 
@@ -64,6 +66,7 @@ def main():
     ax.plot(y)
     ax.axhline(0.9, linestyle="--", color="0.2")
     ax.set_ylim(0, 1)
+    ax.set_xlim(0, n_iteration)
     plt.show()
 
 if __name__=="__main__":
