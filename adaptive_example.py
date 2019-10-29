@@ -25,7 +25,7 @@ def calculate_prob_3_param(x1, b0, b1):
     return p_obs
 
 
-def run(grid_design, grid_param, true_param, func, num_trials=100):
+def run(grid_design, grid_param, true_param, func, num_trial=100):
 
     np.random.seed(123)
 
@@ -75,7 +75,7 @@ def run(grid_design, grid_param, true_param, func, num_trials=100):
             design = engine.get_design(design_type)
 
             # Get a response using the optimal design
-            p = calculate_prob(**true_param, **design)
+            p = func(**true_param, **design)
             response = int(p > np.random.random())
 
             # Update the engine
@@ -106,8 +106,11 @@ def run(grid_design, grid_param, true_param, func, num_trials=100):
                             means + stds, alpha=.2, color=colors[j])
 
             ax.set_title(pr)
+            ax.set_xlabel("time")
+            ax.set_ylabel(f"value")
 
     plt.legend()
+    plt.tight_layout()
 
     FIG_FOLDER = os.path.join("fig", "adaptive")
     os.makedirs(FIG_FOLDER, exist_ok=True)
@@ -133,10 +136,10 @@ def main_three_param():
 
     func = calculate_prob_3_param
 
-    num_trials = 200
+    num_trial = 200
 
     run(true_param=true_param, grid_design=grid_design,
-        grid_param=grid_param, func=func, num_trials=num_trials)
+        grid_param=grid_param, func=func, num_trial=num_trial)
 
 
 def main_original():
@@ -168,3 +171,4 @@ def main_original():
 
 if __name__ == '__main__':
     main_original()
+    main_three_param()

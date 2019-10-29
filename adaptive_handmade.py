@@ -17,6 +17,7 @@ def main_revised():
 
     grid_size = 100
     n_design = 10
+    num_trial = 200
 
     possible_design = np.arange(n_design)
     learner_model = HalfLife
@@ -31,8 +32,6 @@ def main_revised():
     #     "b0": 2,
     #     "b1": 3,
     # }
-
-    num_trial = 200
 
     run(adaptive_engine=AdaptiveRevised,
         learner_model=learner_model,
@@ -72,4 +71,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    main_revised()

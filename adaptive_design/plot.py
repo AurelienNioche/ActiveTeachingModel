@@ -28,8 +28,12 @@ def create_fig(param, design_types, post_means, post_sds, true_param,
                             means+stds, alpha=.2, color=colors[j])
 
             ax.set_title(pr)
+            ax.set_xlabel("time")
+            ax.set_ylabel(f"value")
 
     plt.legend()
+    plt.tight_layout()
+
     FIG_FOLDER = os.path.join("fig", "adaptive")
     os.makedirs(FIG_FOLDER, exist_ok=True)
     plt.savefig(os.path.join(FIG_FOLDER, fig_name))

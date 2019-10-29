@@ -57,48 +57,47 @@ class AdaptiveClassic:
 
         self._update_mutual_info()
 
-    def _p_obs(self, item, param):
-
-        learner = self.learner_model(
-            t=len(self.hist),
-            hist=self.hist,
-            param=param)
-        p_obs = learner.p_recall(item=item)
-        return p_obs
-
     def _compute_log_lik(self):
         """Compute the log likelihood."""
 
-        for i, x in enumerate(self.possible_design):
-            for j, param in enumerate(self.grid_param):
-                p = self._p_obs(x, param)
+        for j, param in enumerate(self.grid_param):
+
+            learner = self.learner_model(
+                t=len(self.hist),
+                hist=self.hist,
+                param=param)
+
+            for i, x in enumerate(self.possible_design):
+
+                p = learner.p_recall(item=x)
+
                 for y in (0, 1):
                     self.log_lik[i, j, y] \
                         = y * np.log(p + EPS) + (1 - y) * np.log(1 - p + EPS)
 
     def _update_mutual_info(self):
 
+        # Get likelihood
+        # shape (num_designs, num_params, num_responses, )
+        ll = self.log_lik
+
         # Calculate the marginal log likelihood.
         # shape (num_designs, num_responses, )
         lp = self.log_post.reshape((1, len(self.log_post), 1))
-        mll = logsumexp(self.log_lik + lp, axis=1)
+        mll = logsumexp(ll + lp, axis=1)
 
         # Calculate the marginal entropy and conditional entropy.
         # shape (num_designs,)
         ent_mrg = - np.sum(np.exp(mll) * mll, -1)
 
         # Compute entropy obs -------------------------
-
-        # shape (num_designs, num_params, num_responses, )
-        ll = self.log_lik
         # shape (num_designs, num_params, )
         ent_obs = - np.multiply(np.exp(ll), ll).sum(-1)
 
         # Compute conditional entropy -----------------
 
         # shape (num_designs,)
-        ent_cond = np.sum(
-            self.post * ent_obs, axis=1)
+        ent_cond = np.sum(np.exp(self.log_post) * ent_obs, axis=1)
 
         # Calculate the mutual information. -----------
         # shape (num_designs,)
