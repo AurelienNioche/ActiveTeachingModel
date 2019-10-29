@@ -14,7 +14,7 @@ def main():
     t_r = 0
     y=[]
     alpha=0.8
-    n_iteration = 1000
+    n_iteration = 10000
 
     presentation = []
     l = 0.1
