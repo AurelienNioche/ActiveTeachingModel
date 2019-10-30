@@ -17,11 +17,6 @@ class AdaptiveRevised(AdaptiveClassic):
 
         self.y = np.arange(2)
 
-    @staticmethod
-    def log_lik_bernoulli(y, p):
-        """Log likelihood for a Bernoulli random variable"""
-        return y * np.log(p + EPS) + (1 - y) * np.log(1 - p + EPS)
-
     def _compute_log_lik(self):
         """Compute the log likelihood."""
 

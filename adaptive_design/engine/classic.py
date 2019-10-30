@@ -20,6 +20,8 @@ class AdaptiveClassic:
         self.log_lik = np.zeros((len(self.possible_design),
                                  len(self.grid_param), 2))
 
+        self.y = np.arange(2)
+
         self.hist = []
 
         # Post <= prior
@@ -51,11 +53,10 @@ class AdaptiveClassic:
         lp = np.ones(len(self.grid_param))
         self.log_post = lp - logsumexp(lp)
 
-        self._compute_log_lik()
-
-        self.mutual_info = None
-
-        self._update_mutual_info()
+    @staticmethod
+    def log_lik_bernoulli(y, p):
+        """Log likelihood for a Bernoulli random variable"""
+        return y * np.log(p + EPS) + (1 - y) * np.log(1 - p + EPS)
 
     def _compute_log_lik(self):
         """Compute the log likelihood."""
@@ -70,10 +71,8 @@ class AdaptiveClassic:
             for i, x in enumerate(self.possible_design):
 
                 p = learner.p_recall(item=x)
-
-                for y in (0, 1):
-                    self.log_lik[i, j, y] \
-                        = y * np.log(p + EPS) + (1 - y) * np.log(1 - p + EPS)
+                log_p = self.log_lik_bernoulli(self.y, p)
+                self.log_lik[i, j, :] = log_p
 
     def _update_mutual_info(self):
 
@@ -103,6 +102,12 @@ class AdaptiveClassic:
         # shape (num_designs,)
         self.mutual_info = ent_mrg - ent_cond
 
+    def _select_design(self, v):
+
+        return np.random.choice(
+            self.possible_design[v == np.max(v)]
+        )
+
     def get_design(self, kind='optimal'):
         # type: (str) -> int
         r"""
@@ -123,11 +128,15 @@ class AdaptiveClassic:
             A chosen design
         """
 
+        self._compute_log_lik()
+
         if kind == 'optimal':
-            idx_design = np.argmax(self.mutual_info)
-            design = self.possible_design[idx_design]
+            self._update_mutual_info()
+            design = self._select_design(self.mutual_info)
+
         elif kind == 'random':
             design = np.random.choice(self.possible_design)
+
         else:
             raise ValueError(
                 'The argument kind should be "optimal" or "random".')
@@ -157,8 +166,6 @@ class AdaptiveClassic:
         self.log_post -= logsumexp(self.log_post)
 
         self.hist.append(design)
-        self._compute_log_lik()
-        self._update_mutual_info()
 
     @property
     def post(self) -> np.ndarray:

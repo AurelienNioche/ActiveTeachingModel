@@ -1,12 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-
-
-def f(t, t_r, b, a=1):
-    print("delta", t-t_r)
-    y = a * np.exp(-b*(t-t_r))
-
-    return y
+import os
 
 
 def proof_of_concept():
@@ -73,7 +67,9 @@ def main():
 
     plt.tight_layout()
 
-    plt.show()
+    fig_folder = os.path.join("fig", "illustration")
+    os.makedirs(fig_folder, exist_ok=True)
+    plt.savefig(os.path.join(fig_folder, 'memory.pdf'))
 
 
 if __name__ == "__main__":
