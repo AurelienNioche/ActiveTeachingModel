@@ -12,8 +12,8 @@ from learner.half_life import HalfLife
 def run():
 
     grid_size = 100
-    n_design = 100
-    num_trial = 500
+    n_design = 20
+    num_trial = 300
 
     possible_design = np.arange(n_design)
     learner_model = HalfLife
@@ -33,8 +33,8 @@ def run():
         grid_size=grid_size)
 
     design_types = [
-        'adaptive_teaching',
-        'pure_teaching', 'optimal', 'random']
+        'pure_teaching', 'adaptive_teaching',
+        'optimal', 'random']
 
     post_means = {d: {pr: np.zeros(num_trial)
                       for pr in param}
