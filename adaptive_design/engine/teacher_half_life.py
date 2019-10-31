@@ -2,6 +2,12 @@ import numpy as np
 
 from . teacher import Teacher
 
+EPS = np.finfo(np.float).eps
+
+from tqdm import tqdm
+from time import time
+import datetime
+
 
 class TeacherHalfLife(Teacher):
 
@@ -9,29 +15,121 @@ class TeacherHalfLife(Teacher):
 
         super().__init__(**kwargs)
 
-        self.eta = np.zeros(len(self.possible_design))
-        self.n_presentation = np.zeros(len(self.possible_design))
+        self.delta = np.zeros(len(self.possible_design), dtype=int)
+        self.n_pres_minus_one = np.full(len(self.possible_design), -1, dtype=int)
+        self.seen = np.zeros(len(self.possible_design), dtype=bool)
 
     def _compute_log_lik(self):
         """Compute the log likelihood."""
 
-        for j, param in enumerate(self.grid_param):
+        t = time()
+        tqdm.write("Compute log")
 
-            for i, x in enumerate(self.possible_design):
+        # log_p = np.zeros((len(self.grid_param), len(self.possible_design)))
 
-                learner = self.learner_model(
-                    t=len(self.hist),
-                    hist=self.hist,
-                    param=param)
-                p = learner.p_recall(item=x)
-                learner.learn(item=x)
-                p_t2 = learner.p_recall(item=x)
+        # for j, param in enumerate(self.grid_param):
+        #
+        #     for i, x in enumerate(self.possible_design):
+        #
+        #         learner = self.learner_model(
+        #             t=len(self.hist),
+        #             hist=self.hist,
+        #             param=param)
+        #         p = learner.p_recall(item=x)
+        #         log_p = self.log_lik_bernoulli(self.y, p)
+        #         self.log_lik[i, j, :] = log_p
+        #
+        #         # learner.learn(item=x)
+        #         # p_t2 = learner.p_recall(item=x)
+        #
+        #         # log_p_t2 = self.log_lik_bernoulli(self.y, p_t2)
+        #
+        #         # self.log_lik_t0_t1[i, j, :] = np.hstack((log_p, log_p_t2))
+        #
+        # # print(self.log_lik)
+        # # old_log_lik = self.log_lik.copy()
 
-                log_p = self.log_lik_bernoulli(self.y, p)
-                log_p_t2 = self.log_lik_bernoulli(self.y, p_t2)
+        for i in range(len(self.possible_design)):
 
-                self.log_lik[i, j, :] = log_p
-                self.log_lik_t0_t1[i, j, :] = np.hstack((log_p, log_p_t2))
+            p = np.zeros((len(self.grid_param), 2))
+
+            seen = self.seen[i] == 1
+            if seen:
+                p[:, 1] = np.exp(
+                    - self.grid_param[:, 1]
+                    * (1-self.grid_param[:, 0])**self.n_pres_minus_one[i]
+                    * self.delta[i])
+            else:
+                p[:, 1] = np.zeros(len(self.grid_param))
+
+            p[:, 0] = 1 - p[:, 1]
+
+            log_p = np.log(p + EPS)
+
+            self.log_lik[i, :, :] = log_p
+
+        # print("# ---------------------- NEW --------------------------- #")
+        # print(self.log_lik)
+        #
+        # assert np.all(self.log_lik == old_log_lik)
+
+            # Learn
+            self.n_pres_minus_one[i] += 1
+            self.delta += 1
+
+            old_delta = self.delta[i]
+            old_seen = self.seen[i]
+
+            self.delta[i] = 1
+            self.seen[i] = 1
+
+            new_p = np.zeros((len(self.grid_param), 2))
+
+            seen = self.seen[i] == 1
+            if seen:
+                new_p[:, 1] = np.exp(
+                    - self.grid_param[:, 1]
+                    * (1-self.grid_param[:, 0])**self.n_pres_minus_one[i]
+                    * self.delta[i])
+            else:
+                new_p[:, 1] = np.zeros(len(self.grid_param))
+
+            new_p[:, 0] = 1 - new_p[:, 1]
+
+            new_log_p = np.log(new_p + EPS)
+
+            self.log_lik_t0_t1[i, :, :] = np.hstack((log_p, new_log_p))
+
+            self.n_pres_minus_one[i] -= 1
+            self.delta -= 1
+            self.delta[i] = old_delta
+            self.seen[i] = old_seen
+
+        tqdm.write(f"Done! [time elapsed "
+        f"{datetime.timedelta(seconds=time() - t)}]")
+
+        # for i, x in enumerate(self.possible_design):
+        #
+        #     learner = self.learner_model(
+        #         t=len(self.hist),
+        #         hist=self.hist,
+        #         param=param)
+        #     p = learner.p_recall(item=x)
+        #     learner.learn(item=x)
+        #     p_t2 = learner.p_recall(item=x)
+        #
+        #     log_p = self.log_lik_bernoulli(self.y, p)
+        #     log_p_t2 = self.log_lik_bernoulli(self.y, p_t2)
+        #
+        #     self.log_lik[i, j, :] = log_p
+        #     self.log_lik_t0_t1[i, j, :] = np.hstack((log_p, log_p_t2))
+
+    def _update_history(self, design):
+
+        self.n_pres_minus_one[design] += 1
+        self.delta += 1
+        self.delta[design] = 1
+        self.seen[design] = 1
 
 # class HalfLife(Learner):
 #

@@ -165,6 +165,9 @@ class AdaptiveClassic:
         self.log_post += self.log_lik[idx_design, :, response].flatten()
         self.log_post -= logsumexp(self.log_post)
 
+        self._update_history(design)
+
+    def _update_history(self, design):
         self.hist.append(design)
 
     @property

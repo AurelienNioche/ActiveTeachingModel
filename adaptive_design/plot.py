@@ -8,7 +8,7 @@ def create_fig(param, design_types, post_means, post_sds, true_param,
 
     fig, axes = plt.subplots(ncols=len(param), figsize=(12, 6))
 
-    colors = [f'C{i}' for i in range(len(param))]
+    colors = [f'C{i}' for i in range(len(design_types))]
 
     for i, ax in enumerate(axes):
 
