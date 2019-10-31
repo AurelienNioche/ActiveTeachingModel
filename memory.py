@@ -62,7 +62,7 @@ def main():
                    linewidth=0.5)
     ax.plot(y)
     # ax.axhline(0.9, linestyle="--", color="0.2")
-    ax.set_ylim(0, 1)
+    ax.set_ylim(0.5, 1)
     ax.set_xlim(0, n_iteration)
 
     plt.tight_layout()
