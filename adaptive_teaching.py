@@ -9,7 +9,7 @@ from adaptive_design.plot import create_fig
 
 from utils.utils import dump, load
 
-from learner.half_life import HalfLife
+from learner.half_life import FastHalfLife
 
 
 def run():
@@ -19,17 +19,20 @@ def run():
     engine_model = TeacherHalfLife
 
     grid_size = 100
-    n_design = 20
+    n_design = 100
     num_trial = 300
 
     possible_design = np.arange(n_design)
-    learner_model = HalfLife
+    learner_model = FastHalfLife
+
     true_param = {
         "beta": 0.02,
         "alpha": 0.2
     }
 
     design_types = [
+        'pure_teaching',
+        'adaptive_teaching',
         'optimal',
         'random']
 
@@ -45,7 +48,7 @@ def run():
 
         np.random.seed(123)
 
-        learner = learner_model(param=true_param)
+        learner = learner_model(param=true_param, n_item=n_design)
         engine = engine_model(
             learner_model=learner_model,
             possible_design=possible_design,
@@ -81,6 +84,7 @@ def run():
 
                 # Get a response using the optimal design
                 p = learner.p_recall(item=design)
+
                 response = int(p > np.random.random())
 
                 # Update the engine
