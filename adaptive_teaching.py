@@ -19,7 +19,7 @@ def run():
 
     grid_size = 100
     n_design = 100
-    num_trial = 200
+    num_trial = 300
 
     possible_design = np.arange(n_design)
     learner_model = FastHalfLife

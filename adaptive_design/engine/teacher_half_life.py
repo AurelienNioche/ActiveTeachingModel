@@ -6,9 +6,9 @@ from scipy.special import logsumexp
 
 EPS = np.finfo(np.float).eps
 
-from tqdm import tqdm
-from time import time
-import datetime
+# from tqdm import tqdm
+# from time import time
+# import datetime
 
 
 class TeacherHalfLife(AdaptiveRevised):
@@ -28,10 +28,14 @@ class TeacherHalfLife(AdaptiveRevised):
         self.seen_i = None
         self.i = None
 
-        self.n_seq = self.n_design**2
+        # self.n_seq = self.n_design**2
+        #
+        # self.seq_idx = np.arange(self.n_seq)\
+        #     .reshape((self.n_design, self.n_design))
 
-        self.seq_idx = np.arange(self.n_seq)\
-            .reshape((self.n_design, self.n_design))
+        self.log_lik_t_plus_one = np.zeros((self.n_design,
+                                            self.n_param_set,
+                                            2))
 
     def _update_learning_value(self):
 
@@ -99,36 +103,48 @@ class TeacherHalfLife(AdaptiveRevised):
 
     def _update_mutual_info(self):
 
-        self.log_lik_seq = np.zeros((self.n_seq, self.n_param_set, 4))
+        # self.log_lik_seq = np.zeros((self.n_seq, self.n_param_set, 4))
 
-        n_seq = 0
+        # n_seq = 0
+
+        lp = self.log_post.reshape((1, len(self.log_post), 1))
 
         for i in range(self.n_design):
 
             log_p = self._log_p(i)
             self.log_lik[i, :, :] = log_p
 
+        self.mutual_info[:] = self._mutual_info(self.log_lik, lp)
+
+        for i in range(self.n_design):
+
             # Learn new item
             self._update_history(i)
+
+            self.log_lik_t_plus_one[:] = 0
 
             for j in range(self.n_design):
 
                 new_log_p = self._log_p(j)
 
-                self.log_lik_seq[n_seq, :, :] = np.hstack((log_p, new_log_p))
+                self.log_lik_t_plus_one[j, :, :] = new_log_p
 
-                n_seq += 1
+            mutual_info_t_plus_one_for_seq_i_j = \
+                self._mutual_info(self.log_lik_t_plus_one, lp)
+
+            self.mutual_info[i] += \
+                np.max(mutual_info_t_plus_one_for_seq_i_j)
 
             # Unlearn item
             self._cancel_last_update_history()
 
-        # Get likelihood
+    def _mutual_info(self, ll, lp):
+
+        # ll => likelihood
         # shape (num_designs, num_params, num_responses, )
-        ll = self.log_lik_seq
 
         # Calculate the marginal log likelihood.
         # shape (num_designs, num_responses, )
-        lp = self.log_post.reshape((1, len(self.log_post), 1))
         mll = logsumexp(ll + lp, axis=1)
 
         # Calculate the marginal entropy and conditional entropy.
@@ -150,8 +166,7 @@ class TeacherHalfLife(AdaptiveRevised):
         # shape (num_designs,)
         mutual_info = ent_mrg - ent_cond
 
-        for i in range(self.n_design):
-            self.mutual_info[i] = np.max(mutual_info[self.seq_idx[i]])
+        return mutual_info
 
     def _update_history(self, design):
 
