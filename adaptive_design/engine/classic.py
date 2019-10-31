@@ -12,13 +12,15 @@ class AdaptiveClassic:
     def __init__(self, learner_model, possible_design, grid_size=5):
 
         self.learner_model = learner_model
-        self.n_param = len(self.learner_model.bounds)
         self.possible_design = possible_design
 
         self.grid_param = self._compute_grid_param(grid_size)
 
-        self.log_lik = np.zeros((len(self.possible_design),
-                                 len(self.grid_param), 2))
+        self.n_design = len(self.possible_design)
+        self.n_param_set = len(self.grid_param)
+
+        self.log_lik = np.zeros((self.n_design,
+                                 self.n_param_set, 2))
 
         self.y = np.arange(2)
 
@@ -26,10 +28,10 @@ class AdaptiveClassic:
 
         # Post <= prior
         # shape (num_params, )
-        lp = np.ones(len(self.grid_param))
+        lp = np.ones(self.n_param_set)
         self.log_post = lp - logsumexp(lp)
 
-        self.mutual_info = None
+        self.mutual_info = np.zeros(self.n_design)
 
     def _compute_grid_param(self, grid_size):
 
@@ -100,7 +102,7 @@ class AdaptiveClassic:
 
         # Calculate the mutual information. -----------
         # shape (num_designs,)
-        self.mutual_info = ent_mrg - ent_cond
+        self.mutual_info[:] = ent_mrg - ent_cond
 
     def _select_design(self, v):
 

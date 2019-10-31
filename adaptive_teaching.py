@@ -3,7 +3,6 @@ from tqdm import tqdm
 import matplotlib.pyplot as plt
 import os
 
-from adaptive_design.engine.teacher import Teacher
 from adaptive_design.engine.teacher_half_life import TeacherHalfLife
 from adaptive_design.plot import create_fig
 
@@ -20,7 +19,7 @@ def run():
 
     grid_size = 100
     n_design = 100
-    num_trial = 300
+    num_trial = 200
 
     possible_design = np.arange(n_design)
     learner_model = FastHalfLife
@@ -31,9 +30,9 @@ def run():
     }
 
     design_types = [
+        'optimal',
         'pure_teaching',
         'adaptive_teaching',
-        'optimal',
         'random']
 
     param = sorted(learner_model.bounds.keys())
@@ -45,8 +44,6 @@ def run():
 
     if not post_means or not post_sds or not recall_means or not recall_sds \
             or force:
-
-        np.random.seed(123)
 
         learner = learner_model(param=true_param, n_item=n_design)
         engine = engine_model(
@@ -71,6 +68,7 @@ def run():
         for design_type in design_types:
 
             print("Resetting the engine...")
+            np.random.seed(123)
 
             # Reset the engine as an initial state
             engine.reset()
@@ -113,7 +111,8 @@ def run():
                true_param=true_param, num_trial=num_trial,
                fig_name=
                f"adaptive_teaching_"
-               f"{learner_model.__name__}.pdf")
+               f"{learner_model.__name__}_n_trial_"
+               f"{num_trial}_n_item_{n_design}.pdf")
 
     fig, ax = plt.subplots(figsize=(12, 6))
 
@@ -135,7 +134,8 @@ def run():
     plt.tight_layout()
 
     fig_name = f"adaptive_teaching_probability_recall_" + \
-               f"{learner_model.__name__}.pdf"
+               f"{learner_model.__name__}_n_trial_" + \
+               f"{num_trial}_n_item_{n_design}.pdf"
 
     FIG_FOLDER = os.path.join("fig", "adaptive")
     os.makedirs(FIG_FOLDER, exist_ok=True)
