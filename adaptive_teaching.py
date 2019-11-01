@@ -79,8 +79,8 @@ def main():
     engine_model = TeacherHalfLife
 
     grid_size = 100
-    n_item = 100
-    n_trial = 300
+    n_item = 200
+    n_trial = 500
 
     learner_model = FastHalfLife
 
@@ -90,7 +90,7 @@ def main():
     }
 
     design_types = [
-        RANDOM, OPT_TEACH, OPT_INF0, ADAPTIVE]
+        ADAPTIVE, RANDOM, OPT_TEACH, OPT_INF0]
 
     results = {}
 
