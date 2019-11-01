@@ -164,10 +164,13 @@ class TeacherHalfLife(AdaptiveRevised):
         self.delta_i = self.delta[design]
         self.seen_i = self.seen[design]
 
-        self.n_pres_minus_one[design] += 1
+        # Increment delta for all items
         self.delta += 1
+
+        # ...except the one for the selected design that equal one
         self.delta[design] = 1
         self.seen[design] = 1
+        self.n_pres_minus_one[design] += 1
 
     def _cancel_last_update_history(self):
 

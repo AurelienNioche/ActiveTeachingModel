@@ -57,7 +57,7 @@ def run(learner_model,
 
         for i, pr in enumerate(param):
             post_means[pr][t] = engine.post_mean[i]
-            post_sds[t] = engine.post_sd[i]
+            post_sds[pr][t] = engine.post_sd[i]
 
         for i in range(n_item):
             p_recall[i, t] = learner.p_recall(item=i)

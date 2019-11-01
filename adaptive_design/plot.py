@@ -15,13 +15,9 @@ def create_fig(param, design_types, post_means, post_sds, true_param,
         for j, dt in enumerate(design_types):
 
             pr = param[i]
-            print(pr)
 
             means = post_means[dt][pr]
             stds = post_sds[dt][pr]
-
-            print(means.shape)
-            print(stds.shape)
 
             true_p = true_param[pr]
             ax.axhline(true_p, linestyle='--', color='black',
