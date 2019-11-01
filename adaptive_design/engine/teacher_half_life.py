@@ -10,10 +10,20 @@ EPS = np.finfo(np.float).eps
 # from time import time
 # import datetime
 
+RANDOM = "Random"
+OPT_INF0 = "Opt. info"
+OPT_TEACH = "Opt. teach only"
+ADAPTIVE = "Adaptive"
+
 
 class TeacherHalfLife(AdaptiveRevised):
 
-    def __init__(self, **kwargs):
+    confidence_threshold = 0.1
+
+    def __init__(self, design_type, **kwargs):
+
+        if design_type not in (RANDOM, OPT_TEACH, OPT_INF0, ADAPTIVE):
+            raise ValueError
 
         super().__init__(**kwargs)
 
@@ -28,18 +38,21 @@ class TeacherHalfLife(AdaptiveRevised):
         self.seen_i = None
         self.i = None
 
-        # self.n_seq = self.n_design**2
-        #
-        # self.seq_idx = np.arange(self.n_seq)\
-        #     .reshape((self.n_design, self.n_design))
-
         self.log_lik_t_plus_one = np.zeros((self.n_design,
                                             self.n_param_set,
                                             2))
 
+        self.get_design = {
+            OPT_INF0: self._optimize_info_selection,
+            OPT_TEACH: self._optimize_teaching_selection,
+            RANDOM: self._random_selection,
+            ADAPTIVE: self._adaptive_selection
+        }[design_type]
+
     def _update_learning_value(self):
 
         for i in range(self.n_design):
+            self.log_lik[i, :, :] = self._log_p(i)
 
             self._update_history(i)
 
@@ -56,29 +69,8 @@ class TeacherHalfLife(AdaptiveRevised):
     def _compute_log_lik(self):
         """Compute the log likelihood."""
 
-        # t = time()
-        # tqdm.write("Compute log")
-
         for i in range(self.n_design):
-
-            log_p = self._log_p(i)
-
-            self.log_lik[i, :, :] = log_p
-
-            # if one_step_forward:
-            #
-            #     # Learn new item
-            #     self._update_history(i)
-            #
-            #     new_log_p = self._log_p(i)
-            #
-            #     self.log_lik_t0_t1[i, :, :] = np.hstack((log_p, new_log_p))
-            #
-            #     # Unlearn item
-            #     self._cancel_last_update_history()
-
-        # tqdm.write(f"Done! [time elapsed "
-        # f"{datetime.timedelta(seconds=time() - t)}]")
+            self.log_lik[i, :, :] = self._log_p(i)
 
     def _p(self, i):
 
@@ -90,8 +82,6 @@ class TeacherHalfLife(AdaptiveRevised):
                 - self.grid_param[:, 1]
                 * (1 - self.grid_param[:, 0]) ** self.n_pres_minus_one[i]
                 * self.delta[i])
-        # else:
-        #     p[:, 1] = np.zeros(self.n_param_set)
 
         p[:, 0] = 1 - p[:, 1]
 
@@ -186,51 +176,20 @@ class TeacherHalfLife(AdaptiveRevised):
         self.delta[self.i] = self.delta_i
         self.seen[self.i] = self.seen_i
 
-    def get_design(self, kind='optimal'):
-        # type: (str) -> int
-        r"""
-        Choose a design with a given type.
+    def _optimize_info_selection(self):
+        self._update_mutual_info()
+        return self._select_design(self.mutual_info)
 
-        * ``optimal``: an optimal design :math:`d^*` that maximizes the mutual
-          information.
-        * ``random``: a design randomly chosen.
+    def _random_selection(self):
+        self._compute_log_lik()
+        return np.random.choice(self.possible_design)
 
-        Parameters
-        ----------
-        kind : {'optimal', 'random'}, optional
-            Type of a design to choose
+    def _optimize_teaching_selection(self):
+        self._update_learning_value()
+        return self._select_design(self.learning_value)
 
-        Returns
-        -------
-        design : int
-            A chosen design
-        """
-
-        if kind == 'optimal':
-            # self._compute_log_lik(one_step_forward=True)
-            self._update_mutual_info()
-            design = self._select_design(self.mutual_info)
-
-        elif kind == 'random':
-            self._compute_log_lik()
-            design = np.random.choice(self.possible_design)
-
-        elif kind == 'pure_teaching':
-            self._compute_log_lik()
-            self._update_learning_value()
-            design = self._select_design(self.learning_value)
-
-        elif kind == 'adaptive_teaching':
-            if np.max(self.post_sd) > 0.1:
-                # self._compute_log_lik(one_step_forward=True)
-                self._update_mutual_info()
-                design = self._select_design(self.mutual_info)
-            else:
-                self._compute_log_lik()
-                self._update_learning_value()
-                design = self._select_design(self.learning_value)
-
+    def _adaptive_selection(self):
+        if np.max(self.post_sd) > self.confidence_threshold:
+            return self._optimize_info_selection()
         else:
-            raise ValueError(
-                'The argument kind is wrong.')
-        return design
+            return self._optimize_teaching_selection()

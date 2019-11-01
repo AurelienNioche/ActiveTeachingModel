@@ -124,6 +124,9 @@ class Learner:
 
         self.init()
 
+    def reset(self):
+        raise NotImplementedError
+
     def set_history(self, hist, t, times=None):
         raise NotImplementedError
 

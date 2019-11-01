@@ -153,6 +153,9 @@ class FastHalfLife(Learner):
         if time_index is not None or time is not None:
             raise NotImplementedError
 
+        if item is None:
+            raise ValueError
+
         seen = self.seen[item] == 1
         if seen:
             p = np.exp(
@@ -186,6 +189,12 @@ class FastHalfLife(Learner):
 
         self.delta[self.old_item] = self.old_delta
         self.seen[self.old_item] = self.old_seen
+
+    def reset(self):
+
+        self.delta[:] = 0
+        self.n_pres_minus_one[:] = -1
+        self.seen[:] = 0
 
     def set_history(self, hist, t, times=None):
         raise NotImplementedError
