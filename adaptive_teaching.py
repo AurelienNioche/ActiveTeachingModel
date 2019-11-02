@@ -90,7 +90,7 @@ def main():
     }
 
     design_types = [
-        ADAPTIVE, RANDOM, OPT_TEACH, OPT_INF0]
+        OPT_INF0, OPT_TEACH, ADAPTIVE, RANDOM]
 
     results = {}
 
