@@ -1,16 +1,18 @@
 import numpy as np
 from tqdm import tqdm
-import matplotlib.pyplot as plt
+
 import os
 
 from adaptive_design.engine.teacher_half_life import TeacherHalfLife, \
     RANDOM, OPT_TEACH, OPT_INF0, ADAPTIVE
-from adaptive_design.plot import create_fig
+from adaptive_design.plot import fig_parameter_recovery, \
+    fig_p_recall, fig_p_recall_item
 
-from utils.utils import dump, load
+from utils.backup import dump, load
 
 from learner.half_life import FastHalfLife
 
+FIG_FOLDER = os.path.join("fig", "adaptive")
 
 P_RECALL = 'p_recall'
 POST_MEAN = 'post_mean'
@@ -74,7 +76,10 @@ def run(learner_model,
 
 def main():
 
-    force = False
+    force = True, False, True, False
+
+    design_types = [
+        OPT_TEACH, OPT_INF0, ADAPTIVE, RANDOM]
 
     engine_model = TeacherHalfLife
 
@@ -89,13 +94,10 @@ def main():
         "alpha": 0.2
     }
 
-    design_types = [
-        OPT_INF0, OPT_TEACH, ADAPTIVE, RANDOM]
-
     results = {}
 
     # Run simulations for every design
-    for dt in design_types:
+    for i, dt in enumerate(design_types):
 
         bkp_file = os.path.join(
             "bkp", "adaptive",
@@ -107,7 +109,12 @@ def main():
 
         r = load(bkp_file)
 
-        if not r or force:
+        if isinstance(force, bool):
+            f = force
+        else:
+            f = force[i]
+
+        if not r or f:
             r = run(
                 design_type=dt,
                 learner_model=learner_model,
@@ -130,6 +137,10 @@ def main():
         d: results[d][POST_SD] for d in design_types
     }
 
+    p_recall = {
+        d: results[d][P_RECALL] for d in design_types
+    }
+
     param = sorted(learner_model.bounds.keys())
 
     fig_ext = \
@@ -138,38 +149,21 @@ def main():
         f"n_item_{n_item}" \
         f".pdf"
 
-    create_fig(param=param, design_types=design_types,
-               post_means=post_means, post_sds=post_sds,
-               true_param=learner_param, num_trial=n_trial,
-               fig_name=f"param_recovery_" + fig_ext)
-
-    fig, ax = plt.subplots(figsize=(12, 6))
-
-    colors = [f'C{i}' for i in range(len(design_types))]
-
-    for i, dt in enumerate(design_types):
-
-        p_recall = results[dt][P_RECALL]
-
-        means = np.mean(p_recall, axis=0)
-        stds = np.std(p_recall, axis=0)
-
-        ax.plot(means, color=colors[i], label=dt)
-        ax.fill_between(range(n_trial),
-                        means-stds,
-                        means+stds,
-                        alpha=.2, color=colors[i])
-
-    ax.set_xlabel("time")
-    ax.set_ylabel(f"probability or recall")
-
-    plt.legend()
-    plt.tight_layout()
+    fig_name = f"param_recovery_" + fig_ext
+    fig_parameter_recovery(param=param, design_types=design_types,
+                           post_means=post_means, post_sds=post_sds,
+                           true_param=learner_param, num_trial=n_trial,
+                           fig_name=fig_name,
+                           fig_folder=FIG_FOLDER)
 
     fig_name = f"p_recall_" + fig_ext
-    FIG_FOLDER = os.path.join("fig", "adaptive")
-    os.makedirs(FIG_FOLDER, exist_ok=True)
-    plt.savefig(os.path.join(FIG_FOLDER, fig_name))
+    fig_p_recall(p_recall=p_recall, design_types=design_types,
+                 fig_name=fig_name, fig_folder=FIG_FOLDER)
+
+    fig_name = f"p_recall_item_" + fig_ext
+    fig_p_recall_item(
+        p_recall=p_recall, design_types=design_types,
+        fig_name=fig_name, fig_folder=FIG_FOLDER)
 
 
 if __name__ == "__main__":

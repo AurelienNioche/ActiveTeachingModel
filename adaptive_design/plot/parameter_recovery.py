@@ -2,9 +2,13 @@ import os
 
 import matplotlib.pyplot as plt
 
+from utils.plot import save_fig
 
-def create_fig(param, design_types, post_means, post_sds, true_param,
-               num_trial, fig_name):
+
+def fig_parameter_recovery(param, design_types, post_means, post_sds,
+                           true_param,
+                           num_trial, fig_name,
+                           fig_folder=os.path.join("fig", "adaptive")):
 
     fig, axes = plt.subplots(ncols=len(param), figsize=(12, 6))
 
@@ -33,8 +37,4 @@ def create_fig(param, design_types, post_means, post_sds, true_param,
             ax.set_ylabel(f"value")
 
     plt.legend()
-    plt.tight_layout()
-
-    FIG_FOLDER = os.path.join("fig", "adaptive")
-    os.makedirs(FIG_FOLDER, exist_ok=True)
-    plt.savefig(os.path.join(FIG_FOLDER, fig_name))
+    save_fig(fig_folder=fig_folder, fig_name=fig_name)

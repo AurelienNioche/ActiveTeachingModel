@@ -1,5 +1,7 @@
 import os
 # Django specific settings
+import utils.console_output
+
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ActiveTeachingModel.settings")
 # Ensure settings are read
 from django.core.wsgi import get_wsgi_application
@@ -51,7 +53,7 @@ def fit_user(user_id=7, model=ActR, verbose=True,
 def _get_model_comparison_data(models, normalize_similarity=False,
                                verbose=False, **kwargs):
 
-    sys.stdout = utils.Tee(f'{LOG_DIR}/fit.log')
+    sys.stdout = utils.console_output.Tee(f'{LOG_DIR}/fit.log')
 
     models = models[::-1]
     model_labels = [m.__name__ for m in models]

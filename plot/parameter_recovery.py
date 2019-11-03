@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import scipy.stats
 
-from plot.generic import save_fig
+from utils.plot import save_fig
 
 SCRIPT_NAME = os.path.basename(__file__).split(".")[0]
 

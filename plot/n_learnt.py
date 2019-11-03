@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 # from matplotlib.ticker import MaxNLocator
 import numpy as np
 
-from plot.generic import save_fig
+from utils.plot import save_fig
 
 
 def curve(p_recall,

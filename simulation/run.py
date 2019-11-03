@@ -13,7 +13,8 @@ from teacher.random import RandomTeacher
 
 from psychologist.psychologist import Psychologist
 
-from utils.utils import dic2string, load, dump
+from utils.string import dic2string
+from utils.backup import dump, load
 
 from . p_recall import p_recall_over_time_after_learning
 from . fake import generate_fake_task_param

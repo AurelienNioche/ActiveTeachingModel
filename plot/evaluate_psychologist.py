@@ -3,8 +3,7 @@ import os
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from . generic import save_fig
-
+from utils.plot import save_fig
 
 SCRIPT_NAME = os.path.basename(__file__).split(".")[0]
 

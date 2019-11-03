@@ -10,9 +10,9 @@ from teacher.random import RandomTeacher
 from simulation.fake import generate_fake_task_param
 from simulation.run import run
 
-from plot.generic import save_fig
+from utils.plot import save_fig
 
-from utils.utils import load, dump
+from utils.backup import dump, load
 
 import os
 

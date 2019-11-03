@@ -11,7 +11,8 @@ from simulation.fake import generate_fake_task_param
 
 import plot.simulation
 
-from utils.utils import dic2string, dump, load
+from utils.string import dic2string
+from utils.backup import dump, load
 
 import argparse
 

@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from plot.generic import save_fig
+from utils.plot import save_fig
 
 
 def scatter(successes, ax=None, fig_name=None):

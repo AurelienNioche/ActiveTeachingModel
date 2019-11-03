@@ -1,7 +1,7 @@
 import numpy as np
 from tqdm import tqdm
 
-from . plot import create_fig
+from . plot import fig_parameter_recovery
 
 
 def run(adaptive_engine, learner_model, true_param,
@@ -55,10 +55,10 @@ def run(adaptive_engine, learner_model, true_param,
             # Make the user
             learner.learn(item=design)
 
-    create_fig(param=param, design_types=design_types,
-               post_means=post_means, post_sds=post_sds,
-               true_param=true_param, num_trial=num_trial,
-               fig_name=
+    fig_parameter_recovery(param=param, design_types=design_types,
+                           post_means=post_means, post_sds=post_sds,
+                           true_param=true_param, num_trial=num_trial,
+                           fig_name=
                f"adaptive_"
                f"{adaptive_engine.__name__}_"
                f"{learner_model.__name__}.pdf")

@@ -13,7 +13,8 @@ from simulation.data import Data
 from simulation.memory import p_recall_over_time_after_learning
 import plot.simulation
 
-from utils.utils import dic2string, dump, load
+from utils.string import dic2string
+from utils.backup import dump, load
 
 import argparse
 

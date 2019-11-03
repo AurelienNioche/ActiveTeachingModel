@@ -1,6 +1,6 @@
 from matplotlib import pyplot as plt
 
-from plot.generic import save_fig
+from utils.plot import save_fig
 
 
 def bar(counts, fig_name, font_size=42, label_size=22):

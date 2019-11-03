@@ -5,7 +5,7 @@ import plot.n_seen
 import plot.n_learnt
 import plot.success
 
-from plot.generic import save_fig
+from utils.plot import save_fig
 
 import numpy as np
 

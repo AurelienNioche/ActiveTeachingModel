@@ -5,7 +5,7 @@ from time import time
 import numpy as np
 
 from duolingo.models import Item
-from utils.utils import dump, load
+from utils.backup import dump, load
 
 from behavior.data_structure import Task
 

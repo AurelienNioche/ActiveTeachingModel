@@ -8,7 +8,7 @@ import plot.simulation
 from simulation.fake import generate_fake_task_param
 from simulation.run import run
 
-from utils.utils import dic2string
+from utils.string import dic2string
 
 import numpy as np
 

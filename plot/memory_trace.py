@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import scipy.stats
 
-from plot.generic import save_fig
+from utils.plot import save_fig
 
 
 def plot(p_recall_value,

@@ -24,8 +24,7 @@ from simulation.fake import generate_fake_task_param
 
 import plot.evaluate_psychologist
 
-from utils.utils import dic2string
-
+from utils.string import dic2string
 
 SCRIPT_NAME = os.path.basename(__file__).split(".")[0]
 

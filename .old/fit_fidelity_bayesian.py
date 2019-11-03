@@ -6,11 +6,11 @@ from tqdm import tqdm
 from fit.fit import Fit
 from learner.act_r import ActR
 from learner.act_r_custom import ActRMeaning
-from plot.generic import save_fig
+from utils.plot import save_fig
 from simulation.data import SimulatedData, Data
 from simulation.task import Task
 
-from utils.utils import load, dump
+from utils.backup import dump, load
 
 import os
 

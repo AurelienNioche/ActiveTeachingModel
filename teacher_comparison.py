@@ -13,9 +13,9 @@ from teacher.leitner import Leitner
 from teacher.random import RandomTeacher
 
 import matplotlib.pyplot as plt
-from plot.generic import save_fig
+from utils.plot import save_fig
 
-from utils.utils import dic2string
+from utils.string import dic2string
 
 import os
 

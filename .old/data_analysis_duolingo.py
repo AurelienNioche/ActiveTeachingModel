@@ -30,7 +30,8 @@ import plot.success
 import plot.memory_trace
 from simulation.memory import p_recall_over_time_after_learning
 
-from utils.utils import dump, load, print_begin, print_done
+from utils.console_output import print_begin, print_done
+from utils.backup import dump, load
 
 TR = googletrans.Translator()
 

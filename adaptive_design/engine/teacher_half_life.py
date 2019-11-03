@@ -212,6 +212,7 @@ class TeacherHalfLife(AdaptiveRevised):
         seen = self.seen[:] == 1
 
         if not np.any(seen):
+            print("Introduce new item (not any seen)")
             return np.random.choice(self.possible_design)
 
         p_recall_seen = np.exp(
@@ -219,7 +220,7 @@ class TeacherHalfLife(AdaptiveRevised):
             * (1 - alpha) ** self.n_pres_minus_one[seen]
             * self.delta[seen])
 
-        u = - (1-p_recall_seen)
+        u = 1-p_recall_seen
 
         sum_u = np.sum(u)
         if sum_u <= 1 and np.sum(seen) < len(seen) and np.random.random() < 1-sum_u:

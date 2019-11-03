@@ -2,6 +2,7 @@ import numpy as np
 import scipy.optimize
 from hyperopt import hp, fmin, tpe
 
+import utils.string
 from utils import utils
 
 IDX_PARAMETERS = 0
@@ -151,7 +152,7 @@ class Fit:
         dsp_bp = ''.join(f'{k}={round(best_param[k], 3)}, '
                          for k in sorted(best_param.keys()))
 
-        dsp_kwargs = f'[{utils.dic2string(self.kwargs)}]' if len(self.kwargs) \
+        dsp_kwargs = f'[{utils.string.dic2string(self.kwargs)}]' if len(self.kwargs) \
             else ''
 
         print(f"[{model_name} - '{self.method}']{dsp_kwargs}"

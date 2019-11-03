@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 
-from plot.generic import save_fig
+from utils.plot import save_fig
 
 
 def curve(p_recall, fig_name='p_recall.pdf', font_size=42, line_width=3,
