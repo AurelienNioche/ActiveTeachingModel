@@ -17,6 +17,8 @@ FIG_FOLDER = os.path.join("fig", "adaptive")
 P_RECALL = 'p_recall'
 POST_MEAN = 'post_mean'
 POST_SD = 'post_sd'
+HIST = 'hist'
+FORGETTING_RATES = 'forgetting_rates'
 
 
 def run(learner_model,
@@ -33,6 +35,9 @@ def run(learner_model,
     post_sds = {pr: np.zeros(n_trial) for pr in param}
 
     p_recall = np.zeros((n_item, n_trial))
+    forgetting_rates = np.zeros((n_item, n_trial))
+
+    hist = np.zeros(n_trial)
 
     # Create learner and engine
     learner = learner_model(param=learner_param, n_item=n_item)
@@ -57,26 +62,34 @@ def run(learner_model,
         # Update the engine
         engine.update(design, response)
 
+        # Backup the mean/std of post dist
         for i, pr in enumerate(param):
             post_means[pr][t] = engine.post_mean[i]
             post_sds[pr][t] = engine.post_sd[i]
 
+        # Backup prob recall / forgetting rates
         for i in range(n_item):
-            p_recall[i, t] = learner.p_recall(item=i)
+            p_recall[:, t], forgetting_rates[:, t] = \
+                learner.p_recalls_and_forgetting_rates()
 
         # Make the user learn
         learner.learn(item=design)
 
+        # Backup history
+        hist[t] = design
+
     return {
         P_RECALL: p_recall,
         POST_MEAN: post_means,
-        POST_SD: post_sds
+        POST_SD: post_sds,
+        HIST: hist,
+        FORGETTING_RATES: forgetting_rates,
     }
 
 
 def main():
 
-    force = True, False, True, False
+    force = True, True, True, True
 
     design_types = [
         OPT_TEACH, OPT_INF0, ADAPTIVE, RANDOM]
@@ -85,7 +98,7 @@ def main():
 
     grid_size = 100
     n_item = 200
-    n_trial = 500
+    n_trial = 2000
 
     learner_model = FastHalfLife
 
@@ -141,6 +154,10 @@ def main():
         d: results[d][P_RECALL] for d in design_types
     }
 
+    strength = {
+        d: 1/results[d][FORGETTING_RATES] for d in design_types
+    }
+
     param = sorted(learner_model.bounds.keys())
 
     fig_ext = \
@@ -157,12 +174,18 @@ def main():
                            fig_folder=FIG_FOLDER)
 
     fig_name = f"p_recall_" + fig_ext
-    fig_p_recall(p_recall=p_recall, design_types=design_types,
+    fig_p_recall(data=p_recall, design_types=design_types,
                  fig_name=fig_name, fig_folder=FIG_FOLDER)
 
     fig_name = f"p_recall_item_" + fig_ext
     fig_p_recall_item(
         p_recall=p_recall, design_types=design_types,
+        fig_name=fig_name, fig_folder=FIG_FOLDER)
+
+    fig_name = f"strength_" + fig_ext
+    fig_p_recall(
+        y_label="Strength",
+        data=strength, design_types=design_types,
         fig_name=fig_name, fig_folder=FIG_FOLDER)
 
 

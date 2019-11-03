@@ -33,8 +33,8 @@ def fig_parameter_recovery(param, design_types, post_means, post_sds,
                             means+stds, alpha=.2, color=colors[j])
 
             ax.set_title(pr)
-            ax.set_xlabel("time")
-            ax.set_ylabel(f"value")
+            ax.set_xlabel("Time")
+            ax.set_ylabel(f"Value")
 
     plt.legend()
     save_fig(fig_folder=fig_folder, fig_name=fig_name)

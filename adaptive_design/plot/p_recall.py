@@ -4,7 +4,8 @@ import numpy as np
 from utils.plot import save_fig
 
 
-def fig_p_recall(p_recall, design_types, fig_name, fig_folder):
+def fig_p_recall(data, design_types, fig_name, fig_folder,
+                 y_label="Probability or recall"):
 
     fig, ax = plt.subplots(figsize=(12, 6))
 
@@ -12,10 +13,10 @@ def fig_p_recall(p_recall, design_types, fig_name, fig_folder):
 
     for i, dt in enumerate(design_types):
 
-        n_trial = p_recall[dt].shape[1]
+        n_trial = data[dt].shape[1]
 
-        means = np.mean(p_recall[dt], axis=0)
-        stds = np.std(p_recall[dt], axis=0)
+        means = np.mean(data[dt], axis=0)
+        stds = np.std(data[dt], axis=0)
 
         ax.plot(means, color=colors[i], label=dt)
         ax.fill_between(range(n_trial),
@@ -23,8 +24,8 @@ def fig_p_recall(p_recall, design_types, fig_name, fig_folder):
                         means+stds,
                         alpha=.2, color=colors[i])
 
-    ax.set_xlabel("time")
-    ax.set_ylabel(f"probability or recall")
+    ax.set_xlabel("Time")
+    ax.set_ylabel(y_label)
 
     plt.legend()
 
@@ -62,8 +63,8 @@ def fig_p_recall_item(p_recall, design_types, fig_name, fig_folder):
 
             ax.set_xticks(x_ticks)
 
-        ax.set_xlabel("time")
-        ax.set_ylabel(f"probability or recall")
+        ax.set_xlabel("Time")
+        ax.set_ylabel("Probability or recall")
 
         ax.legend()
 

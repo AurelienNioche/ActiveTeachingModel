@@ -167,6 +167,20 @@ class FastHalfLife(Learner):
 
         return p
 
+    def p_recalls_and_forgetting_rates(self):
+
+        forgetting_rates = np.full(self.n_item, np.inf)
+        p_recalls = np.zeros(self.n_item)
+
+        fr_seen = \
+            self.beta * (1 - self.alpha) ** self.n_pres_minus_one[self.seen]
+
+        forgetting_rates[self.seen] = fr_seen
+
+        p_recalls[self.seen] = np.exp(
+            - fr_seen * self.delta[self.seen])
+        return p_recalls, forgetting_rates
+
     def learn(self, item, time=None, time_index=None):
 
         if time_index is not None or time is not None:
