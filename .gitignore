@@ -171,3 +171,4 @@ task/migrations/__init__.py
 bkp/exploration/
 bkp/parameter_recovery/
 learner/bkp/hopfield.p
+bkp/adaptive/
