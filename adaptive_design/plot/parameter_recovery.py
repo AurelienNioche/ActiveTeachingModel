@@ -7,12 +7,13 @@ from utils.plot import save_fig
 
 def fig_parameter_recovery(param, design_types, post_means, post_sds,
                            true_param,
-                           num_trial, fig_name,
+                           num_trial, fig_name, colors=None,
                            fig_folder=os.path.join("fig", "adaptive")):
 
     fig, axes = plt.subplots(ncols=len(param), figsize=(12, 6))
 
-    colors = [f'C{i}' for i in range(len(design_types))]
+    if colors is None:
+        colors = [f'C{i}' for i in range(len(design_types))]
 
     for i, ax in enumerate(axes):
 

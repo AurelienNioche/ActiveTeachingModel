@@ -1,98 +1,31 @@
 import numpy as np
-from tqdm import tqdm
 
+from collections.abc import Sequence
 import os
 
+from adaptive_design.constants import P_RECALL, POST_MEAN, POST_SD, HIST, \
+    FORGETTING_RATES
 from adaptive_design.engine.teacher_half_life import TeacherHalfLife, \
     RANDOM, OPT_TEACH, OPT_INF0, ADAPTIVE
 from adaptive_design.plot import fig_parameter_recovery, \
-    fig_p_recall, fig_p_recall_item
+    fig_p_recall, fig_p_recall_item, fig_n_seen
+from adaptive_design.teach import run
 
 from utils.backup import dump, load
 
 from learner.half_life import FastHalfLife
 
+from utils.string import dic2string
+
 FIG_FOLDER = os.path.join("fig", "adaptive")
-
-P_RECALL = 'p_recall'
-POST_MEAN = 'post_mean'
-POST_SD = 'post_sd'
-HIST = 'hist'
-FORGETTING_RATES = 'forgetting_rates'
-
-
-def run(learner_model,
-        learner_param,
-        engine_model,
-        grid_size,
-        design_type, n_trial, n_item):
-
-    print(f"Computing results for design '{design_type}'...")
-
-    param = sorted(learner_model.bounds.keys())
-
-    post_means = {pr: np.zeros(n_trial) for pr in param}
-    post_sds = {pr: np.zeros(n_trial) for pr in param}
-
-    p_recall = np.zeros((n_item, n_trial))
-    forgetting_rates = np.zeros((n_item, n_trial))
-
-    hist = np.zeros(n_trial)
-
-    # Create learner and engine
-    learner = learner_model(param=learner_param, n_item=n_item)
-    engine = engine_model(
-        design_type=design_type,
-        learner_model=learner_model,
-        possible_design=np.arange(n_item),  # item => design
-        grid_size=grid_size)
-
-    np.random.seed(123)
-
-    for t in tqdm(range(n_trial)):
-
-        # Compute an optimal design for the current trial
-        design = engine.get_design()
-
-        # Get a response using the optimal design
-        p = learner.p_recall(item=design)
-
-        response = int(p > np.random.random())
-
-        # Update the engine
-        engine.update(design, response)
-
-        # Backup the mean/std of post dist
-        for i, pr in enumerate(param):
-            post_means[pr][t] = engine.post_mean[i]
-            post_sds[pr][t] = engine.post_sd[i]
-
-        # Backup prob recall / forgetting rates
-        for i in range(n_item):
-            p_recall[:, t], forgetting_rates[:, t] = \
-                learner.p_recalls_and_forgetting_rates()
-
-        # Make the user learn
-        learner.learn(item=design)
-
-        # Backup history
-        hist[t] = design
-
-    return {
-        P_RECALL: p_recall,
-        POST_MEAN: post_means,
-        POST_SD: post_sds,
-        HIST: hist,
-        FORGETTING_RATES: forgetting_rates,
-    }
 
 
 def main():
 
-    force = True, True, True, True
+    force = False  # True, True, True, True
 
     design_types = [
-        OPT_TEACH, OPT_INF0, ADAPTIVE, RANDOM]
+        RANDOM, OPT_TEACH, OPT_INF0, ADAPTIVE]
 
     engine_model = TeacherHalfLife
 
@@ -103,8 +36,10 @@ def main():
     learner_model = FastHalfLife
 
     learner_param = {
-        "beta": 0.02,
-        "alpha": 0.2
+        # "beta": 0.02,
+        # "alpha": 0.2
+        "beta": 0.10,
+        "alpha": 0.5
     }
 
     results = {}
@@ -116,6 +51,7 @@ def main():
             "bkp", "adaptive",
             f"{dt}_"
             f"{learner_model.__name__}_" 
+            f"{dic2string(learner_param)}_"
             f"n_trial_{n_trial}_"
             f"n_item_{n_item}"
             f".p")
@@ -124,8 +60,10 @@ def main():
 
         if isinstance(force, bool):
             f = force
-        else:
+        elif isinstance(force, Sequence):
             f = force[i]
+        else:
+            raise ValueError
 
         if not r or f:
             r = run(
@@ -154,38 +92,93 @@ def main():
         d: results[d][P_RECALL] for d in design_types
     }
 
-    strength = {
-        d: 1/results[d][FORGETTING_RATES] for d in design_types
+    # strength = {
+    #     d: 1/results[d][FORGETTING_RATES] for d in design_types
+    # }
+
+    forgetting_rates = {
+        d: {k: np.zeros(n_trial) for k in ('mean', 'sd')}
+        for d in design_types
     }
+
+    for d in design_types:
+        t_max = results[d][FORGETTING_RATES].shape[1]
+        for t in range(t_max):
+            all_d = results[d][FORGETTING_RATES][:, t]
+            data = all_d[all_d != np.inf]
+            forgetting_rates[d]['mean'][t] = \
+                np.mean(data)
+            forgetting_rates[d]['sd'][t] = \
+                np.std(data)
+
+    forgetting_rates_weighted = {
+        d: {k: np.zeros(n_trial) for k in ('mean', 'sd')}
+        for d in design_types
+    }
+
+    n_seen = {
+        d: np.zeros(n_trial) for d in design_types
+    }
+
+    for d in design_types:
+
+        t_max = results[d][FORGETTING_RATES].shape[1]
+        seen = np.zeros(n_item, dtype=bool)
+        hist = results[d][HIST]
+
+        for t in range(t_max):
+            seen[int(hist[t])] = True
+            n_seen[d][t] = np.sum(seen)
+
+            all_d = results[d][FORGETTING_RATES][:, t]
+            data = all_d[all_d != np.inf] / (np.sum(seen))
+
+            forgetting_rates_weighted[d]['mean'][t] = \
+                np.mean(data)
+
+            forgetting_rates_weighted[d]['sd'][t] = \
+                np.std(data)
 
     param = sorted(learner_model.bounds.keys())
 
     fig_ext = \
-        f"{learner_model.__name__}_" \
+        f"_{learner_model.__name__}_" \
+        f"{dic2string(learner_param)}_" \
         f"n_trial_{n_trial}_" \
         f"n_item_{n_item}" \
         f".pdf"
 
-    fig_name = f"param_recovery_" + fig_ext
+    fig_name = f"param_recovery" + fig_ext
     fig_parameter_recovery(param=param, design_types=design_types,
                            post_means=post_means, post_sds=post_sds,
                            true_param=learner_param, num_trial=n_trial,
                            fig_name=fig_name,
                            fig_folder=FIG_FOLDER)
 
-    fig_name = f"p_recall_" + fig_ext
+    fig_name = f"p_recall" + fig_ext
     fig_p_recall(data=p_recall, design_types=design_types,
                  fig_name=fig_name, fig_folder=FIG_FOLDER)
 
-    fig_name = f"p_recall_item_" + fig_ext
+    fig_name = f"p_recall_item" + fig_ext
     fig_p_recall_item(
         p_recall=p_recall, design_types=design_types,
         fig_name=fig_name, fig_folder=FIG_FOLDER)
 
-    fig_name = f"strength_" + fig_ext
+    fig_name = f"forgetting_rates" + fig_ext
     fig_p_recall(
-        y_label="Strength",
-        data=strength, design_types=design_types,
+        y_label="Forgetting rates",
+        data=forgetting_rates, design_types=design_types,
+        fig_name=fig_name, fig_folder=FIG_FOLDER)
+
+    fig_name = f"forgetting_rates_weighted" + fig_ext
+    fig_p_recall(
+        y_label="Forgetting rates weighted",
+        data=forgetting_rates_weighted, design_types=design_types,
+        fig_name=fig_name, fig_folder=FIG_FOLDER)
+
+    fig_name = f"n_seen" + fig_ext
+    fig_n_seen(
+        data=n_seen, design_types=design_types,
         fig_name=fig_name, fig_folder=FIG_FOLDER)
 
 

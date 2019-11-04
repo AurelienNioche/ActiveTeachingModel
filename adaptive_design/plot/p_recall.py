@@ -5,23 +5,29 @@ from utils.plot import save_fig
 
 
 def fig_p_recall(data, design_types, fig_name, fig_folder,
-                 y_label="Probability or recall"):
+                 y_label="Probability or recall", colors=None):
 
     fig, ax = plt.subplots(figsize=(12, 6))
 
-    colors = [f'C{i}' for i in range(len(design_types))]
+    if colors is None:
+        colors = [f'C{i}' for i in range(len(design_types))]
 
     for i, dt in enumerate(design_types):
 
-        n_trial = data[dt].shape[1]
+        if isinstance(data[dt], dict):
+            means = data[dt]['mean']
+            sds = data[dt]['sd']
+            n_trial = len(means)
 
-        means = np.mean(data[dt], axis=0)
-        stds = np.std(data[dt], axis=0)
+        else:
+            n_trial = data[dt].shape[1]
+            means = np.mean(data[dt], axis=0)
+            sds = np.std(data[dt], axis=0)
 
         ax.plot(means, color=colors[i], label=dt)
         ax.fill_between(range(n_trial),
-                        means-stds,
-                        means+stds,
+                        means-sds,
+                        means+sds,
                         alpha=.2, color=colors[i])
 
     ax.set_xlabel("Time")

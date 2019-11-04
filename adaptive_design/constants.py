@@ -1,0 +1,5 @@
+P_RECALL = 'p_recall'
+POST_MEAN = 'post_mean'
+POST_SD = 'post_sd'
+HIST = 'hist'
+FORGETTING_RATES = 'forgetting_rates'
