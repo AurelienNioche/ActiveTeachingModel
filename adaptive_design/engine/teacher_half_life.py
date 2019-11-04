@@ -212,7 +212,6 @@ class TeacherHalfLife(AdaptiveRevised):
         seen = self.seen[:] == 1
 
         if not np.any(seen):
-            print("Introduce new item (not any seen)")
             return np.random.choice(self.possible_design)
 
         p_recall_seen = np.exp(
