@@ -38,8 +38,8 @@ def main():
     learner_param = {
         # "beta": 0.02,
         # "alpha": 0.2
-        "beta": 0.10,
-        "alpha": 0.5
+        "beta": 0.8,
+        "alpha": 0.01
     }
 
     results = {}

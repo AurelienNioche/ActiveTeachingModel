@@ -3,22 +3,49 @@ import numpy as np
 import os
 
 
+def get_alpha_beta(success_rate=0.9, base_delta=2):
+
+    beta = - np.log(success_rate)
+    alpha = 1 + np.log(success_rate) / (base_delta*beta)
+
+    print(f"beta = {beta}, alpha={alpha}")
+
+    return alpha, beta
+
+
 def proof_of_concept():
 
-    success_rate = 0.9
-
     base_delta = 2
-
-    b = - np.log(success_rate)
-    alpha = 1 + np.log(success_rate) / (base_delta*b)
-
-    print(f"b = {b}, alpha={alpha}")
+    alpha, beta = get_alpha_beta(base_delta=base_delta)
 
     delta = np.array([(base_delta**n) for n in range(0, 10)])
 
+    f = beta
+
     for i, d in enumerate(delta):
-        print(f"delta={d}; p: {np.exp(-b * d)}")
-        b *= (1 - alpha)
+        print(f"delta={d}; p: {np.exp(-f * d)}")
+        f *= (1 - alpha)
+
+
+def fig_memory(y, pres, f_name='memory.pdf'):
+
+    fig, ax = plt.subplots()
+    for pr in pres:
+        ax.axvline(pr+0.5, linestyle="--", color="0.2",
+                   linewidth=0.5)
+    ax.plot(y)
+    # ax.axhline(0.9, linestyle="--", color="0.2")
+    ax.set_ylim(0., 1)
+    ax.set_xlim(0, len(y))
+
+    ax.set_xlabel("Time")
+    ax.set_ylabel("Probability of recall")
+
+    plt.tight_layout()
+
+    fig_folder = os.path.join("fig", "illustration")
+    os.makedirs(fig_folder, exist_ok=True)
+    plt.savefig(os.path.join(fig_folder, f_name))
 
 
 def main():
@@ -56,21 +83,46 @@ def main():
         else:
             d += 1
 
-    fig, ax = plt.subplots()
-    for pr in pres:
-        ax.axvline(pr+0.5, linestyle="--", color="0.2",
-                   linewidth=0.5)
-    ax.plot(y)
-    # ax.axhline(0.9, linestyle="--", color="0.2")
-    ax.set_ylim(0.5, 1)
-    ax.set_xlim(0, n_iteration)
+    fig_memory(y=y, pres=pres)
 
-    plt.tight_layout()
 
-    fig_folder = os.path.join("fig", "illustration")
-    os.makedirs(fig_folder, exist_ok=True)
-    plt.savefig(os.path.join(fig_folder, 'memory.pdf'))
+def main_irregular():
+
+    np.random.seed(1234)
+
+    n_iteration = 100
+
+    delta = np.array([np.random.randint(20) for _ in range(0, 20)])
+    print("delta", delta)
+
+    alpha, beta = get_alpha_beta()
+    f = beta
+
+    y = []
+
+    current_idx = 0
+    d = 0
+    pres = []
+    for t in range(0, n_iteration):
+
+        p = np.exp(-f*d)
+        print(f"t={t}; delta={d}; p={p:.3f}")
+
+        y.append(p)
+
+        if d == delta[current_idx]:
+            f *= (1 - alpha)
+            d = 0
+            current_idx += 1
+            pres.append(t)
+            print("***")
+
+        else:
+            d += 1
+
+    fig_memory(y=y, pres=pres, f_name="memory_irregular.pdf")
+
 
 
 if __name__ == "__main__":
-    main()
+    main_irregular()
