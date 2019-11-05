@@ -9,7 +9,7 @@ def run(learner_model,
         learner_param,
         engine_model,
         grid_size,
-        design_type, n_trial, n_item):
+        design_type, n_trial, n_item, seed):
 
     print(f"Computing results for design '{design_type}'...")
 
@@ -31,7 +31,7 @@ def run(learner_model,
         possible_design=np.arange(n_item),  # item => design
         grid_size=grid_size)
 
-    np.random.seed(123)
+    np.random.seed(seed)
 
     for t in tqdm(range(n_trial)):
 

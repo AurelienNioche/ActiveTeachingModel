@@ -29,17 +29,19 @@ def main():
 
     engine_model = TeacherHalfLife
 
-    grid_size = 100
+    grid_size = 20
     n_item = 200
-    n_trial = 2000
+    n_trial = 500
+
+    seed = 123
 
     learner_model = FastHalfLife
 
     learner_param = {
-        # "beta": 0.02,
-        # "alpha": 0.2
-        "beta": 0.8,
-        "alpha": 0.01
+        "alpha": 0.05,
+        "beta": 0.2
+        # "beta": 0.10,
+        # "alpha": 0.5
     }
 
     results = {}
@@ -73,7 +75,8 @@ def main():
                 engine_model=engine_model,
                 n_item=n_item,
                 n_trial=n_trial,
-                grid_size=grid_size
+                grid_size=grid_size,
+                seed=seed,
             )
 
             dump(r, bkp_file)
@@ -111,10 +114,10 @@ def main():
             forgetting_rates[d]['sd'][t] = \
                 np.std(data)
 
-    forgetting_rates_weighted = {
-        d: {k: np.zeros(n_trial) for k in ('mean', 'sd')}
-        for d in design_types
-    }
+    # forgetting_rates_weighted = {
+    #     d: {k: np.zeros(n_trial) for k in ('mean', 'sd')}
+    #     for d in design_types
+    # }
 
     n_seen = {
         d: np.zeros(n_trial) for d in design_types
@@ -130,14 +133,14 @@ def main():
             seen[int(hist[t])] = True
             n_seen[d][t] = np.sum(seen)
 
-            all_d = results[d][FORGETTING_RATES][:, t]
-            data = all_d[all_d != np.inf] / (np.sum(seen))
-
-            forgetting_rates_weighted[d]['mean'][t] = \
-                np.mean(data)
-
-            forgetting_rates_weighted[d]['sd'][t] = \
-                np.std(data)
+            # all_d = results[d][FORGETTING_RATES][:, t]
+            # data = all_d[all_d != np.inf] / (np.sum(seen))
+            #
+            # forgetting_rates_weighted[d]['mean'][t] = \
+            #     np.mean(data)
+            #
+            # forgetting_rates_weighted[d]['sd'][t] = \
+            #     np.std(data)
 
     param = sorted(learner_model.bounds.keys())
 
@@ -170,11 +173,11 @@ def main():
         data=forgetting_rates, design_types=design_types,
         fig_name=fig_name, fig_folder=FIG_FOLDER)
 
-    fig_name = f"forgetting_rates_weighted" + fig_ext
-    fig_p_recall(
-        y_label="Forgetting rates weighted",
-        data=forgetting_rates_weighted, design_types=design_types,
-        fig_name=fig_name, fig_folder=FIG_FOLDER)
+    # fig_name = f"forgetting_rates_weighted" + fig_ext
+    # fig_p_recall(
+    #     y_label="Forgetting rates weighted",
+    #     data=forgetting_rates_weighted, design_types=design_types,
+    #     fig_name=fig_name, fig_folder=FIG_FOLDER)
 
     fig_name = f"n_seen" + fig_ext
     fig_n_seen(

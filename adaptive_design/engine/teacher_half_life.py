@@ -75,8 +75,8 @@ class TeacherHalfLife(AdaptiveRevised):
         seen = self.seen[i] == 1
         if seen:
             p[:, 1] = np.exp(
-                - self.grid_param[:, 1]
-                * (1 - self.grid_param[:, 0]) ** self.n_pres_minus_one[i]
+                - self.grid_param[:, 0]
+                * (1 - self.grid_param[:, 1]) ** self.n_pres_minus_one[i]
                 * self.delta[i])
 
         p[:, 0] = 1 - p[:, 1]
@@ -100,7 +100,7 @@ class TeacherHalfLife(AdaptiveRevised):
 
         self.mutual_info[:] = self._mutual_info(self.log_lik,
                                                 self.log_post)
-        n_best = int(.05*self.n_param_set)
+        n_best = int(0.1*self.n_param_set)
         best_param_set_idx = \
             np.argsort(self.log_post)[-n_best:]
 
@@ -121,8 +121,8 @@ class TeacherHalfLife(AdaptiveRevised):
                 seen = self.seen[i] == 1
                 if seen:
                     p[:, 1] = np.exp(
-                        - self.grid_param[best_param_set_idx, 1]
-                        * (1 - self.grid_param[best_param_set_idx, 0])
+                        - self.grid_param[best_param_set_idx, 0]
+                        * (1 - self.grid_param[best_param_set_idx, 1])
                         ** self.n_pres_minus_one[i]
                         * self.delta[i])
 
@@ -135,9 +135,10 @@ class TeacherHalfLife(AdaptiveRevised):
             mutual_info_t_plus_one_for_seq_i_j = \
                 self._mutual_info(log_lik_t_plus_one,
                                   self.log_post[best_param_set_idx])
-
-            self.mutual_info[i] += \
+            max_info_next_time_step = \
                 np.max(mutual_info_t_plus_one_for_seq_i_j)
+
+            self.mutual_info[i] += max_info_next_time_step
 
             # Unlearn item
             self._cancel_last_update_history()
@@ -215,8 +216,8 @@ class TeacherHalfLife(AdaptiveRevised):
             return np.random.choice(self.possible_design)
 
         p_recall_seen = np.exp(
-            - beta
-            * (1 - alpha) ** self.n_pres_minus_one[seen]
+            - alpha
+            * (1 - beta) ** self.n_pres_minus_one[seen]
             * self.delta[seen])
 
         u = 1-p_recall_seen
