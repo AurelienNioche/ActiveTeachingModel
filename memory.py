@@ -48,6 +48,34 @@ def fig_memory(y, pres, f_name='memory.pdf'):
     plt.savefig(os.path.join(fig_folder, f_name))
 
 
+def run(alpha, beta, n_iteration, delta):
+    f = beta
+
+    y = []
+
+    current_idx = 0
+    d = 0
+    pres = []
+    for t in range(0, n_iteration):
+
+        p = np.exp(-f * d)
+        # print(f"t={t}; delta={d}; p={p:.3f}")
+
+        y.append(p)
+
+        if d == delta[current_idx]:
+            f *= (1 - alpha)
+            d = 0
+            current_idx += 1
+            pres.append(t)
+            # print("***")
+
+        else:
+            d += 1
+
+    return pres, y
+
+
 def main():
 
     base_delta = 2
@@ -57,31 +85,16 @@ def main():
     delta = np.array([(base_delta ** n) for n in range(0, 10)])
     print("delta", delta)
 
-    b = - np.log(success_rate)
-    alpha = 1 + np.log(success_rate) / (base_delta*b)
-    print(f"b = {b}, alpha={alpha}\n")
+    # b = - np.log(success_rate)
+    # alpha = 1 + np.log(success_rate) / (base_delta*b)
+    # print(f"b = {b}, alpha={alpha}\n")
 
-    y = []
+    alpha, beta = get_alpha_beta(success_rate=success_rate,
+                                 base_delta=base_delta)
 
-    current_idx = 0
-    d = 0
-    pres = []
-    for t in range(0, n_iteration):
-
-        p = np.exp(-b*d)
-        print(f"t={t}; delta={d}; p={p:.3f}")
-
-        y.append(p)
-
-        if d == delta[current_idx]:
-            b *= (1 - alpha)
-            d = 0
-            current_idx += 1
-            pres.append(t)
-            print("***")
-
-        else:
-            d += 1
+    pres, y = \
+        run(alpha=alpha, beta=beta, delta=delta,
+            n_iteration=n_iteration)
 
     fig_memory(y=y, pres=pres)
 
@@ -96,33 +109,31 @@ def main_irregular():
     print("delta", delta)
 
     alpha, beta = get_alpha_beta()
-    f = beta
-
-    y = []
-
-    current_idx = 0
-    d = 0
-    pres = []
-    for t in range(0, n_iteration):
-
-        p = np.exp(-f*d)
-        print(f"t={t}; delta={d}; p={p:.3f}")
-
-        y.append(p)
-
-        if d == delta[current_idx]:
-            f *= (1 - alpha)
-            d = 0
-            current_idx += 1
-            pres.append(t)
-            print("***")
-
-        else:
-            d += 1
+    pres, y = \
+        run(alpha=alpha, beta=beta, delta=delta,
+            n_iteration=n_iteration)
 
     fig_memory(y=y, pres=pres, f_name="memory_irregular.pdf")
 
 
+def main_regular():
+
+    np.random.seed(1234)
+
+    n_iteration = 100
+
+    delta = np.array([int(n_iteration/7) for _ in range(0, 20)])
+    print("delta", delta)
+
+    alpha, beta = get_alpha_beta()
+
+    pres, y = \
+        run(alpha=alpha, beta=beta, delta=delta,
+            n_iteration=n_iteration)
+
+    fig_memory(y=y, pres=pres, f_name="memory_regular.pdf")
+
 
 if __name__ == "__main__":
-    main_irregular()
+    main_regular()
+    main()
