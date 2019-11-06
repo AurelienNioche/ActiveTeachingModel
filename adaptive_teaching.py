@@ -54,6 +54,8 @@ def main():
             f"{dt}_"
             f"{learner_model.__name__}_" 
             f"{dic2string(learner_param)}_"
+            f"confidence_thr_{engine_model.confidence_threshold}_"
+            f"gamma_{engine_model.gamma}_"
             f"n_trial_{n_trial}_"
             f"n_item_{n_item}"
             f".p")
@@ -147,6 +149,8 @@ def main():
     fig_ext = \
         f"_{learner_model.__name__}_" \
         f"{dic2string(learner_param)}_" \
+        f"confidence_thr_{engine_model.confidence_threshold}_" \
+        f"gamma_{engine_model.gamma}_" \
         f"n_trial_{n_trial}_" \
         f"n_item_{n_item}" \
         f".pdf"

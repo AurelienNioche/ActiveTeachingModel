@@ -19,6 +19,7 @@ ADAPTIVE = "Adaptive"
 class TeacherHalfLife(AdaptiveRevised):
 
     confidence_threshold = 0.1
+    gamma = 1
 
     def __init__(self, design_type, **kwargs):
 
@@ -100,7 +101,7 @@ class TeacherHalfLife(AdaptiveRevised):
 
         self.mutual_info[:] = self._mutual_info(self.log_lik,
                                                 self.log_post)
-        n_best = int(0.1*self.n_param_set)
+        n_best = int(self.gamma*self.n_param_set)
         best_param_set_idx = \
             np.argsort(self.log_post)[-n_best:]
 
