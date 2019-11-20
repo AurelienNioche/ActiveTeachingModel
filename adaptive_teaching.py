@@ -22,7 +22,7 @@ FIG_FOLDER = os.path.join("fig", "adaptive")
 
 def main():
 
-    force = True  # True, True, True, True
+    force = True, False, False  # True, True, True, True
 
     design_types = [
         LEITNER, RANDOM, OPT_INF0]

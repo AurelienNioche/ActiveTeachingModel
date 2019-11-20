@@ -63,15 +63,16 @@ class TeacherHalfLife:
         self.seen_i = None
         self.i = None
 
+        self.design_type = design_type
         self.get_design = {
             OPT_INF0: self._optimize_info_selection,
             OPT_TEACH: self._optimize_teaching_selection,
             RANDOM: self._random_selection,
             ADAPTIVE: self._adaptive_selection,
             LEITNER: self._leitner_selection,
-        }[design_type]
+        }[self.design_type]
 
-        if design_type == LEITNER:
+        if self.design_type == LEITNER:
             self.teacher = Leitner(n_item=self.n_design)
 
     # def _update_learning_value(self):
@@ -226,11 +227,13 @@ class TeacherHalfLife:
         return np.random.choice(self.possible_design)
 
     def _leitner_selection(self):
-        return self.teacher.ask(
+        self._compute_log_lik()
+        item = self.teacher.ask(
             t=len(self.hist),
             hist_success=self.responses,
             hist_item=self.hist,
         )
+        return item
 
     def _optimize_teaching_selection(self):
 
@@ -337,6 +340,8 @@ class TeacherHalfLife:
         response
             0 or 1
         """
+
+        print("design type", self.design_type, "item", design, "response", response)
 
         idx_design = list(self.possible_design).index(design)
 
