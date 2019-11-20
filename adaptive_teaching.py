@@ -6,7 +6,7 @@ import os
 from adaptive_design.constants import P_RECALL, POST_MEAN, POST_SD, HIST, \
     FORGETTING_RATES
 from adaptive_design.engine.teacher_half_life import TeacherHalfLife, \
-    RANDOM, OPT_TEACH, OPT_INF0, ADAPTIVE
+    RANDOM, OPT_TEACH, OPT_INF0, ADAPTIVE, LEITNER
 from adaptive_design.plot import fig_parameter_recovery, \
     fig_p_recall, fig_p_recall_item, fig_n_seen
 from adaptive_design.teach import run
@@ -22,10 +22,10 @@ FIG_FOLDER = os.path.join("fig", "adaptive")
 
 def main():
 
-    force = False  # True, True, True, True
+    force = True  # True, True, True, True
 
     design_types = [
-        RANDOM, OPT_TEACH, OPT_INF0, ADAPTIVE]
+        LEITNER, RANDOM, OPT_INF0]
 
     engine_model = TeacherHalfLife
 

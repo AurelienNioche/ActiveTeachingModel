@@ -55,7 +55,7 @@ class FastHalfLife(Learner):
             raise NotImplementedError
 
         if item is None:
-            raise ValueError
+            raise ValueError("'item' should be an integer")
 
         seen = self.seen[item] == 1
         if seen:

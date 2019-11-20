@@ -109,11 +109,11 @@ class FitFidelity:
         return changes
 
 
-def _plot(changes, t_min, fig_name, model):
+def _plot(changes, t_min, fig_name, student_model):
 
     x = t_min + np.arange(changes.shape[2])
 
-    n_param = len(model.bounds)
+    n_param = len(student_model.bounds)
     array_item = np.arange(n_param)
 
     max_n_item_per_figure = 100
@@ -133,7 +133,7 @@ def _plot(changes, t_min, fig_name, model):
 
             ax = axes[ax_idx]
 
-            param_name = model.bounds[ax_idx][0]
+            param_name = student_model.bounds[ax_idx][0]
             ax.set_ylabel(f'{param_name}-change')
 
             data = changes[ax_idx, :]

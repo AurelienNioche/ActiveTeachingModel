@@ -1,8 +1,10 @@
 import numpy as np
 
-from . revised import AdaptiveRevised
+from itertools import product
 
 from scipy.special import logsumexp
+
+from adaptive_design.teacher.leitner import Leitner
 
 EPS = np.finfo(np.float).eps
 
@@ -14,21 +16,43 @@ RANDOM = "Random"
 OPT_INF0 = "Opt. info"
 OPT_TEACH = "Opt. teach only"
 ADAPTIVE = "Adaptive"
+LEITNER = "Leitner"
 
 
-class TeacherHalfLife(AdaptiveRevised):
+class TeacherHalfLife:
 
     confidence_threshold = 0.1
     gamma = 1
 
-    def __init__(self, design_type, **kwargs):
+    def __init__(self, design_type, learner_model, possible_design,
+                 grid_size=5):
 
-        if design_type not in (RANDOM, OPT_TEACH, OPT_INF0, ADAPTIVE):
-            raise ValueError
+        if design_type not in (RANDOM, OPT_TEACH, LEITNER,
+                               OPT_INF0, ADAPTIVE):
+            raise ValueError("Design type not recognized")
 
-        super().__init__(**kwargs)
+        self.learner_model = learner_model
+        self.possible_design = possible_design
 
-        # self.learning_value = np.zeros(self.n_design)
+        self.grid_param = self._compute_grid_param(grid_size)
+
+        self.n_design = len(self.possible_design)
+        self.n_param_set = len(self.grid_param)
+
+        self.log_lik = np.zeros((self.n_design,
+                                 self.n_param_set, 2))
+
+        self.y = np.arange(2)
+
+        self.hist = []
+        self.responses = []
+
+        # Post <= prior
+        # shape (num_params, )
+        lp = np.ones(self.n_param_set)
+        self.log_post = lp - logsumexp(lp)
+
+        self.mutual_info = np.zeros(self.n_design)
 
         self.delta = np.zeros(self.n_design, dtype=int)
         self.n_pres_minus_one = np.full(self.n_design, -1,
@@ -43,8 +67,12 @@ class TeacherHalfLife(AdaptiveRevised):
             OPT_INF0: self._optimize_info_selection,
             OPT_TEACH: self._optimize_teaching_selection,
             RANDOM: self._random_selection,
-            ADAPTIVE: self._adaptive_selection
+            ADAPTIVE: self._adaptive_selection,
+            LEITNER: self._leitner_selection,
         }[design_type]
+
+        if design_type == LEITNER:
+            self.teacher = Leitner(n_item=self.n_design)
 
     # def _update_learning_value(self):
     #
@@ -62,6 +90,16 @@ class TeacherHalfLife(AdaptiveRevised):
     #         self.learning_value[i] = np.sum(v)
     #
     #         self._cancel_last_update_history()
+
+    def _compute_grid_param(self, grid_size):
+
+        return np.asarray(list(
+            product(*[
+                np.linspace(
+                    *self.learner_model.bounds[key],
+                    grid_size) for key in
+                sorted(self.learner_model.bounds)])
+        ))
 
     def _compute_log_lik(self):
         """Compute the log likelihood."""
@@ -89,10 +127,6 @@ class TeacherHalfLife(AdaptiveRevised):
         return np.log(self._p(i) + EPS)
 
     def _update_mutual_info(self):
-
-        # self.log_lik_seq = np.zeros((self.n_seq, self.n_param_set, 4))
-
-        # n_seq = 0
 
         for i in range(self.n_design):
 
@@ -177,6 +211,94 @@ class TeacherHalfLife(AdaptiveRevised):
 
         return mutual_info
 
+    def _select_design(self, v):
+
+        return np.random.choice(
+            self.possible_design[v == np.max(v)]
+        )
+
+    def _optimize_info_selection(self):
+        self._update_mutual_info()
+        return self._select_design(self.mutual_info)
+
+    def _random_selection(self):
+        self._compute_log_lik()
+        return np.random.choice(self.possible_design)
+
+    def _leitner_selection(self):
+        return self.teacher.ask(
+            t=len(self.hist),
+            hist_success=self.responses,
+            hist_item=self.hist,
+        )
+
+    def _optimize_teaching_selection(self):
+
+        self._compute_log_lik()
+        alpha, beta = self.post_mean
+
+        seen = self.seen[:] == 1
+
+        if not np.any(seen):
+            return np.random.choice(self.possible_design)
+
+        p_recall_seen = np.exp(
+            - alpha
+            * (1 - beta) ** self.n_pres_minus_one[seen]
+            * self.delta[seen])
+
+        u = 1-p_recall_seen
+
+        sum_u = np.sum(u)
+        if sum_u <= 1 \
+                and np.sum(seen) < len(seen) \
+                and np.random.random() < 1-sum_u:
+            return np.random.choice(self.possible_design[np.invert(seen)])
+
+        else:
+            u /= np.sum(u)
+            return np.random.choice(self.possible_design[seen], p=u)
+
+        # self._update_learning_value()
+        # return self._select_design(self.learning_value)
+
+    def _adaptive_selection(self):
+        if np.max(self.post_sd) > self.confidence_threshold:
+            return self._optimize_info_selection()
+        else:
+            return self._optimize_teaching_selection()
+
+    @property
+    def post(self) -> np.ndarray:
+        """Posterior distributions of joint parameter space"""
+        return np.exp(self.log_post)
+
+    @property
+    def post_mean(self) -> np.ndarray:
+        """
+        A vector of estimated means for the posterior distribution.
+        Its length is ``num_params``.
+        """
+        return np.dot(self.post, self.grid_param)
+
+    @property
+    def post_cov(self) -> np.ndarray:
+        """
+        An estimated covariance matrix for the posterior distribution.
+        Its shape is ``(num_grids, num_params)``.
+        """
+        # shape: (N_grids, N_param)
+        d = self.grid_param - self.post_mean
+        return np.dot(d.T, d * self.post.reshape(-1, 1))
+
+    @property
+    def post_sd(self) -> np.ndarray:
+        """
+        A vector of estimated standard deviations for the posterior
+        distribution. Its length is ``num_params``.
+        """
+        return np.sqrt(np.diag(self.post_cov))
+
     def _update_history(self, design):
 
         self.i = design
@@ -198,44 +320,29 @@ class TeacherHalfLife(AdaptiveRevised):
         self.delta[self.i] = self.delta_i
         self.seen[self.i] = self.seen_i
 
-    def _optimize_info_selection(self):
-        self._update_mutual_info()
-        return self._select_design(self.mutual_info)
+    def update(self, design, response):
+        r"""
+        Update the posterior :math:`p(\theta | y_\text{obs}(t), d^*)` for
+        all discretized values of :math:`\theta`.
 
-    def _random_selection(self):
-        self._compute_log_lik()
-        return np.random.choice(self.possible_design)
+        .. math::
+            p(\theta | y_\text{obs}(t), d^*) =
+                \frac{ p( y_\text{obs}(t) | \theta, d^*) p_t(\theta) }
+                    { p( y_\text{obs}(t) | d^* ) }
 
-    def _optimize_teaching_selection(self):
+        Parameters
+        ----------
+        design
+            Design vector for given response
+        response
+            0 or 1
+        """
 
-        self._compute_log_lik()
-        alpha, beta = self.post_mean
+        idx_design = list(self.possible_design).index(design)
 
-        seen = self.seen[:] == 1
+        self.log_post += self.log_lik[idx_design, :, response].flatten()
+        self.log_post -= logsumexp(self.log_post)
 
-        if not np.any(seen):
-            return np.random.choice(self.possible_design)
-
-        p_recall_seen = np.exp(
-            - alpha
-            * (1 - beta) ** self.n_pres_minus_one[seen]
-            * self.delta[seen])
-
-        u = 1-p_recall_seen
-
-        sum_u = np.sum(u)
-        if sum_u <= 1 and np.sum(seen) < len(seen) and np.random.random() < 1-sum_u:
-            return np.random.choice(self.possible_design[np.invert(seen)])
-
-        else:
-            u /= np.sum(u)
-            return np.random.choice(self.possible_design[seen], p=u)
-
-        # self._update_learning_value()
-        # return self._select_design(self.learning_value)
-
-    def _adaptive_selection(self):
-        if np.max(self.post_sd) > self.confidence_threshold:
-            return self._optimize_info_selection()
-        else:
-            return self._optimize_teaching_selection()
+        self._update_history(design)
+        self.responses.append(response)
+        self.hist.append(design)

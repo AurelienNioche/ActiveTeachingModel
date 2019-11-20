@@ -29,6 +29,5 @@ def main():
     fig_illustration()
 
 
-
 if __name__ == "__main__":
     main()
