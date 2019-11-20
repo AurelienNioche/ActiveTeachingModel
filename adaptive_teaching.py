@@ -22,10 +22,10 @@ FIG_FOLDER = os.path.join("fig", "adaptive")
 
 def main():
 
-    force = True, False, False  # True, True, True, True
+    force = False, False, False, False  # True, True, True, True
 
     design_types = [
-        LEITNER, RANDOM, OPT_INF0]
+        LEITNER, RANDOM, OPT_INF0, ADAPTIVE]
 
     engine_model = TeacherHalfLife
 

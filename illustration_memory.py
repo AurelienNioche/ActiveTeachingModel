@@ -29,7 +29,7 @@ def proof_of_concept():
 
 def fig_memory(y, pres, f_name='memory.pdf'):
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(4, 4))
     for pr in pres:
         ax.axvline(pr+0.5, linestyle="--", color="0.2",
                    linewidth=0.5)
@@ -137,3 +137,4 @@ def main_regular():
 if __name__ == "__main__":
     main_regular()
     main()
+    main_irregular()
