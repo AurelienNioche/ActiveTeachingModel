@@ -110,16 +110,12 @@ class TeacherHalfLife:
 
     def _p(self, i):
 
-        p = np.zeros((self.n_param_set, 2))
-
-        seen = self.seen[i] == 1
-        if seen:
-            p[:, 1] = np.exp(
-                - self.grid_param[:, 0]
-                * (1 - self.grid_param[:, 1]) ** self.n_pres_minus_one[i]
-                * self.delta[i])
-
-        p[:, 0] = 1 - p[:, 1]
+        p = self.learner_model.p(
+            grid_param=self.grid_param,
+            n_pres_minus_one=self.n_pres_minus_one,
+            seen=self.seen,
+            delta=self.delta,
+            i=i)
 
         return p
 
@@ -152,17 +148,13 @@ class TeacherHalfLife:
 
             for j in range(self.n_design):
 
-                p = np.zeros((n_best, 2))
-
-                seen = self.seen[i] == 1
-                if seen:
-                    p[:, 1] = np.exp(
-                        - self.grid_param[best_param_set_idx, 0]
-                        * (1 - self.grid_param[best_param_set_idx, 1])
-                        ** self.n_pres_minus_one[i]
-                        * self.delta[i])
-
-                p[:, 0] = 1 - p[:, 1]
+                p = self.learner_model.p(
+                    grid_param=self.grid_param[best_param_set_idx],
+                    n_pres_minus_one=self.n_pres_minus_one,
+                    seen=self.seen[i],
+                    delta=self.delta[i],
+                    i=i,
+                )
 
                 new_log_p = np.log(p + EPS)
 
@@ -238,17 +230,17 @@ class TeacherHalfLife:
     def _optimize_teaching_selection(self):
 
         self._compute_log_lik()
-        alpha, beta = self.post_mean
+        best_param = self.post_mean
 
         seen = self.seen[:] == 1
 
         if not np.any(seen):
             return np.random.choice(self.possible_design)
 
-        p_recall_seen = np.exp(
-            - alpha
-            * (1 - beta) ** self.n_pres_minus_one[seen]
-            * self.delta[seen])
+        p_recall_seen = self.learner_model.p_recall_seen(
+            n_pres_minus_one=self.n_pres_minus_one,
+            delta=self.delta, seen=seen, param=best_param
+        )
 
         u = 1-p_recall_seen
 
@@ -341,7 +333,9 @@ class TeacherHalfLife:
             0 or 1
         """
 
-        print("design type", self.design_type, "item", design, "response", response)
+        print("design type", self.design_type,
+              "item", design,
+              "response", response)
 
         idx_design = list(self.possible_design).index(design)
 
