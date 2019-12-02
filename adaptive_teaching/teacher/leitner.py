@@ -1,6 +1,6 @@
 import numpy as np
 
-from teacher.metaclass import GenericTeacher
+from . metaclass import GenericTeacher
 
 
 class Leitner(GenericTeacher):
@@ -33,7 +33,11 @@ class Leitner(GenericTeacher):
 
         self.taboo = None
 
-    def _modify_sets(self, hist_success, t):
+        self.t = 0
+        self.hist_success = []
+        self.hist_item = []
+
+    def _modify_sets(self):
         """
         :param t: time step (integer)
         :param hist_success: list of booleans (True: success, False: failure)
@@ -45,7 +49,7 @@ class Leitner(GenericTeacher):
         """
         taboo = self.taboo
         prev_box = self.box[taboo]
-        if hist_success[t-1]:
+        if self.hist_success[self.t-1]:
             self.box[taboo] += 1
         else:
             if prev_box > 0:
@@ -80,8 +84,7 @@ class Leitner(GenericTeacher):
             arr = np.delete(complete_arr, self.taboo)
         return arr
 
-    @classmethod
-    def _find_due_seen_items(cls, due_items, hist_item):
+    def _find_due_seen_items(self, due_items):
         """
         :param due_items: array that contains items that are due to be shown
         :param hist_item: historic of presented items
@@ -94,7 +97,7 @@ class Leitner(GenericTeacher):
         # integer array with size of due_items
         #                 * Contains the items that have been seen
         #                     at least once and are due to be shown.
-        seen_due_items = np.intersect1d(hist_item, due_items)
+        seen_due_items = np.intersect1d(self.hist_item, due_items)
         count = len(seen_due_items)
 
         if count == 0:
@@ -146,7 +149,7 @@ class Leitner(GenericTeacher):
 
         return items_arr
 
-    def _get_next_node(self, t, hist_success, hist_item, **kwargs):
+    def _get_next_node(self):
         """
         :return: integer (index of the question to ask)
 
@@ -162,21 +165,20 @@ class Leitner(GenericTeacher):
             4. Randomly pick from the said items.
 
         """
-        if t == 0:
+        if self.t == 0:
             # No past memory, so a random question shown from learning set
             random_question = np.random.randint(0, self.n_item)
             self.taboo = random_question
             return int(random_question)
 
-        self._modify_sets(hist_success=hist_success, t=t)
+        self._modify_sets()
         self._update_wait_time()
 
         # Criteria 1, get due items
         due_items = self._find_due_items()
 
         # preference for seen item
-        seen_due_items, count = self._find_due_seen_items(
-            due_items=due_items, hist_item=hist_item)
+        seen_due_items, count = self._find_due_seen_items(due_items=due_items)
 
         # items with maximum waiting time
         max_overdue_items = self._find_max_waiting(seen_due_items[:count])
@@ -192,3 +194,13 @@ class Leitner(GenericTeacher):
 
         self.taboo = new_question
         return new_question
+
+    def ask(self, best_param):
+
+        return self._get_next_node()
+
+    def update(self, item, response):
+
+        self.hist_success.append(response)
+        self.hist_item.append(item)
+        self.t += 1

@@ -1,17 +1,20 @@
 import numpy as np
 from tqdm import tqdm
 
-from adaptive_design.constants import P_RECALL, POST_MEAN, POST_SD, HIST, \
+from adaptive_teaching.constants import P_RECALL, POST_MEAN, POST_SD, HIST, \
     FORGETTING_RATES
 
 
 def run(learner_model,
         learner_param,
         engine_model,
-        grid_size,
-        design_type, n_trial, n_item, seed):
+        engine_param,
+        teacher_model,
+        teacher_param,
+        task_param, seed):
 
-    print(f"Computing results for design '{design_type}'...")
+    n_trial = task_param['n_trial']
+    n_item = task_param['n_item']
 
     param = sorted(learner_model.bounds.keys())
 
@@ -21,30 +24,36 @@ def run(learner_model,
     p_recall = np.zeros((n_item, n_trial))
     forgetting_rates = np.zeros((n_item, n_trial))
 
-    hist = np.zeros(n_trial, dtype=int)
+    hist_item = np.zeros(n_trial, dtype=int)
+    hist_success = np.zeros(n_trial, dtype=bool)
 
     # Create learner and engine
     learner = learner_model(param=learner_param, n_item=n_item)
     engine = engine_model(
-        design_type=design_type,
+        teacher_model=teacher_model,
+        teacher_param=teacher_param,
         learner_model=learner_model,
-        possible_design=np.arange(n_item),  # item => design
-        grid_size=grid_size)
+        task_param=task_param,
+        **engine_param
+    )
 
     np.random.seed(seed)
 
     for t in tqdm(range(n_trial)):
 
         # Compute an optimal design for the current trial
-        design = engine.get_design()
+        item = engine.get_item()
 
         # Get a response using the optimal design
-        p = learner.p_recall(item=design)
+        p = learner.p_recall(item=item)
 
-        response = int(p > np.random.random())
+        response = p > np.random.random()
 
         # Update the engine
-        engine.update(design, response)
+        engine.update(item, response)
+
+        # Make the user learn
+        learner.update(item=item)
 
         # Backup the mean/std of post dist
         for i, pr in enumerate(param):
@@ -56,16 +65,14 @@ def run(learner_model,
             p_recall[:, t], forgetting_rates[:, t] = \
                 learner.p_recalls_and_forgetting_rates()
 
-        # Make the user learn
-        learner.learn(item=design)
-
         # Backup history
-        hist[t] = design
+        hist_item[t] = item
+        hist_success[t] = response
 
     return {
         P_RECALL: p_recall,
         POST_MEAN: post_means,
         POST_SD: post_sds,
-        HIST: hist,
+        HIST: hist_item,
         FORGETTING_RATES: forgetting_rates,
     }
