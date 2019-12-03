@@ -38,7 +38,7 @@ class Threefold(GenericTeacher):
             fr_seen, pr_seen = self.learner.forgetting_rate_and_p_seen()
 
             u[i] = self.alpha * np.mean(pr_seen) \
-                - self.beta * np.mean(fr_seen) \
+                - self.beta * 10 * np.mean(fr_seen) \
                 + (1 - self.alpha - self.beta) * \
                   (np.sum(self.learner.seen)/self.t)
 
