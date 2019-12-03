@@ -10,14 +10,14 @@ class HalfLife(Learner):
         'beta': (0.00, 1.0),
     }
 
-    def __init__(self, n_item, param=None):
+    def __init__(self, task_param, param=None):
 
         super().__init__()
 
         if param is not None:
-            self.alpha, self.beta = param
+            self.alpha, self.beta = param['alpha'], param['beta']
 
-        self.n_item = n_item
+        self.n_item = task_param['n_item']
 
         self.delta = np.zeros(self.n_item, dtype=int)
         self.n_pres_minus_one = np.full(self.n_item, -1, dtype=int)

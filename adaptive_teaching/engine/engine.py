@@ -43,7 +43,7 @@ class Engine:
 
         self.gamma = gamma
 
-        self.learner = learner_model(n_item=self.n_item)
+        self.learner = learner_model(task_param=task_param)
 
     def _compute_grid_param(self, grid_size):
 

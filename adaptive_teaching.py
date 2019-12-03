@@ -18,7 +18,7 @@ from adaptive_teaching.teacher.metaclass import GenericTeacher
 
 from adaptive_teaching.learner.half_life import HalfLife
 
-from adaptive_teaching.teach import run
+from adaptive_teaching.run import run
 
 from utils.backup import dump, load
 
@@ -48,7 +48,7 @@ def main():
         # "alpha": 0.5
     }
 
-    force = False
+    force = True
 
     seed = 123
 
