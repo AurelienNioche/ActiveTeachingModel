@@ -19,7 +19,7 @@ def objective(model,
         item = hist_item[t]
         if show:
             print("Item", item)
-        p_r = agent.p_recall(item=item)
+        p_r = agent.p(item=item)
         if show:
             print('p_recall: ', p_r)
         s = hist_success[t]

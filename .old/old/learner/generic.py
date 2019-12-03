@@ -115,7 +115,7 @@ class Learner:
                         f_param[param_name] = param[i]
                         i += 1
             else:
-                f_param.update(param)
+                f_param.update(param, )
 
         self.param = f_param
 

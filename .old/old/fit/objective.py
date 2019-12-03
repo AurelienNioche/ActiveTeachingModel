@@ -16,7 +16,7 @@ def objective(model,
 
     for t in range(n_iteration):
         item = hist_question[t]
-        p_r = agent.p_recall(item=item)
+        p_r = agent.p(item=item)
         # p_choose_correct = min(1, p_r + p_random)
         #
         # s = hist_success[t]

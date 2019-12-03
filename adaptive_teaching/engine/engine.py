@@ -1,8 +1,7 @@
 import numpy as np
-
 from itertools import product
-
 from scipy.special import logsumexp
+# from deco import concurrent, synchronized
 
 EPS = np.finfo(np.float).eps
 
@@ -10,7 +9,7 @@ EPS = np.finfo(np.float).eps
 class Engine:
 
     def __init__(self, learner_model, task_param, teacher_model, teacher_param,
-                 grid_size=5, gamma=1):
+                 grid_size=5, true_param=None):
 
         self.learner_model = learner_model
 
@@ -36,14 +35,17 @@ class Engine:
         self.mutual_info = np.zeros(self.n_item)
 
         if teacher_model is not None:
+            print(teacher_model)
             self.teacher = teacher_model(task_param=task_param,
                                          **teacher_param)
         else:
             self.teacher = None
 
-        self.gamma = gamma
+        # self.gamma = gamma
 
         self.learner = learner_model(task_param=task_param)
+
+        self.true_param = true_param
 
     def _compute_grid_param(self, grid_size):
 
@@ -63,7 +65,7 @@ class Engine:
 
     def _p(self, i):
 
-        p = self.learner.p(
+        p = self.learner.p_grid(
             grid_param=self.grid_param,
             i=i)
 
@@ -82,26 +84,28 @@ class Engine:
 
         self.mutual_info[:] = self._mutual_info(self.log_lik,
                                                 self.log_post)
-        n_best = int(self.gamma*self.n_param_set)
-        best_param_set_idx = \
-            np.argsort(self.log_post)[-n_best:]
+        # n_best = int(self.gamma*self.n_param_set)
+        # best_param_set_idx = \
+        #     np.argsort(self.log_post)[-n_best:]
 
         for i in range(self.n_item):
 
             # Learn new item
-            self.learner.update(i)
+            self.learner.update(item=i, response=None)
 
             log_lik_t_plus_one = np.zeros((
                 self.n_item,
-                n_best,
+                self.n_param_set,  # n_best,
                 2))
 
             for j in range(self.n_item):
 
-                p = self.learner.p(
-                    grid_param=self.grid_param[best_param_set_idx],
-                    i=i,
-                )
+                # p = self.learner.p_grid(
+                #     grid_param=self.grid_param[best_param_set_idx],
+                #     i=i,
+                # )
+
+                p = self._p(i)
 
                 new_log_p = np.log(p + EPS)
 
@@ -109,7 +113,8 @@ class Engine:
 
             mutual_info_t_plus_one_for_seq_i_j = \
                 self._mutual_info(log_lik_t_plus_one,
-                                  self.log_post[best_param_set_idx])
+                                  self.log_post)
+                                 # self.log_post[best_param_set_idx])
             max_info_next_time_step = \
                 np.max(mutual_info_t_plus_one_for_seq_i_j)
 
@@ -203,20 +208,25 @@ class Engine:
         self.log_post += self.log_lik[item, :, int(response)].flatten()
         self.log_post -= logsumexp(self.log_post)
 
-        self.learner.update(item)
+        self.learner.update(item, response)
         self.teacher.update(item, response)
 
     def get_item(self):
 
-        if np.max(self.post_sd) > self.teacher.confidence_threshold:
+        if self.true_param is None:
 
-            self._update_mutual_info()
-            return np.random.choice(
-                self.items[self.mutual_info == np.max(self.mutual_info)]
-            )
+            if np.max(self.post_sd) > self.teacher.confidence_threshold:
+
+                self._update_mutual_info()
+                return np.random.choice(
+                    self.items[self.mutual_info == np.max(self.mutual_info)]
+                )
+
+            else:
+
+                self._compute_log_lik()
+                return self.teacher.ask(
+                    best_param=self.post_mean)
 
         else:
-
-            self._compute_log_lik()
-            return self.teacher.ask(
-                best_param=self.post_mean)
+            return self.teacher.ask(best_param=self.true_param)

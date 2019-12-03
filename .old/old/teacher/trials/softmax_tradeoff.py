@@ -57,12 +57,12 @@ class SoftmaxTradeoff(GenericTeacher):
         self.usefulness[:] = 0
 
         for i in range(self.tk.n_item):
-            self.p_recall[i] = agent.p_recall(i)
-            p_recall_i_next_it = agent.p_recall(i, time_index=self.t+1)
+            self.p_recall[i] = agent.p(i)
+            p_recall_i_next_it = agent.p(i, time_index=self.t + 1)
             for j in range(self.tk.n_item):
                 if j != i:
                     agent.learn(j)
-                    p_recall_i_after_j = agent.p_recall(i)
+                    p_recall_i_after_j = agent.p(i)
                     agent.unlearn()
 
                     relative = p_recall_i_after_j - p_recall_i_next_it

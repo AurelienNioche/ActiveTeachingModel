@@ -17,16 +17,17 @@ class Memorize(GenericTeacher):
                                         dtype=int)
         self.seen = np.zeros(self.n_item, dtype=bool)
 
-        self.learner = learner_model(n_item=self.n_item)
+        self.learner = learner_model(task_param=task_param)
 
     def ask(self, best_param):
 
         if not np.any(self.seen):
             return np.random.choice(self.items)
 
-        p_recall_seen = self.learner.p_recall_seen_only(param=best_param)
+        self.learner.set_param(best_param)
+        fr_seen, pr_seen = self.learner.forgetting_rate_and_p_seen()
 
-        u = 1-p_recall_seen
+        u = 1-pr_seen
 
         sum_u = np.sum(u)
         if sum_u <= 1 \
@@ -48,4 +49,4 @@ class Memorize(GenericTeacher):
         self.seen[item] = 1
         self.n_pres_minus_one[item] += 1
 
-        self.learner.update(item)
+        self.learner.update(item, )

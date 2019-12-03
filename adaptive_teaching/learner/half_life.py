@@ -16,6 +16,8 @@ class HalfLife(Learner):
 
         if param is not None:
             self.alpha, self.beta = param['alpha'], param['beta']
+        else:
+            self.alpha, self.beta = None, None
 
         self.n_item = task_param['n_item']
 
@@ -27,44 +29,42 @@ class HalfLife(Learner):
         self.delta_i = None
         self.seen_i = None
 
-    def p_recall(self, item):
+    def p(self, item):
 
         assert item is not None, "'item' should be an integer"
 
         seen = self.seen[item] == 1
         if seen:
-            p = np.exp(-self._forgetting_rate(item) * self.delta[item])
+            p = np.exp(
+                -self.alpha
+                * (1 - self.beta) ** self.n_pres_minus_one[item]
+                * self.delta[item])
         else:
             p = 0
 
         return p
 
-    def _forgetting_rate(self, item):
+    def forgetting_rate_and_p_seen(self):
 
-        return self.alpha \
-            * (1 - self.beta) ** self.n_pres_minus_one[item]
+        fr = self.alpha \
+            * (1 - self.beta) ** self.n_pres_minus_one[self.seen]
 
-    def p_recalls_and_forgetting_rates(self):
+        pr = np.exp(-fr*self.delta[self.seen])
+        return fr, pr
+
+    def forgetting_rate_and_p_all(self):
 
         forgetting_rates = np.full(self.n_item, np.inf)
         p_recalls = np.zeros(self.n_item)
 
-        fr_seen = self._forgetting_rate(self.seen)
+        fr_seen, pr_seen = self.forgetting_rate_and_p_seen()
 
         forgetting_rates[self.seen] = fr_seen
+        p_recalls[self.seen] = pr_seen
 
-        p_recalls[self.seen] = np.exp(
-            - fr_seen * self.delta[self.seen])
         return p_recalls, forgetting_rates
 
-    def p(self, grid_param, i):
-
-        """
-        Probability of recall for a specific item for several parameter sets
-        :param grid_param:
-        :param i:
-        :return:
-        """
+    def p_grid(self, grid_param, i):
 
         n_param_set = len(grid_param)
         p = np.zeros((n_param_set, 2))
@@ -79,22 +79,7 @@ class HalfLife(Learner):
         p[:, 0] = 1 - p[:, 1]
         return p
 
-    def p_recall_seen_only(self, param):
-
-        """
-        Probability of recall for seen item only
-        :param param:
-        :return:
-        """
-
-        alpha, beta = param
-
-        return np.exp(
-            - alpha
-            * (1 - beta) ** self.n_pres_minus_one[self.seen]
-            * self.delta[self.seen])
-
-    def update(self, item):
+    def update(self, item, response):
 
         self.i = item
         self.delta_i = self.delta[item]
@@ -114,3 +99,7 @@ class HalfLife(Learner):
         self.delta -= 1
         self.delta[self.i] = self.delta_i
         self.seen[self.i] = self.seen_i
+
+    def set_param(self, param):
+        self.alpha, self.beta = param
+

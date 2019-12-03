@@ -14,7 +14,7 @@ def objective(model,
 
     for t in range(current_n_iteration):
         item = hist_item[t]
-        p_r = agent.p_recall(item=item)
+        p_r = agent.p(item=item)
         s = hist_success[t]
 
         diff[t] = (s - p_r)

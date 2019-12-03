@@ -14,6 +14,7 @@ from adaptive_teaching.plot import fig_parameter_recovery, \
 from adaptive_teaching.teacher.leitner import Leitner
 from adaptive_teaching.teacher.random import RandomTeacher
 from adaptive_teaching.teacher.memorize import Memorize
+from adaptive_teaching.teacher.threefold import Threefold
 from adaptive_teaching.teacher.metaclass import GenericTeacher
 
 from adaptive_teaching.learner.half_life import HalfLife
@@ -48,7 +49,7 @@ def main():
         # "alpha": 0.5
     }
 
-    force = True
+    force = False
 
     seed = 123
 
@@ -57,7 +58,11 @@ def main():
         ("Leitner", Leitner, {}),
         ("Opt. Info", GenericTeacher, {"confidence_threshold": -9999}),
         ("Adapt. Memorize", Memorize, {"confidence_threshold": 0.1,
-                                       "learner_model": learner_model})
+                                       "learner_model": learner_model}),
+         ("Adapt. Threefold", Threefold, {"confidence_threshold": 0.1,
+                                        "learner_model": learner_model,
+                                        }
+          )
     ]
 
     labels = [i[0] for i in labels_teacher_models_and_params]

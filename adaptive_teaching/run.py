@@ -45,15 +45,15 @@ def run(learner_model,
         item = engine.get_item()
 
         # Get a response using the optimal design
-        p = learner.p_recall(item=item)
+        p = learner.p(item=item)
 
         response = p > np.random.random()
 
         # Update the engine
-        engine.update(item, response)
+        engine.update(item=item, response=response)
 
         # Make the user learn
-        learner.update(item=item)
+        learner.update(item=item, response=response)
 
         # Backup the mean/std of post dist
         for i, pr in enumerate(param):
@@ -63,7 +63,7 @@ def run(learner_model,
         # Backup prob recall / forgetting rates
         for i in range(n_item):
             p_recall[:, t], forgetting_rates[:, t] = \
-                learner.p_recalls_and_forgetting_rates()
+                learner.forgetting_rate_and_p_all()
 
         # Backup history
         hist_item[t] = item

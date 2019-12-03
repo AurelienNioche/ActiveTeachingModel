@@ -111,7 +111,7 @@ class Run:
 
         p_recall = np.zeros(self.n_item)
         for i in range(self.n_item):
-            p_recall[i] = self.learner.p_recall(i)
+            p_recall[i] = self.learner.p(i)
 
         learnt = \
             np.sum(p_recall >= self.learnt_threshold)

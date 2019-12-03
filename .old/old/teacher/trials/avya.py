@@ -91,11 +91,11 @@ class AvyaTeacher(GenericTeacher):
         usefulness = np.zeros(self.tk.n_item)
 
         for i in range(self.tk.n_item):
-            recall_arr[i] = agent.p_recall(i)
+            recall_arr[i] = agent.p(i)
             for j in range(self.tk.n_item):
                 if j != i:
                     agent.learn(j)
-                    recall_next_arr[i][j] = agent.p_recall(i)
+                    recall_next_arr[i][j] = agent.p(i)
                     relative[i][j] = recall_next_arr[i][j] - recall_arr[i]
                     agent.unlearn()
                 usefulness[j] += relative[i][j]

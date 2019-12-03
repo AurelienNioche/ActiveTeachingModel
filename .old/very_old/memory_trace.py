@@ -32,7 +32,7 @@ def main_continuous(n_iteration=100, n_item=9):
 
         item, t = questions[i], time[i]
 
-        p = agent.p_recall(item=item, time=t*time_norm)
+        p = agent.p(item=item, time=t * time_norm)
         r = np.random.random()
 
         success[i] = p > r
@@ -71,7 +71,7 @@ def main_discrete(n_iteration=100, n_item=9):
 
         item = questions[t]
 
-        p = agent.p_recall(item=item)
+        p = agent.p(item=item)
         r = np.random.random()
 
         success[t] = p > r

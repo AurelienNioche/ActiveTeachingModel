@@ -1,46 +1,55 @@
+import numpy as np
+
 from . metaclass import GenericTeacher
 
 
 class Threefold(GenericTeacher):
 
-    def __int__(self, task_param, learner_model):
+    def __init__(self, task_param, learner_model, confidence_threshold,
+                 alpha=0.33, beta=0.33):
 
-        super().__init__(task_param=task_param, learner_model=learner_model)
+        super().__init__(task_param=task_param,
+                         confidence_threshold=confidence_threshold,
+                         learner_model=learner_model)
+
         self.learner = learner_model(task_param=task_param)
 
+        assert (alpha + beta) <= 1, \
+            "Sum of alpha and beta should be inferior to 1"
+
+        self.alpha = alpha
+        self.beta = beta
+
+        self.t = 0
+
+        self.items = np.arange(self.n_item)
+
     def ask(self, best_param):
+
+        self.learner.set_param(best_param)
+
+        u = np.zeros(self.n_item)
 
         for i in range(self.n_item):
 
             # Learn new item
-            self.learner.update(i)
+            self.learner.update(item=i, response=None)
 
-            log_lik_t_plus_one = np.zeros((
-                self.n_item,
-                n_best,
-                2))
+            fr_seen, pr_seen = self.learner.forgetting_rate_and_p_seen()
 
-            for j in range(self.n_item):
-                p = self.learner.p(
-                    grid_param=self.grid_param[best_param_set_idx],
-                    i=i,
-                )
-
-                new_log_p = np.log(p + EPS)
-
-                log_lik_t_plus_one[j, :, :] = new_log_p
-
-            mutual_info_t_plus_one_for_seq_i_j = \
-                self._mutual_info(log_lik_t_plus_one,
-                                  self.log_post[best_param_set_idx])
-            max_info_next_time_step = \
-                np.max(mutual_info_t_plus_one_for_seq_i_j)
-
-            self.mutual_info[i] += max_info_next_time_step
+            u[i] = self.alpha * np.mean(pr_seen) \
+                - self.beta * np.mean(fr_seen) \
+                + (1 - self.alpha - self.beta) * \
+                  (np.sum(self.learner.seen)/self.t)
 
             # Unlearn item
             self.learner.cancel_update()
 
+        return np.random.choice(self.items[u == np.max(u)])
+
+    def update(self, item, response):
+
+        self.t += 1
 
 
     # def _update_learning_value(self):

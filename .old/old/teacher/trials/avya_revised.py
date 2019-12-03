@@ -101,12 +101,12 @@ class AvyaRevised(GenericTeacher):
         self.usefulness[:] = 0
 
         for i in range(self.tk.n_item):
-            p_recall_i = agent.p_recall(i)
+            p_recall_i = agent.p(i)
             self.p_recall[i] = p_recall_i
             for j in range(self.tk.n_item):
                 if j != i:
                     agent.learn(j)
-                    p_recall_i_after_j = agent.p_recall(i)
+                    p_recall_i_after_j = agent.p(i)
                     agent.unlearn()
 
                     relative = p_recall_i_after_j - p_recall_i

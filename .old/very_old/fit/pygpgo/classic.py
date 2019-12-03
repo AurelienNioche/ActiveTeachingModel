@@ -92,7 +92,7 @@ class MyGPGO(GPGO):
         """
         kw = {param: self.best[i] for i, param in enumerate(self.parameter_key)}
         f_new = self.f(**kw)
-        self.GP.update(np.atleast_2d(self.best), np.atleast_1d(f_new))
+        self.GP.update(np.atleast_2d(self.best), )
         self.tau = np.max(self.GP.y)
         self.history.append(self.tau)
 

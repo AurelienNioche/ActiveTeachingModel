@@ -46,7 +46,7 @@ class Active(GenericTeacher):
             u_i = 0
             agent.learn(i)
             for j in range(self.n_item):
-                next_p_recall_j_after_i = agent.p_recall(j)
+                next_p_recall_j_after_i = agent.p(j)
                 u_i += next_p_recall_j_after_i ** 2
             agent.unlearn()
             usefulness[i] = u_i

@@ -159,7 +159,7 @@ class LeitnerTeacher(GenericTeacher):
 
         recall_arr = np.zeros(self.tk.n_item)
         for i in range(self.tk.n_item):
-            recall_arr[i] = agent.p_recall(i)
+            recall_arr[i] = agent.p(i)
         result = np.where(recall_arr == np.amin(recall_arr))
         new_question = result[0][0]
         return new_question

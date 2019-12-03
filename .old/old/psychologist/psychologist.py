@@ -53,7 +53,7 @@ class SimplePsychologist(GenericTeacher):
 
                 for i in range(self.n_item):
                     agent.learn(i)
-                    p_recall[i, j] = agent.p_recall(i)
+                    p_recall[i, j] = agent.p(i)
                     agent.unlearn()
 
             std_per_item = np.std(p_recall, axis=1)
@@ -161,7 +161,7 @@ class Psychologist(SimplePsychologist):
 
                 for i in range(self.n_item):
                     agent.learn(i)
-                    p_recall[i, j] = agent.p_recall(i)
+                    p_recall[i, j] = agent.p(i)
                     agent.unlearn()
 
             std_per_item = np.std(p_recall, axis=1)

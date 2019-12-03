@@ -71,7 +71,7 @@ def _run(
         #     question=question,
         #     possible_replies=possible_replies)
 
-        p_r = learner.p_recall(item=question)
+        p_r = learner.p(item=question)
 
         if p_r > np.random.random():
             reply = question
@@ -86,8 +86,8 @@ def _run(
             p_recall = np.zeros(n_item)
             p_recall_model = np.zeros(n_item)
             for i in range(n_item):
-                p_recall[i] = learner.p_recall(i)
-                p_recall_model[i] = model_learner.p_recall(i)
+                p_recall[i] = learner.p(i)
+                p_recall_model[i] = model_learner.p(i)
 
             learnt = np.sum(p_recall >= 0.95)
             which_learnt = np.where(p_recall >= 0.95)[0]

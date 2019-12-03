@@ -43,7 +43,7 @@ class Psychologist:
                                   **task_param)
 
             for i in range(n_item):
-                p_recall[i, j] = agent.p_recall(i)
+                p_recall[i, j] = agent.p(i)
 
         std_per_item = np.std(p_recall, axis=1)
 

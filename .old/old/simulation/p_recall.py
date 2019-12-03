@@ -28,11 +28,11 @@ def _compute(student_model,
             if time_sampling:
                 # noinspection PyUnboundLocalVariable
                 p = \
-                    learner.p_recall(item=item, time=time)
+                    learner.p(item=item, time=time)
             else:
                 print(item)
                 p = \
-                    learner.p_recall(item=item)
+                    learner.p(item=item)
 
             p_recall[item, t] = p
 
