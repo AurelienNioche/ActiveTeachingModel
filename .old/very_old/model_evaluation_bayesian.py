@@ -11,7 +11,6 @@ from simulation.fake import generate_fake_task_param
 from simulation.run import run
 
 from fit.scipy import Minimize
-from fit.objective import objective
 
 from datetime import timedelta
 from time import time

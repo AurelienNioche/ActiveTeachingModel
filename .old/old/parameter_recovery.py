@@ -5,18 +5,11 @@ import pickle
 import numpy as np
 from tqdm import tqdm
 
-from fit.scipy import Minimize, DifferentialEvolution
 from fit.pygpgo import PyGPGO
 
-from learner.act_r_custom import ActRMeaning
-from learner.act_r import ActR
-from learner.rl import QLearner
 from learner.half_life import HalfLife
 
 from teacher.leitner import Leitner
-from teacher.random import RandomTeacher
-
-from psychologist.psychologist import Psychologist
 
 from simulation.run import run
 from simulation.fake import generate_fake_task_param
@@ -28,7 +21,7 @@ SCRIPT_NAME = os.path.basename(__file__).split(".")[0]
 
 N_POSSIBLE_REPLIES = 6
 
-DATA_FOLDER = os.path.join("bkp", SCRIPT_NAME)
+DATA_FOLDER = os.path.join("../../bkp", SCRIPT_NAME)
 
 os.makedirs(DATA_FOLDER, exist_ok=True)
 

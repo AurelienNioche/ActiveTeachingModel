@@ -3,7 +3,6 @@ import plot.success
 import plot.n_seen
 import plot.n_learnt
 
-from learner.act_r_custom import ActRMeaning
 from learner.half_life import HalfLife
 
 from simulation.run import run

@@ -7,7 +7,7 @@ import pandas as pd
 def main():
 
     results_hlr = pd.read_csv(
-        os.path.join("data", "hlr.duolingo.weights"), index_col=1)
+        os.path.join(".old/old/data", "hlr.duolingo.weights"), index_col=1)
 
     print(results_hlr)
 
