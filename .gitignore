@@ -119,58 +119,25 @@ dmypy.json
 # MacOs
 .DS_Store
 
-# Figure folder
-/fig
+# Very old
+.old/very_old/learner/trials/bkp/
+.old/very_old/learner/bkp/*
+.old/very_old/data/*.p
+.old/very_old/docs/_static/
+.old/very_old/docs/_templates/
+.old/very_old/docs/bkp/
 
-# Related to word2vec
-data/word2vec/GoogleNews-vectors-negative300.bin
-bkp/similarity_semantic/*
-
-# Related to autoencoder
-.old/similarity_graphic/auto_encoder/image
-.old/similarity_graphic/auto_encoder/backup
-.old/similarity_graphic/auto_encoder/fig
-
-# Related to fit and model comparison/evaluation
-log/
-bkp/model_comparison/*
-bkp/model_evaluation/*
-bkp/fit_fidelity/
-bkp/learning_material/kanji_meaning_n150_g1_2.p
-bkp/teacher_comparison/
-bkp/learning_material/connect_graphic_norm_False_150_ddc1e03d-8541-3b33-89d9-d8ecf7abe250.p
-bkp/learning_material/connect_semantic_norm_False_150_3f4a3364-c942-339d-974a-d12af19e879c.p
-bkp/full_stack/
-
+# Old
 .old/old/learner/trials/bkp/
-
-# Related to use data
-.old/data/user_and_question_tables2.sql
-data/duolingo.sql
-.old/data/duolingo.csv
-data/db.p
-.old/data/duolingo_user/
-
-# Related to django
-.old/task/migrations/*
-.old/duolingo/migrations/*
-
-# Trials
-.old/old/learner/hopfield.p
-bkp/evaluate_psychologist/
-bkp/model_evaluation/
-bkp/simulation/
-data/duolingo.csv
-data/duolingo_user/
-data/user_and_question_tables2.sql
+.old/old/learner/bkp/*
+.old/old/data/*.p
 .old/old/docs/_static/
 .old/old/docs/_templates/
 .old/old/docs/bkp/
-task/migrations/0001_initial.py
-task/migrations/__init__.py
-bkp/exploration/
-bkp/parameter_recovery/
-.old/old/learner/bkp/hopfield.p
-bkp/adaptive/
-/.old/old/learner/bkp/
-.old/old/docs/__init__.py
+
+# Figure folder
+/fig
+
+# Back folder
+/bkp
+
