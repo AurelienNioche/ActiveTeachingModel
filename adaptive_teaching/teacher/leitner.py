@@ -1,6 +1,6 @@
 import numpy as np
 
-from . metaclass import GenericTeacher
+from . generic import GenericTeacher
 
 
 class Leitner(GenericTeacher):
@@ -33,16 +33,17 @@ class Leitner(GenericTeacher):
 
         self.taboo = None
 
+        # Time step (integer)
         self.t = 0
+
+        # Historic of success (bool)
         self.hist_success = []
+
+        # Historic of presented items (int)
         self.hist_item = []
 
     def _modify_sets(self):
         """
-        :param t: time step (integer)
-        :param hist_success: list of booleans (True: success, False: failure)
-        for every question
-
         The boxes will be modified according to the following rules:
             * Move an item to the next box for a successful reply by learner
             * Move an item to the previous box for a failure.
@@ -87,7 +88,6 @@ class Leitner(GenericTeacher):
     def _find_due_seen_items(self, due_items):
         """
         :param due_items: array that contains items that are due to be shown
-        :param hist_item: historic of presented items
         :return: * seen_due_items: as before
                 * count: the count of the number of items in seen__due_items
 
@@ -154,7 +154,8 @@ class Leitner(GenericTeacher):
         :return: integer (index of the question to ask)
 
         Every item is associated with:
-            * A waiting time i.e the time since it was last shown to the learner.
+            * A waiting time i.e the time since it was last shown
+            to the learner.
                 -- maintained in variable wait_time_arr
             * A box that decides the frequency of repeating an item.
                 -- maintained in variable learning_progress
@@ -185,12 +186,7 @@ class Leitner(GenericTeacher):
 
         # pick item in lowest box
         least_box_items = self._pick_least_box(max_overdue_items)
-
-        if len(least_box_items) > 1:
-            pick_question_index = np.random.randint(len(least_box_items))
-            new_question = least_box_items[pick_question_index]
-        else:
-            new_question = least_box_items[0]
+        new_question = np.random.choice(least_box_items)
 
         self.taboo = new_question
         return new_question

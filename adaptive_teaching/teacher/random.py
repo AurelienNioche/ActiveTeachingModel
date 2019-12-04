@@ -1,6 +1,6 @@
 import numpy as np
 
-from . metaclass import GenericTeacher
+from . generic import GenericTeacher
 
 
 class RandomTeacher(GenericTeacher):

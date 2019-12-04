@@ -4,27 +4,27 @@ import numpy as np
 from utils.plot import save_fig
 
 
-def fig_p_recall(data, design_types, fig_name, fig_folder,
+def fig_p_recall(data, labels, fig_name, fig_folder,
                  y_label="Probability or recall", colors=None):
 
     fig, ax = plt.subplots(figsize=(5, 4))
 
     if colors is None:
-        colors = [f'C{i}' for i in range(len(design_types))]
+        colors = [f'C{i}' for i in range(len(labels))]
 
-    for i, dt in enumerate(design_types):
+    for i, lb in enumerate(labels):
 
-        if isinstance(data[dt], dict):
-            means = data[dt]['mean']
-            sds = data[dt]['sd']
-            n_trial = len(means)
+        if isinstance(data[lb], list):
+            n_trial = len(data[lb])
+            means = np.asarray([np.mean(data[lb][i]) for i in range(n_trial)])
+            sds = np.asarray([np.std(data[lb][i]) for i in range(n_trial)])
 
         else:
-            n_trial = data[dt].shape[1]
-            means = np.mean(data[dt], axis=0)
-            sds = np.std(data[dt], axis=0)
+            n_trial = data[lb].shape[1]
+            means = np.mean(data[lb], axis=0)
+            sds = np.std(data[lb], axis=0)
 
-        ax.plot(means, color=colors[i], label=dt)
+        ax.plot(means, color=colors[i], label=lb)
         ax.fill_between(range(n_trial),
                         means-sds,
                         means+sds,
@@ -36,19 +36,19 @@ def fig_p_recall(data, design_types, fig_name, fig_folder,
     ax.set_xlabel("Time")
     ax.set_ylabel(y_label)
 
-    plt.legend()
+    plt.legend(loc='lower left')
 
     save_fig(fig_folder=fig_folder, fig_name=fig_name)
 
 
-def fig_p_recall_item(p_recall, design_types, fig_name, fig_folder):
+def fig_p_recall_item(p_recall, labels, fig_name, fig_folder):
 
-    n_row = len(design_types)
+    n_row = len(labels)
     fig, axes = plt.subplots(nrows=n_row, figsize=(5, 4*n_row))
 
-    colors = [f'C{i}' for i in range(len(design_types))]
+    colors = [f'C{i}' for i in range(len(labels))]
 
-    for i, dt in enumerate(design_types):
+    for i, dt in enumerate(labels):
 
         ax = axes[i]
         color = colors[i]
@@ -75,7 +75,7 @@ def fig_p_recall_item(p_recall, design_types, fig_name, fig_folder):
         ax.set_xlabel("Time")
         ax.set_ylabel("Probability or recall")
 
-        ax.legend()
+        ax.legend(loc='lower left')
 
     save_fig(fig_folder=fig_folder, fig_name=fig_name)
 

@@ -1,8 +1,9 @@
 import numpy as np
 from tqdm import tqdm
 
-from adaptive_teaching.constants import P_RECALL, POST_MEAN, POST_SD, HIST, \
-    FORGETTING_RATES
+from adaptive_teaching.constants \
+    import P, FR, P_SEEN, FR_SEEN, POST_MEAN, POST_SD, \
+    HIST_ITEM, HIST_SUCCESS, N_SEEN
 
 
 def run(learner_model,
@@ -21,11 +22,15 @@ def run(learner_model,
     post_means = {pr: np.zeros(n_trial) for pr in param}
     post_sds = {pr: np.zeros(n_trial) for pr in param}
 
-    p_recall = np.zeros((n_item, n_trial))
-    forgetting_rates = np.zeros((n_item, n_trial))
+    p = np.zeros((n_item, n_trial))
+    fr = np.zeros((n_item, n_trial))
+    p_seen = []
+    fr_seen = []
 
     hist_item = np.zeros(n_trial, dtype=int)
     hist_success = np.zeros(n_trial, dtype=bool)
+
+    n_seen = np.zeros(n_trial, dtype=int)
 
     # Create learner and engine
     learner = learner_model(param=learner_param, task_param=task_param)
@@ -45,9 +50,9 @@ def run(learner_model,
         item = engine.get_item()
 
         # Get a response using the optimal design
-        p = learner.p(item=item)
+        p_recall = learner.p(item=item)
 
-        response = p > np.random.random()
+        response = p_recall > np.random.random()
 
         # Update the engine
         engine.update(item=item, response=response)
@@ -61,18 +66,29 @@ def run(learner_model,
             post_sds[pr][t] = engine.post_sd[i]
 
         # Backup prob recall / forgetting rates
-        for i in range(n_item):
-            p_recall[:, t], forgetting_rates[:, t] = \
-                learner.forgetting_rate_and_p_all()
+        fr[:, t], p[:, t] = \
+            learner.forgetting_rate_and_p_all()
+
+        fr_seen_t, p_seen_t = \
+            learner.forgetting_rate_and_p_seen()
+
+        fr_seen.append(fr_seen_t)
+        p_seen.append(p_seen_t)
 
         # Backup history
+        n_seen[t] = np.sum(learner.seen)
+
         hist_item[t] = item
         hist_success[t] = response
 
     return {
-        P_RECALL: p_recall,
+        N_SEEN: n_seen,
+        P: p,
+        P_SEEN: p_seen,
+        FR: fr,
+        FR_SEEN: fr_seen,
         POST_MEAN: post_means,
         POST_SD: post_sds,
-        HIST: hist_item,
-        FORGETTING_RATES: forgetting_rates,
+        HIST_ITEM: hist_item,
+        HIST_SUCCESS: hist_success
     }

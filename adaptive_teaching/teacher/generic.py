@@ -10,7 +10,7 @@ class GenericTeacher:
         self.confidence_threshold = confidence_threshold
 
     def ask(self, best_param):
-        return NotImplementedError
+        raise NotImplementedError
 
     def update(self, item, response):
         pass
