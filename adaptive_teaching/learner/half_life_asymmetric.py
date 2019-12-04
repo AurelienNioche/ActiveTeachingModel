@@ -27,8 +27,8 @@ class HalfLifeAsymmetric(HalfLife):
         self.i = None
         self.delta_i = None
         self.seen_i = None
-        self.success_i = None
-        self.failure_i = None
+        self.success_i = 0
+        self.failure_i = 0
 
         self.t = 0
 
