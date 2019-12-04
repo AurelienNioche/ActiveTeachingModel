@@ -49,4 +49,4 @@ class Memorize(GenericTeacher):
         self.seen[item] = 1
         self.n_pres_minus_one[item] += 1
 
-        self.learner.update(item, )
+        self.learner.update(item=item, response=response)
