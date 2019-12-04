@@ -91,7 +91,7 @@ class Engine:
         for i in range(self.n_item):
 
             # Learn new item
-            self.learner.update(item=i, response=1 if self.learner.p(i) > 0.5 else 0)
+            self.learner.update(item=i, response=0)
 
             log_lik_t_plus_one = np.zeros((
                 self.n_item,

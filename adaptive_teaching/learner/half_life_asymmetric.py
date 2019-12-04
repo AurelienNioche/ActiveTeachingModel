@@ -39,8 +39,7 @@ class HalfLifeAsymmetric(HalfLife):
         seen = self.seen[item] == 1
         if seen:
             p = np.exp(
-                -
-                self.alpha
+                - self.alpha
                 * (1 - self.beta) ** self.n_failure[item]
                 * (1 - self.gamma) ** self.n_success[item]
                 * self.delta[item])
@@ -94,6 +93,8 @@ class HalfLifeAsymmetric(HalfLife):
         self.t += 1
 
     def cancel_update(self):
+
+        assert self.delta_i is not None
 
         self.n_success[self.i] = self.success_i
         self.n_failure[self.i] = self.failure_i
