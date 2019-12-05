@@ -38,20 +38,20 @@ def main():
         "n_item": 200
     }
 
-    # learner_model = HalfLife
-    # learner_param = {
-    #     "alpha": 0.05,
-    #     "beta": 0.2
-    #     # "beta": 0.10,
-    #     # "alpha": 0.5
-    # }
-
-    learner_model = HalfLifeAsymmetric
+    learner_model = HalfLife
     learner_param = {
         "alpha": 0.05,
-        "beta": -0.2,
-        "gamma": 0.2,
+        "beta": 0.2
+        # "beta": 0.10,
+        # "alpha": 0.5
     }
+    #
+    # learner_model = HalfLifeAsymmetric
+    # learner_param = {
+    #     "alpha": 0.05,
+    #     "beta": -0.2,
+    #     "gamma": 0.2,
+    # }
 
     engine_model = Engine
     engine_param = {
@@ -69,9 +69,9 @@ def main():
         ("Opt. Info", GenericTeacher, {"confidence_threshold": -9999}),
         # ("Adapt. Memorize", Memorize, {"confidence_threshold": 0.1,
         #                                "learner_model": learner_model}),
-         ("Adapt. Adaptive", Adaptive,  {"confidence_threshold": 0.1,
-                                         "learner_model": learner_model,
-                                         "alpha": 0.999})
+         #("Adapt. Adaptive", Adaptive,  {"confidence_threshold": 0.1,
+                                         # "learner_model": learner_model,
+                                         # "alpha": 0.999})
     ]
 
     labels = [i[0] for i in labels_teacher_models_and_params]

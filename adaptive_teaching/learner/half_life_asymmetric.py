@@ -11,6 +11,8 @@ class HalfLifeAsymmetric(HalfLife):
         'gamma': (0.00, 1.0),
     }
 
+    asymmetric = True
+
     def __init__(self, task_param, param=None):
 
         super().__init__(task_param=task_param, param=None)

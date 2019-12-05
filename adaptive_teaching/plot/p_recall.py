@@ -5,7 +5,7 @@ from utils.plot import save_fig
 
 
 def fig_p_recall(data, labels, fig_name, fig_folder,
-                 y_label="Probability or recall", colors=None):
+                 y_label="Probability of recall", colors=None):
 
     fig, ax = plt.subplots(figsize=(5, 4))
 

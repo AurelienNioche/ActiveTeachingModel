@@ -82,23 +82,32 @@ class HalfLife(Learner):
     def update(self, item, response):
 
         self.i = item
-        self.delta_i = self.delta[item]
-        self.seen_i = self.seen[item]
+
+        if item is not None:
+            self.delta_i = self.delta[item]
+            self.seen_i = self.seen[item]
 
         # Increment delta for all items
         self.delta += 1
 
         # ...except the one for the selected design that equal one
-        self.delta[item] = 1
-        self.seen[item] = 1
-        self.n_pres_minus_one[item] += 1
+        if item is not None:
+            self.delta[item] = 1
+            self.seen[item] = 1
+            self.n_pres_minus_one[item] += 1
 
     def cancel_update(self):
 
-        self.n_pres_minus_one[self.i] -= 1
+        if self.i is not None:
+            self.n_pres_minus_one[self.i] -= 1
+
         self.delta -= 1
-        self.delta[self.i] = self.delta_i
-        self.seen[self.i] = self.seen_i
+
+        if self.i is not None:
+            self.delta[self.i] = self.delta_i
+            self.seen[self.i] = self.seen_i
+
+        assert np.all(self.delta >= 0)
 
     def set_param(self, param):
         self.alpha, self.beta = param

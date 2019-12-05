@@ -10,6 +10,8 @@ class Learner:
         '<name of parameter>': (0.0, 1.0),
     }
 
+    asymmetric = False
+
     def __init__(self):
         pass
 

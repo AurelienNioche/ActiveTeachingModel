@@ -5,6 +5,8 @@ from scipy.special import logsumexp
 
 EPS = np.finfo(np.float).eps
 
+np.seterr(all='raise')
+
 
 class Engine:
 
@@ -47,6 +49,8 @@ class Engine:
 
         self.true_param = true_param
 
+        self.t = 0
+
     def _compute_grid_param(self, grid_size):
 
         return np.asarray(list(
@@ -58,70 +62,200 @@ class Engine:
         ))
 
     def _compute_log_lik(self):
-        """Compute the log likelihood."""
-
         for i in range(self.n_item):
             self.log_lik[i, :, :] = self._log_p(i)
 
-    def _p(self, i):
-
-        p = self.learner.p_grid(
-            grid_param=self.grid_param,
-            i=i)
-
-        return p
-
     def _log_p(self, i):
 
-        return np.log(self._p(i) + EPS)
+        p = self.learner.p_grid(grid_param=self.grid_param, i=i)
+        try:
+            log = np.log(p + EPS)
+        except Exception as e:
+            # print("grid", self.grid_param)
+            print("delta", self.learner.delta[i])
+            print("i", i)
+            print("item", i)
+            print("seen", self.learner.seen[i])
+            print("p", p)
+            print("n pres -1 ", self.learner.n_pres_minus_one[i])
+            raise e
+        return log
 
     def _update_mutual_info(self):
+        # print('t', self.t, "=" * 10)
 
-        for i in range(self.n_item):
+        n_seen = int(np.sum(self.learner.seen))
+        n_not_seen = self.n_item - n_seen
 
-            log_p = self._log_p(i)
-            self.log_lik[i, :, :] = log_p
+        seen = np.zeros(self.n_item, dtype=bool)
+        seen[:] = self.learner.seen
 
-        self.mutual_info[:] = self._mutual_info(self.log_lik,
-                                                self.log_post)
-        # n_best = int(self.gamma*self.n_param_set)
-        # best_param_set_idx = \
-        #     np.argsort(self.log_post)[-n_best:]
+        not_seen = np.zeros(self.n_item, dtype=bool)
+        not_seen[:] = np.logical_not(self.learner.seen)
 
-        for i in range(self.n_item):
+        if n_seen == 0:
+            self._compute_log_lik()
+            return
 
-            # Learn new item
-            self.learner.update(item=i, response=0)
+        n_sample = min(n_seen+1, self.n_item)
 
-            log_lik_t_plus_one = np.zeros((
-                self.n_item,
-                self.n_param_set,  # n_best,
-                2))
+        log_lik = np.zeros((n_sample, self.n_param_set, 2))
 
-            for j in range(self.n_item):
+        items_seen = self.items[self.learner.seen]
 
-                # p = self.learner.p_grid(
-                #     grid_param=self.grid_param[best_param_set_idx],
-                #     i=i,
-                # )
+        if n_not_seen > 0:
+            item_not_seen = self.items[not_seen][0]
+            item_sample = list(items_seen) + [item_not_seen, ]
+        else:
+            item_sample = items_seen
 
-                p = self._p(i)
+        for i, item in enumerate(item_sample):
+            log_lik[i, :, :] = self._log_p(item)
 
-                new_log_p = np.log(p + EPS)
+        self.log_lik[seen] = log_lik[:n_seen]
+        if n_not_seen:
+            self.log_lik[not_seen] = log_lik[-1]
 
-                log_lik_t_plus_one[j, :, :] = new_log_p
+        self.mutual_info[:] = self._mutual_info(
+            self.log_lik,
+            self.log_post)
 
-            mutual_info_t_plus_one_for_seq_i_j = \
-                self._mutual_info(log_lik_t_plus_one,
-                                  self.log_post)
-                                 # self.log_post[best_param_set_idx])
-            max_info_next_time_step = \
-                np.max(mutual_info_t_plus_one_for_seq_i_j)
+        # log_ll_t_plus_one_sample = np.zeros((
+        #     n_sample,
+        #     n_sample,
+        #     self.n_param_set,
+        #     2))
 
-            self.mutual_info[i] += max_info_next_time_step
+        ll_after_pres = np.zeros((n_sample, self.n_param_set, 2))
+
+        for i, item in enumerate(item_sample):
+
+            self.learner.update(item=item, response=None)
+
+            ll_after_pres[i] = self._log_p(item)
 
             # Unlearn item
             self.learner.cancel_update()
+
+        ll_without_pres = np.zeros((n_sample, self.n_param_set, 2))
+
+        # Go to the future
+        self.learner.update(item=None, response=None)
+
+        for i, item in enumerate(item_sample):
+            ll_without_pres[i] = self._log_p(item)
+
+        # Cancel
+        self.learner.cancel_update()
+
+
+        ll_after_pres_full = np.zeros((self.n_item, self.n_param_set, 2))
+        ll_after_pres_full[seen] = ll_after_pres[:n_seen]
+
+        ll_without_pres_full = np.zeros((self.n_item, self.n_param_set, 2))
+        ll_without_pres_full[seen] = ll_without_pres[:n_seen]
+
+        if n_not_seen:
+            # print(f"hey! {ll_after_pres[-1]}, {ll_without_pres[-1]}")
+            ll_after_pres_full[not_seen] = ll_after_pres[-1]
+            ll_without_pres_full[not_seen] = ll_without_pres[-1]
+
+        for i in self.items:
+            ll_t_plus_one = np.zeros((self.n_item, self.n_param_set, 2))
+
+            ll_t_plus_one[:] = ll_without_pres_full[:]
+            ll_t_plus_one[i] = ll_after_pres_full[i]
+
+            mutual_info_t_plus_one_given_i = \
+                self._mutual_info(ll_t_plus_one,
+                                  self.log_post)
+
+            # print(f"mutual info i={i} at t+1",
+            #       mutual_info_t_plus_one_given_i)
+
+            max_info_next_time_step = \
+                np.max(mutual_info_t_plus_one_given_i)
+
+            self.mutual_info[i] += max_info_next_time_step
+
+        # print("mutual info", self.mutual_info)
+
+    # def _update_mutual_info(self):
+    #
+    #     for i in range(self.n_item):
+    #         self.log_lik[i, :, :] = self._log_p(i)
+    #
+    #     self.mutual_info[:] = self._mutual_info(self.log_lik,
+    #                                             self.log_post)
+    #     # n_best = int(self.gamma*self.n_param_set)
+    #     # best_param_set_idx = \
+    #     #     np.argsort(self.log_post)[-n_best:]
+    #     print("t", self.t, "="*10)
+    #     print("mutual info t only", self.mutual_info)
+    #
+    #     for i in range(self.n_item):
+    #
+    #         if not self.learner_model.asymmetric:
+    #
+    #             # Learn new item
+    #             self.learner.update(item=i, response=None)
+    #
+    #             log_lik_t_plus_one = np.zeros((
+    #                 self.n_item,
+    #                 self.n_param_set,  # n_best,
+    #                 2))
+    #
+    #             for j in range(self.n_item):
+    #                 log_lik_t_plus_one[j, :, :] = self._log_p(j)
+    #
+    #             mutual_info_t_plus_one_for_seq_i_j = \
+    #                 self._mutual_info(log_lik_t_plus_one,
+    #                                   self.log_post)
+    #
+    #             max_info_next_time_step = \
+    #                 np.max(mutual_info_t_plus_one_for_seq_i_j)
+    #
+    #             print(f"mutual info i={i} at t+1", mutual_info_t_plus_one_for_seq_i_j)
+    #
+    #             self.mutual_info[i] += max_info_next_time_step
+    #
+    #             # Unlearn item
+    #             self.learner.cancel_update()
+    #
+    #         else:
+    #
+    #             self.learner.set_param(self.post_mean)
+    #             p_success = self.learner.p(i)
+    #
+    #             mutual_info_t_plus_one_for_seq_i_j = np.zeros((2, self.n_item))
+    #
+    #             for response in (0, 1):
+    #                 # Learn new item
+    #                 self.learner.update(item=i, response=response)
+    #
+    #                 log_lik_t_plus_one = np.zeros((
+    #                     self.n_item,
+    #                     self.n_param_set,  # n_best,
+    #                     2))
+    #
+    #                 for j in range(self.n_item):
+    #                     log_lik_t_plus_one[j, :, :] = self._log_p(j)
+    #
+    #                 mutual_info_t_plus_one_for_seq_i_j[response] = \
+    #                     self._mutual_info(log_lik_t_plus_one,
+    #                                       self.log_post)
+    #                 # self.log_post[best_param_set_idx])
+    #
+    #                 # Unlearn item
+    #                 self.learner.cancel_update()
+    #
+    #             max_info_next_time_step = \
+    #                 np.max(
+    #                     mutual_info_t_plus_one_for_seq_i_j[0]*(1-p_success)
+    #                     + mutual_info_t_plus_one_for_seq_i_j[1]*p_success
+    #                 )
+    #
+    #             self.mutual_info[i] += max_info_next_time_step
 
     @staticmethod
     def _mutual_info(ll, lp):
@@ -218,9 +352,12 @@ class Engine:
             if np.max(self.post_sd) > self.teacher.confidence_threshold:
 
                 self._update_mutual_info()
-                return np.random.choice(
+                item = np.random.choice(
                     self.items[self.mutual_info == np.max(self.mutual_info)]
                 )
+                # print('selected item', item)
+                self.t += 1
+                return item
 
             else:
 
