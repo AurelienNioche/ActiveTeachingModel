@@ -151,14 +151,13 @@ class Engine:
 
         max_info_next_time_step = np.zeros(self.n_item)
 
-        p = Pool()
-        max_info_next_time_step[:] = \
-            p.map(self._compute_max_info_time_step, self.items)
+        with Pool() as pool:
+            max_info_next_time_step[:] = \
+                pool.map(self._compute_max_info_time_step, self.items)
 
         self.mutual_info += max_info_next_time_step
 
     def _compute_max_info_time_step(self, i):
-
 
         ll_t_plus_one = np.zeros((self.n_item, self.n_param_set, 2))
 
