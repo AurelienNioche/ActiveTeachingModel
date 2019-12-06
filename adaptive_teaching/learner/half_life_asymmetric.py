@@ -29,10 +29,8 @@ class HalfLifeAsymmetric(HalfLife):
         self.i = None
         self.delta_i = None
         self.seen_i = None
-        self.success_i = 0
-        self.failure_i = 0
-
-        self.t = 0
+        self.n_success_i = None
+        self.n_failure_i = None
 
     def p(self, item):
 
@@ -79,34 +77,38 @@ class HalfLifeAsymmetric(HalfLife):
     def update(self, item, response):
 
         self.i = item
-        self.delta_i = self.delta[item]
-        self.seen_i = self.seen[item]
+
+        if item is not None:
+            self.delta_i = self.delta[item]
+            self.seen_i = self.seen[item]
+            self.n_success_i = self.n_success[item]
+            self.n_failure_i = self.n_failure[item]
 
         # Increment delta for all items
         self.delta += 1
 
         # ...except the one for the selected design that equal one
-        self.delta[item] = 1
-        self.seen[item] = 1
-        if self.t > 0:
-            self.n_success[item] += response
-            self.n_failure[item] += (response-1) * -1
+        if item is not None:
 
-        self.t += 1
+            if self.seen[item]:
+                self.n_success[item] += response
+                self.n_failure[item] += (response-1) * -1
+
+            self.delta[item] = 1
+            self.seen[item] = 1
 
     def cancel_update(self):
 
-        assert self.delta_i is not None
+        if self.i is not None:
 
-        self.n_success[self.i] = self.success_i
-        self.n_failure[self.i] = self.failure_i
-        self.seen[self.i] = self.seen_i
+            self.n_success[self.i] = self.n_success_i
+            self.n_failure[self.i] = self.n_failure_i
+            self.seen[self.i] = self.seen_i
 
         self.delta -= 1
-        self.delta[self.i] = self.delta_i
 
-        self.t -= 1
+        if self.i is not None:
+            self.delta[self.i] = self.delta_i
 
     def set_param(self, param):
         self.alpha, self.beta, self.gamma = param
-

@@ -71,12 +71,18 @@ class HalfLife(Learner):
 
         i_has_been_seen = self.seen[i] == 1
         if i_has_been_seen:
-            p[:, 1] = np.exp(
-                - grid_param[:, 0]
+
+            fr = grid_param[:, 0] \
                 * (1 - grid_param[:, 1]) ** self.n_pres_minus_one[i]
+            assert np.all(fr >= 0), f"{fr[fr<=0][0]}"
+            p[:, 1] = np.exp(
+                - fr
                 * self.delta[i])
 
         p[:, 0] = 1 - p[:, 1]
+
+        # assert np.all(p >= 0)
+        # assert np.all(p <= 1)
         return p
 
     def update(self, item, response):

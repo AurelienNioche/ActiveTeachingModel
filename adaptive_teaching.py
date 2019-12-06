@@ -38,20 +38,20 @@ def main():
         "n_item": 200
     }
 
-    learner_model = HalfLife
-    learner_param = {
-        "alpha": 0.05,
-        "beta": 0.2
-        # "beta": 0.10,
-        # "alpha": 0.5
-    }
-    #
-    # learner_model = HalfLifeAsymmetric
+    # learner_model = HalfLife
     # learner_param = {
     #     "alpha": 0.05,
-    #     "beta": -0.2,
-    #     "gamma": 0.2,
+    #     "beta": 0.2
+    #     # "beta": 0.10,
+    #     # "alpha": 0.5
     # }
+    #
+    learner_model = HalfLifeAsymmetric
+    learner_param = {
+        "alpha": 0.05,
+        "beta": -0.2,
+        "gamma": 0.2,
+    }
 
     engine_model = Engine
     engine_param = {
@@ -123,7 +123,9 @@ def main():
 
     for lb in labels:
         for dt in data_type:
-            data[dt][lb] = results[lb][dt]
+            print(results[lb].keys())
+            d = results[lb][dt]
+            data[dt][lb] = d
 
     param = sorted(learner_model.bounds.keys())
 

@@ -5,7 +5,9 @@ from scipy.special import logsumexp
 
 EPS = np.finfo(np.float).eps
 
-np.seterr(all='raise')
+from multiprocessing import Pool
+
+# np.seterr(all='raise')
 
 
 class Engine:
@@ -49,6 +51,11 @@ class Engine:
 
         self.true_param = true_param
 
+        self.ll_after_pres_full = \
+            np.zeros((self.n_item, self.n_param_set, 2))
+        self.ll_without_pres_full = \
+            np.zeros((self.n_item, self.n_param_set, 2))
+
         self.t = 0
 
     def _compute_grid_param(self, grid_size):
@@ -68,21 +75,11 @@ class Engine:
     def _log_p(self, i):
 
         p = self.learner.p_grid(grid_param=self.grid_param, i=i)
-        try:
-            log = np.log(p + EPS)
-        except Exception as e:
-            # print("grid", self.grid_param)
-            print("delta", self.learner.delta[i])
-            print("i", i)
-            print("item", i)
-            print("seen", self.learner.seen[i])
-            print("p", p)
-            print("n pres -1 ", self.learner.n_pres_minus_one[i])
-            raise e
+        log = np.log(p + EPS)
         return log
 
     def _update_mutual_info(self):
-        # print('t', self.t, "=" * 10)
+        from time import time
 
         n_seen = int(np.sum(self.learner.seen))
         n_not_seen = self.n_item - n_seen
@@ -120,22 +117,17 @@ class Engine:
             self.log_lik,
             self.log_post)
 
-        # log_ll_t_plus_one_sample = np.zeros((
-        #     n_sample,
-        #     n_sample,
-        #     self.n_param_set,
-        #     2))
-
         ll_after_pres = np.zeros((n_sample, self.n_param_set, 2))
 
         for i, item in enumerate(item_sample):
 
-            self.learner.update(item=item, response=None)
+            for response in (0, 1):
+                self.learner.update(item=item, response=response)
 
-            ll_after_pres[i] = self._log_p(item)
+                ll_after_pres[i] += self._log_p(item)
 
-            # Unlearn item
-            self.learner.cancel_update()
+                # Unlearn item
+                self.learner.cancel_update()
 
         ll_without_pres = np.zeros((n_sample, self.n_param_set, 2))
 
@@ -148,37 +140,37 @@ class Engine:
         # Cancel
         self.learner.cancel_update()
 
+        self.ll_after_pres_full[seen] = ll_after_pres[:n_seen]
 
-        ll_after_pres_full = np.zeros((self.n_item, self.n_param_set, 2))
-        ll_after_pres_full[seen] = ll_after_pres[:n_seen]
-
-        ll_without_pres_full = np.zeros((self.n_item, self.n_param_set, 2))
-        ll_without_pres_full[seen] = ll_without_pres[:n_seen]
+        self.ll_without_pres_full[seen] = ll_without_pres[:n_seen]
 
         if n_not_seen:
             # print(f"hey! {ll_after_pres[-1]}, {ll_without_pres[-1]}")
-            ll_after_pres_full[not_seen] = ll_after_pres[-1]
-            ll_without_pres_full[not_seen] = ll_without_pres[-1]
+            self.ll_after_pres_full[not_seen] = ll_after_pres[-1]
+            self.ll_without_pres_full[not_seen] = ll_without_pres[-1]
 
-        for i in self.items:
-            ll_t_plus_one = np.zeros((self.n_item, self.n_param_set, 2))
+        max_info_next_time_step = np.zeros(self.n_item)
 
-            ll_t_plus_one[:] = ll_without_pres_full[:]
-            ll_t_plus_one[i] = ll_after_pres_full[i]
+        p = Pool()
+        max_info_next_time_step[:] = \
+            p.map(self._compute_max_info_time_step, self.items)
 
-            mutual_info_t_plus_one_given_i = \
-                self._mutual_info(ll_t_plus_one,
-                                  self.log_post)
+        self.mutual_info += max_info_next_time_step
 
-            # print(f"mutual info i={i} at t+1",
-            #       mutual_info_t_plus_one_given_i)
+    def _compute_max_info_time_step(self, i):
 
-            max_info_next_time_step = \
-                np.max(mutual_info_t_plus_one_given_i)
 
-            self.mutual_info[i] += max_info_next_time_step
+        ll_t_plus_one = np.zeros((self.n_item, self.n_param_set, 2))
 
-        # print("mutual info", self.mutual_info)
+        ll_t_plus_one[:] = self.ll_without_pres_full[:]
+        ll_t_plus_one[i] = self.ll_after_pres_full[i]
+
+        mutual_info_t_plus_one_given_i = \
+            self._mutual_info(ll_t_plus_one,
+                              self.log_post)
+
+        return np.max(mutual_info_t_plus_one_given_i)
+
 
     # def _update_mutual_info(self):
     #
@@ -187,42 +179,46 @@ class Engine:
     #
     #     self.mutual_info[:] = self._mutual_info(self.log_lik,
     #                                             self.log_post)
-    #     # n_best = int(self.gamma*self.n_param_set)
-    #     # best_param_set_idx = \
-    #     #     np.argsort(self.log_post)[-n_best:]
-    #     print("t", self.t, "="*10)
-    #     print("mutual info t only", self.mutual_info)
     #
     #     for i in range(self.n_item):
     #
-    #         if not self.learner_model.asymmetric:
+    #         # Learn new item
+    #         self.learner.update(item=i, response=None)
     #
-    #             # Learn new item
-    #             self.learner.update(item=i, response=None)
+    #         log_lik_t_plus_one = np.zeros((
+    #             self.n_item,
+    #             self.n_param_set,  # n_best,
+    #             2))
     #
-    #             log_lik_t_plus_one = np.zeros((
-    #                 self.n_item,
-    #                 self.n_param_set,  # n_best,
-    #                 2))
+    #         for j in range(self.n_item):
+    #             log_lik_t_plus_one[j, :, :] = self._log_p(j)
     #
-    #             for j in range(self.n_item):
-    #                 log_lik_t_plus_one[j, :, :] = self._log_p(j)
+    #         mutual_info_t_plus_one_given_i = \
+    #             self._mutual_info(log_lik_t_plus_one,
+    #                               self.log_post)
     #
-    #             mutual_info_t_plus_one_for_seq_i_j = \
-    #                 self._mutual_info(log_lik_t_plus_one,
-    #                                   self.log_post)
+    #         max_info_next_time_step = \
+    #             np.max(mutual_info_t_plus_one_given_i)
     #
-    #             max_info_next_time_step = \
-    #                 np.max(mutual_info_t_plus_one_for_seq_i_j)
+    #         self.mutual_info[i] += max_info_next_time_step
     #
-    #             print(f"mutual info i={i} at t+1", mutual_info_t_plus_one_for_seq_i_j)
+    #         # Unlearn item
+    #         self.learner.cancel_update()
+
+    # def _update_mutual_info_asymmetric(self):
     #
-    #             self.mutual_info[i] += max_info_next_time_step
+    #         for i in range(self.n_item):
+    #             self.log_lik[i, :, :] = self._log_p(i)
     #
-    #             # Unlearn item
-    #             self.learner.cancel_update()
+    #         self.mutual_info[:] = self._mutual_info(self.log_lik,
+    #                                                 self.log_post)
+    #         # n_best = int(self.gamma*self.n_param_set)
+    #         # best_param_set_idx = \
+    #         #     np.argsort(self.log_post)[-n_best:]
+    #         print("t", self.t, "=" * 10)
+    #         print("mutual info t only", self.mutual_info)
     #
-    #         else:
+    #         for i in range(self.n_item):
     #
     #             self.learner.set_param(self.post_mean)
     #             p_success = self.learner.p(i)
