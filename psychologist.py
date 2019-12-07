@@ -42,11 +42,13 @@ def compute_grid_param(grid_size, bounds):
 
 # %%
 
-def compute_log_lik(n_item, grid_param, seen, delta, n_pres_minus_one):
+def compute_log_lik(grid_param, seen, delta, n_pres_minus_one,
+                    items):
 
+    n_item = len(items)
     n_param_set = len(grid_param)
     log_lik = np.zeros((n_item, n_param_set, 2))
-    for i in range(n_item):
+    for i, item in enumerate(items):
         log_lik[i, :, :] = np.log(
             p_grid(grid_param, i, seen, delta, n_pres_minus_one)
             + EPS)
@@ -89,7 +91,23 @@ def mutual_info(ll, lp):
 
 # %%
 
-def compute_mutual_info(n_item, seen, grid_param, delta, n_pres_minus_one):
+def update_learner(delta, seen=None, n_pres_minus_one=None, item=None):
+    # Increment delta for all items
+    new_delta = delta + 1
+    new_seen = seen.copy()
+    new_n_pres_minus_one = n_pres_minus_one.copy()
+
+    # ...except the one for the selected design that equal one
+    if item is not None:
+        new_delta[item] = 1
+        new_seen[item] = 1
+        new_n_pres_minus_one[item] += 1
+
+    return new_delta, new_seen, new_n_pres_minus_one
+
+
+def compute_mutual_info(log_post, n_item, seen,
+                        grid_param, delta, n_pres_minus_one):
 
     n_param_set = len(grid_param)
 
@@ -105,8 +123,6 @@ def compute_mutual_info(n_item, seen, grid_param, delta, n_pres_minus_one):
 
     n_sample = min(n_seen + 1, n_item)
 
-    log_lik = np.zeros((n_sample, n_param_set, 2))
-
     items_seen = items[seen]
 
     if n_not_seen > 0:
@@ -115,103 +131,122 @@ def compute_mutual_info(n_item, seen, grid_param, delta, n_pres_minus_one):
     else:
         item_sample = items_seen
 
-    for i, item in enumerate(item_sample):
-        log_lik[i, :, :] = compute_log_lik(
-            grid_param=grid_param,
-            i=i, seen=seen, delta=delta,
-            n_pres_minus_one=n_pres_minus_one,
-            n_item=n_item)
+    log_lik_sample = compute_log_lik(
+        grid_param=grid_param,
+        seen=seen, delta=delta,
+        n_pres_minus_one=n_pres_minus_one,
+        items=item_sample)
+
+    log_lik = np.zeros((n_item, n_param_set, 2))
 
     log_lik[seen] = log_lik[:n_seen]
     if n_not_seen:
         log_lik[not_seen] = log_lik[-1]
 
-    mutual_info = mutual_info(log_lik, log_post)
+    mi = mutual_info(log_lik, log_post)
 
-    ll_after_pres = np.zeros((n_sample, self.n_param_set, 2))
+    ll_after_pres = np.zeros((n_sample, n_param_set, 2))
 
     for i, item in enumerate(item_sample):
 
-        for response in (0, 1):
-            self.learner.update(item=item, response=response)
+        # for response in (0, 1):
+        new_delta, new_seen, new_n_pres_minus_one = \
+            update_learner(delta=delta, seen=seen,
+                           n_pres_minus_one=n_pres_minus_one,
+                           item=item)
 
-            ll_after_pres[i] += self._log_p(item)
-
-            # Unlearn item
-            self.learner.cancel_update()
+        ll_after_pres[i] += np.log(
+            p_grid(grid_param, i,
+                   new_seen, new_delta, new_n_pres_minus_one)
+            + EPS)
 
     ll_without_pres = np.zeros((n_sample, n_param_set, 2))
 
     # Go to the future
-    self.learner.update(item=None, response=None)
+    new_delta, new_seen, new_n_pres_minus_one = \
+        update_learner(delta=delta, seen=seen,
+                       n_pres_minus_one=n_pres_minus_one,
+                       item=None)
 
     for i, item in enumerate(item_sample):
-        ll_without_pres[i] = self._log_p(item)
+        ll_without_pres[i] = np.log(
+            p_grid(grid_param, i,
+                   new_seen, new_delta, new_n_pres_minus_one)
+            + EPS)
 
-    # Cancel
-    self.learner.cancel_update()
+    ll_after_pres_full = np.zeros(log_lik.shape)
+    ll_without_pres_full = np.zeros(log_lik.shape)
 
-    self.ll_after_pres_full[seen] = ll_after_pres[:n_seen]
+    ll_after_pres_full[seen] = ll_after_pres[:n_seen]
 
-    self.ll_without_pres_full[seen] = ll_without_pres[:n_seen]
+    ll_without_pres_full[seen] = ll_without_pres[:n_seen]
 
     if n_not_seen:
-        self.ll_after_pres_full[not_seen] = ll_after_pres[-1]
-        self.ll_without_pres_full[not_seen] = ll_without_pres[-1]
+        ll_after_pres_full[not_seen] = ll_after_pres[-1]
+        ll_without_pres_full[not_seen] = ll_without_pres[-1]
 
-    max_info_next_time_step = np.zeros(self.n_item)
+    max_info_next_time_step = np.zeros(n_item)
 
-    with Pool() as pool:
-        max_info_next_time_step[:] = \
-            pool.map(self.compute_max_info_time_step, self.items)
+    max_info_next_time_step[:] = np.zeros(n_item)
+    for i in range(n_item):
+        max_info_next_time_step[i] = \
+            compute_max_info_time_step(n_item, n_param_set, i,
+                               ll_without_pres_full,
+                               ll_after_pres_full,
+                               log_post)
 
-    self.mutual_info[:] = mutual_info + max_info_next_time_step
+    mi[:] = mi + max_info_next_time_step
 
 
-def compute_max_info_time_step(self, i):
-    ll_t_plus_one = np.zeros((self.n_item, self.n_param_set, 2))
+def compute_max_info_time_step(n_item, n_param_set, i,
+                               ll_without_pres_full,
+                               ll_after_pres_full,
+                               log_post
+                               ):
+    ll_t_plus_one = np.zeros((n_item, n_param_set, 2))
 
-    ll_t_plus_one[:] = self.ll_without_pres_full[:]
-    ll_t_plus_one[i] = self.ll_after_pres_full[i]
+    ll_t_plus_one[:] = ll_without_pres_full[:]
+    ll_t_plus_one[i] = ll_after_pres_full[i]
 
     mutual_info_t_plus_one_given_i = \
-        self._mutual_info(ll_t_plus_one,
-                          self.log_post)
+        mutual_info(ll_t_plus_one,
+                    log_post)
 
     return np.max(mutual_info_t_plus_one_given_i)
 
 
 # %%
 
-def post(log_post) -> np.ndarray:
-    """Posterior distributions of joint parameter space"""
-    return np.exp(log_post)
+# def post(log_post) -> np.ndarray:
+#     """Posterior distributions of joint parameter space"""
+#     return np.exp(log_post)
 
 
-def post_mean(post, grid_param) -> np.ndarray:
+def post_mean(log_post, grid_param) -> np.ndarray:
     """
     A vector of estimated means for the posterior distribution.
     Its length is ``n_param_set``.
     """
-    return np.dot(post, grid_param)
+    return np.dot(np.exp(log_post), grid_param)
 
 
-def post_cov(grid_param, post_mean, post) -> np.ndarray:
+def post_cov(grid_param, log_post) -> np.ndarray:
     """
     An estimated covariance matrix for the posterior distribution.
     Its shape is ``(num_grids, n_param_set)``.
     """
     # shape: (N_grids, N_param)
-    d = grid_param - post_mean
-    return np.dot(d.T, d * post.reshape(-1, 1))
+    d = grid_param - post_mean(log_post, grid_param)
+    return np.dot(d.T, d * np.exp(log_post).reshape(-1, 1))
 
 
-def post_sd(post_cov) -> np.ndarray:
+def post_sd(grid_param, log_post) -> np.ndarray:
     """
     A vector of estimated standard deviations for the posterior
     distribution. Its length is ``n_param_set``.
     """
-    return np.sqrt(np.diag(post_cov))
+    _post_cov = post_cov(grid_param, log_post)
+    return np.sqrt(np.diag(_post_cov))
 
 
 def update(log_post, log_lik, item, response):
