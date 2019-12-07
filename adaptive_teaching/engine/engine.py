@@ -79,7 +79,6 @@ class Engine:
         return log
 
     def _update_mutual_info(self):
-        from time import time
 
         n_seen = int(np.sum(self.learner.seen))
         n_not_seen = self.n_item - n_seen
@@ -113,7 +112,7 @@ class Engine:
         if n_not_seen:
             self.log_lik[not_seen] = log_lik[-1]
 
-        self.mutual_info[:] = self._mutual_info(
+        mutual_info = self._mutual_info(
             self.log_lik,
             self.log_post)
 
@@ -145,7 +144,6 @@ class Engine:
         self.ll_without_pres_full[seen] = ll_without_pres[:n_seen]
 
         if n_not_seen:
-            # print(f"hey! {ll_after_pres[-1]}, {ll_without_pres[-1]}")
             self.ll_after_pres_full[not_seen] = ll_after_pres[-1]
             self.ll_without_pres_full[not_seen] = ll_without_pres[-1]
 
@@ -155,7 +153,7 @@ class Engine:
             max_info_next_time_step[:] = \
                 pool.map(self._compute_max_info_time_step, self.items)
 
-        self.mutual_info += max_info_next_time_step
+        self.mutual_info[:] = mutual_info + max_info_next_time_step
 
     def _compute_max_info_time_step(self, i):
 
@@ -170,6 +168,31 @@ class Engine:
 
         return np.max(mutual_info_t_plus_one_given_i)
 
+    # def _update_mutual_info(self):
+    #
+    #     for i in range(self.n_item):
+    #         self.log_lik[i, :, :] = self._log_p(i)
+    #
+    #     self.mutual_info[:] = self._mutual_info(self.log_lik,
+    #                                             self.log_post)
+    #
+    #     log_lik_t_plus_one = np.zeros(self.log_lik.shape)
+    #
+    #     for i in range(self.n_item):
+    #
+    #         # Learn new item
+    #         self.learner.update(item=i, response=None)
+    #
+    #         log_lik_t_plus_one[i, :, :] = self._log_p(i)
+    #
+    #         # Unlearn item
+    #         self.learner.cancel_update()
+    #
+    #     mutual_info_t_plus_one_given_i = \
+    #         self._mutual_info(log_lik_t_plus_one,
+    #                           self.log_post)
+    #
+    #     self.mutual_info[:] += mutual_info_t_plus_one_given_i
 
     # def _update_mutual_info(self):
     #
@@ -179,23 +202,30 @@ class Engine:
     #     self.mutual_info[:] = self._mutual_info(self.log_lik,
     #                                             self.log_post)
     #
+    #     mutual_info = self.mutual_info.copy()
+    #
     #     for i in range(self.n_item):
     #
     #         # Learn new item
     #         self.learner.update(item=i, response=None)
     #
-    #         log_lik_t_plus_one = np.zeros((
-    #             self.n_item,
-    #             self.n_param_set,  # n_best,
-    #             2))
+    #         log_lik_t_plus_one = np.zeros(self.log_lik.shape)
     #
     #         for j in range(self.n_item):
     #             log_lik_t_plus_one[j, :, :] = self._log_p(j)
+    #             # if self.t > 0 and self.learner.seen[j]:
+    #             # print(f"t {self.t} i {i} j {j}")
     #
     #         mutual_info_t_plus_one_given_i = \
     #             self._mutual_info(log_lik_t_plus_one,
     #                               self.log_post)
     #
+    #         print(f"t {self.t} I t+1 109", mutual_info_t_plus_one_given_i[109])
+    #         print(f"t {self.t} I t+1 i", mutual_info_t_plus_one_given_i[i])
+    #         print(f"t {self.t} I t109 i", mutual_info[109])
+    #         print(f"t {self.t} I t0 i", mutual_info[i])
+    #
+    #         print(f"i {i}", self.items[mutual_info_t_plus_one_given_i==np.max(mutual_info_t_plus_one_given_i)])
     #         max_info_next_time_step = \
     #             np.max(mutual_info_t_plus_one_given_i)
     #
@@ -350,7 +380,7 @@ class Engine:
                 item = np.random.choice(
                     self.items[self.mutual_info == np.max(self.mutual_info)]
                 )
-                # print('selected item', item)
+                print(f'{self.t} - selected item {item}' + "="*10)
                 self.t += 1
                 return item
 
