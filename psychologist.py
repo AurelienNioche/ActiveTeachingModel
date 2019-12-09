@@ -212,13 +212,13 @@ def compute_expected_gain(grid_param, log_lik, log_post):
         for i in range(n_param):
             gain[i] += p * gain_resp[i]
 
-    for i in range(n_param):
-        _min = np.min(gain[i])
-        _max = np.max(gain[i])
-        if _max - _min > 0:
-            gain[i] = (gain[i] - _min) / (_max - _min)
-        else:
-            gain[i] = 0.5
+    # for i in range(n_param):
+    #     _min = np.min(gain[i])
+    #     _max = np.max(gain[i])
+    #     if _max - _min > 0:
+    #         gain[i] = (gain[i] - _min) / (_max - _min)
+    #     else:
+    #         gain[i] = 0.5
 
     return np.mean(gain)
 
