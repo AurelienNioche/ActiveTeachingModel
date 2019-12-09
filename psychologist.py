@@ -25,31 +25,27 @@ PSYCHOLOGIST = "Psychologist"
 
 # %%
 
-def p_grid(grid_param, i, seen, delta, n_pres_minus_one):
+def log_p_grid(grid_param, seen_i, delta_i, n_pres_minus_one_i):
+
     n_param_set = len(grid_param)
     p = np.zeros((n_param_set, 2))
 
-    i_has_been_seen = seen[i] == 1
-    if i_has_been_seen:
-        fr = grid_param[:, 0] \
-             * (1 - grid_param[:, 1]) ** n_pres_minus_one[i]
+    if seen_i:
+        fr = grid_param[:, 0] * (1 - grid_param[:, 1]) ** n_pres_minus_one_i
+
         assert np.all(fr >= 0), f"{fr[fr <= 0][0]}"
-        p[:, 1] = np.exp(
-            - fr
-            * delta[i])
+
+        p[:, 1] = np.exp(- fr * delta_i)
 
     p[:, 0] = 1 - p[:, 1]
-    return p
+    return np.log(p + EPS)
 
 
-def learner_p(item, param, n_pres_minus_one, delta, seen):
-    alpha, beta = param
-    _seen = seen[item] == 1
-    if _seen:
-        p = np.exp(
-            -alpha
-            * (1 - beta) ** n_pres_minus_one[item]
-            * delta[item])
+def learner_p(param, n_pres_minus_one_i, delta_i, seen_i):
+
+    if seen_i:
+        fr = param[0] * (1 - param[1]) ** n_pres_minus_one_i
+        p = np.exp(- fr * delta_i)
     else:
         p = 0
 
@@ -76,17 +72,18 @@ def compute_grid_param(grid_size, bounds):
 
 # %%
 
-def compute_log_lik(grid_param, seen, delta, n_pres_minus_one,
-                    items):
-    n_item = len(items)
+def compute_log_lik(grid_param, seen, delta, n_pres_minus_one):
+
+    n_item = len(seen)
     n_param_set = len(grid_param)
+
     log_lik = np.zeros((n_item, n_param_set, 2))
-    for i, item in enumerate(items):
-        log_lik[i, :, :] = np.log(
-            p_grid(grid_param=grid_param,
-                   i=i, seen=seen, delta=delta,
-                   n_pres_minus_one=n_pres_minus_one)
-            + EPS)
+
+    for i in range(n_item):
+        log_lik[i, :, :] = log_p_grid(
+            grid_param=grid_param,
+            seen_i=seen[i], delta_i=delta[i],
+            n_pres_minus_one_i=n_pres_minus_one[i])
 
     return log_lik
 
@@ -94,6 +91,7 @@ def compute_log_lik(grid_param, seen, delta, n_pres_minus_one,
 # %%
 
 def mutual_info_one_time_step(ll, lp):
+
     lp_reshaped = lp.reshape((1, len(lp), 1))
 
     # ll => likelihood
@@ -120,32 +118,15 @@ def mutual_info_one_time_step(ll, lp):
 
     # Calculate the mutual information. -----------
     # shape (n_item,)
-    mi = ent_mrg - ent_cond
-
-    return mi
+    return ent_mrg - ent_cond
 
 
 # %%
 
-def update_learner(delta, seen=None, n_pres_minus_one=None, item=None):
-    # Increment delta for all items
-    new_delta = delta + 1
-    new_seen = seen.copy()
-    new_n_pres_minus_one = n_pres_minus_one.copy()
-
-    # ...except the one for the selected design that equal one
-    if item is not None:
-        new_delta[item] = 1
-        new_seen[item] = 1
-        new_n_pres_minus_one[item] += 1
-
-    return new_delta, new_seen, new_n_pres_minus_one
-
-
-def compute_mutual_info(log_post, n_item, seen,
+def compute_mutual_info(log_post, log_lik, n_item, seen,
                         grid_param, delta, n_pres_minus_one):
-    n_param_set = len(grid_param)
 
+    n_param_set = len(grid_param)
     items = np.arange(n_item)
 
     n_seen = int(np.sum(seen))
@@ -155,109 +136,169 @@ def compute_mutual_info(log_post, n_item, seen,
 
     if n_seen == 0:
         return np.zeros(n_item)
+        # item_sample = np.array([0])
 
-    n_sample = min(n_seen + 1, n_item)
+    elif n_not_seen == 0:
+        item_sample = items[seen]
 
-    items_seen = items[seen]
+    else:
+        item_sample = np.hstack((items[seen], [items[not_seen][0], ]))
+
+    n_sample = len(item_sample)
+
+    mi_t = mutual_info_one_time_step(ll=log_lik, lp=log_post)
+
+    ll_pres_spl = np.zeros((n_sample, n_param_set, 2))
+    ll_non_pres_spl = np.zeros((n_sample, n_param_set, 2))
+
+    for i, item in enumerate(item_sample):
+
+        ll_pres_spl[i] = log_p_grid(
+            grid_param=grid_param,
+            seen_i=True,
+            n_pres_minus_one_i=n_pres_minus_one[item] + 1,
+            delta_i=1
+        )
+
+        ll_non_pres_spl[i] = log_p_grid(
+            grid_param=grid_param,
+            seen_i=seen[item],
+            n_pres_minus_one_i=n_pres_minus_one[item],
+            delta_i=delta[item] + 1
+        )
+
+    ll_pres_full = np.zeros(log_lik.shape)
+    ll_non_pres_full = np.zeros(log_lik.shape)
+
+    ll_pres_full[seen] = ll_pres_spl[:n_seen]
+    ll_non_pres_full[seen] = ll_non_pres_spl[:n_seen]
 
     if n_not_seen > 0:
-        item_not_seen = items[not_seen][0]
-        item_sample = list(items_seen) + [item_not_seen, ]
-    else:
-        item_sample = items_seen
-
-    log_lik_sample = compute_log_lik(
-        grid_param=grid_param,
-        seen=seen, delta=delta,
-        n_pres_minus_one=n_pres_minus_one,
-        items=item_sample)
-
-    log_lik = np.zeros((n_item, n_param_set, 2))
-
-    log_lik[seen] = log_lik_sample[:n_seen]
-    if n_not_seen:
-        log_lik[not_seen] = log_lik_sample[-1]
-
-    mi = mutual_info_one_time_step(log_lik, log_post)
-
-    ll_after_pres = np.zeros((n_sample, n_param_set, 2))
-
-    for i, item in enumerate(item_sample):
-        # for response in (0, 1):
-        new_delta, new_seen, new_n_pres_minus_one = \
-            update_learner(delta=delta, seen=seen,
-                           n_pres_minus_one=n_pres_minus_one,
-                           item=item)
-
-        ll_after_pres[i] += np.log(
-            p_grid(grid_param, i,
-                   new_seen, new_delta, new_n_pres_minus_one)
-            + EPS)
-
-    ll_without_pres = np.zeros((n_sample, n_param_set, 2))
-
-    # Go to the future
-    new_delta, new_seen, new_n_pres_minus_one = \
-        update_learner(delta=delta, seen=seen,
-                       n_pres_minus_one=n_pres_minus_one,
-                       item=None)
-
-    for i, item in enumerate(item_sample):
-        ll_without_pres[i] = np.log(
-            p_grid(grid_param, i,
-                   new_seen, new_delta, new_n_pres_minus_one)
-            + EPS)
-
-    ll_after_pres_full = np.zeros(log_lik.shape)
-    ll_without_pres_full = np.zeros(log_lik.shape)
-
-    ll_after_pres_full[seen] = ll_after_pres[:n_seen]
-
-    ll_without_pres_full[seen] = ll_without_pres[:n_seen]
-
-    if n_not_seen:
-        ll_after_pres_full[not_seen] = ll_after_pres[-1]
-        ll_without_pres_full[not_seen] = ll_without_pres[-1]
+        ll_pres_full[not_seen] = ll_pres_spl[-1]
+        ll_non_pres_full[not_seen] = ll_non_pres_spl[-1]
 
     max_info_next_time_step = np.zeros(n_item)
-
-    max_info_next_time_step[:] = np.zeros(n_item)
     for i in range(n_item):
-        max_info_next_time_step[i] = \
-            compute_max_info_time_step(
-                n_item, n_param_set, i,
-                ll_without_pres_full,
-                ll_after_pres_full,
-                log_post)
 
-    mi[:] = mi + max_info_next_time_step
+        ll_t_plus_one = np.zeros((n_item, n_param_set, 2))
+
+        ll_t_plus_one[:] = ll_non_pres_full[:]
+        ll_t_plus_one[i] = ll_pres_full[i]
+
+        mi_t_plus_one_given_i = \
+            mutual_info_one_time_step(ll=ll_t_plus_one, lp=log_post)
+
+        max_info_next_time_step[i] = np.max(mi_t_plus_one_given_i)
+
+    mi = np.zeros(n_item)
+    mi[:] = mi_t + max_info_next_time_step
     return mi
 
 
-def compute_max_info_time_step(n_item, n_param_set, i,
-                               ll_without_pres_full,
-                               ll_after_pres_full,
-                               log_post
-                               ):
-    ll_t_plus_one = np.zeros((n_item, n_param_set, 2))
+def compute_expected_gain(grid_param, log_lik, log_post,
+                          post_standard_deviation):
 
-    ll_t_plus_one[:] = ll_without_pres_full[:]
-    ll_t_plus_one[i] = ll_after_pres_full[i]
+    gain = 0
+    for response in (0, 1):
+        ll_item_response = log_lik[:, int(response)].flatten()
 
-    mutual_info_t_plus_one_given_i = \
-        mutual_info_one_time_step(ll_t_plus_one,
-                                  log_post)
+        new_log_post = log_post + ll_item_response
+        new_log_post -= logsumexp(new_log_post)
+        gain_resp = post_standard_deviation \
+            - post_sd(grid_param=grid_param,
+                      log_post=new_log_post)
 
-    return np.max(mutual_info_t_plus_one_given_i)
+        gain += np.sum(np.exp(ll_item_response + log_post) * gain_resp[1])
+
+    return gain
 
 
-def get_item(log_post, n_item, seen,
+def get_item(log_post, log_lik, n_item, seen,
              grid_param, delta, n_pres_minus_one):
-    mi = compute_mutual_info(log_post, n_item, seen,
-                             grid_param, delta, n_pres_minus_one)
+    # mi = compute_mutual_info(
+    #     log_post=log_post,
+    #     log_lik=log_lik,
+    #     n_item=n_item,
+    #     seen=seen,
+    #     grid_param=grid_param,
+    #     delta=delta,
+    #     n_pres_minus_one=n_pres_minus_one)
+
+    items = np.arange(n_item)
+
+    n_seen = int(np.sum(seen))
+    n_not_seen = n_item - n_seen
+
+    not_seen = np.logical_not(seen)
+
+    if n_seen == 0:
+        return np.random.randint(n_item)
+        # item_sample = np.array([0])
+
+    elif n_not_seen == 0:
+        item_sample = items[seen]
+
+    else:
+        item_sample = np.hstack((items[seen], [items[not_seen][0], ]))
+
+    n_sample = len(item_sample)
+
+    u_t = np.zeros(n_sample)
+
+    u_t_plus_one_if_presented = np.zeros(n_sample)
+
+    u_t_plus_one_if_skipped = np.zeros(n_sample)
+
+    post_standard_deviation = post_sd(grid_param=grid_param, log_post=log_post)
+
+    for i, item in enumerate(item_sample):
+
+        u_t[i] = compute_expected_gain(
+            grid_param=grid_param,
+            log_post=log_post,
+            post_standard_deviation=post_standard_deviation,
+            log_lik=log_lik[i]
+        )
+
+        ll_pres_i = log_p_grid(
+            grid_param=grid_param,
+            seen_i=True,
+            n_pres_minus_one_i=n_pres_minus_one[item] + 1,
+            delta_i=1
+        )
+
+        u_t_plus_one_if_presented[i] = compute_expected_gain(
+            grid_param=grid_param,
+            log_post=log_post,
+            post_standard_deviation=post_standard_deviation,
+            log_lik=ll_pres_i
+        )
+
+        ll_not_pres_i = log_p_grid(
+            grid_param=grid_param,
+            seen_i=seen[item],
+            n_pres_minus_one_i=n_pres_minus_one[item],
+            delta_i=delta[item] + 1
+        )
+
+        u_t_plus_one_if_skipped[i] = compute_expected_gain(
+            grid_param=grid_param,
+            log_post=log_post,
+            post_standard_deviation=post_standard_deviation,
+            log_lik=ll_not_pres_i
+        )
+
+    u = np.zeros(len(item_sample))
+
+    for i in range(n_sample):
+        max_u_skipped = np.max(u_t_plus_one_if_skipped[np.arange(n_sample)!=i])
+        # print(f"{i}/{n_sample-1}: u skipped {max_u_skipped}")
+        u_presented = u_t_plus_one_if_presented[i]
+        # print(f"{i}/{n_sample-1}: u present {u_presented}")
+        u[i] = u_t[i] + u_presented + max(u_presented, max_u_skipped)
 
     return np.random.choice(
-        np.arange(n_item)[mi[:] == np.max(mi)]
+        item_sample[u[:] == np.max(u)]
     )
 
 
@@ -277,7 +318,8 @@ def post_cov(grid_param, log_post) -> np.ndarray:
     Its shape is ``(num_grids, n_param_set)``.
     """
     # shape: (N_grids, N_param)
-    d = grid_param - post_mean(log_post, grid_param)
+    _post_mean = post_mean(log_post=log_post, grid_param=grid_param)
+    d = grid_param - _post_mean
     return np.dot(d.T, d * np.exp(log_post).reshape(-1, 1))
 
 
@@ -286,7 +328,7 @@ def post_sd(grid_param, log_post) -> np.ndarray:
     A vector of estimated standard deviations for the posterior
     distribution. Its length is ``n_param_set``.
     """
-    _post_cov = post_cov(grid_param, log_post)
+    _post_cov = post_cov(grid_param=grid_param, log_post=log_post)
     return np.sqrt(np.diag(_post_cov))
 
 
@@ -320,19 +362,12 @@ def run(n_trial, n_item, bounds, grid_size, param_labels, param, seed,
     p_seen = []
     fr_seen = []
 
-    hist_item = np.zeros(n_trial, dtype=int)
-    hist_success = np.zeros(n_trial, dtype=bool)
-
     n_seen = np.zeros(n_trial, dtype=int)
 
     grid_param = compute_grid_param(bounds=bounds, grid_size=grid_size)
     n_param_set = len(grid_param)
     lp = np.ones(n_param_set)
     log_post = lp - logsumexp(lp)
-
-    # Create learner and engine
-
-    np.random.seed(seed)
 
     delta = np.zeros(n_item, dtype=int)
     n_pres_minus_one = np.zeros(n_item, dtype=int)
@@ -343,43 +378,47 @@ def run(n_trial, n_item, bounds, grid_size, param_labels, param, seed,
     else:
         leitner_teacher = None
 
+    np.random.seed(seed)
     for t in tqdm(range(n_trial)):
 
         log_lik = compute_log_lik(grid_param=grid_param, seen=seen,
                                   delta=delta,
-                                  n_pres_minus_one=n_pres_minus_one,
-                                  items=np.arange(n_item))
+                                  n_pres_minus_one=n_pres_minus_one)
 
         if condition == PSYCHOLOGIST:
 
-            item = get_item(log_post, n_item, seen,
-                            grid_param, delta, n_pres_minus_one)
+            i = get_item(log_post=log_post,
+                         log_lik=log_lik,
+                         n_item=n_item, seen=seen,
+                         grid_param=grid_param,
+                         delta=delta,
+                         n_pres_minus_one=n_pres_minus_one)
         else:
-            item = leitner_teacher.ask()
+            i = leitner_teacher.ask()
 
-        p_recall = learner_p(item=item,
-                             param=param,
-                             delta=delta,
-                             n_pres_minus_one=n_pres_minus_one,
-                             seen=seen)
+        p_recall = learner_p(
+            param=param,
+            delta_i=delta[i],
+            n_pres_minus_one_i=n_pres_minus_one[i],
+            seen_i=seen[i])
 
         response = p_recall > np.random.random()
 
         if condition == LEITNER:
-            leitner_teacher.update(item=item, response=response)
+            leitner_teacher.update(item=i, response=response)
 
         # Update prior
-        log_post += log_lik[item, :, int(response)].flatten()
+        log_post += log_lik[i, :, int(response)].flatten()
         log_post -= logsumexp(log_post)
 
         # Make the user learn
         # Increment delta for all items
         delta += 1
         # ...except the one for the selected design that equal one
-        delta[item] = 1
-        seen[item] = 1
+        delta[i] = 1
+        seen[i] = 1
         if t > 0:
-            n_pres_minus_one[item] += 1
+            n_pres_minus_one[i] += 1
 
         # Compute post mean and std
         pm = post_mean(grid_param=grid_param, log_post=log_post)
@@ -396,16 +435,11 @@ def run(n_trial, n_item, bounds, grid_size, param_labels, param, seed,
                               n_pres_minus_one=n_pres_minus_one,
                               delta=delta)
 
-        p[seen, t] = p_seen_t
-
+        # Backup
         fr_seen.append(fr_seen_t)
         p_seen.append(p_seen_t)
-
-        # Backup history
+        p[seen, t] = p_seen_t
         n_seen[t] = np.sum(seen)
-
-        hist_item[t] = item
-        hist_success[t] = response
 
     return {
         N_SEEN: n_seen,
@@ -420,8 +454,8 @@ def run(n_trial, n_item, bounds, grid_size, param_labels, param, seed,
 def main():
 
     seed = 0
-    n_trial = 100
-    n_item = 100
+    n_trial = 500
+    n_item = 200
 
     grid_size = 20
 
@@ -453,7 +487,6 @@ def main():
 
     for cd in condition_labels:
         for dt in data_type:
-            print(results[cd].keys())
             d = results[cd][dt]
             data[dt][cd] = d
 
