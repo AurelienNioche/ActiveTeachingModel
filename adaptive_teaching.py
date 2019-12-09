@@ -139,7 +139,7 @@ def main():
         f".pdf"
 
     fig_name = f"param_recovery" + fig_ext
-    fig_parameter_recovery(param=param, design_types=labels,
+    fig_parameter_recovery(param=param, condition_labels=labels,
                            post_means=data[POST_MEAN], post_sds=data[POST_SD],
                            true_param=learner_param,
                            num_trial=task_param['n_trial'],
@@ -152,7 +152,7 @@ def main():
 
     fig_name = f"p_item" + fig_ext
     fig_p_recall_item(
-        p_recall=data[P], labels=labels,
+        p_recall=data[P], condition_labels=labels,
         fig_name=fig_name, fig_folder=FIG_FOLDER)
 
     fig_name = f"fr_seen" + fig_ext

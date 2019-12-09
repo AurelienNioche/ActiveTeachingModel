@@ -41,14 +41,15 @@ def fig_p_recall(data, labels, fig_name, fig_folder,
     save_fig(fig_folder=fig_folder, fig_name=fig_name)
 
 
-def fig_p_recall_item(p_recall, labels, fig_name, fig_folder):
+def fig_p_recall_item(p_recall, condition_labels, fig_name=None,
+                      fig_folder=None):
 
-    n_row = len(labels)
+    n_row = len(condition_labels)
     fig, axes = plt.subplots(nrows=n_row, figsize=(5, 4*n_row))
 
-    colors = [f'C{i}' for i in range(len(labels))]
+    colors = [f'C{i}' for i in range(len(condition_labels))]
 
-    for i, dt in enumerate(labels):
+    for i, dt in enumerate(condition_labels):
 
         ax = axes[i]
         color = colors[i]
@@ -77,5 +78,8 @@ def fig_p_recall_item(p_recall, labels, fig_name, fig_folder):
 
         ax.legend(loc='lower left')
 
-    save_fig(fig_folder=fig_folder, fig_name=fig_name)
+    if fig_folder is not None and fig_name is not None:
+        save_fig(fig_folder=fig_folder, fig_name=fig_name)
+    else:
+        plt.show()
 

@@ -191,7 +191,7 @@ class Leitner(GenericTeacher):
         self.taboo = new_question
         return new_question
 
-    def ask(self, best_param):
+    def ask(self, best_param=None):
 
         return self._get_next_node()
 

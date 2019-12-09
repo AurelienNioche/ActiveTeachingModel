@@ -1,23 +1,21 @@
-import os
-
 import matplotlib.pyplot as plt
 
 from utils.plot import save_fig
 
 
-def fig_parameter_recovery(param, design_types, post_means, post_sds,
+def fig_parameter_recovery(param, condition_labels, post_means, post_sds,
                            true_param,
-                           num_trial, fig_name, colors=None,
-                           fig_folder=os.path.join("fig", "adaptive")):
+                           num_trial, fig_name=None, colors=None,
+                           fig_folder=None):
 
     fig, axes = plt.subplots(ncols=len(param), figsize=(12, 6))
 
     if colors is None:
-        colors = [f'C{i}' for i in range(len(design_types))]
+        colors = [f'C{i}' for i in range(len(condition_labels))]
 
     for i, ax in enumerate(axes):
 
-        for j, dt in enumerate(design_types):
+        for j, dt in enumerate(condition_labels):
 
             pr = param[i]
 
@@ -38,4 +36,9 @@ def fig_parameter_recovery(param, design_types, post_means, post_sds,
             ax.set_ylabel(f"Value")
 
     plt.legend(loc='upper right')
-    save_fig(fig_folder=fig_folder, fig_name=fig_name)
+
+    if fig_name is not None and fig_folder is not None:
+        save_fig(fig_folder=fig_folder, fig_name=fig_name)
+
+    else:
+        plt.show()
