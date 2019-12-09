@@ -195,8 +195,7 @@ def compute_mutual_info(log_post, log_lik, n_item, seen,
     return mi
 
 
-def compute_expected_gain(grid_param, log_lik, log_post,
-                          post_standard_deviation):
+def compute_expected_gain(grid_param, log_lik, log_post):
 
     gain = 0
     for response in (0, 1):
@@ -204,11 +203,10 @@ def compute_expected_gain(grid_param, log_lik, log_post,
 
         new_log_post = log_post + ll_item_response
         new_log_post -= logsumexp(new_log_post)
-        gain_resp = post_standard_deviation \
-            - post_sd(grid_param=grid_param,
-                      log_post=new_log_post)
+        gain_resp = - post_sd(grid_param=grid_param,
+                              log_post=new_log_post)
 
-        gain += np.sum(np.exp(ll_item_response + log_post) * gain_resp[1])
+        gain += np.sum(np.exp(ll_item_response + log_post) * gain_resp[0])
 
     return gain
 
@@ -249,14 +247,11 @@ def get_item(log_post, log_lik, n_item, seen,
 
     u_t_plus_one_if_skipped = np.zeros(n_sample)
 
-    post_standard_deviation = post_sd(grid_param=grid_param, log_post=log_post)
-
     for i, item in enumerate(item_sample):
 
         u_t[i] = compute_expected_gain(
             grid_param=grid_param,
             log_post=log_post,
-            post_standard_deviation=post_standard_deviation,
             log_lik=log_lik[i]
         )
 
@@ -270,7 +265,6 @@ def get_item(log_post, log_lik, n_item, seen,
         u_t_plus_one_if_presented[i] = compute_expected_gain(
             grid_param=grid_param,
             log_post=log_post,
-            post_standard_deviation=post_standard_deviation,
             log_lik=ll_pres_i
         )
 
@@ -284,7 +278,6 @@ def get_item(log_post, log_lik, n_item, seen,
         u_t_plus_one_if_skipped[i] = compute_expected_gain(
             grid_param=grid_param,
             log_post=log_post,
-            post_standard_deviation=post_standard_deviation,
             log_lik=ll_not_pres_i
         )
 
@@ -295,7 +288,10 @@ def get_item(log_post, log_lik, n_item, seen,
         # print(f"{i}/{n_sample-1}: u skipped {max_u_skipped}")
         u_presented = u_t_plus_one_if_presented[i]
         # print(f"{i}/{n_sample-1}: u present {u_presented}")
-        u[i] = u_t[i] + u_presented + max(u_presented, max_u_skipped)
+        u[i] = u_t[i] + u_presented  #max(u_presented, max_u_skipped)
+
+    print(u_t)
+    print(u)
 
     return np.random.choice(
         item_sample[u[:] == np.max(u)]
@@ -455,7 +451,7 @@ def main():
 
     seed = 0
     n_trial = 500
-    n_item = 200
+    n_item = 20
 
     grid_size = 20
 
