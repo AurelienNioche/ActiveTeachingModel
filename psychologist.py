@@ -197,7 +197,8 @@ def compute_mutual_info(log_post, log_lik, n_item, seen,
 
 def compute_expected_gain(grid_param, log_lik, log_post):
 
-    gain = 0
+    n_param = grid_param.shape[1]
+    gain = np.zeros(n_param)
     for response in (0, 1):
         ll_item_response = log_lik[:, int(response)].flatten()
 
@@ -206,9 +207,20 @@ def compute_expected_gain(grid_param, log_lik, log_post):
         gain_resp = - post_sd(grid_param=grid_param,
                               log_post=new_log_post)
 
-        gain += np.sum(np.exp(ll_item_response + log_post) * gain_resp[0])
+        p = np.sum(np.exp(ll_item_response + log_post))
 
-    return gain
+        for i in range(n_param):
+            gain[i] += p * gain_resp[i]
+
+    for i in range(n_param):
+        _min = np.min(gain[i])
+        _max = np.max(gain[i])
+        if _max - _min > 0:
+            gain[i] = (gain[i] - _min) / (_max - _min)
+        else:
+            gain[i] = 0.5
+
+    return np.mean(gain)
 
 
 def get_item(log_post, log_lik, n_item, seen,
@@ -288,7 +300,7 @@ def get_item(log_post, log_lik, n_item, seen,
         # print(f"{i}/{n_sample-1}: u skipped {max_u_skipped}")
         u_presented = u_t_plus_one_if_presented[i]
         # print(f"{i}/{n_sample-1}: u present {u_presented}")
-        u[i] = u_t[i] + u_presented  #max(u_presented, max_u_skipped)
+        u[i] = u_t[i] + u_presented  # max(u_presented, max_u_skipped)
 
     print(u_t)
     print(u)
@@ -449,7 +461,7 @@ def run(n_trial, n_item, bounds, grid_size, param_labels, param, seed,
 
 def main():
 
-    seed = 0
+    seed = 3
     n_trial = 500
     n_item = 20
 
