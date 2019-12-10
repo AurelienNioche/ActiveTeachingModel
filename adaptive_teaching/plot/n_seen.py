@@ -1,11 +1,11 @@
 import matplotlib.pyplot as plt
-import numpy as np
+# import numpy as np
 
 from utils.plot import save_fig
 
 
 def fig_n_seen(
-        data, design_types, fig_name, fig_folder,
+        data, design_types, fig_name=None, fig_folder=None,
         y_label="N seen", colors=None):
 
     fig, ax = plt.subplots(figsize=(4, 4))
@@ -22,4 +22,7 @@ def fig_n_seen(
 
     plt.legend()
 
-    save_fig(fig_folder=fig_folder, fig_name=fig_name)
+    if fig_folder is not None and fig_name is not None:
+        save_fig(fig_folder=fig_folder, fig_name=fig_name)
+    else:
+        plt.show()

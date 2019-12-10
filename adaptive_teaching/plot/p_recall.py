@@ -4,7 +4,7 @@ import numpy as np
 from utils.plot import save_fig
 
 
-def fig_p_recall(data, labels, fig_name, fig_folder,
+def fig_p_recall(data, labels, fig_name=None, fig_folder=None,
                  y_label="Probability of recall", colors=None):
 
     fig, ax = plt.subplots(figsize=(5, 4))
@@ -38,7 +38,10 @@ def fig_p_recall(data, labels, fig_name, fig_folder,
 
     plt.legend(loc='lower left')
 
-    save_fig(fig_folder=fig_folder, fig_name=fig_name)
+    if fig_folder is not None and fig_name is not None:
+        save_fig(fig_folder=fig_folder, fig_name=fig_name)
+    else:
+        plt.show()
 
 
 def fig_p_recall_item(p_recall, condition_labels, fig_name=None,
@@ -82,4 +85,3 @@ def fig_p_recall_item(p_recall, condition_labels, fig_name=None,
         save_fig(fig_folder=fig_folder, fig_name=fig_name)
     else:
         plt.show()
-
