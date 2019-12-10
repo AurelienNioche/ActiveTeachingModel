@@ -97,7 +97,9 @@ def get_item(log_post,
                 grid_param=grid_param,
                 n_pres_i=n_pres[item] + 1,
                 n_success_i=n_success[item] + response,
-                delta_i=1)
+                delta_i=1,
+                i=item
+            )
 
             u_t_plus_one_if_pres_and_resp = compute_expected_gain(
                 log_post=log_post,
@@ -109,7 +111,9 @@ def get_item(log_post,
             grid_param=grid_param,
             n_pres_i=n_pres[item],
             n_success_i=n_success[item],
-            delta_i=delta[item] + 1)
+            delta_i=delta[item] + 1,
+            i=item
+        )
 
         u_t_plus_one_if_skipped[i] = compute_expected_gain(
             log_post=log_post,

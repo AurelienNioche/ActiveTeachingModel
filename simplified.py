@@ -55,7 +55,8 @@ def compute_log_lik(grid_param, delta, n_pres, n_success):
             grid_param=grid_param,
             delta_i=delta[i],
             n_pres_i=n_pres[i],
-            n_success_i=n_success[i]
+            n_success_i=n_success[i],
+            i=i
         )
 
     return log_lik
@@ -144,7 +145,7 @@ def run(n_trial, n_item, bounds, grid_size, param_labels, param, seed,
         elif condition == TEACHER:
 
             if t == 0:
-                return np.random.randint(n_item)
+                i = np.random.randint(n_item)
             else:
                 i = teacher.get_item(
                     n_pres=n_pres,
@@ -165,15 +166,16 @@ def run(n_trial, n_item, bounds, grid_size, param_labels, param, seed,
         elif condition == ADAPTIVE:
 
             if t == 0:
-                return np.random.randint(n_item)
+                i = np.random.randint(n_item)
+
             elif np.all([ps[i] < 0.10 * (bounds[i][1] - bounds[i][0])
                          for i in range(len(bounds))]):
                 i = teacher.get_item(
                     n_pres=n_pres,
                     n_success=n_success,
                     param=param,
-                    delta=delta
-                )
+                    delta=delta)
+
             else:
                 i = psychologist.get_item(
                     log_post=log_post,
@@ -194,7 +196,8 @@ def run(n_trial, n_item, bounds, grid_size, param_labels, param, seed,
             param=param,
             delta_i=delta[i],
             n_pres_i=n_pres[i],
-            n_success_i=n_success[i]
+            n_success_i=n_success[i],
+            i=i
         )
 
         response = p_recall > np.random.random()
@@ -249,19 +252,20 @@ def run(n_trial, n_item, bounds, grid_size, param_labels, param, seed,
 
 def main():
 
-    seed = 123
+    seed = 1234
     n_trial = 1000
-    n_item = 200
+    n_item = 30
 
     grid_size = 20
 
-    bounds = (0.00, 1.0), (-1.0, 1.0), (0.00, 1.0),
+    bounds = [(0.00, 1.0), ] * (n_item + 1)
 
-    param = 0.05, -0.2, 0.2
+    param = np.hstack((np.random.uniform(0, 0.5, n_item), [0.05, 0.2]))
 
     param_labels = "alpha", "beta", "gamma"
 
-    condition_labels = TEACHER, PSYCHOLOGIST, LEITNER
+    condition_labels = \
+        TEACHER, LEITNER  # ADAPTIVE
 
     results = {}
     for cd in condition_labels:
