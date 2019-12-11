@@ -264,7 +264,7 @@ def objective(results):
 
         if n_seen[t] == 100 and np.all(np.asarray(p_seen[t]) > 0.85):
             if c == 8:
-                return -n_trial
+                return -t
             else:
                 c += 1
 
@@ -292,7 +292,9 @@ def grid_exploration_objective(bounds, grid_size, **kwargs):
     obj = np.zeros(n_sets)
 
     # Loop over each value of the parameter grid for both parameters
-    for i in tqdm(range(n_sets)):
+    for i in range(n_sets):
+
+        print(f"Total progression: {i / n_sets * 100:.2f}%")
 
         # Select the parameter to use
         param_to_use = param_grid[i]
@@ -340,6 +342,7 @@ def main_comparative_advantage():
 
         phase_diagram(parameter_values=parameter_values,
                       param_names=param_labels,
+                      data=obj_values,
                       fig_folder=FIG_FOLDER,
                       fig_name=f'phase_diagram_{cd}.pdf')
 
