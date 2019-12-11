@@ -17,7 +17,7 @@ def get_item(n_pres, n_success, param, delta):
 
     fr_seen, pr_seen = learner_fr_p_seen(n_success, param, n_pres, delta)
     min_pr_seen = np.min(pr_seen)
-    if min_pr_seen < 0.90:
+    if min_pr_seen < 0.90 or n_seen == n_item:
         return np.random.choice(items[seen][pr_seen[:] == min_pr_seen])
     else:
         return np.random.choice(items[unseen])

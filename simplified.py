@@ -5,13 +5,11 @@ from itertools import product
 from scipy.special import logsumexp
 from tqdm import tqdm
 
-EPS = np.finfo(np.float).eps
+from utils.decorator import use_pickle
 
 from adaptive_teaching.constants import \
     POST_MEAN, POST_SD, \
     P, P_SEEN, FR_SEEN, N_SEEN
-
-FIG_FOLDER = os.path.join("fig", "adaptive")
 
 from adaptive_teaching.plot import \
     fig_parameter_recovery,  fig_p_recall_item, fig_p_recall, fig_n_seen
@@ -24,6 +22,9 @@ from adaptive_teaching.simplified.learner import log_p_grid, learner_p, \
 
 from adaptive_teaching.simplified import psychologist
 from adaptive_teaching.simplified import teacher
+
+EPS = np.finfo(np.float).eps
+FIG_FOLDER = os.path.join("fig", "adaptive")
 
 LEITNER = "Leitner"
 PSYCHOLOGIST = "Psychologist"
@@ -94,6 +95,7 @@ def post_sd(grid_param, log_post) -> np.ndarray:
 
 # %%
 
+@use_pickle
 def run(n_trial, n_item, bounds, grid_size, param_labels, param, seed,
         condition):
 
@@ -252,20 +254,25 @@ def run(n_trial, n_item, bounds, grid_size, param_labels, param, seed,
 
 def main():
 
-    seed = 1234
+    seed = 0
     n_trial = 1000
-    n_item = 30
+    n_item = 50
 
     grid_size = 20
 
-    bounds = [(0.00, 1.0), ] * (n_item + 1)
+    # bounds = [(0.00, 1.0), ] * (n_item + 1)
+    # param = np.hstack((np.random.uniform(0, 0.5, n_item), [0.05, 0.2]))
 
-    param = np.hstack((np.random.uniform(0, 0.5, n_item), [0.05, 0.2]))
+    param = 0.05, 0.2,
+    bounds = (0., 1.), (0., 1.), (0., 1.),
+    param_labels = "alpha", "beta",
 
-    param_labels = "alpha", "beta", "gamma"
+    # param = 0.05, 0, 0.2
+    # bounds = (0., 1.), (0., 1.), (0., 1.), (0., 1.)
+    # param_labels = "alpha", "beta", "gamma"
 
     condition_labels = \
-        TEACHER, LEITNER  # ADAPTIVE
+        TEACHER, LEITNER, ADAPTIVE
 
     results = {}
     for cd in condition_labels:
