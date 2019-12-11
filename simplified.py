@@ -252,76 +252,191 @@ def run(n_trial, n_item, bounds, grid_size, param_labels, param, seed,
     }
 
 
-def main():
+def objective(results):
 
-    seed = 0
+    p_seen = results[P_SEEN]
+    n_seen = results[N_SEEN]
+
+    n_trial = len(p_seen)
+
+    c = 0
+    for t in range(n_trial):
+
+        if n_seen[t] == 100 and np.all(np.asarray(p_seen[t]) > 0.85):
+            if c == 8:
+                return -n_trial
+            else:
+                c += 1
+
+    return 0
+
+
+def grid_exploration_objective(bounds, grid_size, **kwargs):
+
+    n_param = len(bounds)
+
+    parameter_values = np.atleast_2d([
+                np.linspace(
+                    *bounds[i],
+                    grid_size) for i in range(n_param)
+    ])
+
+    # Create a grid for each parameter
+    param_grid = np.asarray(list(
+            product(*parameter_values)
+        ))
+
+    n_sets = len(param_grid)
+
+    # Container for log-likelihood
+    obj = np.zeros(n_sets)
+
+    # Loop over each value of the parameter grid for both parameters
+    for i in tqdm(range(n_sets)):
+
+        # Select the parameter to use
+        param_to_use = param_grid[i]
+
+        # Call the objective function of the optimizer
+        obj[i] = objective(run(
+            bounds=bounds,
+            grid_size=grid_size,
+            param=param_to_use,
+            **kwargs
+        ))
+
+        print(param_to_use, obj[i])
+
+    return parameter_values, obj
+
+
+def main_comparative_advantage():
+
+    from adaptive_teaching.plot.comparison import phase_diagram
+
+    seed = 1
     n_trial = 1000
-    n_item = 50
+    n_item = 300
 
     grid_size = 20
 
-    # bounds = [(0.00, 1.0), ] * (n_item + 1)
-    # param = np.hstack((np.random.uniform(0, 0.5, n_item), [0.05, 0.2]))
-
-    param = 0.05, 0.2,
-    bounds = (0., 1.), (0., 1.), (0., 1.),
+    bounds = (0., 1.), (0., 1.),
     param_labels = "alpha", "beta",
 
-    # param = 0.05, 0, 0.2
-    # bounds = (0., 1.), (0., 1.), (0., 1.), (0., 1.)
-    # param_labels = "alpha", "beta", "gamma"
-
     condition_labels = \
-        TEACHER, LEITNER, ADAPTIVE
+        TEACHER, LEITNER  # , ADAPTIVE
 
-    results = {}
     for cd in condition_labels:
-        results[cd] = run(
+
+        parameter_values, obj_values = grid_exploration_objective(
             condition=cd,
             n_item=n_item,
             n_trial=n_trial,
             bounds=bounds,
             grid_size=grid_size,
             param_labels=param_labels,
-            param=param,
-            seed=seed)
+            seed=seed,
+        )
 
-    data_type = (POST_MEAN, POST_SD, P, P_SEEN, FR_SEEN, N_SEEN)
-    data = {dt: {} for dt in data_type}
+        phase_diagram(parameter_values=parameter_values,
+                      param_names=param_labels,
+                      fig_folder=FIG_FOLDER,
+                      fig_name=f'phase_diagram_{cd}.pdf')
 
-    for cd in condition_labels:
-        for dt in data_type:
-            d = results[cd][dt]
-            data[dt][cd] = d
 
-    fig_parameter_recovery(param=param_labels,
-                           condition_labels=condition_labels,
-                           post_means=data[POST_MEAN],
-                           post_sds=data[POST_SD],
-                           true_param={param_labels[i]: param[i]
-                                       for i in range(len(param))},
-                           num_trial=n_trial,
-                           fig_name=None,
-                           fig_folder=None)
+def main():
 
-    fig_p_recall_item(
-        p_recall=data[P], condition_labels=condition_labels,
-        fig_name=None, fig_folder=None)
+    seed = 1
+    n_trial = 1000
+    n_item = 300
 
-    fig_p_recall(data=data[P_SEEN], labels=condition_labels,
-                 fig_name=None, fig_folder=None)
+    grid_size = 20
 
-    fig_p_recall(
-        y_label="Forgetting rates",
-        data=data[FR_SEEN], labels=condition_labels,
-        fig_name=None, fig_folder=None)
+    # bounds = [(0.00, 1.0), ] * (n_item + 1)
+    # param = np.hstack((np.random.uniform(0, 0.5, n_item), [0.05, 0.2]))
 
-    fig_n_seen(
-        data=data[N_SEEN], design_types=condition_labels,
-        fig_name=None, fig_folder=None)
+    # param = 0.05, 0.2,
+    bounds = (0., 1.), (0., 1.),  # (0., 1.),
+    param_labels = "alpha", "beta",
+
+    # param = 0.05, 0, 0.2
+    # bounds = (0., 1.), (0., 1.), (0., 1.), (0., 1.)
+    # param_labels = "alpha", "beta", "gamma"
+
+    n_param = len(bounds)
+
+    condition_labels = \
+        TEACHER, LEITNER   # , ADAPTIVE
+
+    parameter_values = np.atleast_2d([
+                np.linspace(
+                    *bounds[i],
+                    grid_size) for i in range(n_param)
+    ])
+
+    # Create a grid for each parameter
+    param_grid = np.asarray(list(
+            product(*parameter_values)
+        ))
+
+    n_sets = len(param_grid)
+
+    for i in range(n_sets):
+
+        print(f"Total progression: {i/n_sets*100:.2f}%")
+        # Select the parameter to use
+        param = param_grid[i]
+
+        results = {}
+        for cd in condition_labels:
+            results[cd] = run(
+                condition=cd,
+                n_item=n_item,
+                n_trial=n_trial,
+                bounds=bounds,
+                grid_size=grid_size,
+                param_labels=param_labels,
+                param=param,
+                seed=seed)
+
+        data_type = (POST_MEAN, POST_SD, P, P_SEEN, FR_SEEN, N_SEEN)
+        data = {dt: {} for dt in data_type}
+
+        for cd in condition_labels:
+            for dt in data_type:
+                d = results[cd][dt]
+                data[dt][cd] = d
+
+        str_param = "_".join([f'{p:.2f}' for p in param])
+
+        fig_parameter_recovery(param=param_labels,
+                               condition_labels=condition_labels,
+                               post_means=data[POST_MEAN],
+                               post_sds=data[POST_SD],
+                               true_param={param_labels[i]: param[i]
+                                           for i in range(len(param))},
+                               num_trial=n_trial,
+                               fig_name=f'{str_param}_rc.pdf',
+                               fig_folder=FIG_FOLDER)
+
+        fig_p_recall_item(
+            p_recall=data[P], condition_labels=condition_labels,
+            fig_name=f'{str_param}_pi.pdf', fig_folder=FIG_FOLDER)
+
+        fig_p_recall(data=data[P_SEEN], labels=condition_labels,
+                     fig_name=f'{str_param}_p_.pdf', fig_folder=FIG_FOLDER)
+
+        fig_p_recall(
+            y_label="Forgetting rates",
+            data=data[FR_SEEN], labels=condition_labels,
+            fig_name=f'{str_param}_fr.pdf', fig_folder=FIG_FOLDER)
+
+        fig_n_seen(
+            data=data[N_SEEN], design_types=condition_labels,
+            fig_name=f'{str_param}_n_.pdf', fig_folder=FIG_FOLDER)
 
 
 # %%
 
 if __name__ == "__main__":
-    main()
+    main_comparative_advantage()

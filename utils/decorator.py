@@ -57,7 +57,9 @@ def use_pickle(func):
                                        for i in range(len(info[k]))]):
                             same = False
                             break
-
+                    except KeyError:
+                        same = False
+                        break
                 # ...if they are the sum, load from the associated datafile
                 if same:
                     data = load(file_name(f"{i}_data"))
