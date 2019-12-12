@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import matplotlib.cm as cm
 import numpy as np
 
 from utils.plot import save_fig
@@ -63,7 +64,9 @@ def phase_diagram(
         data,
         parameter_values,
         param_names,
-        n_levels=200,
+        vmin=None,
+        vmax=None,
+        n_levels=100,
         title=None,
         fig_folder=None,
         fig_name=None
@@ -91,19 +94,37 @@ def phase_diagram(
     # Get coordinates
     x_coordinates, y_coordinates = np.meshgrid(x, y)
 
-    # Draw phase diagram
-    c = ax.contourf(x_coordinates, y_coordinates, z,
-                    levels=n_levels, cmap='viridis')
+    if vmin is None:
+        vmin = np.min(z)
+    if vmax is None:
+        vmax = np.max(z)
 
+    levels = np.linspace(vmin, vmax, n_levels)
+    # print(levels)
+
+    # Draw phase diagram
+    c = ax.contourf(x_coordinates, y_coordinates, z, vmin=vmin, vmax=vmax,
+                    levels=levels, cmap='hot')
+
+    ax.set_aspect("equal")
     # ax.scatter(true_params[0], true_params[1], color='red')
 
-    # Square aspect
-    set_aspect_ratio(ax, 1)
+    # m = plt.cm.ScalarMappable(cmap=cm.get_cmap('viridis'))
+    # m.set_array(z)
+    # m.set_clim(0., 1000.)
+    #from mpl_toolkits.axes_grid1 import make_axes_locatable
+   #  divider = make_axes_locatable(ax)
+    #cax = divider.append_axes("right", size="5%", pad=0.05)
 
-    c_bar = fig.colorbar(c, ax=ax, aspect=20, shrink=0.635)
+    c_bar = fig.colorbar(c, ax=ax, boundaries=[vmin, vmax],
+                         ticks=np.linspace(vmin, vmax, 3),
+                         fraction=0.046, pad=0.04)
     c_bar.ax.set_ylabel('Objective value')
 
-    plt.tight_layout()
+    # Square aspect
+    # set_aspect_ratio(ax, 1)
+
+    # plt.tight_layout()
 
     if fig_folder is not None and fig_name is not None:
         save_fig(fig_folder=fig_folder, fig_name=fig_name)

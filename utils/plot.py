@@ -5,9 +5,10 @@ from matplotlib import pyplot as plt
 FIG_FOLDER = 'fig'
 
 
-def save_fig(fig_name, fig_folder=None, sub_folder=None):
+def save_fig(fig_name, fig_folder=None, sub_folder=None, tight_layout=True):
 
-    plt.tight_layout()
+    if tight_layout:
+        plt.tight_layout()
 
     if fig_folder is None:
         fig_folder = FIG_FOLDER

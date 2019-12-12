@@ -5,7 +5,7 @@ from utils.plot import save_fig
 
 def fig_parameter_recovery(param, condition_labels, post_means, post_sds,
                            true_param,
-                           num_trial, fig_name=None, colors=None,
+                           fig_name=None, colors=None,
                            fig_folder=None):
 
     fig, axes = plt.subplots(ncols=len(param), figsize=(12, 6))
@@ -27,7 +27,7 @@ def fig_parameter_recovery(param, condition_labels, post_means, post_sds,
                        alpha=.2)
 
             ax.plot(means, color=colors[j], label=dt)
-            ax.fill_between(range(num_trial),
+            ax.fill_between(range(len(means)),
                             means-stds,
                             means+stds, alpha=.2, color=colors[j])
 
