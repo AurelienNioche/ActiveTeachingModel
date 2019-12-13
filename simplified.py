@@ -5,8 +5,9 @@ from itertools import product
 from scipy.special import logsumexp
 from tqdm import tqdm
 
-from adaptive_teaching.simplified.compute import compute_grid_param, \
-    compute_log_lik, post_mean, post_sd
+from adaptive_teaching.simplified.compute import \
+    compute_grid_param, \
+    post_mean, post_sd
 from utils.decorator import use_pickle
 
 from adaptive_teaching.constants import \
@@ -18,8 +19,8 @@ from adaptive_teaching.plot import \
 
 from adaptive_teaching.teacher.leitner import Leitner
 
-from adaptive_teaching.simplified.learner import learner_p, \
-    learner_fr_p_seen
+from adaptive_teaching.simplified.learner import ExponentialForgetting, \
+    ActR
 
 
 from adaptive_teaching.simplified import psychologist
@@ -36,22 +37,20 @@ ADAPTIVE = "Adaptive"
 TEACHER = "Teacher"
 TEACHER_OMNISCIENT = "TeacherOmniscient"
 
+
 @use_pickle
-def run(n_trial, n_item, bounds, grid_size, param_labels, param, seed,
-        condition):
+def run(n_iteration, n_item, bounds, grid_size, param_labels, param, seed,
+        condition, learner):
 
-    post_means = {pr: np.zeros(n_trial) for pr in param_labels}
-    post_sds = {pr: np.zeros(n_trial) for pr in param_labels}
+    post_means = {pr: np.zeros(n_iteration) for pr in param_labels}
+    post_sds = {pr: np.zeros(n_iteration) for pr in param_labels}
 
-    p = np.zeros((n_item, n_trial))
-
-    hist = np.zeros(n_trial, dtype=int)
-    success = np.zeros(n_trial, dtype=bool)
+    p = np.zeros((n_item, n_iteration))
 
     p_seen = []
     fr_seen = []
 
-    n_seen = np.zeros(n_trial, dtype=int)
+    n_seen = np.zeros(n_iteration, dtype=int)
 
     grid_param = compute_grid_param(bounds=bounds, grid_size=grid_size)
     n_param_set = len(grid_param)
@@ -62,6 +61,10 @@ def run(n_trial, n_item, bounds, grid_size, param_labels, param, seed,
     n_pres = np.zeros(n_item, dtype=int)
     n_success = np.zeros(n_item, dtype=int)
 
+    timestamps = np.zeros(n_iteration)
+    hist = np.zeros(n_iteration, dtype=int)
+    success = np.zeros(n_iteration, dtype=bool)
+
     if condition == LEITNER:
         leitner = Leitner(task_param={'n_item': n_item})
     else:
@@ -70,12 +73,17 @@ def run(n_trial, n_item, bounds, grid_size, param_labels, param, seed,
     pm, ps = None, None
 
     np.random.seed(seed)
-    for t in tqdm(range(n_trial)):
+    for t in tqdm(range(n_iteration)):
 
-        log_lik = compute_log_lik(grid_param=grid_param,
-                                  delta=delta,
-                                  n_pres=n_pres,
-                                  n_success=n_success)
+        log_lik = learner.log_lik(
+            grid_param=grid_param,
+            delta=delta,
+            n_pres=n_pres,
+            n_success=n_success,
+            hist=hist,
+            timestamps=timestamps,
+            t=t
+        )
 
         if condition == PSYCHOLOGIST:
 
@@ -138,7 +146,7 @@ def run(n_trial, n_item, bounds, grid_size, param_labels, param, seed,
         else:
             raise ValueError("Condition not recognized")
 
-        p_recall = learner_p(
+        p_recall = learner.p(
             param=param,
             delta_i=delta[i],
             n_pres_i=n_pres[i],
@@ -174,7 +182,7 @@ def run(n_trial, n_item, bounds, grid_size, param_labels, param, seed,
 
         # Backup prob recall / forgetting rates
         fr_seen_t, p_seen_t = \
-            learner_fr_p_seen(n_pres=n_pres,
+            learner.fr_p_seen(n_pres=n_pres,
                               n_success=n_success,
                               param=param,
                               delta=delta)
@@ -337,21 +345,21 @@ def main_comparative_advantage():
 
 def main():
 
+    learner = ActR
+
     seed = 1
     n_item = 1000
 
     grid_size = 20
 
-    bounds = (0., 0.5), (0., 0.5),  # (0., 1.),
-    param_labels = "alpha", "beta",
-
     condition_labels = \
         TEACHER, LEITNER   # , ADAPTIVE
 
     # Select the parameter to use
-    param = 0.02, 0.2,
+    # param = 0.01, 0.5,
+    param = 0.01, 0.01, 0.06,
 
-    n_day = 365
+    n_day = 10
 
     results = {}
     for cd in condition_labels:
@@ -359,11 +367,11 @@ def main():
             condition=cd,
             n_item=n_item,
             n_day=n_day,
-            bounds=bounds,
             grid_size=grid_size,
-            param_labels=param_labels,
             param=param,
-            seed=seed)
+            seed=seed,
+            learner=learner,
+        )
 
     data_type = (POST_MEAN, POST_SD, P, P_SEEN, FR_SEEN, N_SEEN)
     data = {dt: {} for dt in data_type}
@@ -375,11 +383,11 @@ def main():
 
     str_param = "_".join([f'{p:.2f}' for p in param])
 
-    fig_parameter_recovery(param=param_labels,
+    fig_parameter_recovery(param=learner.param_labels,
                            condition_labels=condition_labels,
                            post_means=data[POST_MEAN],
                            post_sds=data[POST_SD],
-                           true_param={param_labels[i]: param[i]
+                           true_param={learner.param_labels[i]: param[i]
                                        for i in range(len(param))},
                            fig_name=f'{str_param}_rc.pdf',
                            fig_folder=FIG_FOLDER)

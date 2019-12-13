@@ -2,33 +2,12 @@ from itertools import product
 
 import numpy as np
 
-from adaptive_teaching.simplified.learner import log_p_grid
-
 
 def compute_grid_param(grid_size, bounds):
     return np.asarray(list(
         product(*[
             np.linspace(*b, grid_size)
             for b in bounds])))
-
-
-def compute_log_lik(grid_param, delta, n_pres, n_success):
-
-    n_item = len(n_pres)
-    n_param_set = len(grid_param)
-
-    log_lik = np.zeros((n_item, n_param_set, 2))
-
-    for i in range(n_item):
-        log_lik[i, :, :] = log_p_grid(
-            grid_param=grid_param,
-            delta_i=delta[i],
-            n_pres_i=n_pres[i],
-            n_success_i=n_success[i],
-            i=i
-        )
-
-    return log_lik
 
 
 def post_mean(log_post, grid_param) -> np.ndarray:

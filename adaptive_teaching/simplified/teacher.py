@@ -1,9 +1,7 @@
 import numpy as np
 
-from adaptive_teaching.simplified.learner import learner_fr_p_seen
 
-
-def get_item(n_pres, n_success, param, delta):
+def get_item(learner, n_pres, n_success, param, delta, hist, timestamps, t):
 
     n_item = len(n_pres)
     seen = n_pres[:] > 0
@@ -15,9 +13,13 @@ def get_item(n_pres, n_success, param, delta):
     if n_seen == 0:
         return np.random.randint(n_item)
 
-    fr_seen, pr_seen = learner_fr_p_seen(n_success, param, n_pres, delta)
+    pr_seen = learner.p_seen(n_success=n_success,
+                             param=param,
+                             n_pres=n_pres,
+                             delta=delta, hist=hist,
+                             timestamps=timestamps, t=t)
     min_pr_seen = np.min(pr_seen)
-    if min_pr_seen < 0.90 or n_seen == n_item:
+    if min_pr_seen is not None and (min_pr_seen < 0.90 or n_seen == n_item):
         return np.random.choice(items[seen][pr_seen[:] == min_pr_seen])
     else:
         return np.random.choice(items[unseen])

@@ -2,8 +2,6 @@ import numpy as np
 
 from scipy.special import logsumexp
 
-from adaptive_teaching.simplified.learner import log_p_grid
-
 # def compute_expected_gain(grid_param, log_lik, log_post, bounds):
 #
 #     n_param = grid_param.shape[1]
@@ -49,10 +47,14 @@ def compute_expected_gain(log_lik, log_post):
     return np.mean(gain)
 
 
-def get_item(log_post,
-             log_lik,
-             n_item,
-             grid_param, delta, n_pres, n_success):
+def get_item(
+        learner,
+        log_post,
+        log_lik,
+        n_item,
+        grid_param, delta, n_pres, n_success,
+        hist
+):
 
     items = np.arange(n_item)
     seen = n_pres[:] > 0
@@ -93,12 +95,13 @@ def get_item(log_post,
             p_resp = \
                 np.sum(np.exp(log_lik[item, :, response].flatten() + log_post))
 
-            ll_pres_i = log_p_grid(
+            ll_pres_i = learner.log_p_grid(
                 grid_param=grid_param,
                 n_pres_i=n_pres[item] + 1,
                 n_success_i=n_success[item] + response,
                 delta_i=1,
-                i=item
+                i=item,
+                hist=hist + [item, ]
             )
 
             u_t_plus_one_if_pres_and_resp = compute_expected_gain(
@@ -107,12 +110,13 @@ def get_item(log_post,
 
             u_t_plus_one_if_pres[i] += p_resp * u_t_plus_one_if_pres_and_resp
 
-        ll_not_pres_i = log_p_grid(
+        ll_not_pres_i = learner.log_p_grid(
             grid_param=grid_param,
             n_pres_i=n_pres[item],
             n_success_i=n_success[item],
             delta_i=delta[item] + 1,
-            i=item
+            i=item,
+            hist=hist + [-1, ]
         )
 
         u_t_plus_one_if_skipped[i] = compute_expected_gain(
