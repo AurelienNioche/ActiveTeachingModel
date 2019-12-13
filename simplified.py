@@ -342,16 +342,16 @@ def main():
 
     grid_size = 20
 
-    bounds = (0., 1.), (0., 1.),  # (0., 1.),
+    bounds = (0., 0.5), (0., 0.5),  # (0., 1.),
     param_labels = "alpha", "beta",
 
     condition_labels = \
         TEACHER, LEITNER   # , ADAPTIVE
 
     # Select the parameter to use
-    param = 0.05, 0.2,
+    param = 0.02, 0.2,
 
-    n_day = 10
+    n_day = 365
 
     results = {}
     for cd in condition_labels:
