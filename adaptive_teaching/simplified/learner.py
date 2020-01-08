@@ -18,7 +18,7 @@ class GenericLearner:
     @classmethod
     @abstractmethod
     def _log_p_grid(cls, grid_param, delta_i, n_pres_i, n_success_i, i,
-                   hist, timestamps, t):
+                    hist, timestamps, t):
         pass
 
     @classmethod
@@ -33,7 +33,6 @@ class GenericLearner:
         pass
 
     @classmethod
-    @abstractmethod
     def log_lik(cls,
                 grid_param, delta, n_pres, n_success, hist,
                 timestamps, t):
@@ -60,7 +59,7 @@ class GenericLearner:
 
 class ExponentialForgetting(GenericLearner):
 
-    bounds = (0., 0.25), (0., 0.25),
+    bounds = (0., 0.25), (0., 0.50),
     param_labels = "alpha", "beta"
 
     def __init__(self):
@@ -68,7 +67,7 @@ class ExponentialForgetting(GenericLearner):
 
     @classmethod
     def _log_p_grid(cls, grid_param, delta_i, n_pres_i, n_success_i, i,
-                   hist, timestamps, t):
+                    hist, timestamps, t):
 
         n_param_set, n_param = grid_param.shape
         p = np.zeros((n_param_set, 2))
@@ -81,18 +80,7 @@ class ExponentialForgetting(GenericLearner):
 
         else:
 
-            if n_param == 2:
-                fr = grid_param[:, 0] * (1 - grid_param[:, 1]) ** (n_pres_i-1)
-
-            elif n_param == 3:
-                if n_pres_i == 1:
-                    fr = grid_param[:, 0]
-                else:
-                    fr = grid_param[:, 0] \
-                        * (1 - grid_param[:, 1]) ** (n_pres_i - n_success_i - 1) \
-                        * (1 - grid_param[:, 2]) ** n_success_i
-            else:
-                fr = grid_param[:, i] * (1 - grid_param[: -1]) ** (n_pres_i - 1)
+            fr = grid_param[:, 0] * (1 - grid_param[:, 1]) ** (n_pres_i-1)
 
             p[:, 1] = np.exp(- fr * delta_i)
 
@@ -102,19 +90,9 @@ class ExponentialForgetting(GenericLearner):
     @classmethod
     def p(cls, param, n_pres_i, delta_i, n_success_i, i, hist, timestamps, t):
 
-        n_param = len(param)
-
         if n_pres_i:
 
-            if n_param == 2:
-                fr = param[0] * (1 - param[1]) ** (n_pres_i - 1)
-
-            elif n_param == 3:
-                fr = param[0] \
-                    * (1 - param[1]) ** (n_pres_i - n_success_i - 1) \
-                    * (1 - param[2]) ** n_success_i
-            else:
-                fr = param[i] * (1 - param[-1]) ** (n_pres_i - 1)
+            fr = param[0] * (1 - param[1]) ** (n_pres_i - 1)
 
             p = np.exp(- fr * delta_i)
 
@@ -126,21 +104,80 @@ class ExponentialForgetting(GenericLearner):
     @classmethod
     def fr_p_seen(cls, n_success, param, n_pres, delta):
 
-        n_param = len(param)
+        seen = n_pres[:] > 0
+
+        fr = param[0] * (1 - param[1]) ** (n_pres[seen] - 1)
+
+        p = np.exp(-fr * delta[seen])
+        return fr, p
+
+    @classmethod
+    def p_seen(cls, param, n_pres, delta, n_success, hist,
+               timestamps, t):
+
+        return cls.fr_p_seen(n_success=n_success,
+                             param=param, n_pres=n_pres, delta=delta)[1]
+
+
+class ExponentialForgettingAsymmetric(GenericLearner):
+
+    bounds = (0., 0.25), (0., 0.50), (0., 0.50),
+    param_labels = "alpha", "beta_minus", "beta_plus"
+
+    def __init__(self):
+        super().__init__()
+
+    @classmethod
+    def _log_p_grid(cls, grid_param, delta_i, n_pres_i, n_success_i, i,
+                    hist, timestamps, t):
+
+        n_param_set, n_param = grid_param.shape
+        p = np.zeros((n_param_set, 2))
+
+        if n_pres_i == 0:
+            pass
+
+        elif delta_i == 0:
+            p[:, 1] = 1
+
+        else:
+
+            if n_pres_i == 1:
+                fr = grid_param[:, 0]
+            else:
+                fr = grid_param[:, 0] \
+                    * (1 - grid_param[:, 1]) ** (n_pres_i - n_success_i - 1) \
+                    * (1 - grid_param[:, 2]) ** n_success_i
+
+            p[:, 1] = np.exp(- fr * delta_i)
+
+        p[:, 0] = 1 - p[:, 1]
+        return np.log(p + EPS)
+
+    @classmethod
+    def p(cls, param, n_pres_i, delta_i, n_success_i, i, hist, timestamps, t):
+
+        if n_pres_i:
+
+            fr = param[0] \
+                * (1 - param[1]) ** (n_pres_i - n_success_i - 1) \
+                * (1 - param[2]) ** n_success_i
+
+            p = np.exp(- fr * delta_i)
+
+        else:
+            p = 0
+
+        return p
+
+    @classmethod
+    def fr_p_seen(cls, n_success, param, n_pres, delta):
 
         seen = n_pres[:] > 0
 
-        if n_param == 2:
-            fr = param[0] * (1 - param[1]) ** (n_pres[seen] - 1)
-
-        elif n_param == 3:
-            fr = param[0] \
-                 * (1 - param[1]) ** (n_pres[seen] - n_success[seen] - 1) \
-                 * (1 - param[2]) ** n_success[seen]
-        else:
-
-            fr = param[np.arange(len(seen))[seen]] \
-                 * (1 - param[-1]) ** (n_pres[seen] - 1)
+        fr = param[0] \
+            * (1 - param[1]) ** (n_pres[seen] - n_success[seen] - 1) \
+            * (1 - param[2]) ** n_success[seen]
 
         p = np.exp(-fr * delta[seen])
         return fr, p
@@ -251,3 +288,100 @@ class ActR(GenericLearner):
                 hist=hist,
                 timestamps=timestamps,
                 t=t)
+
+        return p
+
+#
+# class ExponentialForgetting(GenericLearner):
+#
+#     bounds = (0., 0.25), (0., 0.25),
+#     param_labels = "alpha", "beta"
+#
+#     def __init__(self):
+#         super().__init__()
+#
+#     @classmethod
+#     def _log_p_grid(cls, grid_param, delta_i, n_pres_i, n_success_i, i,
+#                     hist, timestamps, t):
+#
+#         n_param_set, n_param = grid_param.shape
+#         p = np.zeros((n_param_set, 2))
+#
+#         if n_pres_i == 0:
+#             pass
+#
+#         elif delta_i == 0:
+#             p[:, 1] = 1
+#
+#         else:
+#
+#             if n_param == 2:
+#                 fr = grid_param[:, 0] * (1 - grid_param[:, 1]) ** (n_pres_i-1)
+#
+#             elif n_param == 3:
+#                 if n_pres_i == 1:
+#                     fr = grid_param[:, 0]
+#                 else:
+#                     fr = grid_param[:, 0] \
+#                         * (1 - grid_param[:, 1]) ** (n_pres_i - n_success_i - 1) \
+#                         * (1 - grid_param[:, 2]) ** n_success_i
+#             else:
+#                 fr = grid_param[:, i] * (1 - grid_param[: -1]) ** (n_pres_i - 1)
+#
+#             p[:, 1] = np.exp(- fr * delta_i)
+#
+#         p[:, 0] = 1 - p[:, 1]
+#         return np.log(p + EPS)
+#
+#     @classmethod
+#     def p(cls, param, n_pres_i, delta_i, n_success_i, i, hist, timestamps, t):
+#
+#         n_param = len(param)
+#
+#         if n_pres_i:
+#
+#             if n_param == 2:
+#                 fr = param[0] * (1 - param[1]) ** (n_pres_i - 1)
+#
+#             elif n_param == 3:
+#                 fr = param[0] \
+#                     * (1 - param[1]) ** (n_pres_i - n_success_i - 1) \
+#                     * (1 - param[2]) ** n_success_i
+#             else:
+#                 fr = param[i] * (1 - param[-1]) ** (n_pres_i - 1)
+#
+#             p = np.exp(- fr * delta_i)
+#
+#         else:
+#             p = 0
+#
+#         return p
+#
+#     @classmethod
+#     def fr_p_seen(cls, n_success, param, n_pres, delta):
+#
+#         n_param = len(param)
+#
+#         seen = n_pres[:] > 0
+#
+#         if n_param == 2:
+#             fr = param[0] * (1 - param[1]) ** (n_pres[seen] - 1)
+#
+#         elif n_param == 3:
+#             fr = param[0] \
+#                  * (1 - param[1]) ** (n_pres[seen] - n_success[seen] - 1) \
+#                  * (1 - param[2]) ** n_success[seen]
+#         else:
+#
+#             fr = param[np.arange(len(seen))[seen]] \
+#                  * (1 - param[-1]) ** (n_pres[seen] - 1)
+#
+#         p = np.exp(-fr * delta[seen])
+#         return fr, p
+#
+#     @classmethod
+#     def p_seen(cls, param, n_pres, delta, n_success, hist,
+#                timestamps, t):
+#
+#         return cls.fr_p_seen(n_success=n_success,
+#                              param=param, n_pres=n_pres, delta=delta)[1]

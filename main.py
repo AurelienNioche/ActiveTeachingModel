@@ -20,7 +20,9 @@ from adaptive_teaching.plot import \
 from adaptive_teaching.teacher.leitner import Leitner
 
 from adaptive_teaching.simplified.learner import ExponentialForgetting, \
-    ActR
+    ActR, ExponentialForgettingAsymmetric
+
+from adaptive_teaching.plot.comparison import phase_diagram
 
 
 from adaptive_teaching.simplified import psychologist
@@ -61,9 +63,9 @@ def run(n_iteration, n_item, bounds, grid_size, param_labels, param, seed,
     n_pres = np.zeros(n_item, dtype=int)
     n_success = np.zeros(n_item, dtype=int)
 
-    timestamps = np.zeros(n_iteration)
-    hist = np.zeros(n_iteration, dtype=int)
-    success = np.zeros(n_iteration, dtype=bool)
+    timestamps = np.full(n_iteration, -1)
+    hist = np.full(n_iteration, -1, dtype=int)
+    success = np.full(n_iteration, -1, dtype=bool)
 
     if condition == LEITNER:
         leitner = Leitner(task_param={'n_item': n_item})
@@ -105,7 +107,11 @@ def run(n_iteration, n_item, bounds, grid_size, param_labels, param, seed,
                     n_pres=n_pres,
                     n_success=n_success,
                     param=pm,
-                    delta=delta
+                    delta=delta,
+                    learner=learner,
+                    hist=hist,
+                    timestamps=timestamps,
+                    t=t
                 )
 
         elif condition == TEACHER_OMNISCIENT:
@@ -151,7 +157,10 @@ def run(n_iteration, n_item, bounds, grid_size, param_labels, param, seed,
             delta_i=delta[i],
             n_pres_i=n_pres[i],
             n_success_i=n_success[i],
-            i=i
+            i=i,
+            hist=hist,
+            timestamps=timestamps,
+            t=t,
         )
 
         response = p_recall > np.random.random()
@@ -195,6 +204,7 @@ def run(n_iteration, n_item, bounds, grid_size, param_labels, param, seed,
         n_seen[t] = np.sum(seen)
         success[t] = int(response)
         hist[t] = i
+        timestamps[t] = t
 
     return {
         N_SEEN: n_seen,
@@ -278,15 +288,14 @@ def grid_exploration_objective(
 
 def main_comparative_advantage():
 
-    from adaptive_teaching.plot.comparison import phase_diagram
-
     seed = 1
-    n_trial = 1000
+    n_iteration = 1000
     n_item = 300
 
     grid_size = 20
 
-    bounds = (0., 1.), (0., 1.),
+    learner = ExponentialForgetting
+    bounds = (0.001, 0.04), (0.2, 0.5),
     param_labels = "alpha", "beta",
 
     condition_labels = \
@@ -305,11 +314,12 @@ def main_comparative_advantage():
     for cd in condition_labels:
 
         obj_values[cd] = grid_exploration_objective(
+            learner=learner,
             objective_function=objective,
             parameter_values=parameter_values,
             condition=cd,
             n_item=n_item,
-            n_trial=n_trial,
+            n_iteration=n_iteration,
             bounds=bounds,
             grid_size=grid_size,
             param_labels=param_labels,
@@ -343,9 +353,7 @@ def main_comparative_advantage():
     #               fig_name=f'phase_diagram_leitner_better.pdf')
 
 
-def main():
-
-    learner = ActR
+def scenario_based():
 
     seed = 1
     n_item = 1000
@@ -355,9 +363,11 @@ def main():
     condition_labels = \
         TEACHER, LEITNER   # , ADAPTIVE
 
+    learner = ExponentialForgettingAsymmetric
+
     # Select the parameter to use
-    # param = 0.01, 0.5,
-    param = 0.01, 0.01, 0.06,
+    param = 0.02, 0.22, 0.44,
+    # param = 0.01, 0.01, 0.06,
 
     n_day = 10
 
@@ -381,7 +391,7 @@ def main():
             d = results[cd][dt]
             data[dt][cd] = d
 
-    str_param = "_".join([f'{p:.2f}' for p in param])
+    str_param = learner.__name__ + "_" + "_".join([f'{p:.2f}' for p in param])
 
     fig_parameter_recovery(param=learner.param_labels,
                            condition_labels=condition_labels,
@@ -412,4 +422,4 @@ def main():
 # %%
 
 if __name__ == "__main__":
-    main()
+    main_comparative_advantage()
