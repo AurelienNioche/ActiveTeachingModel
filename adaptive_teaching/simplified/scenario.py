@@ -93,7 +93,10 @@ def run_n_days(
                 grid_param=grid_param,
                 delta=delta,
                 n_pres=n_pres,
-                n_success=n_success)
+                n_success=n_success,
+                hist=hist,
+                learner=learner
+            )
 
         elif condition == TEACHER:
 
@@ -154,7 +157,6 @@ def run_n_days(
                     n_success=n_success,
                     hist=hist,
                     learner=learner,
-                    timestamps=timestamps
                 )
 
         elif condition == LEITNER:

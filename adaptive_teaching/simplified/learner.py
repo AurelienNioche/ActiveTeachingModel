@@ -183,8 +183,8 @@ class ActR(GenericLearner):
 
             time_presentation = timestamps[(hist[:] == i).nonzero()[0]]
 
-            time_elapsed = n_pres_i - time_presentation
-            print('time_elapsed', time_elapsed)
+            time_elapsed = t - time_presentation
+            # print('time_elapsed', time_elapsed)
 
             # Presentation effect
             pe = np.zeros((n_pres_i, n_param_set))
@@ -197,12 +197,13 @@ class ActR(GenericLearner):
             # Sigmoid
             x = (grid_param[:, 1] - a) / (grid_param[:, 2] * np.square(2))
 
-            small = x[:] < -10 ** 2 # 1 / (1+exp(-1000)) equals approx 1.
+            small = x[:] < -10 ** 2  # 1 / (1+exp(-1000)) equals approx 1.
 
-            big = x[:] > 700 # 1 / (1+exp(700)) equals approx 0.
+            big = x[:] > 700  # 1 / (1+exp(700)) equals approx 0.
 
             neither_small_or_big = np.logical_not(small + big)
-            p[neither_small_or_big, 1] = 1 / (1 + np.exp(x[neither_small_or_big]))
+            p[neither_small_or_big, 1] = \
+                1 / (1 + np.exp(x[neither_small_or_big]))
             p[small, 1] = 1
             p[big, 1] = 0
 
