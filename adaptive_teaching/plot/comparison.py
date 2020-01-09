@@ -66,7 +66,7 @@ def phase_diagram(
         param_names,
         vmin=None,
         vmax=None,
-        n_levels=100,
+        n_levels=10,
         title=None,
         fig_folder=None,
         fig_name=None
@@ -98,28 +98,37 @@ def phase_diagram(
         vmin = np.min(z)
     if vmax is None:
         vmax = np.max(z)
-
+    print(vmin, vmax)
     levels = np.linspace(vmin, vmax, n_levels)
+    # else:
+    #     levels = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120,
+    #               130, 140, 150, 160]
     # print(levels)
 
-    # Draw phase diagram
-    c = ax.contourf(x_coordinates, y_coordinates, z, vmin=vmin, vmax=vmax,
-                    levels=levels, cmap='hot')
+    try:
 
-    ax.set_aspect("equal")
-    # ax.scatter(true_params[0], true_params[1], color='red')
 
-    # m = plt.cm.ScalarMappable(cmap=cm.get_cmap('viridis'))
-    # m.set_array(z)
-    # m.set_clim(0., 1000.)
-    #from mpl_toolkits.axes_grid1 import make_axes_locatable
-   #  divider = make_axes_locatable(ax)
-    #cax = divider.append_axes("right", size="5%", pad=0.05)
+        # Draw phase diagram
+        c = ax.contourf(x_coordinates, y_coordinates, z, vmin=vmin, vmax=vmax,
+                        levels=levels, cmap='hot')
 
-    c_bar = fig.colorbar(c, ax=ax, boundaries=[vmin, vmax],
-                         ticks=np.linspace(vmin, vmax, 3),
-                         fraction=0.046, pad=0.04)
-    c_bar.ax.set_ylabel('Objective value')
+        ax.set_aspect(0.1)
+        # ax.scatter(true_params[0], true_params[1], color='red')
+
+        # m = plt.cm.ScalarMappable(cmap=cm.get_cmap('viridis'))
+        # m.set_array(z)
+        # m.set_clim(0., 1000.)
+        # from mpl_toolkits.axes_grid1 import make_axes_locatable
+        #  divider = make_axes_locatable(ax)
+        # cax = divider.append_axes("right", size="5%", pad=0.05)
+
+        c_bar = fig.colorbar(c, ax=ax, boundaries=[vmin, vmax],
+                             ticks=levels,
+                             fraction=0.046, pad=0.04)
+        c_bar.ax.set_ylabel('Objective value')
+
+    except Exception:
+        pass
 
     # Square aspect
     # set_aspect_ratio(ax, 1)

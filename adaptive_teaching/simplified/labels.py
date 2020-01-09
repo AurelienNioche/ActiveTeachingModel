@@ -1,0 +1,5 @@
+LEITNER = "Leitner"
+PSYCHOLOGIST = "Psychologist"
+ADAPTIVE = "Adaptive"
+TEACHER = "Teacher"
+TEACHER_OMNISCIENT = "TeacherOmniscient"

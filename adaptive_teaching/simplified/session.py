@@ -1,60 +1,25 @@
-# %%
-import os
 import numpy as np
-
 from scipy.special import logsumexp
 from tqdm import tqdm
 
-from utils.decorator import use_pickle
-
-from adaptive_teaching.constants import \
-    POST_MEAN, POST_SD, \
-    P, P_SEEN, FR_SEEN, N_SEEN, HIST, SUCCESS
-
+from adaptive_teaching.constants import N_SEEN, P, P_SEEN, FR_SEEN, POST_MEAN, \
+    POST_SD, HIST, SUCCESS
+from adaptive_teaching.simplified import psychologist, teacher
+from adaptive_teaching.simplified.compute import compute_grid_param, post_mean, \
+    post_sd
 from adaptive_teaching.teacher.leitner import Leitner
-
-
-from adaptive_teaching.simplified.compute import compute_grid_param, \
-    post_mean, post_sd
-
-from adaptive_teaching.simplified import psychologist
-from adaptive_teaching.simplified import teacher
-
-EPS = np.finfo(np.float).eps
-FIG_FOLDER = os.path.join("fig", "scenario")
-
-LEITNER = "Leitner"
-PSYCHOLOGIST = "Psychologist"
-ADAPTIVE = "Adaptive"
-TEACHER = "Teacher"
-TEACHER_OMNISCIENT = "TeacherOmniscient"
+from . labels import LEITNER, PSYCHOLOGIST, TEACHER, TEACHER_OMNISCIENT, ADAPTIVE
+from utils.decorator import use_pickle
 
 
 @use_pickle
-def run_n_days(
-        learner,
-        n_day, n_item, grid_size, param, seed,
-        condition, n_iter_session=150, sec_per_iter=2, bounds=None,
-        param_labels=None
-):
-
-    if bounds is None:
-        bounds = learner.bounds
-
-    if param_labels is None:
-        param_labels = learner.param_labels
-
-    n_iter_break = int((60**2 * 24) / sec_per_iter - n_iter_session)
-    n_iteration = n_iter_session*n_day
+def run(n_iteration, n_item, bounds, grid_size, param_labels, param, seed,
+        condition, learner):
 
     post_means = {pr: np.zeros(n_iteration) for pr in param_labels}
     post_sds = {pr: np.zeros(n_iteration) for pr in param_labels}
 
     p = np.zeros((n_item, n_iteration))
-
-    hist = np.zeros(n_iteration, dtype=int)
-    success = np.zeros(n_iteration, dtype=bool)
-    timestamps = np.zeros(n_iteration)
 
     p_seen = []
     fr_seen = []
@@ -70,6 +35,10 @@ def run_n_days(
     n_pres = np.zeros(n_item, dtype=int)
     n_success = np.zeros(n_item, dtype=int)
 
+    timestamps = np.full(n_iteration, -1)
+    hist = np.full(n_iteration, -1, dtype=int)
+    success = np.full(n_iteration, -1, dtype=bool)
+
     if condition == LEITNER:
         leitner = Leitner(task_param={'n_item': n_item})
     else:
@@ -78,19 +47,17 @@ def run_n_days(
     pm, ps = None, None
 
     np.random.seed(seed)
+    for t in tqdm(range(n_iteration)):
 
-    c_iter_session = 0
-    t = 0
-
-    for it in tqdm(range(n_iteration)):
-
-        log_lik = learner.log_lik(grid_param=grid_param,
-                                  delta=delta,
-                                  n_pres=n_pres,
-                                  n_success=n_success,
-                                  hist=hist,
-                                  timestamps=timestamps,
-                                  t=t)
+        log_lik = learner.log_lik(
+            grid_param=grid_param,
+            delta=delta,
+            n_pres=n_pres,
+            n_success=n_success,
+            hist=hist,
+            timestamps=timestamps,
+            t=t
+        )
 
         if condition == PSYCHOLOGIST:
 
@@ -101,10 +68,7 @@ def run_n_days(
                 grid_param=grid_param,
                 delta=delta,
                 n_pres=n_pres,
-                n_success=n_success,
-                hist=hist,
-                learner=learner
-            )
+                n_success=n_success)
 
         elif condition == TEACHER:
 
@@ -116,8 +80,8 @@ def run_n_days(
                     n_success=n_success,
                     param=pm,
                     delta=delta,
-                    hist=hist,
                     learner=learner,
+                    hist=hist,
                     timestamps=timestamps,
                     t=t
                 )
@@ -128,11 +92,7 @@ def run_n_days(
                 n_pres=n_pres,
                 n_success=n_success,
                 param=param,
-                delta=delta,
-                hist=hist,
-                learner=learner,
-                timestamps=timestamps,
-                t=t
+                delta=delta
             )
 
         elif condition == ADAPTIVE:
@@ -140,19 +100,13 @@ def run_n_days(
             if t == 0:
                 i = np.random.randint(n_item)
 
-            elif np.all([ps[i] < 0.10 *
-                         (bounds[i][1] - bounds[i][0])
+            elif np.all([ps[i] < 0.10 * (bounds[i][1] - bounds[i][0])
                          for i in range(len(bounds))]):
                 i = teacher.get_item(
                     n_pres=n_pres,
                     n_success=n_success,
                     param=param,
-                    delta=delta,
-                    hist=hist,
-                    learner=learner,
-                    timestamps=timestamps,
-                    t=t
-                )
+                    delta=delta)
 
             else:
                 i = psychologist.get_item(
@@ -162,10 +116,7 @@ def run_n_days(
                     grid_param=grid_param,
                     delta=delta,
                     n_pres=n_pres,
-                    n_success=n_success,
-                    hist=hist,
-                    learner=learner,
-                )
+                    n_success=n_success)
 
         elif condition == LEITNER:
             i = leitner.ask()
@@ -181,7 +132,7 @@ def run_n_days(
             i=i,
             hist=hist,
             timestamps=timestamps,
-            t=t
+            t=t,
         )
 
         response = p_recall > np.random.random()
@@ -193,18 +144,13 @@ def run_n_days(
         log_post += log_lik[i, :, int(response)].flatten()
         log_post -= logsumexp(log_post)
 
-        timestamps[it] = t
-        hist[it] = i
-
         # Make the user learn
         # Increment delta for all items
-        delta[:] += 1
+        delta += 1
         # ...except the one for the selected design that equal one
         delta[i] = 1
         n_pres[i] += 1
         n_success[i] += int(response)
-
-        t += 1
 
         # Compute post mean and std
         pm = post_mean(grid_param=grid_param, log_post=log_post)
@@ -212,42 +158,25 @@ def run_n_days(
 
         # Backup the mean/std of post dist
         for i, pr in enumerate(param_labels):
-            post_means[pr][it] = pm[i]
-            post_sds[pr][it] = ps[i]
+            post_means[pr][t] = pm[i]
+            post_sds[pr][t] = ps[i]
 
         # Backup prob recall / forgetting rates
-        if hasattr(learner, 'fr_p_seen'):
-            fr_seen_t, p_seen_t = \
-                learner.fr_p_seen(
-                    n_pres=n_pres,
-                    n_success=n_success,
-                    param=param,
-                    delta=delta)
-        else:
-            p_seen_t = learner.p_seen(
-                n_pres=n_pres,
-                n_success=n_success,
-                param=param,
-                delta=delta,
-                hist=hist,
-                timestamps=timestamps,
-                t=t
-            )
-
-            fr_seen_t = []
+        fr_seen_t, p_seen_t = \
+            learner.fr_p_seen(n_pres=n_pres,
+                              n_success=n_success,
+                              param=param,
+                              delta=delta)
 
         # Backup
         seen = n_pres[:] > 0
         fr_seen.append(fr_seen_t)
         p_seen.append(p_seen_t)
-        p[seen, it] = p_seen_t
-        n_seen[it] = np.sum(seen)
-        success[it] = int(response)
-
-        c_iter_session += 1
-        if c_iter_session >= n_iter_session:
-            delta[:] += n_iter_break
-            t += n_iter_break
+        p[seen, t] = p_seen_t
+        n_seen[t] = np.sum(seen)
+        success[t] = int(response)
+        hist[t] = i
+        timestamps[t] = t
 
     return {
         N_SEEN: n_seen,
@@ -259,5 +188,3 @@ def run_n_days(
         HIST: hist,
         SUCCESS: success
     }
-
-
