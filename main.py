@@ -23,6 +23,10 @@ from adaptive_teaching.simplified.labels \
     import LEITNER, PSYCHOLOGIST, ADAPTIVE, TEACHER, TEACHER_OMNISCIENT
 
 
+def truncate_10(x):
+    return int(x/10) * 10
+
+
 def objective(results,):
     p_seen = results[P_SEEN]
     return np.sum(p_seen[-1][:] > 0.80)
@@ -137,16 +141,20 @@ def main_comparative_advantage():
                       param_names=param_labels,
                       data=data,
                       fig_folder=FIG_FOLDER,
-                      fig_name=f'phase_diagram_{cd}.pdf')
+                      fig_name=f'phase_diagram_{cd}.pdf',
+                      levels=np.linspace(np.min(data), np.max(data), 10))
 
-    data = (obj_values[TEACHER] - obj_values[LEITNER]) / obj_values[LEITNER] * 100
+    data = \
+        (obj_values[TEACHER] - obj_values[LEITNER]) / obj_values[LEITNER] * 100
     # data[data[:] < 0] = 0
 
     phase_diagram(parameter_values=parameter_values,
                   param_names=param_labels,
                   data=data,
                   fig_folder=FIG_FOLDER,
-                  fig_name=f'phase_diagram_teacher_better.pdf')
+                  fig_name=f'phase_diagram_teacher_better.pdf',
+                  levels=np.linspace(truncate_10(np.min(data)),
+                                     np.max(data)+10, 10))
 
     # data = obj_values[TEACHER]-obj_values[LEITNER]
     # data[data[:] < 0] = 0
@@ -200,7 +208,7 @@ def main_comparative_advantage_n_days():
 
     seed = 1
     n_iter_session = 150
-    n_day = 10
+    n_day = 20
     n_item = 1000
 
     grid_size = 20
@@ -244,16 +252,20 @@ def main_comparative_advantage_n_days():
                       param_names=param_labels,
                       data=data,
                       fig_folder=FIG_FOLDER,
-                      fig_name=f'phase_diagram_{cd}.pdf')
+                      fig_name=f'phase_diagram_{cd}.pdf',
+                      levels=np.linspace(np.min(data), np.max(data), 10))
 
-    data = (obj_values[TEACHER] - obj_values[LEITNER]) / obj_values[LEITNER] * 100
+    data = \
+        (obj_values[TEACHER] - obj_values[LEITNER]) / obj_values[LEITNER] * 100
     # data[data[:] < 0] = 0
-
+    # print(np.min(data))
     phase_diagram(parameter_values=parameter_values,
                   param_names=param_labels,
                   data=data,
                   fig_folder=FIG_FOLDER,
-                  fig_name=f'phase_diagram_teacher_better.pdf')
+                  fig_name=f'phase_diagram_teacher_better.pdf',
+                  levels=np.arange(0,
+                                     np.max(data) + 10, 10))
 
     # data = obj_values[TEACHER]-obj_values[LEITNER]
     # data[data[:] < 0] = 0

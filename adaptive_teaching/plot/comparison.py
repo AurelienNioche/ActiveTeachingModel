@@ -66,7 +66,7 @@ def phase_diagram(
         param_names,
         vmin=None,
         vmax=None,
-        n_levels=10,
+        levels=10,
         title=None,
         fig_folder=None,
         fig_name=None
@@ -94,19 +94,18 @@ def phase_diagram(
     # Get coordinates
     x_coordinates, y_coordinates = np.meshgrid(x, y)
 
-    if vmin is None:
-        vmin = np.min(z)
-    if vmax is None:
-        vmax = np.max(z)
-    print(vmin, vmax)
-    levels = np.linspace(vmin, vmax, n_levels)
+    # if vmin is None:
+    #     vmin = np.min(z)
+    # if vmax is None:
+    #     vmax = np.max(z)
+    # print(vmin, vmax)
+    # levels = np.linspace(vmin, vmax, n_levels)
     # else:
     #     levels = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120,
     #               130, 140, 150, 160]
     # print(levels)
 
     try:
-
 
         # Draw phase diagram
         c = ax.contourf(x_coordinates, y_coordinates, z, vmin=vmin, vmax=vmax,
