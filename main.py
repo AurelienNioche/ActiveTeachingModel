@@ -206,9 +206,9 @@ def grid_exploration_objective_n_days(
 
 def main_comparative_advantage_n_days():
 
-    seed = 1
+    seed = 2
     n_iter_session = 150
-    n_day = 20
+    n_day = 30
     n_item = 1000
 
     grid_size = 20
@@ -246,14 +246,14 @@ def main_comparative_advantage_n_days():
             seed=seed,
         )
 
-        data = obj_values[cd]
+        # data = obj_values[cd]
 
-        phase_diagram(parameter_values=parameter_values,
-                      param_names=param_labels,
-                      data=data,
-                      fig_folder=FIG_FOLDER,
-                      fig_name=f'phase_diagram_{cd}.pdf',
-                      levels=np.linspace(np.min(data), np.max(data), 10))
+        # phase_diagram(parameter_values=parameter_values,
+        #               param_names=param_labels,
+        #               data=data,
+        #               fig_folder=FIG_FOLDER,
+        #               fig_name=f'phase_diagram_{cd}.pdf',
+        #               levels=np.linspace(np.min(data), np.max(data), 10))
 
     data = \
         (obj_values[TEACHER] - obj_values[LEITNER]) / obj_values[LEITNER] * 100
@@ -263,9 +263,10 @@ def main_comparative_advantage_n_days():
                   param_names=param_labels,
                   data=data,
                   fig_folder=FIG_FOLDER,
-                  fig_name=f'phase_diagram_teacher_better.pdf',
+                  fig_name=
+                  f'phase_diagram_teacher_better_{n_day}days_seed{seed}.pdf',
                   levels=np.arange(0,
-                                     np.max(data) + 10, 10))
+                                   np.max(data) + 10, 10))
 
     # data = obj_values[TEACHER]-obj_values[LEITNER]
     # data[data[:] < 0] = 0

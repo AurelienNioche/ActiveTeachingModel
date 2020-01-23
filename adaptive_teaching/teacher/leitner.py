@@ -78,12 +78,10 @@ class Leitner(GenericTeacher):
 
         Suppose there exist no due item then pick all items except taboo.
         """
-        result = np.where(self.wait_time_arr > 0)
-        arr = result[0]
-        if len(arr) == 0:
-            complete_arr = np.arange(self.n_item)
-            arr = np.delete(complete_arr, self.taboo)
-        return arr
+        result = np.where(self.wait_time_arr > 0)[0]
+        if len(result) == 0:
+            result = np.delete(np.arange(self.n_item), self.taboo)
+        return result
 
     def _find_due_seen_items(self, due_items):
         """
