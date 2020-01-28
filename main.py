@@ -14,6 +14,7 @@ from adaptive_teaching.simplified.learner import ExponentialForgetting
 
 from adaptive_teaching.plot.comparison import phase_diagram
 from adaptive_teaching.simplified.scenario import run_n_days
+from adaptive_teaching.plot.correlation import fig_correlation
 
 EPS = np.finfo(np.float).eps
 FIG_FOLDER = os.path.join("fig", "scenario")
@@ -257,6 +258,33 @@ def main_comparative_advantage_n_days():
 
     data = \
         (obj_values[TEACHER] - obj_values[LEITNER]) / obj_values[LEITNER] * 100
+
+    print(data.shape)
+    print(parameter_values.shape)
+
+    parameter_values_array = np.asarray(list(
+            product(*parameter_values)
+        ))
+
+    print(parameter_values_array.shape)
+
+    coord_alpha_x, coord_beta_x = parameter_values_array.T
+
+    print(coord_beta_x.shape)
+    # for i, (alpha, beta) in enumerate(parameter_values_array):
+    #
+    #     coord_alpha_x.append(alpha)
+    #     coord
+    #     coord_y.append(data[i])
+
+    fig_correlation(coord_alpha_x, data,
+                    fig_folder=FIG_FOLDER,
+                    fig_name=f'alpha_corr_{n_day}days_seed{seed}.pdf')
+    fig_correlation(coord_beta_x, data,
+                    fig_folder=FIG_FOLDER,
+                    fig_name=f'beta_corr_{n_day}days_seed{seed}.pdf')
+
+
     # data[data[:] < 0] = 0
     # print(np.min(data))
     phase_diagram(parameter_values=parameter_values,
