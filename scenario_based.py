@@ -61,14 +61,14 @@ def scenario_based():
         p_recall=data[P], condition_labels=condition_labels,
         fig_name=f'{str_param}_pi.pdf', fig_folder=FIG_FOLDER)
 
-    fig_p_recall(data=data[P_SEEN], labels=condition_labels,
+    fig_p_recall(data=data[P_SEEN], condition_labels=condition_labels,
                  fig_name=f'{str_param}_p_.pdf', fig_folder=FIG_FOLDER)
 
     fig_p_recall(
         y_label="Forgetting rates",
-        data=data[FR_SEEN], labels=condition_labels,
+        data=data[FR_SEEN], condition_labels=condition_labels,
         fig_name=f'{str_param}_fr.pdf', fig_folder=FIG_FOLDER)
 
     fig_n_seen(
-        data=data[N_SEEN], design_types=condition_labels,
+        data=data[N_SEEN], condition_labels=condition_labels,
         fig_name=f'{str_param}_n_.pdf', fig_folder=FIG_FOLDER)

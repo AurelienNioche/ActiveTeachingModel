@@ -9,7 +9,7 @@ from utils.decorator import use_pickle
 
 from adaptive_teaching.constants import \
     POST_MEAN, POST_SD, \
-    P, P_SEEN, FR_SEEN, N_SEEN, HIST, SUCCESS
+    P, P_SEEN, FR_SEEN, N_SEEN, HIST, SUCCESS, TIMESTAMP
 
 from adaptive_teaching.teacher.leitner import Leitner
 
@@ -35,7 +35,8 @@ def run_n_days(
         learner,
         n_day, n_item, grid_size, param, seed,
         condition, n_iter_session=150, sec_per_iter=2, bounds=None,
-        param_labels=None
+        param_labels=None,
+        using_multiprocessing=False,
 ):
 
     if bounds is None:
@@ -54,9 +55,10 @@ def run_n_days(
 
     hist = np.zeros(n_iteration, dtype=int)
     success = np.zeros(n_iteration, dtype=bool)
-    timestamps = np.zeros(n_iteration)
+    timestamp = np.zeros(n_iteration)
 
     p_seen = []
+
     fr_seen = []
 
     n_seen = np.zeros(n_iteration, dtype=int)
@@ -82,14 +84,19 @@ def run_n_days(
     c_iter_session = 0
     t = 0
 
-    for it in tqdm(range(n_iteration)):
+    if using_multiprocessing:
+        iterator = range(n_iteration)
+    else:
+        iterator = tqdm(range(n_iteration))
+
+    for it in iterator:
 
         log_lik = learner.log_lik(grid_param=grid_param,
                                   delta=delta,
                                   n_pres=n_pres,
                                   n_success=n_success,
                                   hist=hist,
-                                  timestamps=timestamps,
+                                  timestamps=timestamp,
                                   t=t)
 
         if condition == PSYCHOLOGIST:
@@ -118,7 +125,7 @@ def run_n_days(
                     delta=delta,
                     hist=hist,
                     learner=learner,
-                    timestamps=timestamps,
+                    timestamps=timestamp,
                     t=t
                 )
 
@@ -131,7 +138,7 @@ def run_n_days(
                 delta=delta,
                 hist=hist,
                 learner=learner,
-                timestamps=timestamps,
+                timestamps=timestamp,
                 t=t
             )
 
@@ -150,7 +157,7 @@ def run_n_days(
                     delta=delta,
                     hist=hist,
                     learner=learner,
-                    timestamps=timestamps,
+                    timestamps=timestamp,
                     t=t
                 )
 
@@ -180,7 +187,7 @@ def run_n_days(
             n_success_i=n_success[i],
             i=i,
             hist=hist,
-            timestamps=timestamps,
+            timestamps=timestamp,
             t=t
         )
 
@@ -193,7 +200,7 @@ def run_n_days(
         log_post += log_lik[i, :, int(response)].flatten()
         log_post -= logsumexp(log_post)
 
-        timestamps[it] = t
+        timestamp[it] = t
         hist[it] = i
 
         # Make the user learn
@@ -230,7 +237,7 @@ def run_n_days(
                 param=param,
                 delta=delta,
                 hist=hist,
-                timestamps=timestamps,
+                timestamps=timestamp,
                 t=t
             )
 
@@ -248,6 +255,7 @@ def run_n_days(
         if c_iter_session >= n_iter_session:
             delta[:] += n_iter_break
             t += n_iter_break
+            c_iter_session = 0
 
     return {
         N_SEEN: n_seen,
@@ -257,7 +265,8 @@ def run_n_days(
         POST_MEAN: post_means,
         POST_SD: post_sds,
         HIST: hist,
-        SUCCESS: success
+        SUCCESS: success,
+        TIMESTAMP: timestamp
     }
 
 

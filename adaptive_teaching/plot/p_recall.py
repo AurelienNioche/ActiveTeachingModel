@@ -4,15 +4,15 @@ import numpy as np
 from utils.plot import save_fig
 
 
-def fig_p_recall(data, labels, fig_name=None, fig_folder=None,
+def fig_p_recall(data, condition_labels, fig_name=None, fig_folder=None,
                  y_label="Probability of recall", colors=None):
 
     fig, ax = plt.subplots(figsize=(5, 4))
 
     if colors is None:
-        colors = [f'C{i}' for i in range(len(labels))]
+        colors = [f'C{i}' for i in range(len(condition_labels))]
 
-    for i, lb in enumerate(labels):
+    for i, lb in enumerate(condition_labels):
 
         if isinstance(data[lb], list):
             n_trial = len(data[lb])

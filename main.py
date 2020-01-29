@@ -3,12 +3,11 @@ import os
 import numpy as np
 from itertools import product
 from tqdm import tqdm
+from multiprocessing import Pool
+from p_tqdm import p_map
 
 from adaptive_teaching.simplified.session import run
 from utils.decorator import use_pickle
-
-from adaptive_teaching.constants import \
-    P_SEEN
 
 from adaptive_teaching.simplified.learner import ExponentialForgetting
 
@@ -16,12 +15,21 @@ from adaptive_teaching.plot.comparison import phase_diagram
 from adaptive_teaching.simplified.scenario import run_n_days
 from adaptive_teaching.plot.correlation import fig_correlation
 
+from adaptive_teaching.plot import fig_parameter_recovery, \
+    fig_p_recall, fig_p_recall_item, fig_n_seen
+
+from utils.string import dic2string
+
+from adaptive_teaching.constants import \
+    POST_MEAN, POST_SD, \
+    P, P_SEEN, FR_SEEN, N_SEEN, HIST, TIMESTAMP
+
 EPS = np.finfo(np.float).eps
 FIG_FOLDER = os.path.join("fig", "scenario")
 
 
 from adaptive_teaching.simplified.labels \
-    import LEITNER, PSYCHOLOGIST, ADAPTIVE, TEACHER, TEACHER_OMNISCIENT
+    import LEITNER, TEACHER
 
 
 def truncate_10(x):
@@ -167,9 +175,12 @@ def main_comparative_advantage():
     #               fig_name=f'phase_diagram_leitner_better.pdf')
 
 
+def _objective_n_days(kwargs):
+    return objective(run_n_days(**kwargs))
+
+
 @use_pickle
 def grid_exploration_objective_n_days(
-        objective_function,
         parameter_values,
         bounds, grid_size, **kwargs):
 
@@ -181,28 +192,40 @@ def grid_exploration_objective_n_days(
     n_sets = len(param_grid)
 
     # Container for log-likelihood
-    obj = np.zeros(n_sets)
+    # obj = np.zeros(n_sets)
 
-    # Loop over each value of the parameter grid for both parameters
-    # for i in range(n_sets):
-    for i in tqdm(range(n_sets)):
+    kwargs_list = [{
+        **kwargs,
+        **{
+            "bounds": bounds,
+            "grid_size": grid_size,
+            "param": param_grid[i],
+            "using_multiprocessing": True
+        }
+    } for i in range(n_sets)]
 
-        # print(f"Total progression: {i / n_sets * 100:.2f}%")
+    obj = p_map(_objective_n_days, kwargs_list)
 
-        # Select the parameter to use
-        param_to_use = param_grid[i]
+    # # Loop over each value of the parameter grid for both parameters
+    # # for i in range(n_sets):
+    # for i in tqdm(range(n_sets)):
+    #
+    #     # print(f"Total progression: {i / n_sets * 100:.2f}%")
+    #
+    #     # Select the parameter to use
+    #     param_to_use = param_grid[i]
+    #
+    #     # Call the objective function of the optimizer
+    #     obj[i] = objective_function(run_n_days(
+    #         bounds=bounds,
+    #         grid_size=grid_size,
+    #         param=param_grid[i],
+    #         **kwargs
+    #     ))
+    #
+    #     # print(param_to_use, obj[i])
 
-        # Call the objective function of the optimizer
-        obj[i] = objective_function(run_n_days(
-            bounds=bounds,
-            grid_size=grid_size,
-            param=param_to_use,
-            **kwargs
-        ))
-
-        # print(param_to_use, obj[i])
-
-    return obj
+    return np.asarray(obj)
 
 
 def main_comparative_advantage_n_days():
@@ -235,7 +258,6 @@ def main_comparative_advantage_n_days():
 
         obj_values[cd] = grid_exploration_objective_n_days(
             learner=learner,
-            objective_function=objective,
             parameter_values=parameter_values,
             condition=cd,
             n_item=n_item,
@@ -278,9 +300,13 @@ def main_comparative_advantage_n_days():
     #     coord_y.append(data[i])
 
     fig_correlation(coord_alpha_x, data,
+                    x_label=r"$\alpha",
+                    y_label="Improvement (%)",
                     fig_folder=FIG_FOLDER,
                     fig_name=f'alpha_corr_{n_day}days_seed{seed}.pdf')
     fig_correlation(coord_beta_x, data,
+                    x_label=r"$\beta$",
+                    y_label="Improvement (%)",
                     fig_folder=FIG_FOLDER,
                     fig_name=f'beta_corr_{n_day}days_seed{seed}.pdf')
 
@@ -306,7 +332,99 @@ def main_comparative_advantage_n_days():
     #               fig_name=f'phase_diagram_leitner_better.pdf')
 
 
-# %%
+def _run_n_days(kwargs):
+    return run_n_days(**kwargs)
+
+
+def main_single(produce_figures=False):
+
+    param = (0.02, 0.2)
+
+    seed = 2
+    n_iter_session = 150
+    sec_per_iter = 2
+    n_day = 30
+    n_item = 1000
+
+    grid_size = 20
+
+    learner = ExponentialForgetting
+    bounds = (0.001, 0.04), (0.2, 0.5),
+    param_labels = "alpha", "beta",
+
+    condition_labels = \
+        TEACHER, LEITNER
+
+    kwargs_list = [{
+        "learner": learner,
+        "n_day": n_day,
+        "n_item": n_item,
+        "grid_size": grid_size,
+        "param": param,
+        "seed": seed,
+        "condition": cd,
+        "n_iter_session": n_iter_session,
+        "sec_per_iter": sec_per_iter,
+        "bounds": bounds,
+        "param_labels": param_labels
+    } for cd in condition_labels]
+
+    results = Pool(processes=os.cpu_count()).map(_run_n_days, kwargs_list)
+
+    data_type = (POST_MEAN, POST_SD, P, P_SEEN, FR_SEEN, N_SEEN, HIST)
+    data = {dt: {} for dt in data_type}
+
+    for i, cd in enumerate(condition_labels):
+        for dt in data_type:
+            d = results[i][dt]
+            data[dt][cd] = d
+
+    if produce_figures:
+        fig_ext = \
+            "_" \
+            f"{learner.__name__}_" \
+            f"{dic2string(param)}_" \
+            f".pdf"
+
+        fig_name = f"param_recovery" + fig_ext
+        fig_parameter_recovery(param_labels=param_labels,
+                               condition_labels=condition_labels,
+                               post_means=data[POST_MEAN],
+                               post_sds=data[POST_SD],
+                               true_param=param,
+                               fig_name=fig_name,
+                               fig_folder=FIG_FOLDER)
+
+        fig_name = f"p_seen" + fig_ext
+        fig_p_recall(data=data[P_SEEN], condition_labels=condition_labels,
+                     fig_name=fig_name, fig_folder=FIG_FOLDER)
+
+        fig_name = f"p_item" + fig_ext
+        fig_p_recall_item(
+            p_recall=data[P], condition_labels=condition_labels,
+            fig_name=fig_name, fig_folder=FIG_FOLDER)
+
+        fig_name = f"fr_seen" + fig_ext
+        fig_p_recall(
+            y_label="Forgetting rates",
+            data=data[FR_SEEN], condition_labels=condition_labels,
+            fig_name=fig_name, fig_folder=FIG_FOLDER)
+
+        fig_name = f"n_seen" + fig_ext
+        fig_n_seen(
+            data=data[N_SEEN], condition_labels=condition_labels,
+            fig_name=fig_name, fig_folder=FIG_FOLDER)
+
+    print(len(data[HIST][TEACHER]))
+    item_seen = np.unique(data[HIST][TEACHER])
+
+    n_iter_break = int((60**2 * 24) / sec_per_iter - n_iter_session)
+    n_iter_day = n_iter_session + n_iter_break
+    n_iter = n_iter_day * n_day
+
+    timestep = np.arange(0, n_iter, n_iter_day)
+    print(len(timestep))
+
 
 if __name__ == "__main__":
     main_comparative_advantage_n_days()

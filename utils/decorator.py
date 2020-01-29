@@ -2,7 +2,11 @@ import os
 import pickle
 import numpy as np
 
-BKP_FOLDER = os.path.join("bkp", "run")
+from adaptive_teaching.settings import BKP_FOLDER
+
+from multiprocessing import Lock
+
+IDX = 0
 
 
 def use_pickle(func):
@@ -28,56 +32,58 @@ def use_pickle(func):
 
     def call_func(*args, **kwargs):
 
-        os.makedirs(os.path.join(BKP_FOLDER, f"{func.__name__}"),
-                    exist_ok=True)
+        with Lock():
 
-        idx_file = file_name('idx')
+            os.makedirs(os.path.join(BKP_FOLDER, f"{func.__name__}"),
+                        exist_ok=True)
 
-        info = {k: v for k, v in kwargs.items()}
-        info.update({'args': args})
+            idx_file = file_name('idx')
 
-        if os.path.exists(idx_file):
+            info = {k: v for k, v in kwargs.items()}
+            info.update({'args': args})
 
-            idx = load(idx_file)
-            for i in range(idx+1):
+            if os.path.exists(idx_file):
 
-                info_loaded = load(file_name(f"{i}_info"))
+                idx = load(idx_file)
+                for i in range(idx+1):
 
-                #  Compare 'info' and 'info_loaded'...
-                same = True
-                for k in info_loaded.keys():
-                    try:
-                        if not info_loaded[k] == info[k]:
+                    info_loaded = load(file_name(f"{i}_info"))
+
+                    #  Compare 'info' and 'info_loaded'...
+                    same = True
+                    for k in info_loaded.keys():
+                        try:
+                            if not info_loaded[k] == info[k]:
+                                same = False
+                                break
+
+                        # Comparison term to term for arrays
+                        except ValueError:
+                            if not np.all([info_loaded[k][i] == info[k][i]
+                                           for i in range(len(info[k]))]):
+                                same = False
+                                break
+                        except KeyError:
                             same = False
                             break
+                    # ...if they are the sum, load from the associated datafile
+                    if same:
+                        data = load(file_name(f"{i}_data"))
+                        return data
 
-                    # Comparison term to term for arrays
-                    except ValueError:
-                        if not np.all([info_loaded[k][i] == info[k][i]
-                                       for i in range(len(info[k]))]):
-                            same = False
-                            break
-                    except KeyError:
-                        same = False
-                        break
-                # ...if they are the sum, load from the associated datafile
-                if same:
-                    data = load(file_name(f"{i}_data"))
-                    return data
+            else:
+                idx = -1
 
-        else:
-            idx = -1
+            idx += 1
 
-        idx += 1
+            data = func(*args, **kwargs)
 
-        data = func(*args, **kwargs)
+            data_file = file_name(f"{idx}_data")
+            info_file = file_name(f"{idx}_info")
 
-        data_file = file_name(f"{idx}_data")
-        info_file = file_name(f"{idx}_info")
-
-        dump(data, data_file)
-        dump(info, info_file)
-        dump(idx, idx_file)
+            dump(data, data_file)
+            dump(info, info_file)
+            dump(idx, idx_file)
 
         return data
 

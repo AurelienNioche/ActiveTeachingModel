@@ -3,12 +3,12 @@ import matplotlib.pyplot as plt
 from utils.plot import save_fig
 
 
-def fig_parameter_recovery(param, condition_labels, post_means, post_sds,
+def fig_parameter_recovery(param_labels, condition_labels, post_means, post_sds,
                            true_param,
                            fig_name=None, colors=None,
                            fig_folder=None):
 
-    fig, axes = plt.subplots(ncols=len(param), figsize=(12, 6))
+    fig, axes = plt.subplots(ncols=len(param_labels), figsize=(12, 6))
 
     if colors is None:
         colors = [f'C{i}' for i in range(len(condition_labels))]
@@ -17,12 +17,15 @@ def fig_parameter_recovery(param, condition_labels, post_means, post_sds,
 
         for j, dt in enumerate(condition_labels):
 
-            pr = param[i]
+            pr = param_labels[i]
 
             means = post_means[dt][pr]
             stds = post_sds[dt][pr]
 
-            true_p = true_param[pr]
+            if isinstance(true_param, dict):
+                true_p = true_param[pr]
+            else:
+                true_p = true_param[param_labels.index(pr)]
             ax.axhline(true_p, linestyle='--', color='black',
                        alpha=.2)
 

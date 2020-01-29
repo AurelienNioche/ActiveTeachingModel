@@ -5,15 +5,15 @@ from utils.plot import save_fig
 
 
 def fig_n_seen(
-        data, design_types, fig_name=None, fig_folder=None,
+        data, condition_labels, fig_name=None, fig_folder=None,
         y_label="N seen", colors=None):
 
     fig, ax = plt.subplots(figsize=(4, 4))
 
     if colors is None:
-        colors = [f'C{i}' for i in range(len(design_types))]
+        colors = [f'C{i}' for i in range(len(condition_labels))]
 
-    for i, dt in enumerate(design_types):
+    for i, dt in enumerate(condition_labels):
 
         ax.plot(data[dt], color=colors[i], label=dt)
 

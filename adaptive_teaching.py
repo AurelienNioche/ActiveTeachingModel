@@ -4,7 +4,7 @@ from collections.abc import Sequence
 import os
 
 from adaptive_teaching.constants import \
-    POST_MEAN, POST_SD, HIST_ITEM, \
+    POST_MEAN, POST_SD, \
     P, P_SEEN, FR_SEEN, N_SEEN
 
 from adaptive_teaching.engine.engine import Engine
@@ -147,7 +147,7 @@ def main():
                            fig_folder=FIG_FOLDER)
 
     fig_name = f"p_seen" + fig_ext
-    fig_p_recall(data=data[P_SEEN], labels=labels,
+    fig_p_recall(data=data[P_SEEN], condition_labels=labels,
                  fig_name=fig_name, fig_folder=FIG_FOLDER)
 
     fig_name = f"p_item" + fig_ext
@@ -158,7 +158,7 @@ def main():
     fig_name = f"fr_seen" + fig_ext
     fig_p_recall(
         y_label="Forgetting rates",
-        data=data[FR_SEEN], labels=labels,
+        data=data[FR_SEEN], condition_labels=labels,
         fig_name=fig_name, fig_folder=FIG_FOLDER)
 
     # fig_name = f"forgetting_rates_weighted" + fig_ext
@@ -169,7 +169,7 @@ def main():
 
     fig_name = f"n_seen" + fig_ext
     fig_n_seen(
-        data=data[N_SEEN], design_types=labels,
+        data=data[N_SEEN], condition_labels=labels,
         fig_name=fig_name, fig_folder=FIG_FOLDER)
 
 

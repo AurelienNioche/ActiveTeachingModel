@@ -8,12 +8,22 @@ from utils.plot import save_fig
 
 from scipy.stats.distributions import t
 
+
 def sigmoid(x, x0, k):
     y = 1 / (1 + np.exp(-k * (x - x0)))
     return y
 
 
-def stats(y, p_opt, p_cov, alpha=0.01):  # 95% confidence interval = 100*(1-alpha)
+def log(x, a, b):
+    return a+b*np.log(x)
+
+
+def exp(x, a, b):
+    return a*np.exp(b*x)
+
+
+# 95% confidence interval = 100*(1-alpha)
+def stats(y, p_opt, p_cov, alpha=0.01):
 
     n = len(y)  # number of data points
     p = len(p_opt)  # number of parameters
@@ -35,32 +45,38 @@ def stats(y, p_opt, p_cov, alpha=0.01):  # 95% confidence interval = 100*(1-alph
         print(f'p{i}: {p:.2f} [{p - me:.2f}  {p + me:.2f}]')
 
 
-def fig_correlation(x_data, y_data, f=sigmoid, fig_folder=None,
+def fig_correlation(
+        x_data, y_data, f=exp,
+        x_label=None, y_label=None,
+        fig_folder=None,
         fig_name=None):
 
     fig, ax = plt.subplots()
 
-    ax.scatter(x_data, y_data)
+    ax.scatter(x_data, y_data, alpha=0.5, s=25)
     # slope, intercept, r, p, stderr = scipy.stats.linregress(x, y)
     # ax.plot(x, intercept + slope * x)
 
-    # try:
-    #
-    #     # Fit sigmoid
-    #     p_opt, p_cov = curve_fit(f, x_data, y_data)
-    #
-    #     # Do stats about fit
-    #     stats(y=y_data, p_cov=p_cov, p_opt=p_opt)
-    #
-    #     # Plot
-    #     n_points = 50  # Arbitrary neither too small, or too large
-    #     x = np.linspace(min(x_data), max(x_data), n_points)
-    #     y = f(x, *p_opt)
-    #
-    #     ax.plot(x, y)
-    #
-    # except RuntimeError as e:
-    #     print(e)
+    try:
+
+        # Fit sigmoid
+        p_opt, p_cov = curve_fit(f, x_data, y_data)
+
+        # Do stats about fit
+        stats(y=y_data, p_cov=p_cov, p_opt=p_opt)
+
+        # Plot
+        n_points = 50  # Arbitrary neither too small, or too large
+        x = np.linspace(min(x_data), max(x_data), n_points)
+        y = f(x, *p_opt)
+
+        ax.plot(x, y, linewidth=3)
+
+        ax.set_xlabel(x_label)
+        ax.set_ylabel(y_label)
+
+    except RuntimeError as e:
+        print(e)
 
     if fig_folder is not None and fig_name is not None:
         save_fig(fig_folder=fig_folder, fig_name=fig_name)
