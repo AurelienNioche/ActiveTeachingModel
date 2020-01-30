@@ -39,7 +39,7 @@ def run_n_days(
         condition, n_iter_session=150, sec_per_iter=2,
         bounds=None,
         param_labels=None,
-        using_multiprocessing=False,
+        using_multiprocessing=False
 ):
 
     if bounds is None:

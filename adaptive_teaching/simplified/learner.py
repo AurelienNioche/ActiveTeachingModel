@@ -1,5 +1,6 @@
 import numpy as np
-from abc import ABC, abstractmethod
+from abc import abstractmethod
+from adaptive_teaching.constants import P_SEEN, N_SEEN, N_LEARNT, P_ITEM
 
 
 EPS = np.finfo(np.float).eps
@@ -64,6 +65,61 @@ class ExponentialForgetting(GenericLearner):
 
     def __init__(self):
         super().__init__()
+
+    @classmethod
+    def stats_ex_post(cls, param, hist, timestamps, timesteps,
+                      learnt_thr):
+
+        seen = list(np.unique(hist))
+        total_n_seen = len(seen)
+
+        print("N end", total_n_seen)
+
+        p_item = [[] for _ in range(total_n_seen)]
+        p_recall_seen = []
+        n_seen = []
+        n_learnt = []
+
+        for j, t in enumerate(timesteps):
+            until_t = timestamps <= t
+            timestamps_until_t = timestamps[until_t]
+            hist_until_t = hist[until_t]
+            items = np.unique(hist_until_t)
+
+            n_seen.append(len(items))
+
+            p_t = np.zeros(len(items))
+
+            for i, item in enumerate(items):
+
+                timestamps_i = timestamps_until_t[hist_until_t == item]
+
+                n_pres_i = len(timestamps_i)
+
+                if n_pres_i:
+
+                    delta_i = t - max(timestamps_i)
+                    fr = param[0] * (1 - param[1]) ** (n_pres_i - 1)
+                    p = np.exp(- fr * delta_i)
+
+                else:
+                    p = 0
+
+                p_t[i] = p
+
+                p_item[seen.index(item)].append((t, p))
+
+            n_learnt.append(np.sum(p_t[:] > learnt_thr))
+            p_recall_seen.append(p_t)
+
+        p_item = [i for i in p_item if len(i) > 0]
+
+        return {
+            P_SEEN: p_recall_seen,
+            P_ITEM: p_item,
+            N_LEARNT: n_learnt,
+            N_SEEN: n_seen
+        }
 
     @classmethod
     def _log_p_grid(cls, grid_param, delta_i, n_pres_i, n_success_i, i,

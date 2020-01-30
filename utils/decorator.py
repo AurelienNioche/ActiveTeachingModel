@@ -7,6 +7,9 @@ from adaptive_teaching.settings import BKP_FOLDER
 
 from multiprocessing import Lock
 
+# Works only in Unix-based systems
+LOCK = Lock()
+
 
 def use_pickle(func):
 
@@ -80,7 +83,7 @@ def use_pickle(func):
         if data is None:
             data = func(*args, **kwargs)
 
-            with Lock():
+            with LOCK:
 
                 info_files = glob.glob(file_name('*_info'))
                 if info_files:

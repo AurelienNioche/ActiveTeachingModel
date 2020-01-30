@@ -6,7 +6,7 @@ from utils.plot import save_fig
 
 def fig_n_seen(
         data, condition_labels, fig_name=None, fig_folder=None,
-        y_label="N seen", colors=None):
+        y_label=None, colors=None):
 
     fig, ax = plt.subplots(figsize=(4, 4))
 

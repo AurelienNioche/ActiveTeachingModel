@@ -85,3 +85,52 @@ def fig_p_recall_item(p_recall, condition_labels, fig_name=None,
         save_fig(fig_folder=fig_folder, fig_name=fig_name)
     else:
         plt.show()
+
+
+def fig_p_item_seen(
+        p_recall, condition_labels, fig_name=None, fig_folder=None):
+
+    n_row = len(condition_labels)
+    fig, axes = plt.subplots(nrows=n_row, figsize=(5, 4*n_row))
+
+    colors = [f'C{i}' for i in range(len(condition_labels))]
+
+    for i, dt in enumerate(condition_labels):
+
+        ax = axes[i]
+        color = colors[i]
+
+        # n_trial = p_recall[dt].shape[1]
+        #
+        # mean = np.mean(p_recall[dt], axis=0)
+        # std = np.std(p_recall[dt], axis=0)
+
+        # ax.plot(mean, color=color, label=dt)
+        # ax.fill_between(range(n_trial),
+        #                 mean-std,
+        #                 mean+std,
+        #                 alpha=.1, color=color)
+
+        line = None
+        for coordinates in p_recall[dt]:
+            x, y = np.asarray(coordinates).T
+
+            x /= 60*60*24
+            line, = ax.plot(x, y, color=color, alpha=0.5, linewidth=0.5)
+            # x_ticks = np.zeros(3, dtype=int)
+            # x_ticks[:] = np.linspace(0, len(y), 3)
+            #
+            # ax.set_xticks(x_ticks)
+
+        if line is not None:
+            line.set_label(dt)
+
+        ax.set_xlabel("Time")
+        ax.set_ylabel("Probability or recall")
+
+        ax.legend(loc='lower left')
+
+    if fig_folder is not None and fig_name is not None:
+        save_fig(fig_folder=fig_folder, fig_name=fig_name)
+    else:
+        plt.show()
