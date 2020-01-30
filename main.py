@@ -66,7 +66,7 @@ def truncate_10(x):
     # return n_trial
 
 
-@use_pickle
+# @use_pickle
 def grid_exploration_objective(
         objective_function,
         parameter_values,
@@ -180,7 +180,7 @@ def _run_n_days(kwargs):
     return r
 
 
-@use_pickle
+# @use_pickle
 def grid_exploration_n_days(
         parameter_values,
         bounds, grid_size, **kwargs):
