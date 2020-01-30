@@ -1,12 +1,11 @@
 import os
 import pickle
 import numpy as np
+import glob
 
 from adaptive_teaching.settings import BKP_FOLDER
 
 from multiprocessing import Lock
-
-IDX = 0
 
 
 def use_pickle(func):
@@ -30,60 +29,72 @@ def use_pickle(func):
     def dump(obj, f_name):
         return pickle.dump(obj, open(f_name, 'wb'))
 
+    def extract_id(f_name):
+        return int("".join([s for s in
+                            os.path.basename(f_name) if s.isdigit()]))
+
     def call_func(*args, **kwargs):
 
-        with Lock():
+        data = None
 
-            os.makedirs(os.path.join(BKP_FOLDER, f"{func.__name__}"),
-                        exist_ok=True)
+        os.makedirs(os.path.join(BKP_FOLDER, f"{func.__name__}"),
+                    exist_ok=True)
 
-            idx_file = file_name('idx')
+        info = {k: v for k, v in kwargs.items()}
+        info.update({'args': args})
 
-            info = {k: v for k, v in kwargs.items()}
-            info.update({'args': args})
+        info_files = glob.glob(file_name('*_info'))
 
-            if os.path.exists(idx_file):
+        for info_file in info_files:
 
-                idx = load(idx_file)
-                for i in range(idx+1):
+            info_loaded = load(info_file)
 
-                    info_loaded = load(file_name(f"{i}_info"))
+            #  Compare 'info' and 'info_loaded'...
+            same = True
 
-                    #  Compare 'info' and 'info_loaded'...
-                    same = True
-                    for k in info_loaded.keys():
-                        try:
-                            if not info_loaded[k] == info[k]:
-                                same = False
-                                break
-
-                        # Comparison term to term for arrays
-                        except ValueError:
-                            if not np.all([info_loaded[k][i] == info[k][i]
-                                           for i in range(len(info[k]))]):
-                                same = False
-                                break
-                        except KeyError:
-                            same = False
-                            break
-                    # ...if they are the sum, load from the associated datafile
-                    if same:
-                        data = load(file_name(f"{i}_data"))
-                        return data
+            if len(info_loaded) != len(info):
+                same = False
 
             else:
-                idx = -1
+                for k in info_loaded.keys():
+                    try:
+                        if not info_loaded[k] == info[k]:
+                            same = False
+                            break
 
-            idx += 1
+                    # Comparison term to term for arrays
+                    except ValueError:
+                        if not np.all([info_loaded[k][i] == info[k][i]
+                                       for i in range(len(info[k]))]):
+                            same = False
+                            break
+                    except KeyError:
+                        same = False
+                        break
+            # ...if they are the sum, load from the associated datafile
+            if same:
+                idx = extract_id(info_file)
+                data = load(file_name(f"{idx}_data"))
+                break
 
+        if data is None:
             data = func(*args, **kwargs)
 
-            data_file = file_name(f"{idx}_data")
-            info_file = file_name(f"{idx}_info")
+            with Lock():
 
-            dump(data, data_file)
-            dump(info, info_file)
-            dump(idx, idx_file)
+                info_files = glob.glob(file_name('*_info'))
+                if info_files:
+                    idx = max([extract_id(f_name) for f_name in info_files]) \
+                          + 1
+
+                else:
+                    idx = 0
+
+                data_file = file_name(f"{idx}_data")
+                info_file = file_name(f"{idx}_info")
+
+                dump(data, data_file)
+                dump(info, info_file)
 
         return data
 
