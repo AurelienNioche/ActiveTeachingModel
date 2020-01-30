@@ -214,7 +214,7 @@ def main_comparative_advantage_n_days():
 
     seed = 1
     n_iter_session = 150
-    n_day = 30
+    n_day = 60
     n_item = 1000
 
     grid_size = 20
@@ -269,24 +269,18 @@ def main_comparative_advantage_n_days():
             d = [r[dt] for r in results[cd]]
             data[dt][cd] = d
 
-        data[OBJECTIVE][cd] = [objective(r) for r in results[cd]]
+        data[OBJECTIVE][cd] = np.array([objective(r) for r in results[cd]])
 
     data_obj = \
         (data[OBJECTIVE][TEACHER] - data[OBJECTIVE][LEITNER]) \
         / data[OBJECTIVE][LEITNER] * 100
 
-    print(data_obj.shape)
-    print(parameter_values.shape)
-
     parameter_values_array = np.asarray(list(
             product(*parameter_values)
         ))
 
-    print(parameter_values_array.shape)
-
     coord_alpha_x, coord_beta_x = parameter_values_array.T
 
-    print(coord_beta_x.shape)
     # for i, (alpha, beta) in enumerate(parameter_values_array):
     #
     #     coord_alpha_x.append(alpha)
