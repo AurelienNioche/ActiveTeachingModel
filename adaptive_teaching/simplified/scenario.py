@@ -9,7 +9,7 @@ from utils.decorator import use_pickle
 
 from adaptive_teaching.constants import \
     POST_MEAN, POST_SD, \
-    P, P_SEEN, FR_SEEN, N_SEEN, HIST, SUCCESS, TIMESTAMP
+    P, P_SEEN, FR_SEEN, N_SEEN, HIST, SUCCESS, TIMESTAMP, OBJECTIVE
 
 from adaptive_teaching.teacher.leitner import Leitner
 
@@ -19,6 +19,8 @@ from adaptive_teaching.simplified.compute import compute_grid_param, \
 
 from adaptive_teaching.simplified import psychologist
 from adaptive_teaching.simplified import teacher
+
+
 
 EPS = np.finfo(np.float).eps
 FIG_FOLDER = os.path.join("fig", "scenario")
@@ -34,7 +36,8 @@ TEACHER_OMNISCIENT = "TeacherOmniscient"
 def run_n_days(
         learner,
         n_day, n_item, grid_size, param, seed,
-        condition, n_iter_session=150, sec_per_iter=2, bounds=None,
+        condition, n_iter_session=150, sec_per_iter=2,
+        bounds=None,
         param_labels=None,
         using_multiprocessing=False,
 ):
@@ -257,7 +260,7 @@ def run_n_days(
             t += n_iter_break
             c_iter_session = 0
 
-    return {
+    results = {
         N_SEEN: n_seen,
         P: p,
         P_SEEN: p_seen,
@@ -268,5 +271,7 @@ def run_n_days(
         SUCCESS: success,
         TIMESTAMP: timestamp
     }
+
+    return results
 
 

@@ -22,7 +22,7 @@ from utils.string import dic2string
 
 from adaptive_teaching.constants import \
     POST_MEAN, POST_SD, \
-    P, P_SEEN, FR_SEEN, N_SEEN, HIST, TIMESTAMP
+    P, P_SEEN, FR_SEEN, N_SEEN, HIST, TIMESTAMP, OBJECTIVE
 
 EPS = np.finfo(np.float).eps
 FIG_FOLDER = os.path.join("fig", "scenario")
@@ -32,13 +32,13 @@ from adaptive_teaching.simplified.labels \
     import LEITNER, TEACHER
 
 
-def truncate_10(x):
-    return int(x/10) * 10
-
-
 def objective(results,):
     p_seen = results[P_SEEN]
     return np.sum(p_seen[-1][:] > 0.80)
+
+
+def truncate_10(x):
+    return int(x/10) * 10
 
     # threshold_item = 30
     # threshold_time = 10
@@ -106,7 +106,7 @@ def grid_exploration_objective(
 
 def main_comparative_advantage():
 
-    seed = 1
+    seed = 2
     n_iteration = 1000
     n_item = 300
 
@@ -175,12 +175,13 @@ def main_comparative_advantage():
     #               fig_name=f'phase_diagram_leitner_better.pdf')
 
 
-def _objective_n_days(kwargs):
-    return objective(run_n_days(**kwargs))
+def _run_n_days(kwargs):
+    r = run_n_days(**kwargs)
+    return r
 
 
 @use_pickle
-def grid_exploration_objective_n_days(
+def grid_exploration_n_days(
         parameter_values,
         bounds, grid_size, **kwargs):
 
@@ -204,7 +205,7 @@ def grid_exploration_objective_n_days(
         }
     } for i in range(n_sets)]
 
-    obj = p_map(_objective_n_days, kwargs_list)
+    return p_map(_run_n_days, kwargs_list)
 
     # # Loop over each value of the parameter grid for both parameters
     # # for i in range(n_sets):
@@ -225,12 +226,10 @@ def grid_exploration_objective_n_days(
     #
     #     # print(param_to_use, obj[i])
 
-    return np.asarray(obj)
-
 
 def main_comparative_advantage_n_days():
 
-    seed = 2
+    seed = 1
     n_iter_session = 150
     n_day = 30
     n_item = 1000
@@ -244,8 +243,6 @@ def main_comparative_advantage_n_days():
     condition_labels = \
         TEACHER, LEITNER  # , ADAPTIVE
 
-    obj_values = dict()
-
     n_param = len(bounds)
 
     parameter_values = np.atleast_2d([
@@ -254,9 +251,11 @@ def main_comparative_advantage_n_days():
                     grid_size) for i in range(n_param)
     ])
 
+    results = {}
+
     for cd in condition_labels:
 
-        obj_values[cd] = grid_exploration_objective_n_days(
+        results[cd] = grid_exploration_n_days(
             learner=learner,
             parameter_values=parameter_values,
             condition=cd,
@@ -278,49 +277,60 @@ def main_comparative_advantage_n_days():
         #               fig_name=f'phase_diagram_{cd}.pdf',
         #               levels=np.linspace(np.min(data), np.max(data), 10))
 
-    data = \
-        (obj_values[TEACHER] - obj_values[LEITNER]) / obj_values[LEITNER] * 100
+    data_type = (POST_MEAN, POST_SD, P, P_SEEN, FR_SEEN, N_SEEN, HIST)
+    data = {dt: {} for dt in data_type}
 
-    print(data.shape)
-    print(parameter_values.shape)
+    for cd in condition_labels:
+        for dt in data_type:
+            d = [r[dt] for r in results[cd]]
+            data[dt][cd] = d
 
-    parameter_values_array = np.asarray(list(
-            product(*parameter_values)
-        ))
-
-    print(parameter_values_array.shape)
-
-    coord_alpha_x, coord_beta_x = parameter_values_array.T
-
-    print(coord_beta_x.shape)
-    # for i, (alpha, beta) in enumerate(parameter_values_array):
+    # data[OBJECTIVE] = objective()
     #
-    #     coord_alpha_x.append(alpha)
-    #     coord
-    #     coord_y.append(data[i])
-
-    fig_correlation(coord_alpha_x, data,
-                    x_label=r"$\alpha",
-                    y_label="Improvement (%)",
-                    fig_folder=FIG_FOLDER,
-                    fig_name=f'alpha_corr_{n_day}days_seed{seed}.pdf')
-    fig_correlation(coord_beta_x, data,
-                    x_label=r"$\beta$",
-                    y_label="Improvement (%)",
-                    fig_folder=FIG_FOLDER,
-                    fig_name=f'beta_corr_{n_day}days_seed{seed}.pdf')
-
-
-    # data[data[:] < 0] = 0
-    # print(np.min(data))
-    phase_diagram(parameter_values=parameter_values,
-                  param_names=param_labels,
-                  data=data,
-                  fig_folder=FIG_FOLDER,
-                  fig_name=
-                  f'phase_diagram_teacher_better_{n_day}days_seed{seed}.pdf',
-                  levels=np.arange(0,
-                                   np.max(data) + 10, 10))
+    # data_obj = \
+    #     (data[TEACHER][OBJECTIVE] - data[LEITNER][OBJECTIVE]) \
+    #     / data[LEITNER][OBJECTIVE] * 100
+    #
+    # print(data_obj.shape)
+    # print(parameter_values.shape)
+    #
+    # parameter_values_array = np.asarray(list(
+    #         product(*parameter_values)
+    #     ))
+    #
+    # print(parameter_values_array.shape)
+    #
+    # coord_alpha_x, coord_beta_x = parameter_values_array.T
+    #
+    # print(coord_beta_x.shape)
+    # # for i, (alpha, beta) in enumerate(parameter_values_array):
+    # #
+    # #     coord_alpha_x.append(alpha)
+    # #     coord
+    # #     coord_y.append(data[i])
+    #
+    # fig_correlation(coord_alpha_x, data_obj,
+    #                 x_label=r"$\alpha$",
+    #                 y_label="Improvement (%)",
+    #                 fig_folder=FIG_FOLDER,
+    #                 fig_name=f'alpha_corr_{n_day}days_seed{seed}.pdf')
+    # fig_correlation(coord_beta_x, data_obj,
+    #                 x_label=r"$\beta$",
+    #                 y_label="Improvement (%)",
+    #                 fig_folder=FIG_FOLDER,
+    #                 fig_name=f'beta_corr_{n_day}days_seed{seed}.pdf')
+    #
+    #
+    # # data[data[:] < 0] = 0
+    # # print(np.min(data))
+    # phase_diagram(parameter_values=parameter_values,
+    #               param_names=param_labels,
+    #               data=data_obj,
+    #               fig_folder=FIG_FOLDER,
+    #               fig_name=
+    #               f'phase_diagram_teacher_better_{n_day}days_seed{seed}.pdf',
+    #               levels=np.arange(truncate_10(np.min(data_obj)),
+    #                                np.max(data_obj) + 10, 10))
 
     # data = obj_values[TEACHER]-obj_values[LEITNER]
     # data[data[:] < 0] = 0
@@ -332,8 +342,8 @@ def main_comparative_advantage_n_days():
     #               fig_name=f'phase_diagram_leitner_better.pdf')
 
 
-def _run_n_days(kwargs):
-    return run_n_days(**kwargs)
+# def _run_n_days(kwargs):
+#     return run_n_days(**kwargs)
 
 
 def main_single(produce_figures=False):
