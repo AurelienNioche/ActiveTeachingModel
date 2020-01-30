@@ -3,7 +3,7 @@ import os
 import numpy as np
 from itertools import product
 from tqdm import tqdm
-from multiprocessing import Pool
+from multiprocessing import Pool, Lock, Manager
 from p_tqdm import p_map
 
 from adaptive_teaching.simplified.session import run
@@ -193,13 +193,17 @@ def grid_exploration_n_days(
 
     n_sets = len(param_grid)
 
+    m = Manager()
+    lock = m.Lock()
+
     kwargs_list = [{
         **kwargs,
         **{
             "bounds": bounds,
             "grid_size": grid_size,
             "param": param_grid[i],
-            "using_multiprocessing": True
+            "using_multiprocessing": True,
+            "lock": lock,
         }
     } for i in range(n_sets)]
 
@@ -244,7 +248,7 @@ def main_comparative_advantage_n_days():
             bounds=bounds,
             grid_size=grid_size,
             param_labels=param_labels,
-            seed=seed,
+            seed=seed
         )
 
         # data = obj_values[cd]
@@ -256,9 +260,9 @@ def main_comparative_advantage_n_days():
         #               fig_name=f'phase_diagram_{cd}.pdf',
         #               levels=np.linspace(np.min(data), np.max(data), 10))
 
-    data_type = (POST_MEAN, POST_SD, P, P_SEEN, FR_SEEN, N_SEEN, HIST,
-                 OBJECTIVE)
+    data_type = (POST_MEAN, POST_SD, P, P_SEEN, FR_SEEN, N_SEEN, HIST)
     data = {dt: {} for dt in data_type}
+    data[OBJECTIVE] = {}
 
     for cd in condition_labels:
         for dt in data_type:
@@ -268,8 +272,8 @@ def main_comparative_advantage_n_days():
         data[OBJECTIVE][cd] = [objective(r) for r in results[cd]]
 
     data_obj = \
-        (data[TEACHER][OBJECTIVE] - data[LEITNER][OBJECTIVE]) \
-        / data[LEITNER][OBJECTIVE] * 100
+        (data[OBJECTIVE][TEACHER] - data[OBJECTIVE][LEITNER]) \
+        / data[OBJECTIVE][LEITNER] * 100
 
     print(data_obj.shape)
     print(parameter_values.shape)

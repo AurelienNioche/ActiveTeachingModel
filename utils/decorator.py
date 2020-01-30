@@ -5,11 +5,6 @@ import glob
 
 from adaptive_teaching.settings import BKP_FOLDER
 
-from multiprocessing import Lock
-
-# Works only in Unix-based systems
-LOCK = Lock()
-
 
 def use_pickle(func):
 
@@ -36,7 +31,7 @@ def use_pickle(func):
         return int("".join([s for s in
                             os.path.basename(f_name) if s.isdigit()]))
 
-    def call_func(*args, **kwargs):
+    def call_func(lock=None, *args, **kwargs):
 
         data = None
 
@@ -83,21 +78,25 @@ def use_pickle(func):
         if data is None:
             data = func(*args, **kwargs)
 
-            with LOCK:
+            if lock is not None:
+                lock.acquire()
 
-                info_files = glob.glob(file_name('*_info'))
-                if info_files:
-                    idx = max([extract_id(f_name) for f_name in info_files]) \
-                          + 1
+            info_files = glob.glob(file_name('*_info'))
+            if info_files:
+                idx = max([extract_id(f_name) for f_name in info_files]) \
+                      + 1
 
-                else:
-                    idx = 0
+            else:
+                idx = 0
 
-                data_file = file_name(f"{idx}_data")
-                info_file = file_name(f"{idx}_info")
+            data_file = file_name(f"{idx}_data")
+            info_file = file_name(f"{idx}_info")
 
-                dump(data, data_file)
-                dump(info, info_file)
+            dump(data, data_file)
+            dump(info, info_file)
+
+            if lock is not None:
+                lock.release()
 
         return data
 
