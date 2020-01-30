@@ -414,17 +414,21 @@ def main_single(produce_figures=False):
 
     timesteps = np.arange(0, n_iter, n_iter_day)
 
-    data_type = (P_SEEN, N_SEEN, N_LEARNT, P_ITEM)
+    data_type = (P_SEEN, N_SEEN, N_LEARNT, P_ITEM, POST_MEAN, POST_SD)
     data = {dt: {} for dt in data_type}
 
     for i, cd in enumerate(condition_labels):
 
         timestamps = results[i][TIMESTAMP]
         hist = results[i][HIST]
+        post_mean = results[i][POST_MEAN]
+        post_sd = results[i][POST_SD]
 
         d = learner.stats_ex_post(
+            param_labels=param_labels,
             param=param, hist=hist, timestamps=timestamps,
-            timesteps=timesteps, learnt_thr=learnt_thr
+            timesteps=timesteps, learnt_thr=learnt_thr,
+            post_mean=post_mean, post_sd=post_sd
         )
         for dt in data_type:
             data[dt][cd] = d[dt]
@@ -456,6 +460,14 @@ def main_single(produce_figures=False):
         data=data[N_LEARNT], y_label="N learnt",
         condition_labels=condition_labels,
         fig_name=fig_name, fig_folder=FIG_FOLDER)
+
+    fig_name = f"param_recovery" + fig_ext
+    fig_parameter_recovery(condition_labels=condition_labels,
+                           param_labels=param_labels,
+                           post_means=data[POST_MEAN], post_sds=data[POST_SD],
+                           true_param=param,
+                           fig_name=fig_name,
+                           fig_folder=FIG_FOLDER)
 
 
 if __name__ == "__main__":

@@ -1,6 +1,7 @@
 import numpy as np
 from abc import abstractmethod
-from adaptive_teaching.constants import P_SEEN, N_SEEN, N_LEARNT, P_ITEM
+from adaptive_teaching.constants import \
+    P_SEEN, N_SEEN, N_LEARNT, P_ITEM, POST_MEAN, POST_SD
 
 
 EPS = np.finfo(np.float).eps
@@ -67,8 +68,9 @@ class ExponentialForgetting(GenericLearner):
         super().__init__()
 
     @classmethod
-    def stats_ex_post(cls, param, hist, timestamps, timesteps,
-                      learnt_thr):
+    def stats_ex_post(cls, param, param_labels,
+                      hist, timestamps, timesteps,
+                      learnt_thr, post_mean, post_sd):
 
         seen = list(np.unique(hist))
         total_n_seen = len(seen)
@@ -80,7 +82,15 @@ class ExponentialForgetting(GenericLearner):
         n_seen = []
         n_learnt = []
 
+        post_mean_scaled = \
+            {pr: np.zeros(len(timesteps)) for pr in param_labels}
+        post_sd_scaled = \
+            {pr: np.zeros(len(timesteps)) for pr in param_labels}
+
+        timestamps_list = list(timestamps)
+
         for j, t in enumerate(timesteps):
+
             until_t = timestamps <= t
             timestamps_until_t = timestamps[until_t]
             hist_until_t = hist[until_t]
@@ -112,13 +122,21 @@ class ExponentialForgetting(GenericLearner):
             n_learnt.append(np.sum(p_t[:] > learnt_thr))
             p_recall_seen.append(p_t)
 
+            idx_last_update = timestamps_list.index(np.max(timestamps_until_t))
+
+            for pr in param_labels:
+                post_mean_scaled[pr][j] = post_mean[pr][idx_last_update]
+                post_sd_scaled[pr][j] = post_sd[pr][idx_last_update]
+
         p_item = [i for i in p_item if len(i) > 0]
 
         return {
             P_SEEN: p_recall_seen,
             P_ITEM: p_item,
             N_LEARNT: n_learnt,
-            N_SEEN: n_seen
+            N_SEEN: n_seen,
+            POST_MEAN: post_mean_scaled,
+            POST_SD: post_sd_scaled
         }
 
     @classmethod
