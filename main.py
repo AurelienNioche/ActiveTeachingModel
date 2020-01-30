@@ -3,10 +3,8 @@ import os
 import numpy as np
 from itertools import product
 from tqdm import tqdm
-from multiprocessing import Pool, Lock, Manager
-from p_tqdm import p_map
+from multiprocessing import Pool, Manager
 
-from adaptive_teaching.simplified.session import run
 from utils.decorator import use_pickle
 
 from adaptive_teaching.simplified.learner import ExponentialForgetting
@@ -207,7 +205,11 @@ def grid_exploration_n_days(
         }
     } for i in range(n_sets)]
 
-    return p_map(_run_n_days, kwargs_list)
+    with Pool(os.cpu_count()) as p:
+        r = list(tqdm(p.imap(_run_n_days, kwargs_list),
+                      total=len(kwargs_list)))
+
+    return r
 
 
 def main_comparative_advantage_n_days():
