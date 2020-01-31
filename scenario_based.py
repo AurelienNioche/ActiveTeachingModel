@@ -1,10 +1,10 @@
-from adaptive_teaching.constants import POST_MEAN, POST_SD, P, P_SEEN, FR_SEEN, \
+from model.constants import POST_MEAN, POST_SD, P, P_SEEN, FR_SEEN, \
     N_SEEN
-from adaptive_teaching.plot import fig_parameter_recovery, fig_p_recall_item, \
+from model.plot import fig_parameter_recovery, fig_p_recall_item, \
     fig_p_recall, fig_n_seen
-from adaptive_teaching.simplified.learner import \
+from model.simplified.learner import \
     ExponentialForgettingAsymmetric
-from adaptive_teaching.simplified.scenario import run_n_days
+from model.simplified.scenario import run_n_days
 from main import TEACHER, LEITNER, FIG_FOLDER
 
 

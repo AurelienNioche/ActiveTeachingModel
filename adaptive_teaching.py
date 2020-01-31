@@ -3,25 +3,25 @@ import numpy as np
 from collections.abc import Sequence
 import os
 
-from adaptive_teaching.constants import \
+from model.constants import \
     POST_MEAN, POST_SD, \
     P, P_SEEN, FR_SEEN, N_SEEN
 
-from adaptive_teaching.engine.engine import Engine
+from model.engine.engine import Engine
 
-from adaptive_teaching.plot import fig_parameter_recovery, \
+from model.plot import fig_parameter_recovery, \
     fig_p_recall, fig_p_recall_item, fig_n_seen
 
-from adaptive_teaching.teacher.leitner import Leitner
-from adaptive_teaching.teacher.random import RandomTeacher
-from adaptive_teaching.teacher.memorize import Memorize
-from adaptive_teaching.teacher.adaptive import Adaptive
-from adaptive_teaching.teacher.generic import GenericTeacher
+from model.teacher.leitner import Leitner
+from model.teacher.random import RandomTeacher
+from model.teacher.memorize import Memorize
+from model.teacher.adaptive import Adaptive
+from model.teacher.generic import GenericTeacher
 
-from adaptive_teaching.learner.half_life import HalfLife
-from adaptive_teaching.learner.half_life_asymmetric import HalfLifeAsymmetric
+from model.learner.half_life import HalfLife
+from model.learner.half_life_asymmetric import HalfLifeAsymmetric
 
-from adaptive_teaching.run import run
+from model.run import run
 
 from utils.backup import dump, load
 

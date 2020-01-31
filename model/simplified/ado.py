@@ -2,7 +2,7 @@ import numpy as np
 
 from scipy.special import logsumexp
 
-from adaptive_teaching.simplified.learner import log_p_grid
+from model.simplified.learner import log_p_grid
 
 
 def mutual_info_one_time_step(ll, lp):

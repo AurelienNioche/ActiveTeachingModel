@@ -5,30 +5,30 @@ from itertools import product
 from scipy.special import logsumexp
 from tqdm import tqdm
 
-from adaptive_teaching.simplified.compute import \
+from model.simplified.compute import \
     compute_grid_param, \
     post_mean, post_sd
 from utils.decorator import use_pickle
 
-from adaptive_teaching.constants import \
+from model.constants import \
     POST_MEAN, POST_SD, \
     P, P_SEEN, FR_SEEN, N_SEEN, HIST, SUCCESS
 
-from adaptive_teaching.plot import \
+from model.plot import \
     fig_parameter_recovery,  fig_p_recall_item, fig_p_recall, fig_n_seen
 
-from adaptive_teaching.teacher.leitner import Leitner
+from model.teacher.leitner import Leitner
 
-from adaptive_teaching.simplified.learner import ExponentialForgetting, \
+from model.simplified.learner import ExponentialForgetting, \
     ActR, ExponentialForgettingAsymmetric
 
-from adaptive_teaching.plot.comparison import phase_diagram
+from model.plot.comparison import phase_diagram
 
 
-from adaptive_teaching.simplified import psychologist
-from adaptive_teaching.simplified import teacher
+from model.simplified import psychologist
+from model.simplified import teacher
 
-from adaptive_teaching.simplified.scenario import run_n_days
+from model.simplified.scenario import run_n_days
 
 EPS = np.finfo(np.float).eps
 FIG_FOLDER = os.path.join("fig", "scenario")

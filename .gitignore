@@ -141,3 +141,12 @@ dmypy.json
 # Back folder
 /bkp
 
+
+# Migrations
+*/migrations
+!*/*/__init__.py
+
+# Docker
+/data
+
+ActiveTeachingModel/credentials.py

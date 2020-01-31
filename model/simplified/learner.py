@@ -1,6 +1,6 @@
 import numpy as np
 from abc import abstractmethod
-from adaptive_teaching.constants import \
+from model.constants import \
     P_SEEN, N_SEEN, N_LEARNT, P_ITEM, POST_MEAN, POST_SD
 
 

@@ -1,8 +1,8 @@
 import numpy as np
 from tqdm import tqdm
 
-import adaptive_teaching.simplified.compute
-from adaptive_teaching.constants \
+import model.simplified.compute
+from model.constants \
     import P, FR, P_SEEN, FR_SEEN, POST_MEAN, POST_SD, \
     HIST_ITEM, HIST_SUCCESS, N_SEEN
 
@@ -63,8 +63,8 @@ def run(learner_model,
 
         # Backup the mean/std of post dist
         for i, pr in enumerate(param):
-            post_means[pr][t] = adaptive_teaching.simplified.compute.post_mean[i]
-            post_sds[pr][t] = adaptive_teaching.simplified.compute.post_sd[i]
+            post_means[pr][t] = model.simplified.compute.post_mean[i]
+            post_sds[pr][t] = model.simplified.compute.post_sd[i]
 
         # Backup prob recall / forgetting rates
         fr[:, t], p[:, t] = \

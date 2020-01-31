@@ -3,7 +3,7 @@ import pickle
 import numpy as np
 import glob
 
-from adaptive_teaching.settings import BKP_FOLDER
+from model.settings import BKP_FOLDER
 
 
 def use_pickle(func):

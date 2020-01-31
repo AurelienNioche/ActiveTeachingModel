@@ -7,19 +7,19 @@ from multiprocessing import Pool, Manager
 
 from utils.decorator import use_pickle
 
-from adaptive_teaching.simplified.learner import ExponentialForgetting
+from model.simplified.learner import ExponentialForgetting
 
-from adaptive_teaching.plot.comparison import phase_diagram
-from adaptive_teaching.simplified.scenario import run_n_days
-from adaptive_teaching.plot.correlation import fig_correlation
+from model.plot.comparison import phase_diagram
+from model.simplified.scenario import run_n_days
+from model.plot.correlation import fig_correlation
 
-from adaptive_teaching.plot import fig_parameter_recovery, \
+from model.plot import fig_parameter_recovery, \
     fig_p_recall, fig_p_recall_item, fig_n_seen, \
     fig_p_item_seen
 
 from utils.string import dic2string
 
-from adaptive_teaching.constants import \
+from model.constants import \
     POST_MEAN, POST_SD, \
     P, P_SEEN, FR_SEEN, N_SEEN, HIST, TIMESTAMP, OBJECTIVE, N_LEARNT, P_ITEM
 
@@ -27,7 +27,7 @@ EPS = np.finfo(np.float).eps
 FIG_FOLDER = os.path.join("fig", "scenario")
 
 
-from adaptive_teaching.simplified.labels \
+from model.simplified.labels \
     import LEITNER, TEACHER
 
 
