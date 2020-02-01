@@ -47,3 +47,24 @@ Remove container (be cautious while using it!)
 
     docker-compose down
  
+ 
+ ### Config 
+ 
+ #### Create db
+ 
+1. Connect to the container
+
+        docker-compose exec db bash
+ 
+2. Switch to postgres user
+ 
+        su - postgres
+    
+ 
+3. Connect to the db postgres (using the user postgres):
+
+        psql
+ 
+ * Change the password:
+
+        ALTER USER postgres WITH password 'postgres';

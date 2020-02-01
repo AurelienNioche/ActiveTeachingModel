@@ -10,4 +10,4 @@ services:
     restart: always
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: posgres
+      POSTGRES_PASSWORD: postgres
