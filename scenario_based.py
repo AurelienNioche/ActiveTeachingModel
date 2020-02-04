@@ -48,7 +48,7 @@ def scenario_based():
 
     str_param = learner.__name__ + "_" + "_".join([f'{p:.2f}' for p in param])
 
-    fig_parameter_recovery(param=learner.param_labels,
+    fig_parameter_recovery(param_labels=learner.param_labels,
                            condition_labels=condition_labels,
                            post_means=data[POST_MEAN],
                            post_sds=data[POST_SD],
