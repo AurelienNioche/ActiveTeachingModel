@@ -20,6 +20,11 @@ class Simulation(models.Model):
     param_upper_bounds = ArrayField(models.FloatField(), default=list)
     param_lower_bounds = ArrayField(models.FloatField(), default=list)
 
+    timestamp = ArrayField(models.IntegerField(), default=list)
+    hist = ArrayField(models.IntegerField(), default=list)
+    success = ArrayField(models.BooleanField(), default=list)
+    n_seen = ArrayField(models.IntegerField(), default=list)
+
     seed = models.IntegerField()
 
 
@@ -27,24 +32,13 @@ class Post(models.Model):
 
     simulation = models.ForeignKey(Simulation, on_delete=models.CASCADE)
     param_label = models.CharField(max_length=32)
-    iteration = models.IntegerField()
-    mean = models.FloatField()
-    std = models.FloatField()
+    mean = ArrayField(models.FloatField(), default=list)
+    std = ArrayField(models.FloatField(), default=list)
 
 
-class Iteration(models.Model):
-
-    simulation = models.ForeignKey(Simulation, on_delete=models.CASCADE)
-    item = models.IntegerField()
-    iteration = models.IntegerField()
-    timestamp = models.IntegerField()
-    success = models.BooleanField()
-    n_seen = models.IntegerField()
-
-
-class ProbRecall(models.Model):
-
-    simulation = models.ForeignKey(Simulation, on_delete=models.CASCADE)
-    item = models.IntegerField()
-    p = models.FloatField()
-    iteration = models.IntegerField()
+# class ProbRecall(models.Model):
+#
+#     simulation = models.ForeignKey(Simulation, on_delete=models.CASCADE)
+#     item = models.IntegerField()
+#     p = models.FloatField()
+#     iteration = models.IntegerField()

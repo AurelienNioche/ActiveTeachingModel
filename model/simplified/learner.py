@@ -75,8 +75,6 @@ class ExponentialForgetting(GenericLearner):
         seen = list(np.unique(hist))
         total_n_seen = len(seen)
 
-        print("N end", total_n_seen)
-
         p_item = [[] for _ in range(total_n_seen)]
         p_recall_seen = []
         n_seen = []
@@ -98,26 +96,31 @@ class ExponentialForgetting(GenericLearner):
 
             n_seen.append(len(items))
 
-            p_t = np.zeros(len(items))
+            p_t = cls.p_recall_seen_at_t(hist=hist_until_t,
+                                         timestamps=timestamps_until_t,
+                                         param=param, t=t, items=items)
+
+            # p_t = np.zeros(len(items))
+            #
+            # for i, item in enumerate(items):
+            #
+            #     timestamps_i = timestamps_until_t[hist_until_t == item]
+            #
+            #     n_pres_i = len(timestamps_i)
+            #
+            #     if n_pres_i:
+            #
+            #         delta_i = t - max(timestamps_i)
+            #         fr = param[0] * (1 - param[1]) ** (n_pres_i - 1)
+            #         p = np.exp(- fr * delta_i)
+            #
+            #     else:
+            #         p = 0
+            #
+            #     p_t[i] = p
 
             for i, item in enumerate(items):
-
-                timestamps_i = timestamps_until_t[hist_until_t == item]
-
-                n_pres_i = len(timestamps_i)
-
-                if n_pres_i:
-
-                    delta_i = t - max(timestamps_i)
-                    fr = param[0] * (1 - param[1]) ** (n_pres_i - 1)
-                    p = np.exp(- fr * delta_i)
-
-                else:
-                    p = 0
-
-                p_t[i] = p
-
-                p_item[seen.index(item)].append((t, p))
+                p_item[seen.index(item)].append((t, p_t[i]))
 
             n_learnt.append(np.sum(p_t[:] > learnt_thr))
             p_recall_seen.append(p_t)
@@ -138,6 +141,33 @@ class ExponentialForgetting(GenericLearner):
             POST_MEAN: post_mean_scaled,
             POST_SD: post_sd_scaled
         }
+
+    @classmethod
+    def p_recall_seen_at_t(cls, hist, timestamps, param, t, items=None):
+
+        if items is None:
+            items = np.unique(hist)
+
+        p_seen = np.zeros(len(items))
+
+        for i, item in enumerate(items):
+
+            timestamps_i = timestamps[hist == item]
+
+            n_pres_i = len(timestamps_i)
+
+            if n_pres_i:
+
+                delta_i = t - timestamps_i[-1]
+                fr = param[0] * (1 - param[1]) ** (n_pres_i - 1)
+                p = np.exp(- fr * delta_i)
+
+            else:
+                p = 0
+
+            p_seen[i] = p
+
+        return p_seen
 
     @classmethod
     def _log_p_grid(cls, grid_param, delta_i, n_pres_i, n_success_i, i,

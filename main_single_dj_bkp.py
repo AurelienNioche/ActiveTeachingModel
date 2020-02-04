@@ -6,7 +6,6 @@ application = get_wsgi_application()
 
 import numpy as np
 from multiprocessing import Pool
-from tqdm import tqdm
 
 from model.teacher.leitner import Leitner
 
@@ -17,17 +16,16 @@ from model.simplified.learner import ExponentialForgetting
 from utils.string import dic2string
 
 
-from model.plot import fig_parameter_recovery, \
-    fig_p_recall, fig_p_recall_item, fig_n_seen, \
-    fig_p_item_seen
+from model.plot import \
+    fig_parameter_recovery, \
+    fig_p_recall, fig_n_seen, fig_p_item_seen
 
 from model.constants import \
-    POST_MEAN, POST_SD, \
-    P, P_SEEN, FR_SEEN, N_SEEN, HIST, TIMESTAMP, OBJECTIVE, N_LEARNT, P_ITEM
+    POST_MEAN, POST_SD, P_SEEN, N_SEEN, N_LEARNT, P_ITEM
 
 
 EPS = np.finfo(np.float).eps
-FIG_FOLDER = os.path.join("fig", "main_django_backup")
+FIG_FOLDER = os.path.join("fig", os.path.basename(__file__))
 os.makedirs(FIG_FOLDER, exist_ok=True)
 
 
@@ -64,7 +62,7 @@ def main_single():
     sec_per_iter = 2
     n_iteration_between_session = \
         int((60 ** 2 * 24) / sec_per_iter - n_iteration_per_session)
-    n_session = 2
+    n_session = 1
     n_item = 1000
 
     grid_size = 20
@@ -105,23 +103,20 @@ def main_single():
 
     for i, cd in enumerate(condition_labels):
 
-        iter_entries = \
-            sim_entries[i].iteration_set.all().order_by('iteration')
+        e = sim_entries[i]
 
-        timestamps = np.array([e.timestamp for e in iter_entries], dtype=int)
-        hist = np.array([e.item for e in iter_entries], dtype=int)
+        timestamps = np.array(e.timestamp, dtype=int)
+        hist = np.array(e.hist, dtype=int)
 
-        post_entries = \
-            sim_entries[i].post_set.all().order_by('iteration')
+        post_entries = sim_entries[i].post_set.all()
 
-        post_mean = {
-            pr: np.array([e.mean for e in post_entries.filter(param_label=pr)])
-            for pr in param_labels
-        }
-        post_sd = {
-            pr: np.array([e.std for e in post_entries.filter(param_label=pr)])
-            for pr in param_labels
-        }
+        post_mean = {}
+        post_sd = {}
+
+        for pr in param_labels:
+            post_entry_pr = post_entries.get(param_label=pr)
+            post_mean[pr] = np.array(post_entry_pr.mean)
+            post_sd[pr] = np.array(post_entry_pr.std)
 
         d = learner.stats_ex_post(
             param_labels=param_labels,

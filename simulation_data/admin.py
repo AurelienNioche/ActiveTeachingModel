@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from . models import Simulation, Post, Iteration
+from . models import Simulation, Post
 
 
 class SimulationAdmin(admin.ModelAdmin):
@@ -15,15 +15,8 @@ class SimulationAdmin(admin.ModelAdmin):
 
 class PostAdmin(admin.ModelAdmin):
     list_display = (
-        "id", "simulation", "iteration", "param_label", "mean", "std")
-
-
-class IterationAdmin(admin.ModelAdmin):
-    list_display = (
-        "id", "simulation", "iteration", "timestamp", "item", "success",
-        "n_seen")
+        "id", "simulation", "param_label", ) # "mean", "std")
 
 
 admin.site.register(Simulation, SimulationAdmin)
 admin.site.register(Post, PostAdmin)
-admin.site.register(Iteration, IterationAdmin)

@@ -20,6 +20,7 @@ from model.simplified.compute import compute_grid_param, \
 from model.simplified import psychologist
 from model.simplified.teacher import Teacher
 
+from simulation_data.models import Simulation, Post
 
 EPS = np.finfo(np.float).eps
 FIG_FOLDER = os.path.join("fig", "scenario")
@@ -29,9 +30,6 @@ PSYCHOLOGIST = "Psychologist"
 ADAPTIVE = "Adaptive"
 TEACHER = "Teacher"
 TEACHER_OMNISCIENT = "TeacherOmniscient"
-
-from simulation_data.models import Simulation, \
-    Post, Iteration, ProbRecall
 
 
 def run_n_session(
@@ -70,20 +68,6 @@ def run_n_session(
 
     if sim_entries.count():
         return sim_entries[0]
-
-    sim_entry = Simulation.objects.create(
-        n_session=n_session,
-        n_iteration_per_session=n_iteration_per_session,
-        n_iteration_between_session=n_iteration_between_session,
-        teacher_model=teacher_model.__name__,
-        learner_model=learner_model.__name__,
-        param_labels=param_labels,
-        param_values=param,
-        param_upper_bounds=[b[0] for b in bounds],
-        param_lower_bounds=[b[1] for b in bounds],
-        grid_size=grid_size,
-        seed=seed
-    )
 
     n_iteration = n_iteration_per_session * n_session
 
@@ -233,43 +217,36 @@ def run_n_session(
             t += n_iteration_between_session
             c_iter_session = 0
 
-    iteration_entries = []
+    sim_entry = Simulation.objects.create(
+        n_session=n_session,
+        n_iteration_per_session=n_iteration_per_session,
+        n_iteration_between_session=n_iteration_between_session,
+        teacher_model=teacher_model.__name__,
+        learner_model=learner_model.__name__,
+        param_labels=param_labels,
+        param_values=param,
+        param_upper_bounds=[b[0] for b in bounds],
+        param_lower_bounds=[b[1] for b in bounds],
+        grid_size=grid_size,
+        timestamp=list(timestamp),
+        hist=list(hist),
+        success=list(success),
+        n_seen=list(n_seen),
+        seed=seed
+    )
+
     post_entries = []
 
-    for it in range(n_iteration):
-        iteration_entries.append(
-            Iteration(
+    for i, pr in enumerate(param_labels):
+
+        post_entries.append(
+            Post(
                 simulation=sim_entry,
-                item=hist[it],
-                iteration=it,
-                timestamp=timestamp[it],
-                success=success[it],
-                n_seen=n_seen[it]))
+                param_label=pr,
+                std=list(post_sds[pr]),
+                mean=list(post_means[pr])))
 
-        for i, pr in enumerate(param_labels):
-
-            post_entries.append(
-                Post(
-                    simulation=sim_entry,
-                    param_label=pr,
-                    iteration=it,
-                    std=post_sds[pr][it],
-                    mean=post_means[pr][it]))
-
-    Iteration.objects.bulk_create(iteration_entries)
     Post.objects.bulk_create(post_entries)
-
-    # results = {
-    #     N_SEEN: n_seen,
-    #     P: p,
-    #     P_SEEN: p_seen,
-    #     FR_SEEN: fr_seen,
-    #     POST_MEAN: post_means,
-    #     POST_SD: post_sds,
-    #     HIST: hist,
-    #     SUCCESS: success,
-    #     TIMESTAMP: timestamp
-    # }
 
     return sim_entry
 
