@@ -50,7 +50,8 @@ def grid_exploration_n_session(parameter_values, **kwargs):
     kwargs_list = [{
         **kwargs,
         **{
-            "param": param_grid[i]
+            "param": param_grid[i],
+            "using_multiprocessing": True
         }
     } for i in range(n_sets)]
 
@@ -63,7 +64,7 @@ def grid_exploration_n_session(parameter_values, **kwargs):
 
 def main_comparative_advantage_n_session():
 
-    seed = 2
+    seed = 1
     n_iteration_per_session = 150
     sec_per_iter = 2
     n_iteration_between_session = \
@@ -73,7 +74,7 @@ def main_comparative_advantage_n_session():
 
     grid_size = 20
 
-    learner = ExponentialForgetting
+    learner_model = ExponentialForgetting
     bounds = (0.001, 0.04), (0.2, 0.5),
     param_labels = "alpha", "beta",
 
@@ -82,7 +83,7 @@ def main_comparative_advantage_n_session():
     teacher_models = Teacher, Leitner
 
     kwargs_list = [{
-        "learner_model": learner,
+        "learner_model": learner_model,
         "teacher_model": teacher_model,
         "n_session": n_session,
         "n_item": n_item,
