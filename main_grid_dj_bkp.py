@@ -68,7 +68,7 @@ def main_comparative_advantage_n_session():
     sec_per_iter = 2
     n_iteration_between_session = \
         int((60 ** 2 * 24) / sec_per_iter - n_iteration_per_session)
-    n_session = 1  # 60
+    n_session = 60
     n_item = 1000
 
     grid_size = 20
@@ -169,3 +169,8 @@ def main_comparative_advantage_n_session():
                   f'phase_diagram_teacher_better{ext}.pdf',
                   levels=np.arange(truncate_10(np.min(data_obj)),
                                    np.max(data_obj) + 10, 10))
+
+
+if __name__ == "__main__":
+
+    main_comparative_advantage_n_session()

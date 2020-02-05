@@ -6,6 +6,8 @@ from django.contrib.postgres.fields import ArrayField
 # Create your models here.
 class Simulation(models.Model):
 
+    n_item = models.IntegerField()
+
     n_session = models.IntegerField()
     n_iteration_per_session = models.IntegerField()
     n_iteration_between_session = models.IntegerField()

@@ -96,7 +96,7 @@ class ExponentialForgetting(GenericLearner):
 
             n_seen.append(len(items))
 
-            p_t = cls.p_recall_seen_at_t(hist=hist_until_t,
+            p_t = cls.p_seen_at_t(hist=hist_until_t,
                                          timestamps=timestamps_until_t,
                                          param=param, t=t, items=items)
 
@@ -143,7 +143,7 @@ class ExponentialForgetting(GenericLearner):
         }
 
     @classmethod
-    def p_recall_seen_at_t(cls, hist, timestamps, param, t, items=None):
+    def p_seen_at_t(cls, hist, timestamps, param, t, items=None):
 
         if items is None:
             items = np.unique(hist)

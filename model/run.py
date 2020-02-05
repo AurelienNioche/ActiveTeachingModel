@@ -4,7 +4,7 @@ from tqdm import tqdm
 import model.simplified.compute
 from model.constants \
     import P, FR, P_SEEN, FR_SEEN, POST_MEAN, POST_SD, \
-    HIST_ITEM, HIST_SUCCESS, N_SEEN
+    HIST, SUCCESS, N_SEEN
 
 
 def run(learner_model,
@@ -90,6 +90,6 @@ def run(learner_model,
         FR_SEEN: fr_seen,
         POST_MEAN: post_means,
         POST_SD: post_sds,
-        HIST_ITEM: hist_item,
-        HIST_SUCCESS: hist_success
+        HIST: hist_item,
+        SUCCESS: hist_success
     }

@@ -52,19 +52,22 @@ def run_n_session(
     if param_labels is None:
         param_labels = learner_model.param_labels
 
-    sim_entries = Simulation.objects.filter(
-        n_session=n_session,
-        n_iteration_per_session=n_iteration_per_session,
-        n_iteration_between_session=n_iteration_between_session,
-        teacher_model=teacher_model.__name__,
-        learner_model=learner_model.__name__,
-        param_labels=param_labels,
-        param_values=param,
-        param_upper_bounds=[b[0] for b in bounds],
-        param_lower_bounds=[b[1] for b in bounds],
-        grid_size=grid_size,
-        seed=seed
-    )
+    sim_parameters = {
+        "n_item": n_item,
+        "n_session": n_session,
+        "n_iteration_per_session": n_iteration_per_session,
+        "n_iteration_between_session": n_iteration_between_session,
+        "teacher_model": teacher_model.__name__,
+        "learner_model": learner_model.__name__,
+        "param_labels": list(param_labels),
+        "param_values": list(param),
+        "param_upper_bounds": [b[0] for b in bounds],
+        "param_lower_bounds": [b[1] for b in bounds],
+        "grid_size": grid_size,
+        "seed": seed
+    }
+
+    sim_entries = Simulation.objects.filter(**sim_parameters)
 
     if sim_entries.count():
         return sim_entries[0]
@@ -218,21 +221,11 @@ def run_n_session(
             c_iter_session = 0
 
     sim_entry = Simulation.objects.create(
-        n_session=n_session,
-        n_iteration_per_session=n_iteration_per_session,
-        n_iteration_between_session=n_iteration_between_session,
-        teacher_model=teacher_model.__name__,
-        learner_model=learner_model.__name__,
-        param_labels=param_labels,
-        param_values=param,
-        param_upper_bounds=[b[0] for b in bounds],
-        param_lower_bounds=[b[1] for b in bounds],
-        grid_size=grid_size,
         timestamp=list(timestamp),
         hist=list(hist),
         success=list(success),
         n_seen=list(n_seen),
-        seed=seed
+        **sim_parameters
     )
 
     post_entries = []
