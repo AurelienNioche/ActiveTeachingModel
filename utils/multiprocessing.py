@@ -57,9 +57,9 @@ class MultiProcess:
      (so we dont have to worry about garbage collection calling __del__)
     """
 
-    def __init__(self):
+    def __init__(self, n_worker=multiprocessing.cpu_count()):
 
-        self.num_workers = multiprocessing.cpu_count()
+        self.num_workers = n_worker
 
         self.job_queue = multiprocessing.Queue()
         self.result_queue = multiprocessing.Queue()

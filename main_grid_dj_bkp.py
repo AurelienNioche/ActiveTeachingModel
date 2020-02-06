@@ -60,7 +60,7 @@ def grid_exploration_n_session(parameter_values, **kwargs):
         }
     } for i in range(n_sets)]
 
-    with MultiProcess() as mp:
+    with MultiProcess(n_worker=os.cpu_count()-2) as mp:
         results = mp.map(run_n_session, kwargs_list)
 
     # with Pool(os.cpu_count()-1) as p:
