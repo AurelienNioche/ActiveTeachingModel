@@ -3,25 +3,33 @@
 Note: All commands are given based on the assumption of using the Homebrew's package manager (MacOs).
 Small changes are expected under Linux and/or Windows.
 
-## Configuration
+## Dependencies
 
 #### Python 3
 
+Using brew on mac:
+
     brew install python3
-
-#### Python libraries
-
-* numpy, matplotlib, scipy
-
     
-    pip3 install numpy matplotlib scipy
+* Create a virtual environment (optional)
+
+        source venv/bin/activate
+    
+    (If using venv, replace 'pip3' by pip)
+
+* Python libraries
+
+        pip3 install -r requirements.txt
         
-## Run
+#### Docker
 
-    python3 adaptive_teaching.py
+
+Using Docker desktop:
+
+    https://hub.docker.com/editions/community/docker-ce-desktop-mac
     
     
- ## Docker
+* Basic operations
  
  
 Launch the docker container
@@ -48,9 +56,9 @@ Remove container (be cautious while using it!)
     docker-compose down
  
  
- ### Config 
+ ## Config 
  
- #### Create db
+ #### Create db inside the container
  
 1. Connect to the container
 
@@ -60,11 +68,25 @@ Remove container (be cautious while using it!)
  
         su - postgres
     
- 
 3. Connect to the db postgres (using the user postgres):
 
         psql
  
- * Change the password:
+4. Change the password:
 
         ALTER USER postgres WITH password 'postgres';
+
+5. Create db
+    
+        createdb ActiveTeachingModel --user=postgres
+        
+#### Django migrations
+
+    python3 makemigrations
+    python3 migrate
+
+        
+## Run
+
+    python3 main_grid_dj_bkp.py
+    

@@ -915,7 +915,7 @@ domReady(function enableCssMediaQueries() {
 		    var type = mqs[i].getMediaType();
 		    if (mqs[i].getExpressions().length === 0) {
 		        continue;
-		        // TODO: Browser check! Assuming old browsers do apply the bare media types, even in a list with media queries.
+		        // TODO: Browser check! Assuming old_2019 browsers do apply the bare media types, even in a list with media queries.
 		    }
 		    var typeAllowed = true;
 		    if (type !== 'all' && ts && ts.length > 0) {

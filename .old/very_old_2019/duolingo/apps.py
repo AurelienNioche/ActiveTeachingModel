@@ -2,4 +2,4 @@ from django.apps import AppConfig
 
 
 class DuolingoConfig(AppConfig):
-    name = '.old.duolingo'
+    name = 'old_2019.duolingo'

@@ -1,4 +1,9 @@
-# %%
+import os
+os.environ.setdefault("DJANGO_SETTINGS_MODULE",
+                      "ActiveTeachingModel.settings")
+from django.core.wsgi import get_wsgi_application
+application = get_wsgi_application()
+
 import os
 import numpy as np
 from itertools import product
@@ -13,7 +18,8 @@ from model.plot.correlation import fig_correlation
 from model.teacher.leitner import Leitner
 from model.simplified.teacher import Teacher
 
-from main_single_dj_bkp import _run_n_session
+from model.simplified.scenario import run_n_session
+from utils.multiprocessing import MultiProcess
 
 EPS = np.finfo(np.float).eps
 FIG_FOLDER = os.path.join("fig", os.path.basename(__file__))
@@ -51,20 +57,22 @@ def grid_exploration_n_session(parameter_values, **kwargs):
         **kwargs,
         **{
             "param": param_grid[i],
-            "using_multiprocessing": True
         }
     } for i in range(n_sets)]
 
-    with Pool(os.cpu_count()) as p:
-        r = list(tqdm(p.imap(_run_n_session, kwargs_list),
-                      total=n_sets))
+    with MultiProcess() as mp:
+        results = mp.map(run_n_session, kwargs_list)
 
-    return r
+    # with Pool(os.cpu_count()-1) as p:
+    #     results = list(tqdm(p.imap(_run_n_session, kwargs_list),
+    #                    total=n_sets))
+
+    return results
 
 
 def main_comparative_advantage_n_session():
 
-    seed = 1
+    seed = 2
     n_iteration_per_session = 150
     sec_per_iter = 2
     n_iteration_between_session = \

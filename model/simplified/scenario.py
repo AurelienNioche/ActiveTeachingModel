@@ -44,7 +44,7 @@ def run_n_session(
         n_iteration_between_session=43050,
         bounds=None,
         param_labels=None,
-        using_multiprocessing=False):
+        stop_event=None):
 
     if bounds is None:
         bounds = learner_model.bounds
@@ -113,12 +113,15 @@ def run_n_session(
     c_iter_session = 0
     t = 0
 
-    if using_multiprocessing:
+    if stop_event:
         iterator = range(n_iteration)
     else:
         iterator = tqdm(range(n_iteration))
 
     for it in iterator:
+
+        if stop_event and stop_event.is_set():
+            return
 
         log_lik = learner_model.log_lik(
             grid_param=grid_param,

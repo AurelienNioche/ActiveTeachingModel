@@ -97,27 +97,8 @@ class ExponentialForgetting(GenericLearner):
             n_seen.append(len(items))
 
             p_t = cls.p_seen_at_t(hist=hist_until_t,
-                                         timestamps=timestamps_until_t,
-                                         param=param, t=t, items=items)
-
-            # p_t = np.zeros(len(items))
-            #
-            # for i, item in enumerate(items):
-            #
-            #     timestamps_i = timestamps_until_t[hist_until_t == item]
-            #
-            #     n_pres_i = len(timestamps_i)
-            #
-            #     if n_pres_i:
-            #
-            #         delta_i = t - max(timestamps_i)
-            #         fr = param[0] * (1 - param[1]) ** (n_pres_i - 1)
-            #         p = np.exp(- fr * delta_i)
-            #
-            #     else:
-            #         p = 0
-            #
-            #     p_t[i] = p
+                                  timestamps=timestamps_until_t,
+                                  param=param, t=t, items=items)
 
             for i, item in enumerate(items):
                 p_item[seen.index(item)].append((t, p_t[i]))

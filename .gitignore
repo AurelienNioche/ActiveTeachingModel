@@ -119,21 +119,21 @@ dmypy.json
 # MacOs
 .DS_Store
 
-# Very old
-.old/very_old/learner/trials/bkp/
-.old/very_old/learner/bkp/*
+# Very old_2019
+.old/very_old_2019/learner/trials/bkp/
+.old/very_old_2019/learner/bkp/*
 .old/very_old/data/*.p
-.old/very_old/docs/_static/
-.old/very_old/docs/_templates/
-.old/very_old/docs/bkp/
+.old/very_old_2019/docs/_static/
+.old/very_old_2019/docs/_templates/
+.old/very_old_2019/docs/bkp/
 
 # Old
-.old/old/learner/trials/bkp/
-.old/old/learner/bkp/*
+.old/old_2019/learner/trials/bkp/
+.old/old_2019/learner/bkp/*
 .old/old/data/*.p
-.old/old/docs/_static/
-.old/old/docs/_templates/
-.old/old/docs/bkp/
+.old/old_2019/docs/_static/
+.old/old_2019/docs/_templates/
+.old/old_2019/docs/bkp/
 
 # Figure folder
 /fig
