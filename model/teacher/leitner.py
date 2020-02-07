@@ -1,19 +1,11 @@
 import numpy as np
 
-from . generic import GenericTeacher
 
+class Leitner():
 
-class Leitner(GenericTeacher):
-
-    def __init__(self, delay_factor=2, **kwargs):
+    def __init__(self, n_item, delay_factor=2):
         """
-        :param normalize_similarity: bool.
-            Normalized description of
-            semantic and graphic connections between items
         :param delay_factor:
-        :param verbose:
-            displays each question asked and replies at each
-            iteration
         :var self.taboo:
             integer value in range(0 to n_items). Index of the item
             shown in previous iteration.
@@ -25,7 +17,7 @@ class Leitner(GenericTeacher):
             of i^th item at i^th index.
         """
 
-        super().__init__(**kwargs)
+        self.n_item = n_item
 
         self.delay_factor = delay_factor
         self.box = np.zeros(self.n_item)
@@ -189,7 +181,7 @@ class Leitner(GenericTeacher):
         self.taboo = new_question
         return new_question
 
-    def ask(self, best_param=None):
+    def ask(self):
 
         return self._get_next_node()
 

@@ -3,7 +3,8 @@ import pickle
 import numpy as np
 import glob
 
-from model.settings import BKP_FOLDER
+
+BKP_FOLDER = os.path.join('bkp', 'pickle')
 
 
 def use_pickle(func):

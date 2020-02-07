@@ -89,4 +89,3 @@ Remove container (be cautious while using it!)
 ## Run
 
     python3 main_grid_dj_bkp.py
-    
