@@ -72,12 +72,12 @@ def grid_exploration_n_session(parameter_values, **kwargs):
 
 def main_comparative_advantage_n_session():
 
-    seed = 2
+    seed = 0
     n_iteration_per_session = 150
     sec_per_iter = 2
     n_iteration_between_session = \
         int((60 ** 2 * 24) / sec_per_iter - n_iteration_per_session)
-    n_session = 60
+    n_session = 30
     n_item = 1000
 
     grid_size = 20
