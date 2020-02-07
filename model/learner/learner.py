@@ -70,7 +70,9 @@ class ExponentialForgetting(GenericLearner):
     @classmethod
     def stats_ex_post(cls, param, param_labels,
                       hist, timestamps, timesteps,
-                      learnt_thr, post_mean, post_sd):
+                      learnt_thr, post):
+
+        post_mean, post_sd = post["mean"], post["std"]
 
         seen = list(np.unique(hist))
         total_n_seen = len(seen)

@@ -31,8 +31,8 @@ def truncate_10(x):
 def objective(e, learnt_thr):
 
     param = e.param_values
-    timestamps = np.array(e.timestamp, dtype=int)
-    hist = np.array(e.hist, dtype=int)
+    timestamps = e.timestamps_array
+    hist = e.hist_array
 
     t = timestamps[-1]
 
@@ -55,13 +55,13 @@ def main_comparative_advantage_n_session():
 
     grid_size = 20
 
-    learner_model = ExponentialForgetting.__name__
+    learner_model = ExponentialForgetting
     bounds = (0.001, 0.04), (0.2, 0.5),
     param_labels = "alpha", "beta",
 
     learnt_thr = 0.8
 
-    teacher_models = Teacher.__name__, Leitner.__name__
+    teacher_models = Teacher, Leitner
 
     n_param = len(bounds)
 
@@ -87,32 +87,48 @@ def main_comparative_advantage_n_session():
         "param_labels": param_labels,
     }
 
-    kwargs_list = [{
-        ** constant_param,
-        ** {
-            "teacher_model": teacher_model,
-            "param": param,
-        }} for teacher_model in teacher_models for param in param_grid]
+    kwargs_list = []
+    for teacher_model in teacher_models:
+        for param in param_grid:
+            kwargs_list.append({
+                ** constant_param,
+                ** {
+                    "teacher_model": teacher_model,
+                    "param": param,
+                }})
 
     with MultiProcess(n_worker=os.cpu_count()-2) as mp:
-        mp.map(run_n_session, kwargs_list)
-
-    condition_labels = [m.__name__ for m in teacher_models]
+        sim_entries = mp.map(run_n_session, kwargs_list)
 
     n = len(param_grid)
 
-    data = {cd: np.zeros(n) for cd in condition_labels}
+    data = {}
 
-    constant_param["learner_model"] = \
-        constant_param.get("learner_model").__name__
+    j = 0
+    for teacher_model in teacher_models:
+        t_name = teacher_model.__name__
+        data[t_name] = np.zeros(n)
+        for i in range(n):
+            data[t_name][i] = objective(sim_entries[j], learnt_thr)
+            j += 1
 
-    for cd in condition_labels:
+    # data = {cd: np.zeros(n) for cd in condition_labels}
 
-        for i, param in enumerate(param_grid):
-            e = Simulation.objects.get(
-                **constant_param, teacher_model=cd,
-                param=list(param))
-            data[cd][i] = objective(e, learnt_thr)
+    # constant_param.pop("bounds")
+    # constant_param.update({
+    #       "param_upper_bounds": [b[0] for b in bounds],
+    #       "param_lower_bounds": [b[1] for b in bounds],
+    #       "learner_model": learner_model.__name__
+    #                       })
+    #
+    # for cd in condition_labels:
+    #
+    #     for i, param in enumerate(param_grid):
+    #         e = Simulation.objects.get(
+    #             **constant_param,
+    #             teacher_model=cd,
+    #             param_values=list(param))
+    #         data[cd][i] = objective(e, learnt_thr)
 
     data_obj = \
         (data[Teacher.__name__] - data[Leitner.__name__]) \

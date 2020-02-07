@@ -2,8 +2,9 @@ from django.db import models
 
 from django.contrib.postgres.fields import ArrayField
 
+import numpy as np
 
-# Create your models here.
+
 class Simulation(models.Model):
 
     n_item = models.IntegerField()
@@ -29,6 +30,36 @@ class Simulation(models.Model):
 
     seed = models.IntegerField()
 
+    @property
+    def post(self):
+
+        post_entries = self.post_set.all()
+
+        post = {stat: {} for stat in ("std", "mean")}
+
+        for pr in self.param_labels:
+            post_entry_pr = post_entries.get(param_label=pr)
+            post["mean"][pr] = np.array(post_entry_pr.mean[:self.n_session])
+            post["std"][pr] = np.array(post_entry_pr.std[:self.n_session])
+
+        return post
+
+    @property
+    def timestamp_array(self):
+        return np.asarray(self.timestamp[:self.n_session], dtype=int)
+
+    @property
+    def hist_array(self):
+        return np.asarray(self.hist[:self.n_session], dtype=int)
+
+    @property
+    def success_array(self):
+        return np.asarray(self.success[:self.n_session], dtype=bool)
+
+    @property
+    def n_seen_array(self):
+        return np.asarray(self.n_seen[:self.n_session], dtype=int)
+
 
 class Post(models.Model):
 
@@ -36,6 +67,16 @@ class Post(models.Model):
     param_label = models.CharField(max_length=32)
     mean = ArrayField(models.FloatField(), default=list)
     std = ArrayField(models.FloatField(), default=list)
+
+
+class RandomState(models.Model):
+
+    simulation = models.OneToOneField(Simulation, on_delete=models.CASCADE)
+    entry_1 = models.TextField()
+    entry_2 = ArrayField(models.IntegerField())
+    entry_3 = models.IntegerField()
+    entry_4 = models.IntegerField()
+    entry_5 = models.FloatField()
 
 
 # class ProbRecall(models.Model):

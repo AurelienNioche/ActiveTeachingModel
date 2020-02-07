@@ -12,7 +12,7 @@ from model.compute import compute_grid_param, \
 
 from model.teacher.teacher import Teacher
 
-from simulation_data.models import Simulation, Post
+from simulation_data.models import Simulation, Post, RandomState
 
 EPS = np.finfo(np.float).eps
 FIG_FOLDER = os.path.join("fig", "scenario")
@@ -22,6 +22,51 @@ PSYCHOLOGIST = "Psychologist"
 ADAPTIVE = "Adaptive"
 TEACHER = "Teacher"
 TEACHER_OMNISCIENT = "TeacherOmniscient"
+
+
+def cut_extra_session(e, n_session, **kwargs):
+
+    # sim_entry = Simulation.objects.create(
+    #     timestamp=e.timestamp[:n_session],
+    #     hist=e.hist[:n_session],
+    #     success=e.success[:n_session],
+    #     n_seen=e.n_seen[:n_session],
+    #     **kwargs
+    # )
+
+    # post_entries = []
+    #
+    # for i, pr in enumerate(param_labels):
+    #     post_entries.append(
+    #         Post(
+    #             simulation=sim_entry,
+    #             param_label=pr,
+    #             std=list(post_sds[pr]),
+    #             mean=list(post_means[pr])))
+    #
+    # Post.objects.bulk_create(post_entries)
+
+    return e
+
+
+def find_already_existing(n_session, **kwargs):
+
+    sim_entries = Simulation.objects.filter(**kwargs)
+
+    if sim_entries.count():
+        sim_with_same_n = sim_entries.filter(n_session=n_session)
+        if sim_with_same_n.count():
+            sim = sim_with_same_n[0]
+        else:
+            sim_entries_diff_n = sim_entries.order_by("n_session")
+            sim = sim_entries_diff_n[-1]
+            if sim.n_session > n_session:
+                sim.n_session = n_session
+
+        return sim
+
+    else:
+        return None
 
 
 def run_n_session(
@@ -59,10 +104,12 @@ def run_n_session(
         "seed": seed
     }
 
-    sim_entries = Simulation.objects.filter(**sim_parameters)
-
-    if sim_entries.count():
-        return sim_entries[0]
+    previous = find_already_existing(**sim_parameters)
+    if previous is not None:
+        if previous.n_session == n_session:
+            return previous
+        else:
+            pass
 
     n_iteration = n_iteration_per_session * n_session
 
@@ -86,7 +133,7 @@ def run_n_session(
     n_success = np.zeros(n_item, dtype=int)
 
     if teacher_model == Leitner:
-        teacher_inst = Leitner()
+        teacher_inst = Leitner(n_item=n_item)
     elif teacher_model == Teacher:
         teacher_inst = Teacher()
     else:
@@ -205,5 +252,15 @@ def run_n_session(
                 mean=list(post_means[pr])))
 
     Post.objects.bulk_create(post_entries)
+
+    state = np.random.get_state()
+    RandomState.objects.create(
+        simulation=sim_entry,
+        entry_1=state[0],
+        entry_2=state[1],
+        entry_3=state[2],
+        entry_4=state[3],
+        entry_5=state[4],
+    )
 
     return sim_entry

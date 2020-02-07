@@ -32,7 +32,6 @@ def close_service_connections():
 
 
 def ignore_keyboard_interrupts():
-
     """Ignore keyboard interrupt"""
     signal.signal(signal.SIGINT, signal.SIG_IGN)
 
@@ -43,8 +42,8 @@ def work(func, job_queue, result_queue, stop_event):
 
     while not job_queue.empty():
         try:
-            kwargs = job_queue.get(block=False)
-            result_queue.put(func(stop_event=stop_event, **kwargs))
+            i, job = job_queue.get(block=False)
+            result_queue.put((i, func(stop_event=stop_event, **job)))
         except queue.Empty:
             pass
 
@@ -75,8 +74,8 @@ class MultiProcess:
 
         pbar = tqdm(total=len(iterable))
 
-        for it in iterable:
-            self.job_queue.put(it)
+        for i, it in enumerate(iterable):
+            self.job_queue.put((i, it))
 
         for _ in range(self.num_workers):
 
@@ -90,12 +89,14 @@ class MultiProcess:
             p.start()
             self.workers.append(p)
 
-        rv = []
+        n_jobs = len(iterable)
+        rv = [None for _ in range(n_jobs)]
 
         try:
 
-            for i in range(len(iterable)):
-                rv.append(self.result_queue.get(block=True))
+            for _ in range(n_jobs):
+                i, r = self.result_queue.get(block=True)
+                rv[i] = r
                 pbar.update()
 
             return rv

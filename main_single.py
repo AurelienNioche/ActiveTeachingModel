@@ -92,7 +92,7 @@ def main_single():
 
     n_iteration = n_iteration_per_session * n_session
 
-    timesteps = np.arange(0, n_iteration, n_iteration_per_session)
+    # timesteps = np.arange(0, n_iteration, n_iteration_per_session)
 
     data_type = (P_SEEN, N_SEEN, N_LEARNT, P_ITEM, POST_MEAN, POST_SD)
     data = {dt: {} for dt in data_type}
@@ -103,24 +103,22 @@ def main_single():
 
         e = sim_entries[i]
 
-        timestamps = np.array(e.timestamp, dtype=int)
-        hist = np.array(e.hist, dtype=int)
+        timestamps = e.timestamp_array
+        hist = e.hist_array
 
-        post_entries = sim_entries[i].post_set.all()
+        timesteps = timestamps.copy()
 
-        post_mean = {}
-        post_sd = {}
+        print(f"cd {cd}, timestamps {timestamps}")
 
-        for pr in param_labels:
-            post_entry_pr = post_entries.get(param_label=pr)
-            post_mean[pr] = np.array(post_entry_pr.mean)
-            post_sd[pr] = np.array(post_entry_pr.std)
+        # post_entries = sim_entries[i].post_set.all()
+
+        post = sim_entries[i].post
 
         d = learner_model.stats_ex_post(
             param_labels=param_labels,
             param=param, hist=hist, timestamps=timestamps,
             timesteps=timesteps, learnt_thr=learnt_thr,
-            post_mean=post_mean, post_sd=post_sd
+            post=post
         )
         for dt in data_type:
             data[dt][cd] = d[dt]
