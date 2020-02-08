@@ -4,10 +4,13 @@ import numpy as np
 from utils.plot import save_fig
 
 
-def fig_p_recall(data, condition_labels, fig_name=None, fig_folder=None,
+def fig_p_recall(data, condition_labels,
+                 ax=None,
+                 fig_name=None, fig_folder=None,
                  y_label="Probability of recall", colors=None):
 
-    fig, ax = plt.subplots(figsize=(5, 4))
+    if ax is None:
+        fig, ax = plt.subplots(figsize=(5, 4))
 
     if colors is None:
         colors = [f'C{i}' for i in range(len(condition_labels))]
@@ -40,8 +43,8 @@ def fig_p_recall(data, condition_labels, fig_name=None, fig_folder=None,
 
     if fig_folder is not None and fig_name is not None:
         save_fig(fig_folder=fig_folder, fig_name=fig_name)
-    else:
-        plt.show()
+    # else:
+    #     #plt.show()
 
 
 def fig_p_recall_item(p_recall, condition_labels, fig_name=None,
@@ -88,7 +91,7 @@ def fig_p_recall_item(p_recall, condition_labels, fig_name=None,
 
 
 def fig_p_item_seen(
-        p_recall, condition_labels, fig_name=None, fig_folder=None):
+        p_recall, condition_labels, axes=None, fig_name=None, fig_folder=None):
 
     n_row = len(condition_labels)
     fig, axes = plt.subplots(nrows=n_row, figsize=(5, 4*n_row))
@@ -132,5 +135,5 @@ def fig_p_item_seen(
 
     if fig_folder is not None and fig_name is not None:
         save_fig(fig_folder=fig_folder, fig_name=fig_name)
-    else:
-        plt.show()
+    # else:
+    #     plt.show()

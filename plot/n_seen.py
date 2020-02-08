@@ -5,10 +5,13 @@ from utils.plot import save_fig
 
 
 def fig_n_seen(
-        data, condition_labels, fig_name=None, fig_folder=None,
+        data, condition_labels,
+        ax=None,
+        fig_name=None, fig_folder=None,
         y_label=None, colors=None):
 
-    fig, ax = plt.subplots(figsize=(4, 4))
+    if ax is None:
+        fig, ax = plt.subplots(figsize=(4, 4))
 
     if colors is None:
         colors = [f'C{i}' for i in range(len(condition_labels))]
@@ -24,5 +27,5 @@ def fig_n_seen(
 
     if fig_folder is not None and fig_name is not None:
         save_fig(fig_folder=fig_folder, fig_name=fig_name)
-    else:
-        plt.show()
+    # else:
+    #     plt.show()

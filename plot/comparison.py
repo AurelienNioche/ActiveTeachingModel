@@ -64,6 +64,7 @@ def phase_diagram(
         data,
         parameter_values,
         param_names,
+        ax=None,
         vmin=None,
         vmax=None,
         levels=10,
@@ -81,8 +82,9 @@ def phase_diagram(
     z = data.reshape((grid_size, grid_size)).T
     x_label, y_label = param_names
 
-    # Create figures
-    fig, ax = plt.subplots(figsize=(5, 5))
+    if ax is None:
+        # Create figures
+        fig, ax = plt.subplots(figsize=(5, 5))
 
     # Axes labels
     ax.set_xlabel(x_label)
@@ -121,7 +123,7 @@ def phase_diagram(
         #  divider = make_axes_locatable(ax)
         # cax = divider.append_axes("right", size="5%", pad=0.05)
 
-        c_bar = fig.colorbar(c, ax=ax, boundaries=[vmin, vmax],
+        c_bar = ax.colorbar(c, ax=ax, boundaries=[vmin, vmax],
                              ticks=levels,
                              fraction=0.046, pad=0.04)
         c_bar.ax.set_ylabel('Objective value')
@@ -136,5 +138,5 @@ def phase_diagram(
 
     if fig_folder is not None and fig_name is not None:
         save_fig(fig_folder=fig_folder, fig_name=fig_name)
-    else:
-        plt.show()
+    # else:
+    #     plt.show()

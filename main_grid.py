@@ -13,12 +13,10 @@ from utils.multiprocessing import MultiProcess
 from model.learner import ExponentialForgetting
 from model.teacher import Teacher, Leitner
 
-from model.plot.comparison import phase_diagram
-from model.plot.correlation import fig_correlation
+from plot.comparison import phase_diagram
+from plot.correlation import fig_correlation
 
 from model.run import run_n_session
-
-from simulation_data.models import Simulation
 
 EPS = np.finfo(np.float).eps
 FIG_FOLDER = os.path.join("fig", os.path.basename(__file__))
@@ -31,7 +29,7 @@ def truncate_10(x):
 def objective(e, learnt_thr):
 
     param = e.param_values
-    timestamps = e.timestamps_array
+    timestamps = e.timestamp_array
     hist = e.hist_array
 
     t = timestamps[-1]
@@ -45,12 +43,12 @@ def objective(e, learnt_thr):
 
 def main_comparative_advantage_n_session():
 
-    seed = 0
+    seed = 2
     n_iteration_per_session = 150
     sec_per_iter = 2
     n_iteration_between_session = \
         int((60 ** 2 * 24) / sec_per_iter - n_iteration_per_session)
-    n_session = 30
+    n_session = 60
     n_item = 1000
 
     grid_size = 20

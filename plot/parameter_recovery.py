@@ -4,11 +4,12 @@ from utils.plot import save_fig
 
 
 def fig_parameter_recovery(param_labels, condition_labels, post_means, post_sds,
-                           true_param,
+                           true_param, axes=None,
                            fig_name=None, colors=None,
                            fig_folder=None):
 
-    fig, axes = plt.subplots(ncols=len(param_labels), figsize=(12, 6))
+    if axes is None:
+        fig, axes = plt.subplots(ncols=len(param_labels), figsize=(12, 6))
 
     if colors is None:
         colors = [f'C{i}' for i in range(len(condition_labels))]
@@ -42,6 +43,6 @@ def fig_parameter_recovery(param_labels, condition_labels, post_means, post_sds,
 
     if fig_name is not None and fig_folder is not None:
         save_fig(fig_folder=fig_folder, fig_name=fig_name)
-
-    else:
-        plt.show()
+    #
+    # else:
+    #     plt.show()

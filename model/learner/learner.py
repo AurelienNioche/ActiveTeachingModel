@@ -76,6 +76,7 @@ class ExponentialForgetting(GenericLearner):
 
         seen = list(np.unique(hist))
         total_n_seen = len(seen)
+        print("N seen", total_n_seen)
 
         p_item = [[] for _ in range(total_n_seen)]
         p_recall_seen = []
@@ -92,11 +93,17 @@ class ExponentialForgetting(GenericLearner):
         for j, t in enumerate(timesteps):
 
             until_t = timestamps <= t
+            # print("n iter until t", np.sum(until_t))
             timestamps_until_t = timestamps[until_t]
             hist_until_t = hist[until_t]
             items = np.unique(hist_until_t)
 
-            n_seen.append(len(items))
+            # print(len(hist_until_t))
+
+            n_seen_t = len(items)
+            # print("j", j, "t", t, "n_seen", n_seen_t)
+
+            n_seen.append(n_seen_t)
 
             p_t = cls.p_seen_at_t(hist=hist_until_t,
                                   timestamps=timestamps_until_t,

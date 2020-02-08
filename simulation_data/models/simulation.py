@@ -31,6 +31,11 @@ class Simulation(models.Model):
     seed = models.IntegerField()
 
     @property
+    def n_iteration(self):
+        n = self.n_session * self.n_iteration_per_session
+        return n
+
+    @property
     def post(self):
 
         post_entries = self.post_set.all()
@@ -39,26 +44,30 @@ class Simulation(models.Model):
 
         for pr in self.param_labels:
             post_entry_pr = post_entries.get(param_label=pr)
-            post["mean"][pr] = np.array(post_entry_pr.mean[:self.n_session])
-            post["std"][pr] = np.array(post_entry_pr.std[:self.n_session])
+            post["mean"][pr] = np.array(post_entry_pr.mean[:self.n_iteration])
+            post["std"][pr] = np.array(post_entry_pr.std[:self.n_iteration])
 
         return post
 
     @property
     def timestamp_array(self):
-        return np.asarray(self.timestamp[:self.n_session], dtype=int)
+        a = np.asarray(self.timestamp[:self.n_iteration], dtype=int)
+        return a
 
     @property
     def hist_array(self):
-        return np.asarray(self.hist[:self.n_session], dtype=int)
+        a = np.asarray(self.hist[:self.n_iteration], dtype=int)
+        return a
 
     @property
     def success_array(self):
-        return np.asarray(self.success[:self.n_session], dtype=bool)
+        a = np.asarray(self.success[:self.n_iteration], dtype=bool)
+        return a
 
     @property
     def n_seen_array(self):
-        return np.asarray(self.n_seen[:self.n_session], dtype=int)
+        a = np.asarray(self.n_seen[:self.n_iteration], dtype=int)
+        return a
 
 
 class Post(models.Model):
@@ -77,6 +86,11 @@ class RandomState(models.Model):
     entry_3 = models.IntegerField()
     entry_4 = models.IntegerField()
     entry_5 = models.FloatField()
+
+    def get(self):
+
+        return self.entry_1, self.entry_2, self.entry_3, \
+               self.entry_4, self.entry_5
 
 
 # class ProbRecall(models.Model):

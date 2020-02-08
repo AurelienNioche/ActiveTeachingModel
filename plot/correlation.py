@@ -47,11 +47,14 @@ def stats(y, p_opt, p_cov, alpha=0.01):
 
 def fig_correlation(
         x_data, y_data, f=exp,
-        x_label=None, y_label=None,
+        ax=None,
+        x_label=None,
+        y_label=None,
         fig_folder=None,
         fig_name=None):
 
-    fig, ax = plt.subplots()
+    if ax is None:
+        fig, ax = plt.subplots()
 
     ax.scatter(x_data, y_data, alpha=0.5, s=25)
     # slope, intercept, r, p, stderr = scipy.stats.linregress(x, y)
@@ -80,5 +83,5 @@ def fig_correlation(
 
     if fig_folder is not None and fig_name is not None:
         save_fig(fig_folder=fig_folder, fig_name=fig_name)
-    else:
-        plt.show()
+    # else:
+    #     plt.show()

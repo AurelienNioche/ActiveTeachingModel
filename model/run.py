@@ -109,6 +109,10 @@ def run_n_session(
         if previous.n_session == n_session:
             return previous
         else:
+            # rd_state = previous.randomstate.get()
+            # np.random.set_state(rd_state)
+
+
             pass
 
     n_iteration = n_iteration_per_session * n_session

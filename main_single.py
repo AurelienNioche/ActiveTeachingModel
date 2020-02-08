@@ -5,7 +5,6 @@ from django.core.wsgi import get_wsgi_application
 application = get_wsgi_application()
 
 import numpy as np
-from multiprocessing import Pool
 
 from model.run import run_n_session
 from model.teacher import Teacher, Leitner
@@ -14,12 +13,16 @@ from model.learner import ExponentialForgetting
 from utils.string import dic2string
 from utils.multiprocessing import MultiProcess
 
-from model.plot import \
+from plot import \
     fig_parameter_recovery, \
     fig_p_recall, fig_n_seen, fig_p_item_seen
 
 from model.constants import \
     POST_MEAN, POST_SD, P_SEEN, N_SEEN, N_LEARNT, P_ITEM
+
+import matplotlib.pyplot as plt
+
+from utils.plot import save_fig
 
 
 EPS = np.finfo(np.float).eps
@@ -60,7 +63,7 @@ def main_single():
     sec_per_iter = 2
     n_iteration_between_session = \
         int((60 ** 2 * 24) / sec_per_iter - n_iteration_per_session)
-    n_session = 1
+    n_session = 60
     n_item = 1000
 
     grid_size = 20
@@ -92,7 +95,12 @@ def main_single():
 
     n_iteration = n_iteration_per_session * n_session
 
-    # timesteps = np.arange(0, n_iteration, n_iteration_per_session)
+    n_time_steps = \
+        (n_iteration_per_session + n_iteration_between_session) * n_session
+
+    # n_time_steps_per_day =
+
+    timesteps = np.arange(0, n_time_steps, n_iteration_per_session)
 
     data_type = (P_SEEN, N_SEEN, N_LEARNT, P_ITEM, POST_MEAN, POST_SD)
     data = {dt: {} for dt in data_type}
@@ -106,9 +114,11 @@ def main_single():
         timestamps = e.timestamp_array
         hist = e.hist_array
 
-        timesteps = timestamps.copy()
+        n_seen_array = e.n_seen_array
 
-        print(f"cd {cd}, timestamps {timestamps}")
+        # timesteps = timestamps.copy()
+
+        # print(f"cd {cd}, timestamps {timestamps}")
 
         # post_entries = sim_entries[i].post_set.all()
 
@@ -129,11 +139,46 @@ def main_single():
         f"{dic2string(param)}_" \
         f"{n_session}session" \
         f".pdf"
+    #
+    # # ax.text(-0.2, 1.2, string.ascii_uppercase[row],
+    # #         transform=ax.transAxes,
+    # #         size=20, weight='bold')
+    #
+    # fig, axes = plt.subplots(nrows=1)
+    #
+    # fig_p_recall(data=data[P_SEEN], condition_labels=condition_labels,
+    #              ax=axes)
+
+    # # n axes := n_conditions
+    # fig_p_item_seen(
+    #     p_recall=data[P_ITEM], condition_labels=condition_labels,
+    #     axes=axes[1:3]
+    #     )
+    #
+    # fig_n_seen(
+    #     data=data[N_SEEN], y_label="N seen",
+    #     condition_labels=condition_labels,
+    #     ax=axes[3])
+    #
+    # fig_n_seen(
+    #     data=data[N_LEARNT], y_label="N learnt",
+    #     condition_labels=condition_labels,
+    #     ax=axes[4])
+    #
+    # # n axes := n_parameters
+    # fig_parameter_recovery(condition_labels=condition_labels,
+    #                        param_labels=param_labels,
+    #                        post_means=data[POST_MEAN], post_sds=data[POST_SD],
+    #                        true_param=param,
+    #                        axes=axes[5:7])
+
+    # save_fig(fig_name=f"single{fig_ext}", fig_folder=FIG_FOLDER)
 
     fig_name = f"p_seen" + fig_ext
     fig_p_recall(data=data[P_SEEN], condition_labels=condition_labels,
                  fig_name=fig_name, fig_folder=FIG_FOLDER)
 
+    # 2 axes
     fig_name = f"p_item" + fig_ext
     fig_p_item_seen(
         p_recall=data[P_ITEM], condition_labels=condition_labels,
