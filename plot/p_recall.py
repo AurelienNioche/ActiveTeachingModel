@@ -93,8 +93,9 @@ def fig_p_recall_item(p_recall, condition_labels, fig_name=None,
 def fig_p_item_seen(
         p_recall, condition_labels, axes=None, fig_name=None, fig_folder=None):
 
-    n_row = len(condition_labels)
-    fig, axes = plt.subplots(nrows=n_row, figsize=(5, 4*n_row))
+    if axes is None:
+        n_row = len(condition_labels)
+        fig, axes = plt.subplots(nrows=n_row, figsize=(5, 4*n_row))
 
     colors = [f'C{i}' for i in range(len(condition_labels))]
 

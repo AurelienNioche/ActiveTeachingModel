@@ -23,7 +23,7 @@ def fig_n_seen(
     ax.set_xlabel("Time")
     ax.set_ylabel(y_label)
 
-    plt.legend()
+    ax.legend()
 
     if fig_folder is not None and fig_name is not None:
         save_fig(fig_folder=fig_folder, fig_name=fig_name)

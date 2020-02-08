@@ -123,13 +123,13 @@ def phase_diagram(
         #  divider = make_axes_locatable(ax)
         # cax = divider.append_axes("right", size="5%", pad=0.05)
 
-        c_bar = ax.colorbar(c, ax=ax, boundaries=[vmin, vmax],
+        c_bar = plt.colorbar(c, ax=ax, boundaries=[vmin, vmax],
                              ticks=levels,
                              fraction=0.046, pad=0.04)
         c_bar.ax.set_ylabel('Objective value')
 
-    except Exception:
-        pass
+    except Exception as e:
+        print(e)
 
     # Square aspect
     # set_aspect_ratio(ax, 1)

@@ -43,7 +43,7 @@ def objective(e, learnt_thr):
 
 def main_comparative_advantage_n_session():
 
-    seed = 2
+    seed = 1
     n_iteration_per_session = 150
     sec_per_iter = 2
     n_iteration_between_session = \
