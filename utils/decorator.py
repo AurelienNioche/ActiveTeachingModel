@@ -4,16 +4,16 @@ import numpy as np
 import glob
 
 
-BKP_FOLDER = os.path.join('bkp', 'pickle')
+BKP_FOLDER = os.path.join('bkp', 'pilot_2019_09_02')
 
 
 def use_pickle(func):
 
     """
     Decorator that does the following:
-    * If a pickle file corresponding to the call exists,
+    * If a pilot_2019_09_02 file corresponding to the call exists,
     it load the data from it instead of calling the function.
-    * If no such pickle file exists, it calls 'func',
+    * If no such pilot_2019_09_02 file exists, it calls 'func',
     creates the file and saves the output in it
     :param func: any function
     :return: output of func(*args, **kwargs)
