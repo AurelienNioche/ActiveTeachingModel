@@ -1,15 +1,16 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from . subplot import n_seen, success
+from . subplot import n_seen as subplot_n_seen
+from .subplot import success as subplot_success
 from utils.plot import save_fig
 
 
 def plot(
-        seen, successes,
+        n_seen, success,
         fig_name, fig_folder,
         font_size=10, label_size=8, line_width=1,
-        normalize=False,
+        normalize_by=None,
         window=np.inf
 ):
 
@@ -18,9 +19,9 @@ def plot(
     fig, axes = plt.subplots(nrows=n_rows, ncols=n_cols, figsize=(6, 14))
 
     ax = axes[0]
-    n_seen.curve(
-        seen=seen,
-        normalize=normalize,
+    subplot_n_seen.curve(
+        y=n_seen,
+        normalize_by=normalize_by,
         ax=ax,
         font_size=font_size,
         label_size=label_size,
@@ -28,8 +29,8 @@ def plot(
     )
 
     ax = axes[1]
-    success.curve(
-        successes=successes,
+    subplot_success.curve(
+        successes=success,
         ax=ax,
         font_size=font_size,
         label_size=label_size,

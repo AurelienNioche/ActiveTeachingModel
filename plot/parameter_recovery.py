@@ -52,6 +52,8 @@ def parameter_recovery_grid(
         data,
         param_labels,
         param_bounds,
+        alpha=0.2,
+        dot_size=2,
         axes=None,
         x_label='Used to simulate',
         y_label='Recovered',
@@ -81,19 +83,19 @@ def parameter_recovery_grid(
         y = data[i, 1]
 
         # Create scatter
-        ax.scatter(x, y, alpha=0.5, color=colors[i])
+        ax.scatter(x, y, alpha=alpha, color=colors[i], s=dot_size)
 
         # Set axis label
         ax.set_xlabel(x_label)
         ax.set_ylabel(y_label)
 
         # Set title
-        ax.set_title(title)
+        # ax.set_title(title)
 
         # Set ticks positions
         ticks = (
             param_bounds[i][0],
-            (param_bounds[i][1]-param_bounds[i][0])/2,
+            # (param_bounds[i][1]-param_bounds[i][0])/2,
             param_bounds[i][1],
         )
 
@@ -110,4 +112,4 @@ def parameter_recovery_grid(
         ax.set_aspect(1)
 
     if fig_name is not None and fig_folder is not None:
-        save_fig(fig_folder=fig_folder, fig_name=fig_name)
+        save_fig(fig_folder=fig_folder, fig_name=fig_name, pad_inches = 0)

@@ -5,7 +5,7 @@ from itertools import combinations
 
 import numpy as np
 
-from user_data.settings import BKP_SEMANTIC_CONNECTION
+from user_data.settings import BKP_CONNECTION
 
 
 def create(word_list, use_nan):
@@ -19,7 +19,7 @@ def _normalize(a):
     return np.interp(a, (np.nanmin(a), np.nanmax(a)), (0, 1))
 
 
-def _compute(word_list, normalize_similarity=True, verbose=False):
+def _compute(word_list, normalize_similarity, verbose=False):
 
     word_list = [i.lower() for i in word_list]
 
@@ -38,30 +38,31 @@ def _compute(word_list, normalize_similarity=True, verbose=False):
     return sim
 
 
-def get(word_list=None, normalize_similarity=None):
+def get(word_list, normalize_similarity):
 
-    if os.path.exists(BKP_SEMANTIC_CONNECTION):
+    bkp_file = os.path.join(BKP_CONNECTION,
+                            f"sem_con_norm_{normalize_similarity}.p")
+
+    if os.path.exists(bkp_file):
 
         data, loaded_word_list, loaded_normalize = \
-            pickle.load(open(BKP_SEMANTIC_CONNECTION, 'rb'))
+            pickle.load(open(bkp_file, 'rb'))
 
-        conform = True
-        if word_list is not None:
-            conform *= (loaded_word_list == np.array(word_list)).all()
-
-        if normalize_similarity is not None:
-            conform *= loaded_normalize == normalize_similarity
+        conform = (loaded_word_list == np.array(word_list)).all() \
+            and loaded_normalize == normalize_similarity
 
         if conform:
-            return data, loaded_word_list, normalize_similarity
+            return data
 
     assert word_list is not None, \
         "If no backup file is existing, a word list has to be provided "
 
-    data = _compute(word_list=word_list, normalize_similarity=True)
+    data = _compute(word_list=word_list,
+                    normalize_similarity=normalize_similarity)
+    os.makedirs(BKP_CONNECTION, exist_ok=True)
     pickle.dump((data, word_list, normalize_similarity),
-                open(BKP_SEMANTIC_CONNECTION, 'wb'))
-    return data, word_list, normalize_similarity
+                open(bkp_file, 'wb'))
+    return data
 
 
 def demo(word_list=None):
@@ -69,4 +70,5 @@ def demo(word_list=None):
     if not word_list:
         word_list = ['computer', 'myself', 'king']
 
-    _compute(word_list=word_list, verbose=True)
+    _compute(word_list=word_list, normalize_similarity=True,
+             verbose=True)

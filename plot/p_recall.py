@@ -91,7 +91,9 @@ def fig_p_recall_item(p_recall, condition_labels, fig_name=None,
 
 
 def fig_p_item_seen(
-        p_recall, condition_labels, axes=None, fig_name=None, fig_folder=None):
+        p_recall, condition_labels,
+        n_iteration_per_day=(60*60*24)/2,
+        axes=None, fig_name=None, fig_folder=None):
 
     if axes is None:
         n_row = len(condition_labels)
@@ -119,7 +121,7 @@ def fig_p_item_seen(
         for coordinates in p_recall[dt]:
             x, y = np.asarray(coordinates).T
 
-            x /= 60*60*24
+            x /= n_iteration_per_day
             line, = ax.plot(x, y, color=color, alpha=0.5, linewidth=0.5)
             # x_ticks = np.zeros(3, dtype=int)
             # x_ticks[:] = np.linspace(0, len(y), 3)

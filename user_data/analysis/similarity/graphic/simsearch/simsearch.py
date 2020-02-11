@@ -3,18 +3,9 @@ Adapted from https://github.com/larsyencken/simsearch
 Related paper: https://www.aclweb.org/anthology/C08-1131
 """
 
-import os
-
 import numpy as np
 
-# static data files needed for building
-DATA_DIR = os.path.join('user_data', 'bkp', 'simsearch')
-
-# The source of stroke data for each character
-STROKE_SOURCE = os.path.join(DATA_DIR, 'stroke_ulrich')
-
-assert os.path.exists(STROKE_SOURCE), \
-    "Error of configuration for the 'stroke ulrich' file..."
+from user_data.settings import STROKE_SOURCE
 
 
 class StrokeSimilarity:
@@ -30,10 +21,6 @@ class StrokeSimilarity:
             for i, line in enumerate(i_stream):
                 line = line.decode()
                 kanji, raw_strokes = line.rstrip().split()
-
-                # Decode from bytes
-                # kanji = kanji.decode()
-                # raw_strokes = raw_strokes.decode()
 
                 raw_strokes = raw_strokes.split(',')
                 strokes = list(map(self.get_stroke_type, raw_strokes))

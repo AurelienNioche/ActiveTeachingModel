@@ -44,8 +44,8 @@ class Simulation(models.Model):
 
         for pr in self.param_labels:
             post_entry_pr = post_entries.get(param_label=pr)
-            post["mean"][pr] = np.array(post_entry_pr.mean[:self.n_iteration])
-            post["std"][pr] = np.array(post_entry_pr.std[:self.n_iteration])
+            post["mean"][pr] = np.array(post_entry_pr.mean[:self.n_iteration+1])
+            post["std"][pr] = np.array(post_entry_pr.std[:self.n_iteration+1])
 
         return post
 

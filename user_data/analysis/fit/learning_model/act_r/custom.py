@@ -63,7 +63,8 @@ class ActRMeaning(ActR):
         if pr_effect_i == 0:
             return 0
 
-        contrib = (self.c_x[item, list_j] * pr_effect_j).sum() * self.x
+        weight = (self.c_x[item, list_j] * pr_effect_j).sum()
+        contrib = weight * self.x
 
         _sum = pr_effect_i + contrib
         if _sum <= 0:

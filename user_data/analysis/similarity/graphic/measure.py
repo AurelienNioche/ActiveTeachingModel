@@ -8,7 +8,7 @@ from tqdm import tqdm
 
 from . simsearch import simsearch
 
-from user_data.settings import BKP_GRAPHIC_CONNECTION
+from user_data.settings import BKP_CONNECTION
 
 
 def _normalize(a):
@@ -16,7 +16,7 @@ def _normalize(a):
     # return # (x - np.min(x)) / (np.max(x) - np.min(x))
 
 
-def _compute(kanji_list, normalize_similarity=True, verbose=False):
+def _compute(kanji_list, normalize_similarity, verbose=False):
 
     s = simsearch.StrokeSimilarity()
 
@@ -49,31 +49,32 @@ def _compute(kanji_list, normalize_similarity=True, verbose=False):
     return sim_array
 
 
-def get(kanji_list=None, normalize_similarity=None):
+def get(kanji_list, normalize_similarity):
 
-    if os.path.exists(BKP_GRAPHIC_CONNECTION):
+    bkp_file = os.path.join(BKP_CONNECTION,
+                            f"graph_con_norm_{normalize_similarity}.p")
+
+    if os.path.exists(bkp_file):
 
         data, loaded_kanji_list, loaded_normalize = \
-            pickle.load(open(BKP_GRAPHIC_CONNECTION, 'rb'))
+            pickle.load(open(bkp_file, 'rb'))
 
-        conform = True
-        if kanji_list is not None:
-            conform *= (loaded_kanji_list == np.array(kanji_list)).all()
-
-        if normalize_similarity is not None:
-            conform *= loaded_normalize == normalize_similarity
+        conform = (loaded_kanji_list == np.array(kanji_list)).all() \
+            and loaded_normalize == normalize_similarity
 
         if conform:
-            return data, loaded_kanji_list, loaded_normalize
+            return data
 
     assert kanji_list is not None, \
         "If no backup file is existing, a kanji list has to be provided "
 
-    data = _compute(kanji_list=kanji_list, normalize_similarity=True)
+    data = _compute(kanji_list=kanji_list,
+                    normalize_similarity=normalize_similarity)
+    os.makedirs(BKP_CONNECTION, exist_ok=True)
     pickle.dump((data, kanji_list, normalize_similarity),
-                open(BKP_GRAPHIC_CONNECTION, 'wb'))
+                open(bkp_file, 'wb'))
 
-    return data, kanji_list, normalize_similarity
+    return data
 
 
 def demo(kanji_list=None):
@@ -82,4 +83,5 @@ def demo(kanji_list=None):
         kanji_list = ['目', '耳', '犬', '大', '王',
                       '玉', '夕', '二', '一', '左', '右']
 
-    _compute(kanji_list=kanji_list, verbose=True)
+    _compute(kanji_list=kanji_list, normalize_similarity=True,
+             verbose=True)

@@ -5,22 +5,22 @@ from matplotlib.ticker import MaxNLocator
 from utils.plot import save_fig
 
 
-def curve(seen, fig_name=None,
+def curve(y, fig_name=None,
           font_size=12, line_width=3,
-          label_size=8, ax=None, normalize=False):
+          label_size=8, ax=None, normalize_by=None):
 
     if ax is None:
         fig = plt.figure(figsize=(10, 10))
         ax = fig.add_subplot(111)
 
     # Data pre-processing
-    n_item, n_iteration = seen.shape
+    n_iteration = len(y)
 
     x = np.arange(n_iteration) + 1
-    y = np.sum(seen, axis=0)
+    y = y
 
-    if normalize:
-        y[:] = y/n_item
+    if normalize_by is not None:
+        y[:] = y/normalize_by
 
     # Plot
     ax.plot(x, y, color='C0', linewidth=line_width)
@@ -40,7 +40,7 @@ def curve(seen, fig_name=None,
     # y-axis
     ax.set_ylabel('$N_{seen}$', fontsize=font_size)
 
-    if normalize:  # Scale is normalized
+    if normalize_by is not None:  # Scale is normalized
         ax.set_ylim((-0.01, 1.01))
         ax.set_yticks((0, 0.5, 1))
 
