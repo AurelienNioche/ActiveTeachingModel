@@ -5,7 +5,7 @@ import os
 
 from utils.plot import save_fig
 from plot.scatter_metric import plot_scatter_metric
-from plot.parameter_recovery import parameter_recovery_grid
+from plot.parameter_recovery_single import parameter_recovery_grid
 
 
 def xp_results():

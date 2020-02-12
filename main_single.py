@@ -5,6 +5,7 @@ from django.core.wsgi import get_wsgi_application
 application = get_wsgi_application()
 
 import numpy as np
+import string
 
 from model.run import run_n_session
 from model.teacher import Teacher, Leitner
@@ -93,7 +94,7 @@ def main_single():
     with MultiProcess(n_worker=os.cpu_count()-2) as mp:
         sim_entries = mp.map(run_n_session, kwargs_list)
 
-    n_iteration = n_iteration_per_session * n_session
+    # n_iteration = n_iteration_per_session * n_session
 
     n_time_steps = \
         (n_iteration_per_session + n_iteration_between_session) * n_session
@@ -114,7 +115,7 @@ def main_single():
         timestamps = e.timestamp_array
         hist = e.hist_array
 
-        n_seen_array = e.n_seen_array
+        # n_seen_array = e.n_seen_array
 
         # timesteps = timestamps.copy()
 
@@ -146,15 +147,23 @@ def main_single():
     #
     fig, axes = plt.subplots(ncols=2, nrows=3, figsize=(12, 9))
 
+    ax = axes[0, 0]
     fig_n_seen(
         data=data[N_LEARNT], y_label="N learnt",
         condition_labels=condition_labels,
-        ax=axes[0, 0])
+        ax=ax)
 
+    ax.text(-0.1, -0.1, string.ascii_uppercase[0],
+                    transform=ax.transAxes, size=20, weight='bold')
+
+    ax = axes[0, 1]
     fig_n_seen(
         data=data[N_SEEN], y_label="N seen",
         condition_labels=condition_labels,
-        ax=axes[0, 1])
+        ax=ax)
+
+    ax.text(-0.1, -0.1, string.ascii_uppercase[1],
+                    transform=ax.transAxes, size=20, weight='bold')
 
 
     # n axes := n_parameters
@@ -163,12 +172,19 @@ def main_single():
                            post_means=data[POST_MEAN], post_sds=data[POST_SD],
                            true_param=param,
                            axes=axes[1, :])
-    #
+    ax = axes[1, 0]
+    ax.text(-0.1, -0.1, string.ascii_uppercase[2],
+                    transform=ax.transAxes, size=20, weight='bold')
+
     # n axes := n_conditions
     fig_p_item_seen(
         p_recall=data[P_ITEM], condition_labels=condition_labels,
         axes=axes[2, :]
         )
+
+    ax = axes[2, 0]
+    ax.text(-0.1, -0.1, string.ascii_uppercase[3],
+                    transform=ax.transAxes, size=20, weight='bold')
     #
     # fig_p_recall(data=data[P_SEEN], condition_labels=condition_labels,
     #              ax=axes[5])

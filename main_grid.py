@@ -7,8 +7,11 @@ application = get_wsgi_application()
 import os
 import numpy as np
 from itertools import product
+import matplotlib.pyplot as plt
+import string
 
 from utils.multiprocessing import MultiProcess
+from utils.plot import save_fig
 
 from model.learner import ExponentialForgetting
 from model.teacher import Teacher, Leitner
@@ -17,6 +20,7 @@ from plot.comparison import phase_diagram
 from plot.correlation import fig_correlation
 
 from model.run import run_n_session
+
 
 EPS = np.finfo(np.float).eps
 FIG_FOLDER = os.path.join("fig", os.path.basename(__file__))
@@ -43,7 +47,7 @@ def objective(e, learnt_thr):
 
 def main_comparative_advantage_n_session():
 
-    seed = 1
+    seed = 2
     n_iteration_per_session = 150
     sec_per_iter = 2
     n_iteration_between_session = \
@@ -134,19 +138,29 @@ def main_comparative_advantage_n_session():
 
     coord_alpha_x, coord_beta_x = param_grid.T
 
-    ext = f"_{n_session}session_seed{seed}"
+    fig_ext = f"_{n_session}session_seed{seed}"
 
+    fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(12, 5))
+
+    ax = axes[0]
     fig_correlation(coord_alpha_x, data_obj,
+                    ax=ax,
                     x_label=r"$\alpha$",
-                    y_label="Improvement (%)",
-                    fig_folder=FIG_FOLDER,
-                    fig_name=f'alpha_corr{ext}.pdf')
+                    y_label="Improvement (%)")
+    ax.text(-0.1, -0.1, string.ascii_uppercase[0],
+            transform=ax.transAxes, size=20, weight='bold')
+
+    ax = axes[1]
     fig_correlation(coord_beta_x, data_obj,
                     x_label=r"$\beta$",
                     y_label="Improvement (%)",
-                    fig_folder=FIG_FOLDER,
-                    fig_name=f'beta_corr{ext}.pdf')
+                    ax=ax)
 
+    ax.text(-0.1, -0.1, string.ascii_uppercase[1],
+            transform=ax.transAxes, size=20, weight='bold')
+
+    save_fig(fig_name=f"relation_improvement_parameter_{fig_ext}.pdf",
+             fig_folder=FIG_FOLDER)
 
     # data[data[:] < 0] = 0
     # print(np.min(data))
@@ -155,9 +169,10 @@ def main_comparative_advantage_n_session():
                   data=data_obj,
                   fig_folder=FIG_FOLDER,
                   fig_name=
-                  f'phase_diagram_teacher_better{ext}.pdf',
+                  f'phase_diagram_teacher_better{fig_ext}.pdf',
                   levels=np.arange(truncate_10(np.min(data_obj)),
                                    np.max(data_obj) + 10, 10))
+
 
 
 if __name__ == "__main__":
