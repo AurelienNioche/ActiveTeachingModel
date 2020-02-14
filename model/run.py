@@ -11,6 +11,8 @@ from model.compute import compute_grid_param, \
     post_mean, post_sd
 
 from model.teacher.teacher import Teacher
+from model.teacher.teacher_perfect_info import TeacherPerfectInfo
+from model.teacher.psychologist import Psychologist
 
 from simulation_data.models import Simulation, Post, RandomState
 
@@ -111,8 +113,6 @@ def run_n_session(
         else:
             # rd_state = previous.randomstate.get()
             # np.random.set_state(rd_state)
-
-
             pass
 
     n_iteration = n_iteration_per_session * n_session
@@ -140,6 +140,10 @@ def run_n_session(
         teacher_inst = Leitner(n_item=n_item)
     elif teacher_model == Teacher:
         teacher_inst = Teacher()
+    elif teacher_model == TeacherPerfectInfo:
+        teacher_inst = TeacherPerfectInfo(param=param)
+    elif teacher_model == Psychologist:
+        teacher_inst = Psychologist()
     else:
         raise ValueError
 
@@ -169,7 +173,22 @@ def run_n_session(
             timestamps=timestamp,
             t=t)
 
-        if teacher_model == Teacher:
+        if teacher_model == Leitner:
+            i = teacher_inst.ask()
+
+        elif teacher_model == Psychologist:
+            i = teacher_inst.get_item(
+                learner=learner_model,
+                log_post=log_post,
+                log_lik=log_lik,
+                n_item=n_item,
+                grid_param=grid_param,
+                delta=delta,
+                n_pres=n_pres,
+                n_success=n_success,
+                hist=hist)
+
+        else:
             i = teacher_inst.get_item(
                 n_pres=n_pres,
                 n_success=n_success,
@@ -180,8 +199,6 @@ def run_n_session(
                 timestamps=timestamp,
                 t=t
             )
-        else:
-            i = teacher_inst.ask()
 
         p_recall = learner_model.p(
             param=param,
@@ -261,7 +278,7 @@ def run_n_session(
     RandomState.objects.create(
         simulation=sim_entry,
         entry_1=state[0],
-        entry_2=state[1],
+        entry_2=list(state[1]),
         entry_3=state[2],
         entry_4=state[3],
         entry_5=state[4],

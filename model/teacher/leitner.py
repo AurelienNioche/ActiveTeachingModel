@@ -1,7 +1,7 @@
 import numpy as np
 
 
-class Leitner():
+class Leitner:
 
     def __init__(self, n_item, delay_factor=2):
         """

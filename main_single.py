@@ -8,7 +8,8 @@ import numpy as np
 import string
 
 from model.run import run_n_session
-from model.teacher import Teacher, Leitner
+from model.teacher import Teacher, Leitner, Psychologist, \
+    TeacherPerfectInformation
 from model.learner import ExponentialForgetting
 
 from utils.string import dic2string
@@ -40,11 +41,11 @@ def basic():
         int((60 ** 2 * 24) / sec_per_iter - n_iteration_per_session)
 
     run_n_session(
-        n_session=1,
+        n_session=60,
         n_iteration_per_session=n_iteration_per_session,
         n_iteration_between_session=n_iteration_between_session,
         learner_model=ExponentialForgetting,
-        teacher_model=Teacher,
+        teacher_model=TeacherPerfectInformation,
         bounds=((0.001, 0.04), (0.2, 0.5)),
         param_labels=("alpha", "beta"),
         param=(0.02, 0.2),
@@ -224,4 +225,4 @@ def main_single():
 
 if __name__ == "__main__":
 
-    main_single()
+    basic()
