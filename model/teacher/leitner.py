@@ -182,7 +182,6 @@ class Leitner:
         return new_question
 
     def ask(self):
-
         return self._get_next_node()
 
     def update(self, item, response):

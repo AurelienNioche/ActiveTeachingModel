@@ -9,4 +9,4 @@ class TeacherPerfectInfo(Teacher):
 
     def get_item(self, param, *args, **kwargs):
 
-        super().get_item(param=self.param, *args, **kwargs)
+        return super().get_item(param=self.param, *args, **kwargs)

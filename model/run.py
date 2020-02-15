@@ -1,77 +1,31 @@
 import os
-import numpy as np
 
+import numpy as np
 from scipy.special import logsumexp
 from tqdm import tqdm
+import pickle
 
 from model.teacher.leitner import Leitner
 
 
 from model.compute import compute_grid_param, \
-    post_mean, post_sd
+    post_mean_sd
 
 from model.teacher.teacher import Teacher
 from model.teacher.teacher_perfect_info import TeacherPerfectInfo
 from model.teacher.psychologist import Psychologist
 
-from simulation_data.models import Simulation, Post, RandomState
+from simulation_data.models import Simulation, Post
 
 EPS = np.finfo(np.float).eps
 FIG_FOLDER = os.path.join("fig", "scenario")
 
-LEITNER = "Leitner"
-PSYCHOLOGIST = "Psychologist"
-ADAPTIVE = "Adaptive"
-TEACHER = "Teacher"
-TEACHER_OMNISCIENT = "TeacherOmniscient"
+
+def run_n_session(**kwargs):
+    return Simulation.run(**kwargs)
 
 
-def cut_extra_session(e, n_session, **kwargs):
-
-    # sim_entry = Simulation.objects.create(
-    #     timestamp=e.timestamp[:n_session],
-    #     hist=e.hist[:n_session],
-    #     success=e.success[:n_session],
-    #     n_seen=e.n_seen[:n_session],
-    #     **kwargs
-    # )
-
-    # post_entries = []
-    #
-    # for i, pr in enumerate(param_labels):
-    #     post_entries.append(
-    #         Post(
-    #             simulation=sim_entry,
-    #             param_label=pr,
-    #             std=list(post_sds[pr]),
-    #             mean=list(post_means[pr])))
-    #
-    # Post.objects.bulk_create(post_entries)
-
-    return e
-
-
-def find_already_existing(n_session, **kwargs):
-
-    sim_entries = Simulation.objects.filter(**kwargs)
-
-    if sim_entries.count():
-        sim_with_same_n = sim_entries.filter(n_session=n_session)
-        if sim_with_same_n.count():
-            sim = sim_with_same_n[0]
-        else:
-            sim_entries_diff_n = sim_entries.order_by("n_session")
-            sim = sim_entries_diff_n[-1]
-            if sim.n_session > n_session:
-                sim.n_session = n_session
-
-        return sim
-
-    else:
-        return None
-
-
-def run_n_session(
+def run_n_session_legacy(
         learner_model,
         teacher_model,
         param,
@@ -92,28 +46,24 @@ def run_n_session(
         param_labels = learner_model.param_labels
 
     sim_parameters = {
-        "n_item": n_item,
-        "n_session": n_session,
-        "n_iteration_per_session": n_iteration_per_session,
-        "n_iteration_between_session": n_iteration_between_session,
-        "teacher_model": teacher_model.__name__,
-        "learner_model": learner_model.__name__,
-        "param_labels": list(param_labels),
-        "param_values": list(param),
-        "param_upper_bounds": [b[0] for b in bounds],
-        "param_lower_bounds": [b[1] for b in bounds],
-        "grid_size": grid_size,
-        "seed": seed
-    }
+            "n_item": n_item,
+            "n_session": n_session,
+            "n_iteration_per_session": n_iteration_per_session,
+            "n_iteration_between_session": n_iteration_between_session,
+            "teacher_model": teacher_model.__name__,
+            "learner_model": learner_model.__name__,
+            "param_labels": list(param_labels),
+            "param_values": list(param),
+            "param_upper_bounds": [b[0] for b in bounds],
+            "param_lower_bounds": [b[1] for b in bounds],
+            "grid_size": grid_size,
+            "seed": seed
+        }
 
-    previous = find_already_existing(**sim_parameters)
-    if previous is not None:
-        if previous.n_session == n_session:
-            return previous
-        else:
-            # rd_state = previous.randomstate.get()
-            # np.random.set_state(rd_state)
-            pass
+    sim_entries = Simulation.objects.filter(**sim_parameters)
+
+    if sim_entries.count():
+        return sim_entries[0]
 
     n_iteration = n_iteration_per_session * n_session
 
@@ -124,13 +74,8 @@ def run_n_session(
     success = np.zeros(n_iteration, dtype=bool)
     timestamp = np.zeros(n_iteration)
 
-    n_seen = np.zeros(n_iteration, dtype=int)
-
     grid_param = compute_grid_param(bounds=bounds, grid_size=grid_size)
     n_param_set = len(grid_param)
-
-    lp = np.ones(n_param_set)
-    log_post = lp - logsumexp(lp)
 
     delta = np.zeros(n_item, dtype=int)
     n_pres = np.zeros(n_item, dtype=int)
@@ -146,6 +91,9 @@ def run_n_session(
         teacher_inst = Psychologist()
     else:
         raise ValueError
+
+    lp = np.ones(n_param_set)
+    log_post = lp - logsumexp(lp)
 
     pm, ps = None, None
 
@@ -220,9 +168,6 @@ def run_n_session(
         log_post += log_lik[i, :, int(response)].flatten()
         log_post -= logsumexp(log_post)
 
-        timestamp[it] = t
-        hist[it] = i
-
         # Make the user learn
         # Increment delta for all items
         delta[:] += 1
@@ -232,19 +177,17 @@ def run_n_session(
         n_success[i] += int(response)
 
         # Compute post mean and std
-        pm = post_mean(grid_param=grid_param, log_post=log_post)
-        ps = post_sd(grid_param=grid_param, log_post=log_post)
+        pm, ps = post_mean_sd(grid_param=grid_param, log_post=log_post)
 
         # Backup the mean/std of post dist
         for i, pr in enumerate(param_labels):
             post_means[pr][it] = pm[i]
             post_sds[pr][it] = ps[i]
 
-        # Backup
-        seen = n_pres[:] > 0
-
-        n_seen[it] = np.sum(seen)
+        # Backup success, timestamp, hist
         success[it] = int(response)
+        timestamp[it] = t
+        hist[it] = i
 
         t += 1
         c_iter_session += 1
@@ -253,11 +196,14 @@ def run_n_session(
             t += n_iteration_between_session
             c_iter_session = 0
 
+    state = pickle.dumps(np.random.get_state())
+
     sim_entry = Simulation.objects.create(
         timestamp=list(timestamp),
         hist=list(hist),
         success=list(success),
-        n_seen=list(n_seen),
+        log_post=list(log_post),
+        random_state=state,
         **sim_parameters
     )
 
@@ -273,15 +219,5 @@ def run_n_session(
                 mean=list(post_means[pr])))
 
     Post.objects.bulk_create(post_entries)
-
-    state = np.random.get_state()
-    RandomState.objects.create(
-        simulation=sim_entry,
-        entry_1=state[0],
-        entry_2=list(state[1]),
-        entry_3=state[2],
-        entry_4=state[3],
-        entry_5=state[4],
-    )
 
     return sim_entry

@@ -9,7 +9,7 @@ import string
 
 from model.run import run_n_session
 from model.teacher import Teacher, Leitner, Psychologist, \
-    TeacherPerfectInformation
+    TeacherPerfectInfo
 from model.learner import ExponentialForgetting
 
 from utils.string import dic2string
@@ -45,10 +45,11 @@ def basic():
         n_iteration_per_session=n_iteration_per_session,
         n_iteration_between_session=n_iteration_between_session,
         learner_model=ExponentialForgetting,
-        teacher_model=TeacherPerfectInformation,
+        teacher_model=TeacherPerfectInfo,
         bounds=((0.001, 0.04), (0.2, 0.5)),
         param_labels=("alpha", "beta"),
         param=(0.02, 0.2),
+        seed=2
     )
 
 
@@ -100,7 +101,8 @@ def main_single():
     n_time_steps = \
         (n_iteration_per_session + n_iteration_between_session) * n_session
 
-    n_time_steps_per_day = n_iteration_per_session + n_iteration_between_session
+    n_time_steps_per_day = \
+        n_iteration_per_session + n_iteration_between_session
 
     timesteps = np.arange(0, n_time_steps, n_time_steps_per_day)
 
