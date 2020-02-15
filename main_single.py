@@ -41,7 +41,7 @@ def basic():
         int((60 ** 2 * 24) / sec_per_iter - n_iteration_per_session)
 
     run_n_session(
-        n_session=60,
+        n_session=3,
         n_iteration_per_session=n_iteration_per_session,
         n_iteration_between_session=n_iteration_between_session,
         learner_model=ExponentialForgetting,

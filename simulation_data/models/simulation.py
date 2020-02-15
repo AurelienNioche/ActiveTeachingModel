@@ -37,7 +37,7 @@ class Simulation(models.Model):
 
     # Outputs ----------------------------------------
 
-    random_state = models.TextField(null=True, blank=True)
+    random_state = models.BinaryField(null=True, blank=True)
 
     log_post = ArrayField(models.FloatField(), default=list)
 
@@ -135,6 +135,9 @@ class Simulation(models.Model):
         previous_n_session = self.n_session
         previous_n_iteration = self.n_iteration
 
+        print("new n session", n_session)
+        print("old n session", previous_n_session)
+
         self.n_session = n_session
         self.n_iteration = n_session * self.n_iteration_per_session
 
@@ -144,8 +147,12 @@ class Simulation(models.Model):
                   + self.n_iteration_per_session) * previous_n_session
         self.c_iter_session = 0
 
+        print("old n session", previous_n_session)
+        print("n iter per session", self.n_iteration_per_session)
+        current_it = self.n_iteration_per_session * previous_n_session
+        print("current it", current_it)
         self.iterator = range(
-                self.n_iteration_between_session * previous_n_session,
+                current_it,
                 self.n_iteration)
 
         # If no multiprocessing, wrap with tqdm
@@ -159,9 +166,11 @@ class Simulation(models.Model):
         for i in range(self.n_item):
 
             i_pres = self.hist_array[:] == i
-            self.delta[i] = np.argmax(self.timestamp_array[i_pres])
-            self.n_pres[i] = np.sum(i_pres)
-            self.n_success[i] = np.sum(self.success_array[i_pres])
+            n_pres_i = np.sum(i_pres)
+            self.n_pres[i] = n_pres_i
+            if n_pres_i:
+                self.delta[i] = np.argmax(self.timestamp_array[i_pres])
+                self.n_success[i] = np.sum(self.success_array[i_pres])
 
         self.log_post_array[:] = self.log_post
 
@@ -172,7 +181,7 @@ class Simulation(models.Model):
             self.post_mean_array[:previous_n_iteration, i] = \
                 post_entry_pr.mean
             self.post_sd_array[:previous_n_iteration, i] = \
-                post_entry_pr.mean.sd
+                post_entry_pr.std
 
         np.random.set_state(pickle.loads(self.random_state))
 
@@ -193,7 +202,8 @@ class Simulation(models.Model):
         elif self.teacher_model == Psychologist.__name__:
             teacher_inst = Psychologist()
         else:
-            raise ValueError(f"Teacher model not recognized: {self.teacher_model}")
+            raise ValueError(f"Teacher model not recognized: "
+                             f"{self.teacher_model}")
 
         for it in self.iterator:
 
@@ -295,17 +305,25 @@ class Simulation(models.Model):
 
         super().save()
 
-        post_entries = []
+        post_entries = self.post_set.all()
+        if post_entries.count():
+            for i, pr in enumerate(self.param_labels):
+                e = post_entries.get(param_label=pr)
+                e.std = list(self.post_sd_array[:, i])
+                e.mean = list(self.post_mean_array[:, i])
 
-        for i, pr in enumerate(self.param_labels):
-            post_entries.append(
-                Post(
-                    simulation=self,
-                    param_label=pr,
-                    std=list(self.post_sd_array[:, i]),
-                    mean=list(self.post_mean_array[:, i])))
+        else:
+            post_entries = []
 
-        Post.objects.bulk_create(post_entries)
+            for i, pr in enumerate(self.param_labels):
+                post_entries.append(
+                    Post(
+                        simulation=self,
+                        param_label=pr,
+                        std=list(self.post_sd_array[:, i]),
+                        mean=list(self.post_mean_array[:, i])))
+
+            Post.objects.bulk_create(post_entries)
 
     @classmethod
     def run(cls, learner_model,
@@ -338,9 +356,11 @@ class Simulation(models.Model):
         sim = cls.already_existing(kwargs=kwargs, n_session=n_session)
 
         if sim is not None:
+            print("found already existing")
             if sim.n_session == n_session:
+                print("same size")
                 return sim
-
+            print("shorter")
             sim.prepare_extension(stop_event=stop_event,
                                   n_session=n_session)
         else:
@@ -385,13 +405,16 @@ class Simulation(models.Model):
                 sim = sim_with_same_n[0]
 
             else:
-                sim_entries_diff_n = sim_entries.order_by("n_session")
-                sim = sim_entries_diff_n[-1]
+                sim_entries_diff_n = \
+                    sim_entries.order_by("n_session").reverse()
+                sim = sim_entries_diff_n[0]
 
                 # If a sim is longer
                 if sim.n_session > n_session:
                     sim = cls.as_shorter(sim, n_session)
                 elif sim.teacher_model == Leitner.__name__:
+                    sim = None
+                elif sim.random_state is None:
                     sim = None
         return sim
 
