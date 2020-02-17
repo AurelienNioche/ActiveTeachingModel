@@ -356,11 +356,8 @@ class Simulation(models.Model):
         sim = cls.already_existing(kwargs=kwargs, n_session=n_session)
 
         if sim is not None:
-            print("found already existing")
             if sim.n_session == n_session:
-                print("same size")
                 return sim
-            print("shorter")
             sim.prepare_extension(stop_event=stop_event,
                                   n_session=n_session)
         else:

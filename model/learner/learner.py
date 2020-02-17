@@ -150,7 +150,11 @@ class ExponentialForgetting(GenericLearner):
 
                 delta_i = t - timestamps_i[-1]
                 fr = param[0] * (1 - param[1]) ** (n_pres_i - 1)
-                p = np.exp(- fr * delta_i)
+
+                if delta_i > 0:
+                    p = np.exp(- fr * delta_i)
+                else:
+                    p = 1
 
             else:
                 p = 0
