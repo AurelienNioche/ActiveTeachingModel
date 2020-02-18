@@ -135,8 +135,8 @@ class Simulation(models.Model):
         previous_n_session = self.n_session
         previous_n_iteration = self.n_iteration
 
-        print("new n session", n_session)
-        print("old n session", previous_n_session)
+        # print("new n session", n_session)
+        # print("old n session", previous_n_session)
 
         self.n_session = n_session
         self.n_iteration = n_session * self.n_iteration_per_session
@@ -147,10 +147,10 @@ class Simulation(models.Model):
                   + self.n_iteration_per_session) * previous_n_session
         self.c_iter_session = 0
 
-        print("old n session", previous_n_session)
-        print("n iter per session", self.n_iteration_per_session)
+        # print("old n session", previous_n_session)
+        # print("n iter per session", self.n_iteration_per_session)
         current_it = self.n_iteration_per_session * previous_n_session
-        print("current it", current_it)
+        # print("current it", current_it)
         self.iterator = range(
                 current_it,
                 self.n_iteration)
@@ -233,8 +233,8 @@ class Simulation(models.Model):
                     n_pres=self.n_pres,
                     n_success=self.n_success,
                     hist=self.hist)
-
             else:
+
                 i = teacher_inst.get_item(
                     n_pres=self.n_pres,
                     n_success=self.n_success,
@@ -267,12 +267,12 @@ class Simulation(models.Model):
             self.log_post_array -= logsumexp(self.log_post_array)
 
             # Compute post mean and std
-            pm, psd = \
+            self.pm, psd = \
                 post_mean_sd(grid_param=self.grid_param,
                              log_post=self.log_post_array)
 
             # Backup
-            self.post_mean_array[it] = pm
+            self.post_mean_array[it] = self.pm
             self.post_sd_array[it] = psd
             self.success_array[it] = int(response)
             self.hist_array[it] = i
@@ -368,6 +368,8 @@ class Simulation(models.Model):
 
         if stop_event is None or not stop_event.is_set():
             sim.save()
+
+        return sim
 
     @classmethod
     def as_shorter(cls, sim, n_session):

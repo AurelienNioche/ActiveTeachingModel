@@ -11,32 +11,61 @@ from utils.plot import save_fig
 
 FIG_FOLDER = os.path.join("fig", os.path.basename(__file__))
 
-from main_grid import main_grid, PARAM_LABELS, PARAM_GRID, TEACHER_MODELS, \
-    LEARNT_THR, N_ITERATION_PER_SESSION, N_SESSION, LEARNER_MODEL
+from simulation_data.models.simulation import Simulation
+
+from model.teacher import Leitner, Teacher
+from model.learner import ExponentialForgetting
 from model.compute.objective import objective
 
 
 def main():
     force = False
 
+    teacher_models = (Leitner, Teacher)
+    learn_thr = 0.80
+
+    seed = 2
+    n_iteration_per_session = 150
+    sec_per_iter = 2
+    n_iteration_between_session = \
+        int((60 ** 2 * 24) / sec_per_iter - n_iteration_per_session)
+    n_session = 60
+    n_item = 1000
+
+    grid_size = 20
+
+    bounds = [(0.001, 0.04), (0.2, 0.5)]
+
     bkp_file = os.path.join("bkp", f"data_{os.path.basename(__file__)}.p")
 
-    n = len(PARAM_GRID)
+    n = grid_size**len(ExponentialForgetting.param_labels)
 
     if not os.path.exists(bkp_file) or force:
 
-        sim_entries = main_grid()
-
-        obs_point = np.arange(N_ITERATION_PER_SESSION - 1,
-                              N_ITERATION_PER_SESSION * N_SESSION,
-                              N_ITERATION_PER_SESSION)
+        obs_point = np.arange(n_iteration_per_session - 1,
+                              n_iteration_per_session * n_session,
+                              n_iteration_per_session)
         n_obs_point = len(obs_point)
 
         data = {}
 
         j = 0
-        for teacher_model in TEACHER_MODELS:
+        for teacher_model in teacher_models:
             t_name = teacher_model.__name__
+
+            sim_entries = Simulation.objects.filter(
+                n_item=n_item,
+                n_session=n_session,
+                n_iteration_per_session=n_iteration_per_session,
+                n_iteration_between_session=n_iteration_between_session,
+                grid_size=grid_size,
+                teacher_model=Teacher.__name__,
+                learner_model=ExponentialForgetting.__name__,
+                param_labels=ExponentialForgetting.param_labels,
+                param_upper_bounds=[b[0] for b in bounds],
+                param_lower_bounds=[b[1] for b in bounds],
+                seed=seed)
+
             data[t_name] = np.zeros((n, n_obs_point))
             for i in tqdm(range(n)):
 
@@ -45,20 +74,18 @@ def main():
                 timestamps = e.timestamp_array
                 hist = e.hist_array
 
-                assert e.learner_model == LEARNER_MODEL.__name__
-
                 for k, it in enumerate(obs_point):
 
                     t = timestamps[it]
 
-                    p_seen = LEARNER_MODEL.p_seen_at_t(
+                    p_seen = ExponentialForgetting.p_seen_at_t(
                         hist=hist[:it+1],
                         timestamps=timestamps[:it+1],
                         param=param,
                         t=t
                     )
 
-                    v = np.sum(p_seen[:] > LEARNT_THR)
+                    v = np.sum(p_seen[:] > learn_thr)
 
                     data[t_name][i, k] = v
 
@@ -77,11 +104,11 @@ def main():
     # print("n obs point", n_obs_point)
     # print("n sim", n_obs_point)
 
-    colors = [f'C{i}' for i in range(len(TEACHER_MODELS))]
+    colors = [f'C{i}' for i in range(len(teacher_models))]
 
     fig, ax = plt.subplots(figsize=(12, 5))
 
-    for t_idx, teacher_model in enumerate(TEACHER_MODELS):
+    for t_idx, teacher_model in enumerate(teacher_models):
         t_name = teacher_model.__name__
         for i in range(n):
             ax.plot(data[t_name][i, :],

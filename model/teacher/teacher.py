@@ -7,7 +7,8 @@ class Teacher:
         pass
 
     @staticmethod
-    def get_item(learner, n_pres, n_success, param, delta, hist, timestamps, t):
+    def get_item(learner, n_pres, n_success, param, delta, hist,
+                 timestamps, t):
 
         n_item = len(n_pres)
         seen = n_pres[:] > 0

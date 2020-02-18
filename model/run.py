@@ -22,7 +22,8 @@ FIG_FOLDER = os.path.join("fig", "scenario")
 
 
 def run_n_session(**kwargs):
-    return Simulation.run(**kwargs)
+    s = Simulation.run(**kwargs)
+    return s.id
 
 
 def run_n_session_legacy(

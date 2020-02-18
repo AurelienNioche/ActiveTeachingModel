@@ -62,8 +62,8 @@ def objective_value(
 
 def phase_diagram(
         data,
-        parameter_values,
-        param_names,
+        param_values,
+        param_labels,
         ax=None,
         vmin=None,
         vmax=None,
@@ -74,13 +74,13 @@ def phase_diagram(
 ):
 
     # Extract from data...
-    n_param, grid_size = parameter_values.shape
+    n_param, grid_size = param_values.shape
     assert n_param == 2, \
         'This figure is made for models with exactly 2 parameters!'
 
-    x, y = parameter_values
+    x, y = param_values
     z = data.reshape((grid_size, grid_size)).T
-    x_label, y_label = param_names
+    x_label, y_label = param_labels
 
     if ax is None:
         # Create figures
