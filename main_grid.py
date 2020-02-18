@@ -112,34 +112,15 @@ def make_figures(
                                    np.max(data_obj) + 10, 10))
 
 
-def main_grid():
-    seed = 2
-    n_iteration_per_session = 150
-    sec_per_iter = 2
-    n_iteration_between_session = \
-        int((60 ** 2 * 24) / sec_per_iter - n_iteration_per_session)
-    n_session = 60
-    n_item = 1000
-
-    grid_size = 20
-
-    learner_model = ExponentialForgetting
-    bounds = [(0.001, 0.04), (0.2, 0.5)]
-    param_labels = ["alpha", "beta"]
-
-    teacher_models = TeacherPerfectInfo,
-
-    n_param = len(bounds)
-
-    param_values = np.atleast_2d([
-        np.linspace(
-            *bounds[i],
-            grid_size) for i in range(n_param)
-    ])
-
-    param_grid = np.asarray(list(
-        product(*param_values)
-    ))
+def main_grid(
+        learner_model,
+        bounds,
+        param_labels,
+        param_grid, teacher_models, n_session, seed,
+        n_iteration_per_session=150,
+        n_iteration_between_session=43050,
+        n_item=1000,
+        grid_size=20):
 
     constant_param = {
         "learner_model": learner_model,
@@ -170,6 +151,61 @@ def main_grid():
     return sim_entries
 
 
+def main():
+
+    n_iteration_per_session = 150
+    sec_per_iter = 2
+    n_iteration_between_session = \
+        int((60 ** 2 * 24) / sec_per_iter - n_iteration_per_session)
+
+    learner_model = ExponentialForgetting
+
+    seed = 2
+    n_session = 60
+    n_item = 1000
+
+    grid_size = 20
+
+    bounds = [(0.001, 0.04), (0.2, 0.5)]
+
+    n_param = len(bounds)
+
+    param_values = np.atleast_2d([
+        np.linspace(
+            *bounds[i],
+            grid_size) for i in range(n_param)
+    ])
+
+    param_labels = ["alpha", "beta"]
+
+    param_grid = np.asarray(list(
+        product(*param_values)
+    ))
+
+    teacher_models = Leitner, Teacher, TeacherPerfectInfo,
+
+    sim_entries = main_grid(
+        n_iteration_per_session=n_iteration_per_session,
+        n_iteration_between_session=n_iteration_between_session,
+        n_item=n_item,
+        bounds=bounds,
+        param_labels=param_labels,
+        param_grid=param_grid,
+        teacher_models=teacher_models,
+        n_session=n_session,
+        seed=seed,
+        learner_model=learner_model,
+    )
+
+    make_figures(
+        sim_entries=sim_entries,
+        param_values=param_values,
+        param_labels=param_labels,
+        param_grid=param_grid,
+        teacher_models=teacher_models,
+        n_session=n_session, seed=seed)
+
+
 if __name__ == "__main__":
 
-    main_grid()
+    main()

@@ -1,4 +1,5 @@
 import numpy as np
+from model.learner import ExponentialForgetting
 
 
 def objective(e, learnt_thr):
@@ -9,7 +10,12 @@ def objective(e, learnt_thr):
 
     t = timestamps[-1]
 
-    p_seen = eval(e.learner_model).p_seen_at_t(
+    if e.learner_model == ExponentialForgetting.__name__:
+        pass
+    else:
+        raise ValueError("Model not recognized")
+
+    p_seen = ExponentialForgetting.p_seen_at_t(
         hist=hist, timestamps=timestamps, param=param, t=t
     )
 
