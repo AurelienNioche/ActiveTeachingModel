@@ -104,10 +104,12 @@ class MultiProcess:
         except KeyboardInterrupt:
             print("Received Ctr-C")
             self.stop_event.set()
-
             for p in self.workers:
                 p.join()
             exit()
+        for p in self.workers:
+            p.terminate()
+            p.join()
 
     def __exit__(self, *args, **kwargs):
         pass

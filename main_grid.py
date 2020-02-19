@@ -32,15 +32,16 @@ FIG_FOLDER = os.path.join("fig", os.path.basename(__file__))
 
 
 def make_figures(
+        param_grid,
         param_values,
         param_labels,
         sim_entries,
-        param_grid, teacher_models, n_session, seed,
+        grid_size, teacher_models, n_session, seed,
         learn_thr=0.8):
     def truncate_10(x):
         return int(x / 10) * 10
 
-    n = len(param_grid)
+    n = grid_size ** len(param_labels)
 
     data = {}
 
@@ -116,11 +117,24 @@ def main_grid(
         learner_model,
         bounds,
         param_labels,
-        param_grid, teacher_models, n_session, seed,
+        teacher_models, n_session, seed,
+        param_grid=None,
         n_iteration_per_session=150,
         n_iteration_between_session=43050,
         n_item=1000,
         grid_size=20):
+
+    if param_grid is None:
+        n_param = len(param_labels)
+        param_values = np.atleast_2d([
+            np.linspace(
+                *bounds[i],
+                grid_size) for i in range(n_param)
+        ])
+
+        param_grid = np.asarray(list(
+            product(*param_values)
+        ))
 
     constant_param = {
         "learner_model": learner_model,
