@@ -5,7 +5,7 @@ import os
 
 from utils.plot import save_fig
 from plot.scatter_metric import plot_scatter_metric
-from plot.parameter_recovery_single import parameter_recovery_grid
+# from plot.parameter_recovery_single import fig_parameter_recovery
 
 
 def xp_results():
@@ -38,32 +38,32 @@ def xp_results():
              fig_folder=os.path.join("fig", "illustration"))
 
 
-def simu_results():
-
-    n_param = 2
-
-    grid_size = 20
-    param_bounds = ((0.001, 0.04), (0.2, 0.5))
-    param_labels = ('alpha', "beta")
-
-    data = np.zeros((n_param, grid_size, grid_size))
-
-    for i in range(n_param):
-
-        data[i, 0] = np.linspace(param_bounds[i][0], param_bounds[i][1],
-                                 grid_size)
-
-        noise_std = (param_bounds[i][1] - param_bounds[i][0]) * 0.5
-
-        data[i, 1] = data[i, 0] + np.random.normal(loc=0.0, scale=noise_std, size=grid_size)
-
-    parameter_recovery_grid(
-        data,
-        param_labels=param_labels,
-        param_bounds=param_bounds,
-        fig_name="parameter_recovery_grid.pdf",
-        fig_folder=os.path.join("fig", "illustration")
-    )
+# def simu_results():
+#
+#     n_param = 2
+#
+#     grid_size = 20
+#     param_bounds = ((0.001, 0.04), (0.2, 0.5))
+#     param_labels = ('alpha', "beta")
+#
+#     data = np.zeros((n_param, grid_size, grid_size))
+#
+#     for i in range(n_param):
+#
+#         data[i, 0] = np.linspace(param_bounds[i][0], param_bounds[i][1],
+#                                  grid_size)
+#
+#         noise_std = (param_bounds[i][1] - param_bounds[i][0]) * 0.5
+#
+#         data[i, 1] = data[i, 0] + np.random.normal(loc=0.0, scale=noise_std, size=grid_size)
+#
+#     fig_parameter_recovery(
+#         data,
+#         param_labels=param_labels,
+#         param_bounds=param_bounds,
+#         fig_name="parameter_recovery_grid.pdf",
+#         fig_folder=os.path.join("fig", "illustration")
+#     )
 
     # fig, axes = plt.subplots(ncols=3, figsize=(5, 15))
     #
@@ -96,5 +96,5 @@ def simu_results():
 
 
 if __name__ == "__main__":
-
-    simu_results()
+    pass
+    #simu_results()

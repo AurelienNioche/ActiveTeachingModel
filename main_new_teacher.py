@@ -1,23 +1,31 @@
 import numpy as np
 
 import matplotlib.pyplot as plt
-from scipy.optimize import minimize
+from tqdm import tqdm
+import multiprocessing as mp
+import os
+from scipy.optimize import minimize, differential_evolution
+
+FIG_FOLDER = os.path.join("fig", os.path.basename(__file__).split(".")[0])
+os.makedirs(FIG_FOLDER, exist_ok=True)
 
 
 N_ITEM = 100
 
-ALPHA = 0.02
+ALPHA = 0.04
 BETA = 0.2
 
-N_ITER = 1000
+N_ITER = 2000
+
+EPSILON = 0.2
 
 
 def compute_next_recall(hist, item, tau):
     n_view = hist.count(item)
-    return - np.log(tau)/ eta(ALPHA, BETA, n_view)
+    return - np.log(tau) / eta(ALPHA, BETA, n_view)
 
 
-def objective(tau):
+def objective(tau, new_strategy=True):
 
     hist = []
 
@@ -43,11 +51,25 @@ def objective(tau):
         hist.append(item)
         next_recall[item] = t + compute_next_recall(hist, item, tau)
 
-    ps = np.zeros(N_ITEM)
-    for i in range(N_ITEM):
-        ps[i] = exp_forget(i, ALPHA, BETA, hist)
+        if new_strategy is True:
 
-    return np.mean(ps)
+            ps = np.zeros(N_ITEM)
+            for i in range(N_ITEM):
+                ps[i] = exp_forget(i, ALPHA, BETA, hist)
+
+            if np.all(ps[:] > (1 - EPSILON)):
+                return t
+
+    if new_strategy is True:
+        return N_ITER
+
+    else:
+        ps = np.zeros(N_ITEM)
+        for i in range(N_ITEM):
+            ps[i] = exp_forget(i, ALPHA, BETA, hist)
+        return np.sum(ps[:] > (1-EPSILON))
+
+    # return N_ITER
 
 
 def fig_memory(y, pres=None, f_name='memory.pdf'):
@@ -74,7 +96,7 @@ def fig_memory(y, pres=None, f_name='memory.pdf'):
 
 
 def eta(alpha, beta, n_view):
-    alpha * (1 - beta) ** (n_view - 1)
+    return alpha * (1 - beta) ** (n_view - 1)
 
 
 def exp_forget(i, alpha, beta, hist):
@@ -91,7 +113,7 @@ def exp_forget(i, alpha, beta, hist):
     return np.exp(-eta*delta)
 
 
-def main():
+def exp():
 
     alpha, beta = 0.02, 0.2,
 
@@ -113,5 +135,73 @@ def main():
     fig_memory(ps)
 
 
+def p_recall_as_a_function_of_time(tau):
+
+    hist = []
+
+    dumb_value = 999999
+    next_recall = np.ones(N_ITEM) * dumb_value
+
+    seen = np.zeros(N_ITEM, dtype=bool)
+
+    items = np.arange(N_ITEM)
+
+    ps = np.zeros((N_ITEM, N_ITER))
+
+    for t in range(N_ITER):
+
+        if t == 0:
+            item = 0
+
+        else:
+            to_r = np.where(t >= next_recall[:])[0]
+            if len(to_r):
+                item = np.argmin(next_recall)
+            else:
+                to_select = np.where(next_recall[:] == dumb_value)[0]
+                if len(to_select):
+                    item = to_select[0]
+                else:
+                    item = np.argmin(next_recall)
+
+        seen[item] = True
+        hist.append(item)
+        next_recall[item] = t + compute_next_recall(hist, item, tau)
+
+        for i in items[seen]:
+            ps[i, t] = exp_forget(i, ALPHA, BETA, hist)
+    # ps = np.zeros(N_ITEM)
+    # for i in range(N_ITEM):
+    #     ps[i] = exp_forget(i, ALPHA, BETA, hist)
+
+    # if np.all(ps[:] > (1-EPSILON)):
+    #     return t
+
+    fig, ax = plt.subplots()
+    for i in items[seen]:
+        ax.plot(ps[i], linewidth=0.2, alpha=0.5, color='C0')
+
+    plt.savefig(os.path.join(FIG_FOLDER, f"play_tau_{tau}.pdf"))
+
+    return np.sum(ps[:] > (1-EPSILON))
+
+
+def optimize_using_grid_explo():
+
+    x = np.linspace(0.01, 0.99, 10)
+
+    with mp.Pool() as pool:
+        y = list(tqdm(pool.imap(objective, x), total=len(x)))
+
+    # y = pool.map(objective, x)
+    #
+
+    plt.plot(x, y)
+    plt.savefig(os.path.join(FIG_FOLDER, "exp_new_teacher.pdf"))
+
+
+    # r = differential_evolution(objective, bounds=[(0, 1)])
+    # print(r)
+
 if __name__ == "__main__":
-    main()
+    optimize_using_grid_explo()

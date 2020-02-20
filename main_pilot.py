@@ -31,6 +31,9 @@ import user_data.analysis.plot.human
 from user_data.settings import N_POSSIBLE_REPLIES, BKP_FIT
 
 
+FIG_FOLDER = os.path.join("fig", os.path.basename(__file__).split(".")[0])
+
+
 def _mp_fit_user_data(kwargs):
     return fit_user_data(**kwargs)
 

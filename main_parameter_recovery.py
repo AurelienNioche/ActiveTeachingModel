@@ -19,7 +19,8 @@ from plot.parameter_recovery_multi import \
     fig_parameter_recovery_multi, fig_parameter_recovery_curve_multi
 
 EPS = np.finfo(np.float).eps
-FIG_FOLDER = os.path.join("fig", os.path.basename(__file__))
+FIG_FOLDER = os.path.join("fig", os.path.basename(__file__).split(".")[0])
+os.makedirs(FIG_FOLDER, exist_ok=True)
 
 BOUNDS = (0.001, 0.04), (0.2, 0.5),
 PARAM_LABELS = "alpha", "beta",

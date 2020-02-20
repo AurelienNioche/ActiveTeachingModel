@@ -14,8 +14,6 @@ from tqdm import tqdm
 
 from utils.plot import save_fig
 
-FIG_FOLDER = os.path.join("fig", os.path.basename(__file__))
-
 from simulation_data.models.simulation import Simulation
 
 from model.teacher import Leitner, Teacher, TeacherPerfectInfo
@@ -23,6 +21,9 @@ from model.learner import ExponentialForgetting
 from model.compute.objective import objective
 
 from main_grid import main_grid
+
+FIG_FOLDER = os.path.join("fig", os.path.basename(__file__).split(".")[0])
+os.makedirs(FIG_FOLDER, exist_ok=True)
 
 
 def main():

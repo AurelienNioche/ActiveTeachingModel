@@ -28,7 +28,8 @@ from simulation_data.models.simulation import Simulation
 
 
 # EPS = np.finfo(np.float).eps
-FIG_FOLDER = os.path.join("fig", os.path.basename(__file__))
+FIG_FOLDER = os.path.join("fig", os.path.basename(__file__).split(".")[0])
+os.makedirs(FIG_FOLDER, exist_ok=True)
 
 
 def make_figures(
@@ -217,7 +218,8 @@ def main():
         param_labels=param_labels,
         param_grid=param_grid,
         teacher_models=teacher_models,
-        n_session=n_session, seed=seed)
+        n_session=n_session, seed=seed,
+        grid_size=grid_size)
 
 
 if __name__ == "__main__":
