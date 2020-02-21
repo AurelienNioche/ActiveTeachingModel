@@ -10,12 +10,14 @@ FIG_FOLDER = os.path.join("fig", os.path.basename(__file__).split(".")[0])
 os.makedirs(FIG_FOLDER, exist_ok=True)
 
 
-N_ITEM = 100
+ENDPOINT_OPT = True
+
+N_ITEM = 200
 
 ALPHA = 0.04
 BETA = 0.2
 
-N_ITER = 2000
+N_ITER = 10000
 
 EPSILON = 0.2
 
@@ -25,7 +27,7 @@ def compute_next_recall(hist, item, tau):
     return - np.log(tau) / eta(ALPHA, BETA, n_view)
 
 
-def objective(tau, new_strategy=True):
+def objective(tau):
 
     hist = []
 
@@ -51,16 +53,20 @@ def objective(tau, new_strategy=True):
         hist.append(item)
         next_recall[item] = t + compute_next_recall(hist, item, tau)
 
-        if new_strategy is True:
+        if ENDPOINT_OPT is True:
 
             ps = np.zeros(N_ITEM)
             for i in range(N_ITEM):
-                ps[i] = exp_forget(i, ALPHA, BETA, hist)
+                p = exp_forget(i, ALPHA, BETA, hist)
+                if p <= (1 - EPSILON):
+                    break
+                else:
+                    ps[i] = p
 
             if np.all(ps[:] > (1 - EPSILON)):
                 return t
 
-    if new_strategy is True:
+    if ENDPOINT_OPT is True:
         return N_ITER
 
     else:
@@ -197,7 +203,7 @@ def optimize_using_grid_explo():
     #
 
     plt.plot(x, y)
-    plt.savefig(os.path.join(FIG_FOLDER, "exp_new_teacher.pdf"))
+    plt.savefig(os.path.join(FIG_FOLDER, f"exp_new_teacher_end_point_opt={ENDPOINT_OPT}.pdf"))
 
 
     # r = differential_evolution(objective, bounds=[(0, 1)])
