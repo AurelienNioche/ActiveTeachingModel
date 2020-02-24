@@ -12,14 +12,34 @@ os.makedirs(FIG_FOLDER, exist_ok=True)
 
 ENDPOINT_OPT = True
 
-N_ITEM = 200
+N_ITEM = 20
 
 ALPHA = 0.04
 BETA = 0.2
 
-N_ITER = 10000
+N_ITER = 100
 
 EPSILON = 0.2
+
+EPS = np.finfo(np.float).eps
+
+
+def eta(alpha, beta, n_view):
+    return alpha * (1 - beta) ** (n_view - 1)
+
+
+def exp_forget(i, alpha, beta, hist):
+
+    hist_array = np.asarray(hist)
+    t = len(hist_array)
+
+    bool_view = hist_array[:] == i
+    n_view = np.sum(bool_view)
+    if n_view == 0:
+        return 0.0
+    delta = t - np.max(np.arange(t)[bool_view])
+    eta = alpha * (1 - beta)**(n_view-1)
+    return np.exp(-eta*delta)
 
 
 def compute_next_recall(hist, item, tau):
@@ -99,24 +119,6 @@ def fig_memory(y, pres=None, f_name='memory.pdf'):
     #fig_folder = os.path.join("fig", "illustration")
     #os.makedirs(fig_folder, exist_ok=True)
     # plt.savefig(os.path.join(fig_folder, f_name))
-
-
-def eta(alpha, beta, n_view):
-    return alpha * (1 - beta) ** (n_view - 1)
-
-
-def exp_forget(i, alpha, beta, hist):
-
-    hist_array = np.asarray(hist)
-    t = len(hist_array)
-
-    bool_view = hist_array[:] == i
-    n_view = np.sum(bool_view)
-    if n_view == 0:
-        return 0.0
-    delta = t - np.max(np.arange(t)[bool_view])
-    eta = alpha * (1 - beta)**(n_view-1)
-    return np.exp(-eta*delta)
 
 
 def exp():
@@ -203,11 +205,14 @@ def optimize_using_grid_explo():
     #
 
     plt.plot(x, y)
-    plt.savefig(os.path.join(FIG_FOLDER, f"exp_new_teacher_end_point_opt={ENDPOINT_OPT}.pdf"))
+    plt.savefig(
+        os.path.join(FIG_FOLDER,
+        f"exp_new_teacher_end_point_opt={ENDPOINT_OPT}.pdf"))
 
 
     # r = differential_evolution(objective, bounds=[(0, 1)])
     # print(r)
+
 
 if __name__ == "__main__":
     optimize_using_grid_explo()
