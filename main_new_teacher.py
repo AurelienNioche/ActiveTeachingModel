@@ -214,5 +214,10 @@ def optimize_using_grid_explo():
     # print(r)
 
 
+def optimize_black_box():
+    r = differential_evolution(objective, bounds=[(0, 1)])
+    print(r)
+
+
 if __name__ == "__main__":
     optimize_using_grid_explo()
