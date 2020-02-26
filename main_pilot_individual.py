@@ -3,6 +3,7 @@ import pickle
 import numpy as np
 import multiprocessing as mp
 import scipy.optimize
+from tqdm import tqdm
 
 # from user_data.models import User
 # from teaching_material.selection import kanji
@@ -36,26 +37,29 @@ EPS = np.finfo(np.float).eps
 
 class Fit:
 
-    def __init__(self, hist, item):
+    def __init__(self, hist, item, correct):
 
         self.hist = np.asarray(hist)
         bool_pres = self.hist == item
+        self.n_pres = np.sum(bool_pres)
         t_pres = np.where(bool_pres)[0]
         self.delta = [t_pres[i+1] - t_pres[i] for i in range(len(t_pres)-1)]
 
     def objective(self, param):
         alpha, beta = param
-
-        p = np.zeros(self.delta)
+        print("param", alpha, beta)
+        p = np.zeros(self.n_pres)
         for i, delta in enumerate(self.delta):
             eta = alpha * (1 - beta)**i
             p[i] = np.exp(-eta*delta)
-        return - np.sum(np.log(p+EPS))
+        r = - np.sum(np.log(p+EPS))
+        return r
 
     def run(self):
-        return scipy.optimize.differential_evolution(
-            self.objective, ((0, 1), (0, 1))
-        ).x
+        r = scipy.optimize.differential_evolution(
+            self.objective, ((0., 1.), (0., 1.))
+        )
+        return r.x
 
 
 def main():
@@ -88,15 +92,17 @@ def main():
     results = np.zeros((n_item, n_user, n_param))
 
     u_data = data["user_data"]
-    for i, item in enumerate(unq_items):
+    for (i, item) in tqdm(enumerate(unq_items), total=n_item):
         for j, user in enumerate(u_data):
 
             hist = user["hist"]
+            correct = user["correct"]
+            best_param = np.ones(n_param) * -1
             if np.sum(hist == item) > 1:
-                f = Fit(hist=hist, item=item)
-                results[i, j] = f.run()
-            else:
-                results[i, j, :] = -1
+                f = Fit(hist=hist, item=item, correct=correct)
+                best_param[:] = f.run()
+            print(f"user {j} - item {i}: {best_param}")
+            results[i, j] = best_param
 
     bkp = os.path.join("user_data", "bkp", "pilot_2019_09_02",
                            "fit_ind.p")
