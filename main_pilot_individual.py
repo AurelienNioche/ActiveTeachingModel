@@ -146,6 +146,25 @@ def main(force=False):
         ax.set_xlim((0, 0.1))
     plt.savefig(os.path.join(FIG_FOLDER, "ind_plot.pdf"))
 
+    for param_idx in range(n_param):
+        print("*" * 40)
+        print(f"param {param_idx}")
 
+        for i in range(n_user):
+            relevant = n[i, :] > 2
+
+            a = results[i, relevant, param_idx]
+            print(f"user {i}: MEAN={np.mean(a):.3f} STD={np.std(a):.3f}, "
+                  f"N={np.sum(relevant)}")
+
+        for j in range(n_item):
+            relevant = n[:, j] > 2
+
+            _n = np.sum(relevant)
+            if _n <= 1:
+                continue
+
+            a = results[relevant, j, param_idx]
+            print(f"item {j}: {np.mean(a):.3f} {np.std(a):.3f}, N={_n}")
 
 main()
