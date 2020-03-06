@@ -220,12 +220,12 @@ def check(P, R):
 
     Arguments
     ---------
-    P : array
+    P : np.array
         The transition matrices. It can be a three dimensional array with
         a shape of (A, S, S). It can also be a one dimensional arraye with
         a shape of (A, ), where each element contains a matrix of shape (S, S)
         which can possibly be sparse.
-    R : array
+    R : np.array
         The reward matrix. It can be a three dimensional array with a
         shape of (S, A, A). It can also be a one dimensional array with a
         shape of (A, ), where each element contains matrix with a shape of
