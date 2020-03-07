@@ -1,6 +1,6 @@
-import math as _math
+import math as math
 
-import numpy as _np
+import numpy as np
 
 from mdp.mdp import MDP, _printVerbosity, \
     _MSG_STOP_EPSILON_OPTIMAL_POLICY, _MSG_STOP_MAX_ITER, util as _util
@@ -31,11 +31,11 @@ class RelativeValueIteration(MDP):
 
     Data Attributes
     ---------------
-    policy : tuple
+    self.policy : tuple
         epsilon-optimal policy
-    average_reward  : tuple
+    self.average_reward  : tuple
         average reward of the optimal policy
-    cpu_time : float
+    self.time : float
         used CPU time
 
     Notes
@@ -48,7 +48,7 @@ class RelativeValueIteration(MDP):
     --------
     >>> import mdptoolbox, mdptoolbox.example
     >>> P, R = mdptoolbox.example.forest()
-    >>> rvi = mdptoolbox.mdp.RelativeValueIteration(P, R)
+    >>> rvi = RelativeValueIteration(P, R)
     >>> rvi.run()
     >>> rvi.average_reward
     3.2399999999999993
@@ -61,7 +61,7 @@ class RelativeValueIteration(MDP):
     >>> import numpy as np
     >>> P = np.array([[[0.5, 0.5],[0.8, 0.2]],[[0, 1],[0.1, 0.9]]])
     >>> R = np.array([[5, 10], [-1, 2]])
-    >>> rvi = mdptoolbox.mdp.RelativeValueIteration(P, R)
+    >>> rvi = RelativeValueIteration(P, R)
     >>> rvi.run()
     >>> expected = (10.0, 3.885235246411831)
     >>> all(expected[k] - rvi.V[k] < 1e-12 for k in range(len(expected)))
@@ -79,13 +79,14 @@ class RelativeValueIteration(MDP):
                  skip_check=False):
         # Initialise a relative value iteration MDP.
 
-        MDP.__init__(self,  transitions, reward, None, epsilon, max_iter,
+        MDP.__init__(self,  transitions=transitions,
+                     reward=reward, epsilon=epsilon, max_iter=max_iter,
                      skip_check=skip_check)
 
         self.epsilon = epsilon
         self.discount = 1
 
-        self.V = _np.zeros(self.S)
+        self.V = np.zeros(self.S)
         self.gain = 0  # self.U[self.S]
 
         self.average_reward = None
@@ -169,14 +170,14 @@ class ValueIteration(MDP):
 
     Data Attributes
     ---------------
-    V : tuple
+    self.V : np.array
         The optimal value function.
-    policy : tuple
+    self.policy : np.array
         The optimal policy function. Each element is an integer corresponding
         to an action which maximises the value function in that state.
-    iter : int
+    self.iter : int
         The number of iterations taken to complete the computation.
-    time : float
+    self.time : float
         The amount of CPU time used to run the algorithm.
 
     Methods
@@ -198,7 +199,7 @@ class ValueIteration(MDP):
     --------
     >>> import mdptoolbox, mdptoolbox.example
     >>> P, R = mdptoolbox.example.forest()
-    >>> vi = mdptoolbox.mdp.ValueIteration(P, R, 0.96)
+    >>> vi = ValueIteration(P, R, 0.96)
     >>> vi.verbose
     False
     >>> vi.run()
@@ -214,7 +215,7 @@ class ValueIteration(MDP):
     >>> import numpy as np
     >>> P = np.array([[[0.5, 0.5],[0.8, 0.2]],[[0, 1],[0.1, 0.9]]])
     >>> R = np.array([[5, 10], [-1, 2]])
-    >>> vi = mdptoolbox.mdp.ValueIteration(P, R, 0.9)
+    >>> vi = ValueIteration(P, R, 0.9)
     >>> vi.run()
     >>> expected = (40.048625392716815, 33.65371175967546)
     >>> all(expected[k] - vi.V[k] < 1e-12 for k in range(len(expected)))
@@ -231,7 +232,7 @@ class ValueIteration(MDP):
     >>> P[0] = sparse([[0.5, 0.5],[0.8, 0.2]])
     >>> P[1] = sparse([[0, 1],[0.1, 0.9]])
     >>> R = np.array([[5, 10], [-1, 2]])
-    >>> vi = mdptoolbox.mdp.ValueIteration(P, R, 0.9)
+    >>> vi = ValueIteration(P, R, 0.9)
     >>> vi.run()
     >>> expected = (40.048625392716815, 33.65371175967546)
     >>> all(expected[k] - vi.V[k] < 1e-12 for k in range(len(expected)))
@@ -245,16 +246,18 @@ class ValueIteration(MDP):
                  max_iter=1000, initial_value=0, skip_check=False):
         # Initialise a value iteration MDP.
 
-        MDP.__init__(self, transitions, reward, discount, epsilon, max_iter,
+        MDP.__init__(self, transitions=transitions,
+                     reward=reward, discount=discount,
+                     epsilon=epsilon, max_iter=max_iter,
                      skip_check=skip_check)
 
         # initialization of optional arguments
         if initial_value == 0:
-            self.V = _np.zeros(self.S)
+            self.V = np.zeros(self.S)
         else:
             assert len(initial_value) == self.S, "The initial value must be " \
                 "a vector of length S."
-            self.V = _np.array(initial_value).reshape(self.S)
+            self.V = np.array(initial_value).reshape(self.S)
         if self.discount < 1:
             # compute a bound for the number of iterations and update the
             # stored value of self.max_iter
@@ -288,11 +291,11 @@ class ValueIteration(MDP):
         # p 202, Theorem 6.6.6
         # k =    max     [1 - S min[ P(j|s,a), p(j|s',a')] ]
         #     s,a,s',a'       j
-        k = 0
-        h = _np.zeros(self.S)
+        # k = 0
+        h = np.zeros(self.S)
 
         for ss in range(self.S):
-            PP = _np.zeros((self.A, self.S))
+            PP = np.zeros((self.A, self.S))
             for aa in range(self.A):
                 try:
                     PP[aa] = self.P[aa][:, ss]
@@ -306,11 +309,11 @@ class ValueIteration(MDP):
         null, value = self._bellmanOperator()
         # p 201, Proposition 6.6.5
         span = _util.getSpan(value - Vprev)
-        max_iter = (_math.log((epsilon * (1 - self.discount) / self.discount) /
-                    span) / _math.log(self.discount * k))
+        max_iter = (math.log((epsilon * (1 - self.discount) / self.discount) /
+                             span) / math.log(self.discount * k))
         # self.V = Vprev
 
-        self.max_iter = int(_math.ceil(max_iter))
+        self.max_iter = int(math.ceil(max_iter))
 
     def run(self):
         # Run the value iteration algorithm.
@@ -373,13 +376,13 @@ class ValueIterationGS(ValueIteration):
         arguments to make sure they describe a valid MDP. You can set this
         argument to True in order to skip this check.
 
-    Data Attribues
+    Data Attributes
     --------------
-    policy : tuple
+    self.policy : np.array
         epsilon-optimal policy
-    iter : int
+    self.iter : int
         number of done iterations
-    time : float
+    self.time : float
         used CPU time
 
     Notes
@@ -392,7 +395,7 @@ class ValueIterationGS(ValueIteration):
     --------
     >>> import mdptoolbox.example, numpy as np
     >>> P, R = mdptoolbox.example.forest()
-    >>> vigs = mdptoolbox.mdp.ValueIterationGS(P, R, 0.9)
+    >>> vigs = ValueIterationGS(P, R, 0.9)
     >>> vigs.run()
     >>> expected = (25.5833879767579, 28.830654635546928, 32.83065463554693)
     >>> all(expected[k] - vigs.V[k] < 1e-12 for k in range(len(expected)))
@@ -406,12 +409,14 @@ class ValueIterationGS(ValueIteration):
                  max_iter=10, initial_value=0, skip_check=False):
         # Initialise a value iteration Gauss-Seidel MDP.
 
-        MDP.__init__(self, transitions, reward, discount, epsilon, max_iter,
+        MDP.__init__(self, transitions=transitions,
+                     reward=reward, discount=discount,
+                     epsilon=epsilon, max_iter=max_iter,
                      skip_check=skip_check)
 
         # initialization of optional arguments
         if initial_value == 0:
-            self.V = _np.zeros(self.S)
+            self.V = np.zeros(self.S)
         else:
             if len(initial_value) != self.S:
                 raise ValueError("The initial value must be a vector of "
@@ -420,7 +425,7 @@ class ValueIterationGS(ValueIteration):
                 try:
                     self.V = initial_value.reshape(self.S)
                 except AttributeError:
-                    self.V = _np.array(initial_value)
+                    self.V = np.array(initial_value)
                 except:
                     raise
         if self.discount < 1:
@@ -467,7 +472,7 @@ class ValueIterationGS(ValueIteration):
 
         self.policy = []
         for s in range(self.S):
-            Q = _np.zeros(self.A)
+            Q = np.zeros(self.A)
             for a in range(self.A):
                 Q[a] = (self.R[a][s] +
                         self.discount * self.P[a][s, :].dot(self.V))

@@ -1,7 +1,7 @@
 import math as _math
-import time as _time
+import time as time
 
-import numpy as _np
+import numpy as np
 
 from mdp.mdp import MDP, _computeDimensions, util as _util
 
@@ -49,7 +49,7 @@ class QLearning(MDP):
     >>> import mdptoolbox, mdptoolbox.example
     >>> np.random.seed(0)
     >>> P, R = mdptoolbox.example.forest()
-    >>> ql = mdptoolbox.mdp.QLearning(P, R, 0.96)
+    >>> ql = QLearning(P, R, 0.96)
     >>> ql.run()
     >>> ql.Q
     array([[ 11.198909  ,  10.34652034],
@@ -66,7 +66,7 @@ class QLearning(MDP):
     >>> P = np.array([[[0.5, 0.5],[0.8, 0.2]],[[0, 1],[0.1, 0.9]]])
     >>> R = np.array([[5, 10], [-1, 2]])
     >>> np.random.seed(0)
-    >>> ql = mdptoolbox.mdp.QLearning(P, R, 0.9)
+    >>> ql = QLearning(P, R, 0.9)
     >>> ql.run()
     >>> ql.Q
     array([[ 33.33010866,  40.82109565],
@@ -88,49 +88,45 @@ class QLearning(MDP):
         self.max_iter = int(n_iter)
         assert self.max_iter >= 10000, "'n_iter' should be greater than 10000."
 
-        if not skip_check:
-            # We don't want to send this to MDP because _computePR should not
-            #  be run on it, so check that it defines an MDP
-            _util.check(transitions, reward)
-
-        # Store P, S, and A
-        self.S, self.A = _computeDimensions(transitions)
-        self.P = self._computeTransition(transitions)
+        # Initialise the base class
+        MDP.__init__(self, transitions=transitions, reward=reward,
+                     discount=discount,
+                     skip_check=skip_check)
 
         self.R = reward
 
         self.discount = discount
 
         # Initialisations
-        self.Q = _np.zeros((self.S, self.A))
+        self.Q = np.zeros((self.S, self.A))
         self.mean_discrepancy = []
 
     def run(self):
         # Run the Q-learning algoritm.
         discrepancy = []
 
-        self.time = _time.time()
+        self.time = time.time()
 
         # initial state choice
-        s = _np.random.randint(0, self.S)
+        s = np.random.randint(0, self.S)
 
         for n in range(1, self.max_iter + 1):
 
             # Reinitialisation of trajectories every 100 transitions
             if (n % 100) == 0:
-                s = _np.random.randint(0, self.S)
+                s = np.random.randint(0, self.S)
 
             # Action choice : greedy with increasing probability
             # probability 1-(1/log(n+2)) can be changed
-            pn = _np.random.random()
+            pn = np.random.random()
             if pn < (1 - (1 / _math.log(n + 2))):
                 # optimal_action = self.Q[s, :].max()
                 a = self.Q[s, :].argmax()
             else:
-                a = _np.random.randint(0, self.A)
+                a = np.random.randint(0, self.A)
 
             # Simulating next state s_new and reward associated to <s,s_new,a>
-            p_s_new = _np.random.random()
+            p_s_new = np.random.random()
             p = 0
             s_new = -1
             while (p < p_s_new) and (s_new < (self.S - 1)):
@@ -155,11 +151,11 @@ class QLearning(MDP):
             s = s_new
 
             # Computing and saving maximal values of the Q variation
-            discrepancy.append(_np.absolute(dQ))
+            discrepancy.append(np.absolute(dQ))
 
             # Computing means all over maximal Q variations values
             if len(discrepancy) == 100:
-                self.mean_discrepancy.append(_np.mean(discrepancy))
+                self.mean_discrepancy.append(np.mean(discrepancy))
                 discrepancy = []
 
             # compute the value function and the policy

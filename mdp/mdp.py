@@ -151,7 +151,7 @@ class MDP:
         Transition probability matrices.
     R : np.array
         Reward vectors.
-    V : tuple
+    V : np.array
         The optimal value function. Each element is a float corresponding to
         the expected value of being in that state assuming the optimal policy
         is followed.
@@ -159,7 +159,7 @@ class MDP:
         The discount rate on future rewards.
     max_iter : int
         The maximum number of iterations.
-    policy : tuple
+    policy : np.array
         The optimal policy.
     time : float
         The time used to converge to the optimal policy.
@@ -178,7 +178,7 @@ class MDP:
 
     """
 
-    def __init__(self, transitions, reward, discount=0.9, epsilon=0.001,
+    def __init__(self, transitions, reward, discount=None, epsilon=None,
                  max_iter=10000,
                  skip_check=False):
         # Initialise a MDP based on the input parameters.
@@ -302,7 +302,7 @@ class MDP:
             raise NotImplementedError
         else:
             r = np.array(reward).reshape(self.S)
-            return tuple(r for a in range(self.A))
+            return tuple(r for _ in range(self.A))
 
     def _computeArrayReward(self, reward):
         if sp.issparse(reward):
@@ -332,13 +332,13 @@ class MDP:
         self.time = _time.time()
 
     def _endRun(self):
-        # store value and policy as tuples
-        self.V = tuple(self.V.tolist())
-
-        try:
-            self.policy = tuple(self.policy.tolist())
-        except AttributeError:
-            self.policy = tuple(self.policy)
+        # # store value and policy as tuples
+        # self.V = tuple(self.V.tolist())
+        #
+        # try:
+        #     self.policy = tuple(self.policy.tolist())
+        # except AttributeError:
+        #     self.policy = tuple(self.policy)
 
         self.time = _time.time() - self.time
 

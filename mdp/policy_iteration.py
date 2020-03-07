@@ -1,5 +1,5 @@
-import numpy as _np
-from scipy import sparse as _sp
+import numpy as np
+from scipy import sparse as sp
 
 from mdp.mdp import _printVerbosity, MDP, \
     _MSG_STOP_EPSILON_OPTIMAL_VALUE, _MSG_STOP_MAX_ITER, \
@@ -73,19 +73,20 @@ class PolicyIteration(MDP):
         # Initialise a policy iteration MDP.
         #
         # Set up the MDP, but don't need to worry about epsilon values
-        MDP.__init__(self, transitions, reward, discount, None, max_iter,
+        MDP.__init__(self, transitions=transitions, reward=reward,
+                     discount=discount, max_iter=max_iter,
                      skip_check=skip_check)
         # Check if the user has supplied an initial policy. If not make one.
         if policy0 is None:
             # Initialise the policy to the one which maximises the expected
             # immediate reward
-            null = _np.zeros(self.S)
+            null = np.zeros(self.S)
             self.policy, null = self._bellmanOperator(null)
             del null
         else:
             # Use the policy that the user supplied
             # Make sure it is a numpy array
-            policy0 = _np.array(policy0)
+            policy0 = np.array(policy0)
             # Make sure the policy is the right size and shape
             assert policy0.shape in ((self.S, ), (self.S, 1), (1, self.S)), \
                 "'policy0' must a vector with length S."
@@ -93,12 +94,12 @@ class PolicyIteration(MDP):
             policy0 = policy0.reshape(self.S)
             # The policy can only contain integers between 0 and S-1
             msg = "'policy0' must be a vector of integers between 0 and S-1."
-            assert not _np.mod(policy0, 1).any(), msg
+            assert not np.mod(policy0, 1).any(), msg
             assert (policy0 >= 0).all(), msg
             assert (policy0 < self.S).all(), msg
             self.policy = policy0
         # set the initial values to zero
-        self.V = _np.zeros(self.S)
+        self.V = np.zeros(self.S)
         # Do some setup depending on the evaluation type
         if eval_type in (0, "matrix"):
             self.eval_type = "matrix"
@@ -129,8 +130,8 @@ class PolicyIteration(MDP):
         # Ppolicy(SxS)  = transition matrix for policy
         # PRpolicy(S)   = reward matrix for policy
         #
-        Ppolicy = _np.empty((self.S, self.S))
-        Rpolicy = _np.zeros(self.S)
+        Ppolicy = np.empty((self.S, self.S))
+        Rpolicy = np.zeros(self.S)
         for aa in range(self.A):  # avoid looping over S
             # the rows that use action a.
             ind = (self.policy == aa).nonzero()[0]
@@ -148,8 +149,8 @@ class PolicyIteration(MDP):
         # it should be possible in the future. Also, if R is so big that its
         # a good idea to use a sparse matrix for it, then converting PRpolicy
         # from a dense to sparse matrix doesn't seem very memory efficient
-        if type(self.R) is _sp.csr_matrix:
-            Rpolicy = _sp.csr_matrix(Rpolicy)
+        if type(self.R) is sp.csr_matrix:
+            Rpolicy = sp.csr_matrix(Rpolicy)
         # self.Ppolicy = Ppolicy
         # self.Rpolicy = Rpolicy
         return (Ppolicy, Rpolicy)
@@ -188,12 +189,12 @@ class PolicyIteration(MDP):
         try:
             assert V0.shape in ((self.S, ), (self.S, 1), (1, self.S)), \
                 "'V0' must be a vector of length S."
-            policy_V = _np.array(V0).reshape(self.S)
+            policy_V = np.array(V0).reshape(self.S)
         except AttributeError:
             if V0 == 0:
-                policy_V = _np.zeros(self.S)
+                policy_V = np.zeros(self.S)
             else:
-                policy_V = _np.array(V0).reshape(self.S)
+                policy_V = np.array(V0).reshape(self.S)
 
         policy_P, policy_R = self._computePpolicyPRpolicy()
 
@@ -208,7 +209,7 @@ class PolicyIteration(MDP):
             Vprev = policy_V
             policy_V = policy_R + self.discount * policy_P.dot(Vprev)
 
-            variation = _np.absolute(policy_V - Vprev).max()
+            variation = np.absolute(policy_V - Vprev).max()
             if self.verbose:
                 _printVerbosity(itr, variation)
 
@@ -246,8 +247,8 @@ class PolicyIteration(MDP):
         #
         Ppolicy, Rpolicy = self._computePpolicyPRpolicy()
         # V = PR + gPV  => (I-gP)V = PR  => V = inv(I-gP)* PR
-        self.V = _np.linalg.solve(
-            (_sp.eye(self.S, self.S) - self.discount * Ppolicy), Rpolicy)
+        self.V = np.linalg.solve(
+            (sp.eye(self.S, self.S) - self.discount * Ppolicy), Rpolicy)
 
     def run(self):
         # Run the policy iteration algorithm.
@@ -315,20 +316,20 @@ class PolicyIterationModified(PolicyIteration):
 
     Data Attributes
     ---------------
-    V : tuple
+    self.V : np.array
         value function
-    policy : tuple
+    self.policy : np.array
         optimal policy
-    iter : int
+    self.iter : int
         number of done iterations
-    time : float
+    self.time : float
         used CPU time
 
     Examples
     --------
     >>> import mdptoolbox, mdptoolbox.example
     >>> P, R = mdptoolbox.example.forest()
-    >>> pim = mdptoolbox.mdp.PolicyIterationModified(P, R, 0.9)
+    >>> pim = PolicyIterationModified(P, R, 0.9)
     >>> pim.run()
     >>> pim.policy
     (0, 0, 0)
@@ -347,8 +348,10 @@ class PolicyIterationModified(PolicyIteration):
         # being calculated here which doesn't need to be. The only thing that
         # is needed from the PolicyIteration class is the _evalPolicyIterative
         # function. Perhaps there is a better way to do it?
-        PolicyIteration.__init__(self, transitions, reward, discount, None,
-                                 max_iter, 1, skip_check=skip_check)
+        PolicyIteration.__init__(self, transitions=transitions,
+                                 reward=reward, discount=discount,
+                                 max_iter=max_iter, eval_type=1,
+                                 skip_check=skip_check)
 
         # PolicyIteration doesn't pass epsilon to MDP.__init__() so we will
         # check it here
@@ -363,10 +366,10 @@ class PolicyIterationModified(PolicyIteration):
             self.thresh = self.epsilon
 
         if self.discount == 1:
-            self.V = _np.zeros(self.S)
+            self.V = np.zeros(self.S)
         else:
             Rmin = min(R.min() for R in self.R)
-            self.V = 1 / (1 - self.discount) * Rmin * _np.ones((self.S,))
+            self.V = 1 / (1 - self.discount) * Rmin * np.ones((self.S,))
 
     def run(self):
         # Run the modified policy iteration algorithm.

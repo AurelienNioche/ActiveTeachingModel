@@ -31,14 +31,14 @@ class FiniteHorizon(MDP):
 
     Data Attributes
     ---------------
-    V : np.array
+    self.V : np.array
         Optimal value function. Shape = (S, N+1). ``V[:, n]`` = optimal value
         function at stage ``n`` with stage in {0, 1...N-1}. ``V[:, N]`` value
         function for terminal stage.
-    policy : np.array
+    self.policy : np.array
         Optimal policy. ``policy[:, n]`` = optimal policy at stage ``n`` with
         stage in {0, 1...N}. ``policy[:, N]`` = policy for stage ``N``.
-    time : float
+    self.time : float
         used CPU time
 
     Notes
@@ -49,7 +49,7 @@ class FiniteHorizon(MDP):
     --------
     >>> import mdptoolbox, mdptoolbox.example
     >>> P, R = mdptoolbox.example.forest()
-    >>> fh = mdptoolbox.mdp.FiniteHorizon(P, R, 0.9, 3)
+    >>> fh = FiniteHorizon(P, R, 0.9, 3)
     >>> fh.run()
     >>> fh.V
     array([[ 2.6973,  0.81  ,  0.    ,  0.    ],
@@ -68,7 +68,8 @@ class FiniteHorizon(MDP):
         self.N = int(N)
         assert self.N > 0, "N must be greater than 0."
         # Initialise the base class
-        MDP.__init__(self, transitions, reward, discount, None, None,
+        MDP.__init__(self, transitions=transitions, reward=reward,
+                     discount=discount,
                      skip_check=skip_check)
         # remove the iteration counter, it is not meaningful for backwards
         # induction
@@ -92,7 +93,7 @@ class FiniteHorizon(MDP):
             self.V[:, stage] = X
             self.policy[:, stage] = W
             if self.verbose:
-                print(("stage: %s, policy: %s") % (
+                print("stage: %s, policy: %s" % (
                     stage, self.policy[:, stage].tolist()))
         # update time spent running
         self.time = time.time() - self.time

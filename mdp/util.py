@@ -240,11 +240,11 @@ def check(P, R):
     --------
     >>> import mdptoolbox, mdptoolbox.example
     >>> P_valid, R_valid = mdptoolbox.example.rand(100, 5)
-    >>> mdptoolbox.util.check(P_valid, R_valid) # Nothing should happen
+    >>> check(P_valid, R_valid) # Nothing should happen
     >>>
     >>> import numpy as np
     >>> P_invalid = np.random.rand(5, 100, 100)
-    >>> mdptoolbox.util.check(P_invalid, R_valid) # Raises an exception
+    >>> check(P_invalid, R_valid) # Raises an exception
     Traceback (most recent call last):
     ...
     StochasticError:...
