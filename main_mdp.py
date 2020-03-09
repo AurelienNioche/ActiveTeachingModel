@@ -99,7 +99,7 @@ def main():
     print("run MDP")
     a = datetime.datetime.utcnow()
 
-    best_policy = policy_iteration(transition=transition, reward=reward)
+    best_policy = value_iteration(transition=transition, reward=reward)
     b = datetime.datetime.utcnow()
     print(b-a)
     print(f"best policy: {best_policy}")
