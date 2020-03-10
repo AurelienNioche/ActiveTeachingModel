@@ -92,8 +92,18 @@ def fig_p_recall_item(p_recall, condition_labels, fig_name=None,
 
 def fig_p_item_seen(
         p_recall, condition_labels,
-        n_iteration_per_day=(60*60*24)/2,
+        time_scale=(60*60*24)/2,
         axes=None, fig_name=None, fig_folder=None):
+
+    """
+    :param p_recall: list of np.array
+    :param condition_labels: list of string
+    :param time_scale: float
+    :param axes: plt.axes (optional)
+    :param fig_name: string (optional)
+    :param fig_folder: string (optional)
+    :return: None
+    """
 
     if axes is None:
         n_row = len(condition_labels)
@@ -118,10 +128,10 @@ def fig_p_item_seen(
         #                 alpha=.1, color=color)
 
         line = None
-        for coordinates in p_recall[dt]:
+        for coordinates in p_recall[i]:
             x, y = np.asarray(coordinates).T
 
-            x /= n_iteration_per_day
+            x /= time_scale
             line, = ax.plot(x, y, color=color, alpha=0.5, linewidth=0.5)
             # x_ticks = np.zeros(3, dtype=int)
             # x_ticks[:] = np.linspace(0, len(y), 3)
@@ -133,6 +143,9 @@ def fig_p_item_seen(
 
         ax.set_xlabel("Time")
         ax.set_ylabel("Probability or recall")
+
+        ax.set_ylim(0, 1)
+        ax.set_yticks([0, 0.5, 1])
 
         ax.legend(loc='lower left')
 

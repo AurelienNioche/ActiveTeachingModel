@@ -26,7 +26,6 @@ class Node:
 class MCTS:
     def __init__(self, time_limit=None, iteration_limit=None,
                  exploration_constant=1 / np.sqrt(2),
-                 horizon=5,
                  verbose=False):
 
         """
@@ -54,8 +53,6 @@ class MCTS:
         self.exploration_constant = exploration_constant
 
         self.verbose = verbose
-
-        self.horizon = horizon
 
         self.root = None
 
@@ -138,7 +135,7 @@ class MCTS:
 
         reward = 0
         t = 0
-        while not state.is_terminal() and t < self.horizon:
+        while not state.is_terminal():
             try:
                 action = np.random.choice(state.get_possible_actions())
             except IndexError:
@@ -148,7 +145,10 @@ class MCTS:
             state = state.take_action(action)
             reward += state.get_reward()
             t += 1
-        return state.get_reward()
+
+        if t > 0:
+            reward /= t
+        return reward
 
     @classmethod
     def _backpropogate(cls, node, reward):

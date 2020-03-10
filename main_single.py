@@ -4,6 +4,8 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE",
 from django.core.wsgi import get_wsgi_application
 application = get_wsgi_application()
 
+from simulation_data.models import Simulation
+
 import numpy as np
 import string
 
@@ -17,7 +19,9 @@ from utils.multiprocessing import MultiProcess
 
 from plot import \
     fig_parameter_recovery, \
-    fig_p_recall, fig_n_seen, fig_p_item_seen
+    fig_p_recall, fig_n_against_time, fig_p_item_seen
+
+from plot.single import DataFigSingle, fig_single
 
 from model.constants import \
     POST_MEAN, POST_SD, P_SEEN, N_SEEN, N_LEARNT, P_ITEM
@@ -94,7 +98,7 @@ def main_single():
     } for teacher_model in teacher_models]
 
     with MultiProcess(n_worker=os.cpu_count()-2) as mp:
-        sim_entries = mp.map(run_n_session, kwargs_list)
+        sim_entry_ids = mp.map(run_n_session, kwargs_list)
 
     # n_iteration = n_iteration_per_session * n_session
 
@@ -106,14 +110,18 @@ def main_single():
 
     timesteps = np.arange(0, n_time_steps, n_time_steps_per_day)
 
-    data_type = (P_SEEN, N_SEEN, N_LEARNT, P_ITEM, POST_MEAN, POST_SD)
-    data = {dt: {} for dt in data_type}
+    # data_type = (P_SEEN, N_SEEN, N_LEARNT, P_ITEM, POST_MEAN, POST_SD)
+    # data = {dt: {} for dt in data_type}
 
     condition_labels = [m.__name__ for m in teacher_models]
 
+    data = DataFigSingle(learner_model=learner_model,
+                         param=param, param_labels=param_labels,
+                         n_session=n_session)
+
     for i, cd in enumerate(condition_labels):
 
-        e = sim_entries[i]
+        e = Simulation.objects.get(id=sim_entry_ids[i])
 
         timestamps = e.timestamp_array
         hist = e.hist_array
@@ -126,105 +134,27 @@ def main_single():
 
         # post_entries = sim_entries[i].post_set.all()
 
-        post = sim_entries[i].post
+        post = e.post
 
-        d = learner_model.stats_ex_post(
+        d = learner_model().stats_ex_post(
             param_labels=param_labels,
             param=param, hist=hist, timestamps=timestamps,
             timesteps=timesteps, learnt_thr=learnt_thr,
             post=post
         )
-        for dt in data_type:
-            data[dt][cd] = d[dt]
 
-    fig_ext = \
-        "_" \
-        f"{learner_model.__name__}_" \
-        f"{dic2string(param)}_" \
-        f"{n_session}session" \
-        f".pdf"
-    #
-    # # ax.text(-0.2, 1.2, string.ascii_uppercase[row],
-    # #         transform=ax.transAxes,
-    # #         size=20, weight='bold')
-    #
-    fig, axes = plt.subplots(ncols=2, nrows=3, figsize=(12, 9))
-
-    ax = axes[0, 0]
-    fig_n_seen(
-        data=data[N_LEARNT], y_label="N learnt",
-        condition_labels=condition_labels,
-        ax=ax)
-
-    ax.text(-0.1, -0.1, string.ascii_uppercase[0],
-                    transform=ax.transAxes, size=20, weight='bold')
-
-    ax = axes[0, 1]
-    fig_n_seen(
-        data=data[N_SEEN], y_label="N seen",
-        condition_labels=condition_labels,
-        ax=ax)
-
-    ax.text(-0.1, -0.1, string.ascii_uppercase[1],
-                    transform=ax.transAxes, size=20, weight='bold')
-
-
-    # n axes := n_parameters
-    fig_parameter_recovery(condition_labels=condition_labels,
-                           param_labels=param_labels,
-                           post_means=data[POST_MEAN], post_sds=data[POST_SD],
-                           true_param=param,
-                           axes=axes[1, :])
-    ax = axes[1, 0]
-    ax.text(-0.1, -0.1, string.ascii_uppercase[2],
-                    transform=ax.transAxes, size=20, weight='bold')
-
-    # n axes := n_conditions
-    fig_p_item_seen(
-        p_recall=data[P_ITEM], condition_labels=condition_labels,
-        axes=axes[2, :]
+        data.add(
+            n_learnt=d.n_learnt,
+            n_seen=d.n_seen,
+            p_item=d.p_item,
+            label=cd,
+            post_mean=d.post_mean,
+            post_std=d.post_std
         )
 
-    ax = axes[2, 0]
-    ax.text(-0.1, -0.1, string.ascii_uppercase[3],
-                    transform=ax.transAxes, size=20, weight='bold')
-    #
-    # fig_p_recall(data=data[P_SEEN], condition_labels=condition_labels,
-    #              ax=axes[5])
-    #
-    save_fig(fig_name=f"single{fig_ext}", fig_folder=FIG_FOLDER)
-
-    # fig_name = f"p_seen" + fig_ext
-    # fig_p_recall(data=data[P_SEEN], condition_labels=condition_labels,
-    #              fig_name=fig_name, fig_folder=FIG_FOLDER)
-    #
-    # # 2 axes
-    # fig_name = f"p_item" + fig_ext
-    # fig_p_item_seen(
-    #     p_recall=data[P_ITEM], condition_labels=condition_labels,
-    #     fig_name=fig_name, fig_folder=FIG_FOLDER)
-    #
-    # fig_name = f"n_seen" + fig_ext
-    # fig_n_seen(
-    #     data=data[N_SEEN], y_label="N seen",
-    #     condition_labels=condition_labels,
-    #     fig_name=fig_name, fig_folder=FIG_FOLDER)
-    #
-    # fig_name = f"n_learnt" + fig_ext
-    # fig_n_seen(
-    #     data=data[N_LEARNT], y_label="N learnt",
-    #     condition_labels=condition_labels,
-    #     fig_name=fig_name, fig_folder=FIG_FOLDER)
-    #
-    # fig_name = f"param_recovery" + fig_ext
-    # fig_parameter_recovery(condition_labels=condition_labels,
-    #                        param_labels=param_labels,
-    #                        post_means=data[POST_MEAN], post_sds=data[POST_SD],
-    #                        true_param=param,
-    #                        fig_name=fig_name,
-    #                        fig_folder=FIG_FOLDER)
+    fig_single(data=data, fig_folder=FIG_FOLDER)
 
 
 if __name__ == "__main__":
 
-    basic()
+    main_single()

@@ -64,15 +64,54 @@ class ExponentialForgetting(GenericLearner):
     bounds = (0., 0.25), (0., 0.50),
     param_labels = "alpha", "beta"
 
-    def __init__(self):
+    def __init__(self, param=None, n_item=0):
         super().__init__()
 
-    @classmethod
-    def stats_ex_post(cls, param, param_labels,
-                      hist, timestamps, timesteps,
-                      learnt_thr, post):
+        # For stats ex post
+        self.p_seen = None
+        self.p_item = None
+        self.n_learnt = None
+        self.n_seen = None
+        self.post_mean = None
+        self.post_std = None
 
-        post_mean, post_sd = post["mean"], post["std"]
+        # For decision
+        self.param = param
+        self.n_pres = np.zeros(n_item, dtype=int)
+        self.delta = np.zeros(n_item, dtype=int)
+
+    def recall(self, item, learn=True):
+
+        if self.n_pres[item] == 0:
+            recall = False
+        else:
+            fr = self.param[0] * (1 - self.param[1]) ** (self.n_pres[item] - 1)
+            p = np.exp(-fr * self.delta[item])
+            recall = np.random.choice([False, True], p=[1-p, p])
+
+        if learn:
+            self.n_pres[item] += 1
+
+            # Increment delta for all items
+            self.delta[:] += 1
+            # ...except the one for the selected design that equal one
+            self.delta[item] = 1
+
+        return recall
+
+    def stats_ex_post(self, param,
+                      hist,
+                      learnt_thr,
+                      timestamps=None,
+                      timesteps=None,
+                      param_labels=None,
+                      post=None,):
+
+        if timestamps is None:
+            timestamps = np.arange(len(hist))
+
+        if timesteps is None:
+            timesteps = np.arange(len(timestamps))
 
         seen = list(np.unique(hist))
         total_n_seen = len(seen)
@@ -83,10 +122,13 @@ class ExponentialForgetting(GenericLearner):
         n_seen = []
         n_learnt = []
 
-        post_mean_scaled = \
-            {pr: np.zeros(len(timesteps)) for pr in param_labels}
-        post_sd_scaled = \
-            {pr: np.zeros(len(timesteps)) for pr in param_labels}
+        if post is not None:
+            post_mean, post_sd = post["mean"], post["std"]
+
+            post_mean_scaled = \
+                {pr: np.zeros(len(timesteps)) for pr in param_labels}
+            post_sd_scaled = \
+                {pr: np.zeros(len(timesteps)) for pr in param_labels}
 
         timestamps_list = list(timestamps)
 
@@ -105,9 +147,9 @@ class ExponentialForgetting(GenericLearner):
 
             n_seen.append(n_seen_t)
 
-            p_t = cls.p_seen_at_t(hist=hist_until_t,
-                                  timestamps=timestamps_until_t,
-                                  param=param, t=t, items=items)
+            p_t = self.p_seen_at_t(hist=hist_until_t,
+                                   timestamps=timestamps_until_t,
+                                   param=param, t=t, items=items)
 
             for i, item in enumerate(items):
                 p_item[seen.index(item)].append((t, p_t[i]))
@@ -117,20 +159,23 @@ class ExponentialForgetting(GenericLearner):
 
             idx_last_update = timestamps_list.index(np.max(timestamps_until_t))
 
-            for pr in param_labels:
-                post_mean_scaled[pr][j] = post_mean[pr][idx_last_update]
-                post_sd_scaled[pr][j] = post_sd[pr][idx_last_update]
+            if post is not None:
+                for pr in param_labels:
+                    post_mean_scaled[pr][j] = post_mean[pr][idx_last_update]
+                    post_sd_scaled[pr][j] = post_sd[pr][idx_last_update]
 
         p_item = [i for i in p_item if len(i) > 0]
 
-        return {
-            P_SEEN: p_recall_seen,
-            P_ITEM: p_item,
-            N_LEARNT: n_learnt,
-            N_SEEN: n_seen,
-            POST_MEAN: post_mean_scaled,
-            POST_SD: post_sd_scaled
-        }
+        self.p_seen = p_recall_seen
+        self.p_item = p_item
+        self.n_learnt = n_learnt
+        self.n_seen = n_seen
+
+        if post is not None:
+            self.post_mean = post_mean_scaled
+            self.post_std = post_sd_scaled
+
+        return self
 
     @classmethod
     def p_seen_at_t(cls, hist, timestamps, param, t, items=None):

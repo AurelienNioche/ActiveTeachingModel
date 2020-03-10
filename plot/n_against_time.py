@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from utils.plot import save_fig
 
 
-def fig_n_seen(
+def fig_n_against_time(
         data, condition_labels,
         ax=None,
         fig_name=None, fig_folder=None,
@@ -18,7 +18,7 @@ def fig_n_seen(
 
     for i, dt in enumerate(condition_labels):
 
-        ax.plot(data[dt], color=colors[i], label=dt)
+        ax.plot(data[i], color=colors[i], label=dt)
 
     ax.set_xlabel("Time")
     ax.set_ylabel(y_label)

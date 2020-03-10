@@ -20,8 +20,8 @@ def fig_parameter_recovery(param_labels, condition_labels, post_means, post_sds,
 
             pr = param_labels[i]
 
-            means = post_means[dt][pr]
-            stds = post_sds[dt][pr]
+            means = post_means[j][pr]
+            stds = post_sds[j][pr]
 
             if isinstance(true_param, dict):
                 true_p = true_param[pr]

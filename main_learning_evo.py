@@ -4,12 +4,10 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE",
 from django.core.wsgi import get_wsgi_application
 application = get_wsgi_application()
 
-import numpy as np
-import matplotlib.pyplot as plt
-import string
-import pickle
 from itertools import product
 
+import numpy as np
+import matplotlib.pyplot as plt
 from tqdm import tqdm
 
 from utils.plot import save_fig
@@ -92,16 +90,16 @@ def main():
 
                 e = Simulation.run(
                     n_item=n_item,
-                        n_session=n_session,
-                        n_iteration_per_session=n_iteration_per_session,
-                        n_iteration_between_session=n_iteration_between_session,
-                        grid_size=grid_size,
-                        teacher_model=teacher_model,
-                        learner_model=ExponentialForgetting,
-                        param_labels=ExponentialForgetting.param_labels,
-                        bounds=bounds,
-                        seed=seed,
-                        param=param
+                    n_session=n_session,
+                    n_iteration_per_session=n_iteration_per_session,
+                    n_iteration_between_session=n_iteration_between_session,
+                    grid_size=grid_size,
+                    teacher_model=teacher_model,
+                    learner_model=ExponentialForgetting,
+                    param_labels=ExponentialForgetting.param_labels,
+                    bounds=bounds,
+                    seed=seed,
+                    param=param
                 )
                 # param = e.param_values
                 timestamps = e.timestamp_array

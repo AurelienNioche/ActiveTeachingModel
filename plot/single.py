@@ -8,7 +8,7 @@ from utils.string import dic2string
 
 from plot import \
     fig_parameter_recovery, \
-    fig_p_recall, fig_n_seen, fig_p_item_seen
+    fig_p_recall, fig_n_against_time, fig_p_item_seen
 
 from model.constants import \
     POST_MEAN, POST_SD, P_SEEN, N_SEEN, N_LEARNT, P_ITEM
@@ -18,96 +18,105 @@ import matplotlib.pyplot as plt
 from utils.plot import save_fig
 
 
-EPS = np.finfo(np.float).eps
-FIG_FOLDER = os.path.join("fig", os.path.basename(__file__).split(".")[0])
-os.makedirs(FIG_FOLDER, exist_ok=True)
+# EPS = np.finfo(np.float).eps
 
 
-class DataSingle:
+class DataFigSingle:
 
-    def __init__(self):
+    def __init__(self, learner_model, n_session, param, param_labels, ):
 
-        self._learnt = []
-        self._n_seen = []
-        self._label = []
-        self._p_item = []
+        self.learner_model = learner_model
+        self.param = param
+        self.param_labels = param_labels
+        self.n_session = n_session
 
-    def add(self, learnt, n_seen, p_item, label):
+        self.n_learnt = []
+        self.n_seen = []
+        self.labels = []
+        self.p_item = []
+        self.post_mean = []
+        self.post_std = []
 
-        self._learnt.append(learnt)
-        self._n_seen.append(n_seen)
-        self._p_item.append(p_item)
-        self._label.append(label)
+    def add(self, n_learnt, n_seen, p_item, label,
+            post_mean=None, post_std=None):
 
-    @property
-    def learnt(self):
-        return
-
-    def _dic_data(self, attr):
-        return {
-            k: v for (k, v) in zip(self._label, attr)
-        }
+        self.n_learnt.append(n_learnt)
+        self.n_seen.append(n_seen)
+        self.p_item.append(p_item)
+        self.labels.append(label)
+        self.post_mean.append(post_mean)
+        self.post_std.append(post_std)
 
 
-def plot_single(data_learnt,
-                data_n_seen,
-                data_p_item,
-                condition_labels, ):
-
-    fig_ext = \
-        "_" \
-        f"{learner_model.__name__}_" \
-        f"{dic2string(param)}_" \
-        f"{n_session}session" \
-        f".pdf"
-    #
-    # # ax.text(-0.2, 1.2, string.ascii_uppercase[row],
-    # #         transform=ax.transAxes,
-    # #         size=20, weight='bold')
-    #
-    fig, axes = plt.subplots(ncols=2, nrows=3, figsize=(12, 9))
-
-    ax = axes[0, 0]
-    fig_n_seen(
-        data=data[N_LEARNT], y_label="N learnt",
-        condition_labels=condition_labels,
-        ax=ax)
-
-    ax.text(-0.1, -0.1, string.ascii_uppercase[0],
-                    transform=ax.transAxes, size=20, weight='bold')
-
-    ax = axes[0, 1]
-    fig_n_seen(
-        data=data[N_SEEN], y_label="N seen",
-        condition_labels=condition_labels,
-        ax=ax)
-
-    ax.text(-0.1, -0.1, string.ascii_uppercase[1],
+def add_letter(ax, letter):
+    ax.text(-0.1, -0.1, letter,
             transform=ax.transAxes, size=20, weight='bold')
 
 
-    # # n axes := n_parameters
-    # fig_parameter_recovery(condition_labels=condition_labels,
-    #                        param_labels=param_labels,
-    #                        post_means=data[POST_MEAN], post_sds=data[POST_SD],
-    #                        true_param=param,
-    #                        axes=axes[1, :])
+def fig_single(data, fig_folder, time_scale=(60*60*24)/2):
 
-    ax = axes[1, 0]
-    ax.text(-0.1, -0.1, string.ascii_uppercase[2],
-                    transform=ax.transAxes, size=20, weight='bold')
+    """
+    :param time_scale: float
+    :param fig_folder: string
+    :param data: FigDataSingle
+    :return: None
+    """
+    param_string = \
+        '_'.join(f'{k}={v:.2f}'
+                 for (k, v) in zip(data.param_labels, data.param))
+
+    fig_ext = \
+        f"{data.learner_model.__name__}_" \
+        f"{param_string}_" \
+        f"n_session={data.n_session}"
+
+    n_rows = 2 + int(None not in data.post_mean)
+
+    fig, axes = plt.subplots(ncols=2, nrows=n_rows, figsize=(12, 9))
+
+    ax_n_learnt = axes[0, 0]
+    ax_n_seen = axes[0, 1]
+    # n axes := n_conditions
+    ax_p_item = axes[1, :]
+
+    where_to_put_letter = [ax_n_learnt, ax_n_seen, ax_p_item[0], ]
+
+    fig_n_against_time(
+        data=data.n_learnt, y_label="N learnt",
+        condition_labels=data.labels,
+        ax=ax_n_learnt)
+
+    for i, ax in enumerate(where_to_put_letter):
+        add_letter(ax=ax, letter=string.ascii_uppercase[i])
+
+    fig_n_against_time(
+        data=data.n_seen, y_label="N seen",
+        condition_labels=data.labels,
+        ax=ax_n_seen)
 
     # n axes := n_conditions
     fig_p_item_seen(
-        p_recall=data[P_ITEM], condition_labels=condition_labels,
-        axes=axes[2, :]
+        p_recall=data.p_item, condition_labels=data.labels,
+        axes=ax_p_item,
+        time_scale=time_scale
         )
 
-    ax = axes[2, 0]
-    ax.text(-0.1, -0.1, string.ascii_uppercase[3],
-                    transform=ax.transAxes, size=20, weight='bold')
-    #
+    if None not in data.post_mean:
+
+        # n axes := n_parameters
+        ax_param_rec = axes[2, :]
+        where_to_put_letter.append(ax_param_rec[0])
+
+        # n axes := n_parameters
+        fig_parameter_recovery(condition_labels=data.labels,
+                               param_labels=data.param_labels,
+                               post_means=data.post_mean,
+                               post_sds=data.post_std,
+                               true_param=data.param,
+                               axes=ax_param_rec)
+
+    save_fig(fig_name=f"single_{fig_ext}.pdf", fig_folder=fig_folder)
+
     # fig_p_recall(data=data[P_SEEN], condition_labels=condition_labels,
     #              ax=axes[5])
     #
-    save_fig(fig_name=f"single{fig_ext}", fig_folder=FIG_FOLDER)
