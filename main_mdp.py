@@ -30,6 +30,7 @@ def q_learning(transition, reward):
     m.run()
     return m.policy
 
+
 def policy_iteration(transition, reward):
     m = mdp.PolicyIteration(transitions=transition, reward=reward, discount=0.96)
     m.run()
