@@ -133,8 +133,6 @@ class MCTS:
         if self.verbose:
             print(f"rollout for state {state}")
 
-        reward = 0
-        t = 0
         while not state.is_terminal():
             try:
                 action = np.random.choice(state.get_possible_actions())
@@ -143,12 +141,7 @@ class MCTS:
                     "Non-terminal state has no possible actions: " + str(
                         state))
             state = state.take_action(action)
-            reward += state.get_reward()
-            t += 1
-
-        if t > 0:
-            reward /= t
-        return reward
+        return state.get_reward()
 
     @classmethod
     def _backpropogate(cls, node, reward):

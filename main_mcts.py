@@ -21,9 +21,56 @@ PARAM = (0.02, 0.2)
 THR = 0.9
 N_ITER = 100
 
-HORIZON = 5
+HORIZON = 20
 
 MCTS_ITERATION_LIMIT = 1000
+
+
+class ThresholdTeacher:
+
+    def __init__(self):
+
+        self.n_pres = np.zeros(N_ITEM, dtype=int)
+        self.delta = np.zeros(N_ITEM, dtype=int)
+
+        self.t = 0
+
+    def get_item(self):
+
+        n_item = len(n_pres)
+        seen = n_pres[:] > 0
+        unseen = np.logical_not(seen)
+        n_seen = np.sum(seen)
+
+        items = np.arange(n_item)
+
+        if n_seen == 0:
+            item = np.random.randint(n_item)
+
+        else:
+
+            seen = self.n_pres[:] > 0
+
+            fr = PARAM[0] * (1 - PARAM[1]) ** (self.n_pres[seen] - 1)
+
+            p = np.exp(-fr * self.delta[seen])
+
+            min_p = np.min(p)
+
+            if n_seen == n_item or min_p <= THR:
+                item = np.random.choice(items[seen][p[:] == min_p])
+
+            else:
+                item = np.random.choice(items[unseen])
+
+        self.n_pres[item] += 1
+
+        # Increment delta for all items
+        self.delta[:] += 1
+        # ...except the one for the selected design that equal one
+        self.delta[item] = 1
+
+        return item
 
 
 class BasicLearnerState(State):
@@ -57,15 +104,17 @@ class BasicLearnerState(State):
 
 class LearnerState(State):
 
-    def __init__(self, n_pres, delta, t):
+    def __init__(self, n_pres, delta, t, cumulative_reward):
 
         self.n_pres = n_pres
         self.delta = delta
 
         self.t = t
 
-        self._reward = None
+        self._instant_reward = None
         self._possible_actions = None
+
+        self.cumulative_reward = cumulative_reward + self.get_instant_reward()
 
     def get_possible_actions(self):
         """Returns an iterable of all actions which can be taken
@@ -74,7 +123,7 @@ class LearnerState(State):
             seen = self.n_pres[:] > 0
             n_seen = np.sum(seen)
             if n_seen == 0:
-                return np.arange(1)
+                self._possible_actions = np.arange(1)
             elif n_seen == N_ITEM:
                 self._possible_actions = np.arange(N_ITEM)
             else:
@@ -85,7 +134,7 @@ class LearnerState(State):
 
         # return np.arange(N_ITEM)
 
-    def take_action(self, action):
+    def take_action(self, action, fake=True):
         """Returns the state which results from taking action 'action'"""
         n_pres = self.n_pres.copy()
         delta = self.delta.copy()
@@ -97,26 +146,37 @@ class LearnerState(State):
         # ...except the one for the selected design that equal one
         delta[action] = 1
         t = self.t+1
-        return self.__class__(n_pres=n_pres, delta=delta, t=t)
+
+        if fake:
+            new_state = self.__class__(n_pres=n_pres, delta=delta, t=t,
+                                       cumulative_reward=self.cumulative_reward)
+        else:
+            new_state = self.__class__(n_pres=n_pres, delta=delta,
+                                       t=0, cumulative_reward=0)
+
+        return new_state
 
     def is_terminal(self):
         """Returns whether this state is a terminal state"""
         return self.t >= HORIZON
 
-    def get_reward(self):
-        """"Returns the reward for this state"""
+    def get_instant_reward(self):
+        """"Returns the INSTANT reward for this state"""
 
-        if self._reward is not None:
-            return self._reward
+        if self._instant_reward is not None:
+            return self._instant_reward
         else:
             seen = self.n_pres[:] > 0
 
             fr = PARAM[0] * (1 - PARAM[1]) ** (self.n_pres[seen] - 1)
 
             p = np.exp(-fr * self.delta[seen])
-            self._reward = np.sum(p > THR)
-            return self._reward
+            self._instant_reward = np.sum(p > THR)
+            return self._instant_reward
 
+    def get_reward(self):
+        """"Returns the CUMULATIVE reward for this state"""
+        return self.cumulative_reward
     # def __str__(self):
     #     return f"State: "
 
@@ -124,7 +184,8 @@ class LearnerState(State):
 def main():
 
     leaner_state = LearnerState(n_pres=np.zeros(N_ITEM, dtype=bool),
-                                delta=np.zeros(N_ITEM, dtype=int), t=0)
+                                delta=np.zeros(N_ITEM, dtype=int), t=0,
+                                cumulative_reward=0)
     hist = {}
 
     h = np.zeros(N_ITER, dtype=int)
@@ -133,8 +194,7 @@ def main():
         m = MCTS(iteration_limit=MCTS_ITERATION_LIMIT, verbose=False)
         action = m.run(initial_state=leaner_state)
 
-        leaner_state = leaner_state.take_action(action)
-        leaner_state.t = 0
+        leaner_state = leaner_state.take_action(action, fake=False)
 
         h[t] = action
         # print(f"t={t}, action={action}")
