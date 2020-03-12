@@ -10,20 +10,22 @@ from model.learner.learner import ExponentialForgetting
 
 from plot.single import DataFigSingle, fig_single
 
+import itertools as it
+
 from tqdm import tqdm
 
 
 FIG_FOLDER = os.path.join("fig", os.path.basename(__file__).split(".")[0])
 os.makedirs(FIG_FOLDER, exist_ok=True)
 
-N_ITEM = 100
+N_ITEM = 10
 PARAM = (0.02, 0.2)
 THR = 0.9
-N_ITER = 100
+N_ITER = 200
 
-HORIZON = 20
+HORIZON = 10
 
-MCTS_ITERATION_LIMIT = 1000
+MCTS_ITERATION_LIMIT = 10000
 
 
 class ThresholdTeacher:
@@ -35,24 +37,19 @@ class ThresholdTeacher:
 
         self.t = 0
 
-    def get_item(self):
+    def ask(self):
 
-        n_item = len(n_pres)
-        seen = n_pres[:] > 0
-        unseen = np.logical_not(seen)
+        n_item = len(self.n_pres)
+        seen = self.n_pres[:] > 0
         n_seen = np.sum(seen)
 
         items = np.arange(n_item)
 
         if n_seen == 0:
-            item = np.random.randint(n_item)
+            item = 0
 
         else:
-
-            seen = self.n_pres[:] > 0
-
             fr = PARAM[0] * (1 - PARAM[1]) ** (self.n_pres[seen] - 1)
-
             p = np.exp(-fr * self.delta[seen])
 
             min_p = np.min(p)
@@ -61,7 +58,8 @@ class ThresholdTeacher:
                 item = np.random.choice(items[seen][p[:] == min_p])
 
             else:
-                item = np.random.choice(items[unseen])
+                unseen = np.logical_not(seen)
+                item = items[unseen][0]
 
         self.n_pres[item] += 1
 
@@ -102,9 +100,68 @@ class BasicLearnerState(State):
         return f"State: {self.seen}"
 
 
+class BruteForceTeacher:
+
+    def __init__(self, horizon=2):
+        self.n_pres = np.zeros(N_ITEM, dtype=int)
+        self.delta = np.zeros(N_ITEM, dtype=int)
+
+        self.horizon = horizon
+
+        self.t = 0
+
+    def ask(self):
+
+        p = []
+
+        n_item = len(self.n_pres)
+        seen = self.n_pres[:] > 0
+        unseen = np.logical_not(seen)
+        n_seen = np.sum(seen)
+
+        items = np.arange(n_item)
+
+        nodes = []
+
+        for t in range(self.horizon):
+            nodes.append([])
+
+            for item in range(N_ITEM):
+                nodes[t].append(item)
+
+
+        if n_seen == 0:
+            item = 0
+
+        else:
+
+            seen = self.n_pres[:] > 0
+
+            fr = PARAM[0] * (1 - PARAM[1]) ** (self.n_pres[seen] - 1)
+
+            p = np.exp(-fr * self.delta[seen])
+
+            min_p = np.min(p)
+
+            if n_seen == n_item or min_p <= THR:
+                item = np.random.choice(items[seen][p[:] == min_p])
+
+            else:
+                item = items[unseen][0]
+
+        self.n_pres[item] += 1
+
+        # Increment delta for all items
+        self.delta[:] += 1
+        # ...except the one for the selected design that equal one
+        self.delta[item] = 1
+
+        return item
+
+
 class LearnerState(State):
 
-    def __init__(self, n_pres, delta, t, cumulative_reward):
+    def __init__(self, n_pres, delta, t, cumulative_reward, first=False):
 
         self.n_pres = n_pres
         self.delta = delta
@@ -114,7 +171,11 @@ class LearnerState(State):
         self._instant_reward = None
         self._possible_actions = None
 
-        self.cumulative_reward = cumulative_reward + self.get_instant_reward()
+        if first is not True:
+            self.cumulative_reward = cumulative_reward \
+                                     + self.get_instant_reward()
+        else:
+            self.cumulative_reward = - self.get_instant_reward()
 
     def get_possible_actions(self):
         """Returns an iterable of all actions which can be taken
@@ -152,7 +213,7 @@ class LearnerState(State):
                                        cumulative_reward=self.cumulative_reward)
         else:
             new_state = self.__class__(n_pres=n_pres, delta=delta,
-                                       t=0, cumulative_reward=0)
+                                       t=0, cumulative_reward=0, first=True)
 
         return new_state
 
@@ -176,7 +237,7 @@ class LearnerState(State):
 
     def get_reward(self):
         """"Returns the CUMULATIVE reward for this state"""
-        return self.cumulative_reward
+        return self.cumulative_reward / HORIZON
     # def __str__(self):
     #     return f"State: "
 
@@ -185,7 +246,7 @@ def main():
 
     leaner_state = LearnerState(n_pres=np.zeros(N_ITEM, dtype=bool),
                                 delta=np.zeros(N_ITEM, dtype=int), t=0,
-                                cumulative_reward=0)
+                                cumulative_reward=0, first=True)
     hist = {}
 
     h = np.zeros(N_ITER, dtype=int)
@@ -214,6 +275,17 @@ def main():
         h[t] = item
 
     hist["leitner"] = h
+
+    # Simulate Threshold Teacher
+    h = np.zeros(N_ITER, dtype=int)
+    np.random.seed(0)
+    teacher = ThresholdTeacher()
+
+    for t in tqdm(range(N_ITER)):
+        item = teacher.ask()
+        h[t] = item
+
+    hist["threshold"] = h
 
     data = DataFigSingle(learner_model=ExponentialForgetting,
                          param=PARAM,

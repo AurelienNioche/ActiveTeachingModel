@@ -71,8 +71,9 @@ def fig_single(data, fig_folder, time_scale=(60*60*24)/2):
         f"n_session={data.n_session}"
 
     n_rows = 2 + int(None not in data.post_mean)
+    n_cols = len(data.labels)
 
-    fig, axes = plt.subplots(ncols=2, nrows=n_rows, figsize=(12, 9))
+    fig, axes = plt.subplots(ncols=n_cols, nrows=n_rows, figsize=(12, 9))
 
     ax_n_learnt = axes[0, 0]
     ax_n_seen = axes[0, 1]

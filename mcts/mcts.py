@@ -131,7 +131,7 @@ class MCTS:
         """
 
         if self.verbose:
-            print(f"rollout for state {state}")
+            print(f"Rollout for state {state}")
 
         while not state.is_terminal():
             try:
