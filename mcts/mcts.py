@@ -1,23 +1,23 @@
 """
 Adapted from: https://github.com/pbsinclair42/MCTS/blob/master/mcts.py
 """
-
-
-from . state import State
-
 import time
 import numpy as np
 
 
 class Node:
     def __init__(self, state, parent):
+
         self.state = state
+
         self.is_terminal = state.is_terminal()
         self.is_fully_expanded = self.is_terminal
+
         self.parent = parent
+        self.children = {}
+
         self.num_visits = 0
         self.total_reward = 0
-        self.children = {}
 
     def __str__(self):
         return str(self.state)
