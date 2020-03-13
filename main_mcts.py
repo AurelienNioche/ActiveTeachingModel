@@ -16,10 +16,10 @@ from tqdm import tqdm
 FIG_FOLDER = os.path.join("fig", os.path.basename(__file__).split(".")[0])
 os.makedirs(FIG_FOLDER, exist_ok=True)
 
-N_ITEM = 4
+N_ITEM = 100
 PARAM = (0.02, 0.2)
 THR = 0.9
-N_ITER = 10
+N_ITER = 1000
 
 MCTS_HORIZON = 10
 
@@ -28,39 +28,108 @@ MCTS_ITERATION_LIMIT = 10000
 
 class BruteForceTeacher:
 
-    def __init__(self, horizon=2):
-        self.n_pres = np.zeros(N_ITEM, dtype=int)
-        self.delta = np.zeros(N_ITEM, dtype=int)
-
-        self.horizon = horizon
+    def __init__(self, horizon=2, verbose=0):
 
         self.t = 0
 
-    def ask(self, learner_state):
+        self.learner_state = \
+            LearnerState(
+                n_pres=np.zeros(N_ITEM, dtype=int),
+                delta=np.zeros(N_ITEM, dtype=int),
+                learnt_thr=THR,
+                horizon=horizon,
+                param=PARAM)
+
+        self.verbose = verbose
+
+    def ask(self):
+        if self.verbose:
+            print("*" * 40)
+            print(f"T = {self.t}")
+            print("*" * 40)
+            print()
+
+        self.learner_state.reset()
+
+        done = False
 
         value = []
         root_actions = []
 
-        for t in range(self.horizon):
+        initial_state = self.learner_state
 
-            print("t", t)
+        learner_state = initial_state
 
+        if self.verbose:
             actions = learner_state.get_possible_actions()
-            print("possible actions", actions)
+            print()
+            print("Possible actions " + "*" * 10)
+            print(f"t={learner_state.t}, possible actions={actions}")
+            print()
+            print("Evaluation" + "*" * 10)
+
+        while True:
+            actions = learner_state.get_possible_actions()
+
+            if self.verbose==2:
+                print()
+                print("Possible actions " + "*" * 10)
+                print(f"t={learner_state.t}, possible actions={actions}")
+                print()
+                print("Evaluation" + "*"*10)
 
             for a in actions:
-                print("evaluate action", a)
-                learner_state = learner_state.take_action(
-                    action=a, root=t == 0)
-                if t == self.horizon-1:
-                    value.append(learner_state.get_reward())
-                    root_actions.append(learner_state.root_action)
 
-        best_idx = int(np.argmax(value))
-        best_action = root_actions[best_idx]
-        print("value", value)
-        print("best idx", best_idx)
-        print("best action", best_action)
+                if a not in learner_state.children:
+                    if self.verbose==2:
+                        print(f"evaluate action {a} at t={learner_state.t}")
+                    learner_state = learner_state.take_action(action=a)
+                    if self.verbose==2:
+                        print(f"New learner state at t={learner_state.t} "
+                              f"with r={learner_state.get_instant_reward()}")
+                    break
+
+            if learner_state.is_terminal():
+                if self.verbose==2:
+                    print("New state is terminal.")
+                value.append(learner_state.get_reward())
+                root_actions.append(learner_state.action[0])
+
+                fully_expanded = True
+                while fully_expanded:
+                    if self.verbose==2:
+                        print("Fully expanded or terminal. Taking parent.")
+                    learner_state = learner_state.parent
+                    actions = learner_state.get_possible_actions()
+                    fully_expanded = len(learner_state.children) == len(
+                        actions)
+
+                    root = learner_state == initial_state
+                    if fully_expanded and root:
+                        if self.verbose==2:
+                            print("Tree is fully expanded.")
+                        done = True
+                        break
+
+            if done:
+                if self.verbose==2:
+                    print("Ready to provide action.")
+                break
+
+        a_value = np.asarray(value)
+        a_actions = np.asarray(root_actions)
+        max_value = np.max(a_value)
+        best_action = np.random.choice(a_actions[a_value == max_value])
+
+        if self.verbose:
+            print(f"Root action-value={[(s,v) for s, v in zip(root_actions, value)]}")
+            print("Selected action", best_action)
+            print("Max value", max_value)
+            print("*" * 40)
+
+        self.learner_state = self.learner_state.take_action(best_action)
+
+        self.t += 1
         return best_action
 
 
@@ -133,13 +202,6 @@ def main():
     # hist["mcts"] = h
 
     # Simulate bruteforce
-    leaner_state = LearnerState(n_pres=np.zeros(N_ITEM, dtype=bool),
-                                delta=np.zeros(N_ITEM, dtype=int),
-                                learnt_thr=THR,
-                                horizon=MCTS_HORIZON,
-                                param=PARAM)
-    leaner_state.t = 0
-    leaner_state.cumulative_reward = - leaner_state.get_instant_reward()
 
     hist = {}
 
@@ -148,11 +210,9 @@ def main():
     perfect_teacher = BruteForceTeacher()
     for t in tqdm(range(N_ITER)):
 
-        action = perfect_teacher.ask(learner_state=leaner_state)
-        print("teacher choose", action)
-        leaner_state = leaner_state.take_action(action, fake=False)
-
+        action = perfect_teacher.ask()
         h[t] = action
+        # print("teacher choose", action)
         # print(f"t={t}, action={action}")
 
     hist["bruteforce"] = h
