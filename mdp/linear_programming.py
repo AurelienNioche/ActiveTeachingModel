@@ -1,7 +1,7 @@
 import time as _time
 
-import numpy as _np
-from scipy import sparse as _sp
+import numpy as np
+from scipy import sparse as sp
 
 from mdp.mdp import MDP
 
@@ -84,20 +84,20 @@ class _LP(MDP):
         # min V / (discount*P-I) * V <= - PR
         # To avoid loop on states, the matrix M is structured following actions
         # M(A*S,S)
-        f = self._cvxmat(_np.ones((self.S, 1)))
-        h = _np.array(self.R).reshape(self.S * self.A, 1, order="F")
+        f = self._cvxmat(np.ones((self.S, 1)))
+        h = np.array(self.R).reshape(self.S * self.A, 1, order="F")
         h = self._cvxmat(h, tc='d')
-        M = _np.zeros((self.A * self.S, self.S))
+        M = np.zeros((self.A * self.S, self.S))
         for aa in range(self.A):
             pos = (aa + 1) * self.S
             M[(pos - self.S):pos, :] = (
-                self.discount * self.P[aa] - _sp.eye(self.S, self.S))
+                    self.discount * self.P[aa] - sp.eye(self.S, self.S))
         M = self._cvxmat(M)
         # Using the glpk option will make this behave more like Octave
         # (Octave uses glpk) and perhaps Matlab. If solver=None (ie using the
         # default cvxopt solver) then V agrees with the Octave equivalent
         # only to 10e-8 places. This assumes glpk is installed of course.
-        self.V = _np.array(self._linprog(f, M, -h)['x']).reshape(self.S)
+        self.V = np.array(self._linprog(f, M, -h)['x']).reshape(self.S)
         # apply the Bellman operator
         self.policy, self.V = self._bellmanOperator()
         # update the time spent solving

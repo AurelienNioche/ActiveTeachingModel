@@ -55,7 +55,7 @@ Available functions
 
 import numpy as _np
 
-import mdptoolbox.error as _error
+import mdp.trash.error as _error
 
 _MDPERR = {
 "mat_nonneg" :
