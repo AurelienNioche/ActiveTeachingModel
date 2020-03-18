@@ -76,11 +76,12 @@ class LearnerState(State):
 
         if parent is not None:
             self.reward = \
-                self.parent.reward + [self.parent.get_instant_reward()]
+                self.parent.reward + [self.parent.get_instant_reward(), ]
             self.action = \
                 self.parent.action + [action]
             self.t = self.parent.t + 1
         else:
+            self.t = 0
             self.reward = []
             self.action = []
 
@@ -141,7 +142,7 @@ class LearnerState(State):
 
     def get_reward(self):
         """"Returns the CUMULATIVE reward for this state"""
-        return np.sum(self.reward + self.get_instant_reward())
+        return np.sum(self.reward) + self.get_instant_reward()
 
     def reset(self):
 

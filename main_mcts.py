@@ -16,7 +16,7 @@ from tqdm import tqdm
 FIG_FOLDER = os.path.join("fig", os.path.basename(__file__).split(".")[0])
 os.makedirs(FIG_FOLDER, exist_ok=True)
 
-N_ITEM = 100
+N_ITEM = 50
 PARAM = (0.02, 0.2)
 THR = 0.9
 N_ITER = 100
@@ -30,9 +30,11 @@ def main():
     # Simulate adversarial
     h = np.zeros(N_ITER, dtype=int)
     np.random.seed(0)
-    teacher = AdversarialTeacher(param=PARAM,
-                          n_item=N_ITEM,
-                          learnt_threshold=THR)
+    teacher = AdversarialTeacher(
+        horizon=0,
+        param=PARAM,
+        n_item=N_ITEM,
+        learnt_threshold=THR)
     for t in tqdm(range(N_ITER)):
 
         action = teacher.ask()
@@ -60,9 +62,11 @@ def main():
     # Simulate bruteforce
     h = np.zeros(N_ITER, dtype=int)
     np.random.seed(0)
-    teacher = BruteForceTeacher(param=PARAM,
-                                n_item=N_ITEM,
-                                learnt_threshold=THR)
+    teacher = BruteForceTeacher(
+        horizon=4,
+        param=PARAM,
+        n_item=N_ITEM,
+        learnt_threshold=THR)
     for t in tqdm(range(N_ITER)):
 
         action = teacher.ask()

@@ -1,6 +1,5 @@
 import numpy as np
 
-from mcts.state import LearnerState
 from . bruteforce import BruteForceTeacher
 
 
@@ -23,9 +22,7 @@ class AdversarialTeacher(BruteForceTeacher):
             print()
 
         initial_state = self.learner_state
-
         learner_state = initial_state
-
         actions = learner_state.get_possible_actions()
 
         if self.verbose:
