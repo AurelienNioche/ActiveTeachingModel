@@ -27,10 +27,7 @@ class BruteForceTeacher:
             print("*" * 40)
             print()
 
-        self.learner_state.reset()
-
         actions, values = self.explore_tree(self.learner_state)
-
         best_action = self.pickup_best_action(actions=actions,
                                               values=values)
 
@@ -47,11 +44,12 @@ class BruteForceTeacher:
         root_actions = []
 
         learner_state = initial_state
+        learner_state.reset()
 
         while True:
             actions = learner_state.get_possible_actions()
 
-            if self.verbose==2:
+            if self.verbose == 2:
                 print()
                 print("Possible actions " + "*" * 10)
                 print(f"t={learner_state.t}, possible actions={actions}")
@@ -61,23 +59,23 @@ class BruteForceTeacher:
             for a in actions:
 
                 if a not in learner_state.children:
-                    if self.verbose==2:
+                    if self.verbose == 2:
                         print(f"evaluate action {a} at t={learner_state.t}")
                     learner_state = learner_state.take_action(action=a)
-                    if self.verbose==2:
+                    if self.verbose == 2:
                         print(f"New learner state at t={learner_state.t} "
                               f"with r={learner_state.get_instant_reward()}")
                     break
 
             if learner_state.is_terminal():
-                if self.verbose==2:
+                if self.verbose == 2:
                     print("New state is terminal.")
                 values.append(learner_state.get_reward())
                 root_actions.append(learner_state.action[0])
 
                 fully_expanded = True
                 while fully_expanded:
-                    if self.verbose==2:
+                    if self.verbose == 2:
                         print("Fully expanded or terminal. Taking parent.")
                     learner_state = learner_state.parent
                     actions = learner_state.get_possible_actions()
@@ -86,13 +84,13 @@ class BruteForceTeacher:
 
                     root = learner_state == initial_state
                     if fully_expanded and root:
-                        if self.verbose==2:
+                        if self.verbose == 2:
                             print("Tree is fully expanded.")
                         done = True
                         break
 
             if done:
-                if self.verbose==2:
+                if self.verbose == 2:
                     print("Ready to provide action.")
                 break
 

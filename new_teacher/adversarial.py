@@ -22,13 +22,6 @@ class AdversarialTeacher(BruteForceTeacher):
             print("*" * 40)
             print()
 
-        self.learner_state.reset()
-
-        done = False
-
-        value = []
-        root_actions = []
-
         initial_state = self.learner_state
 
         learner_state = initial_state
@@ -46,7 +39,6 @@ class AdversarialTeacher(BruteForceTeacher):
 
         for i, a in enumerate(actions):
             learner_state = learner_state.take_action(a)
-            learner_state.reset()
             _, values = self.explore_tree(initial_state=learner_state)
 
             min_values[i] = np.min(values)
