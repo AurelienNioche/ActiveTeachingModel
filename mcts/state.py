@@ -56,11 +56,19 @@ class LearnerState(State):
                  learnt_thr,
                  horizon,
                  param,
+                 c_iter_session=0,
+                 n_iteration_per_session=150,
+                 n_iteration_between_session=43050,
                  action=None,
                  parent=None):
 
         self.n_pres = n_pres
         self.delta = delta
+
+        self.c_iter_session = c_iter_session
+
+        self.n_iteration_per_session = n_iteration_per_session
+        self.n_iteration_between_session = n_iteration_between_session
 
         self.param = param
         self.learnt_thr = learnt_thr
@@ -113,9 +121,15 @@ class LearnerState(State):
         # ...except the one for the selected design that equal one
         delta[action] = 1
 
+        c_iter_session = self.c_iter_session + 1
+        if c_iter_session >= self.n_iteration_per_session:
+            delta[:] += self.n_iteration_between_session
+            c_iter_session = 0
+
         new_state = LearnerState(
             parent=self, delta=delta,
             n_pres=n_pres, horizon=self.horizon,
+            c_iter_session=c_iter_session,
             learnt_thr=self.learnt_thr, param=self.param,
             action=action
         )

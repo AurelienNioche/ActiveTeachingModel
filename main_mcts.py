@@ -2,7 +2,7 @@ import os
 
 import numpy as np
 
-from model.teacher.leitner import Leitner
+from new_teacher.leitner import Leitner
 from model.learner.learner import ExponentialForgetting
 from new_teacher.bruteforce import BruteForceTeacher
 from new_teacher.mcts import MCTSTeacher
@@ -16,10 +16,10 @@ from tqdm import tqdm
 FIG_FOLDER = os.path.join("fig", os.path.basename(__file__).split(".")[0])
 os.makedirs(FIG_FOLDER, exist_ok=True)
 
-N_ITEM = 50
+N_ITEM = 100
 PARAM = (0.02, 0.2)
 THR = 0.9
-N_ITER = 100
+N_ITER = 1000
 
 
 def main():
@@ -27,29 +27,33 @@ def main():
     # Will stock the hist for each method
     hist = {}
 
-    # Simulate adversarial
+    # # Simulate adversarial
+    # tqdm.write("Simulating Adversarial Teacher")
+    # h = np.zeros(N_ITER, dtype=int)
+    # np.random.seed(0)
+    # teacher = AdversarialTeacher(
+    #     horizon=0,
+    #     param=PARAM,
+    #     n_item=N_ITEM,
+    #     learnt_threshold=THR)
+    # for t in tqdm(range(N_ITER)):
+    #
+    #     action = teacher.ask()
+    #     h[t] = action
+    #     # print("teacher choose", action)
+    #     # print(f"t={t}, action={action}")
+    #
+    # hist["adversarial"] = h
+
+    # Simulate mcts
+    tqdm.write("Simulating MCTS Teacher")
     h = np.zeros(N_ITER, dtype=int)
     np.random.seed(0)
-    teacher = AdversarialTeacher(
-        horizon=0,
+    teacher = MCTSTeacher(
+        horizon=10,
         param=PARAM,
         n_item=N_ITEM,
         learnt_threshold=THR)
-    for t in tqdm(range(N_ITER)):
-
-        action = teacher.ask()
-        h[t] = action
-        # print("teacher choose", action)
-        # print(f"t={t}, action={action}")
-
-    hist["adversarial"] = h
-
-    # Simulate mcts
-    h = np.zeros(N_ITER, dtype=int)
-    np.random.seed(0)
-    teacher = MCTSTeacher(param=PARAM,
-                          n_item=N_ITEM,
-                          learnt_threshold=THR)
     for t in tqdm(range(N_ITER)):
 
         action = teacher.ask()
@@ -59,24 +63,26 @@ def main():
 
     hist["mcts"] = h
 
-    # Simulate bruteforce
-    h = np.zeros(N_ITER, dtype=int)
-    np.random.seed(0)
-    teacher = BruteForceTeacher(
-        horizon=4,
-        param=PARAM,
-        n_item=N_ITEM,
-        learnt_threshold=THR)
-    for t in tqdm(range(N_ITER)):
-
-        action = teacher.ask()
-        h[t] = action
-        # print("teacher choose", action)
-        # print(f"t={t}, action={action}")
-
-    hist["bruteforce"] = h
+    # # Simulate bruteforce
+    # tqdm.write("Simulating Bruteforce Teacher")
+    # h = np.zeros(N_ITER, dtype=int)
+    # np.random.seed(0)
+    # teacher = BruteForceTeacher(
+    #     horizon=4,
+    #     param=PARAM,
+    #     n_item=N_ITEM,
+    #     learnt_threshold=THR)
+    # for t in tqdm(range(N_ITER)):
+    #
+    #     action = teacher.ask()
+    #     h[t] = action
+    #     # print("teacher choose", action)
+    #     # print(f"t={t}, action={action}")
+    #
+    # hist["bruteforce"] = h
 
     # Simulate Leitner
+    tqdm.write("Simulating Leitner Teacher")
     h = np.zeros(N_ITER, dtype=int)
     np.random.seed(0)
     teacher = Leitner(n_item=N_ITEM)
@@ -91,6 +97,7 @@ def main():
     hist["leitner"] = h
 
     # Simulate Threshold Teacher
+    tqdm.write("Simulating Threshold Teacher")
     h = np.zeros(N_ITER, dtype=int)
     np.random.seed(0)
     teacher = ThresholdTeacher(n_item=N_ITEM,
