@@ -122,6 +122,27 @@ class MCTS:
 
         raise Exception("Should never reach here")
 
+    def _get_best_child(self, node, exploration_value):
+
+        if self.verbose:
+            print(f"Get best child of node {node}")
+        best_value = - np.inf
+        best_nodes = []
+        for child in node.children.values():
+            node_value = \
+                child.total_reward / child.num_visits \
+                + exploration_value * np.sqrt(
+                    2 * np.log(node.num_visits) / child.num_visits)
+            if node_value > best_value:
+                best_value = node_value
+                best_nodes = [child]
+            elif node_value == best_value:
+                best_nodes.append(child)
+        best_node = np.random.choice(best_nodes)
+        if self.verbose:
+            print(f"Best node is: {best_node}")
+        return best_node
+
     def _rollout(self, state):
 
         """
@@ -149,27 +170,6 @@ class MCTS:
             node.num_visits += 1
             node.total_reward += reward
             node = node.parent
-
-    def _get_best_child(self, node, exploration_value):
-
-        if self.verbose:
-            print(f"Get best child of node {node}")
-        best_value = - np.inf
-        best_nodes = []
-        for child in node.children.values():
-            node_value = \
-                child.total_reward / child.num_visits \
-                + exploration_value * np.sqrt(
-                    2 * np.log(node.num_visits) / child.num_visits)
-            if node_value > best_value:
-                best_value = node_value
-                best_nodes = [child]
-            elif node_value == best_value:
-                best_nodes.append(child)
-        best_node = np.random.choice(best_nodes)
-        if self.verbose:
-            print(f"Best node is: {best_node}")
-        return best_node
 
     @classmethod
     def _get_action(cls, root, best_child):

@@ -50,6 +50,7 @@ def main():
     h = np.zeros(N_ITER, dtype=int)
     np.random.seed(0)
     teacher = MCTSTeacher(
+        iteration_limit=500,
         horizon=10,
         param=PARAM,
         n_item=N_ITEM,

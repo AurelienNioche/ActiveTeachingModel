@@ -3,6 +3,8 @@ Adapted from: https://github.com/pbsinclair42/MCTS/blob/master/mcts.py
 """
 import numpy as np
 
+# np.seterr(all='raise')
+
 
 class State:
 
@@ -146,17 +148,21 @@ class LearnerState(State):
         """"Returns the INSTANT reward for this state"""
 
         seen = self.n_pres[:] > 0
+        if np.sum(seen) == 0:
+            return 0
 
         fr = self.param[0] * (1 - self.param[1]) ** (self.n_pres[seen] - 1)
 
         p = np.exp(-fr * self.delta[seen])
-
-        self._instant_reward = np.sum(p > self.learnt_thr)
+        n_learnt = np.sum(p > self.learnt_thr)
+        self._instant_reward = n_learnt/self.n_item
         return self._instant_reward
 
     def get_reward(self):
-        """"Returns the CUMULATIVE reward for this state"""
-        return np.sum(self.reward) + self.get_instant_reward()
+        """"Returns the MEAN reward up to this state"""
+        mean = np.mean(self.reward + [self.get_instant_reward(), ])
+        # print(f'mean: {mean}')
+        return mean
 
     def reset(self):
 
