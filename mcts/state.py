@@ -6,6 +6,33 @@ import numpy as np
 # np.seterr(all='raise')
 
 
+def reward_sigmoid(n_pres, param, delta, k=100, x0=0.9):
+
+    seen = n_pres[:] > 0
+    n_item = len(n_pres)
+    if np.sum(seen) == 0:
+        return 0
+
+    fr = param[0] * (1 - param[1]) ** (n_pres[seen] - 1)
+    p = np.exp(-fr * delta[seen])
+
+    return np.sum(1 / (1 + np.exp(-k * (p - x0)))) / n_item
+
+
+def reward_threshold(n_pres, param, delta, tau=0.9):
+
+    seen = n_pres[:] > 0
+    n_item = len(n_pres)
+    if np.sum(seen) == 0:
+        return 0
+
+    fr = param[0] * (1 - param[1]) ** (n_pres[seen] - 1)
+    p = np.exp(-fr * delta[seen])
+
+    n_learnt = np.sum(p > tau)
+    return n_learnt / n_item
+
+
 class State:
 
     def get_possible_actions(self):
@@ -147,15 +174,9 @@ class LearnerState(State):
     def get_instant_reward(self):
         """"Returns the INSTANT reward for this state"""
 
-        seen = self.n_pres[:] > 0
-        if np.sum(seen) == 0:
-            return 0
-
-        fr = self.param[0] * (1 - self.param[1]) ** (self.n_pres[seen] - 1)
-
-        p = np.exp(-fr * self.delta[seen])
-        n_learnt = np.sum(p > self.learnt_thr)
-        self._instant_reward = n_learnt/self.n_item
+        self._instant_reward = \
+            reward_sigmoid(n_pres=self.n_pres, param=self.param,
+                           delta=self.delta, )
         return self._instant_reward
 
     def get_reward(self):
