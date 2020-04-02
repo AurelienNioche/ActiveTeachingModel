@@ -6,7 +6,7 @@ import numpy as np
 # np.seterr(all='raise')
 
 
-def reward_sigmoid(n_pres, param, delta, k=100, x0=0.9):
+def reward_sigmoid(n_pres, param, delta, k=50, x0=0.9):
 
     seen = n_pres[:] > 0
     n_item = len(n_pres)
@@ -175,8 +175,10 @@ class LearnerState(State):
         """"Returns the INSTANT reward for this state"""
 
         self._instant_reward = \
-            reward_sigmoid(n_pres=self.n_pres, param=self.param,
-                           delta=self.delta, )
+            reward_threshold(n_pres=self.n_pres, param=self.param,
+                             delta=self.delta)
+            # reward_sigmoid(n_pres=self.n_pres, param=self.param,
+            #                delta=self.delta, )
         return self._instant_reward
 
     def get_reward(self):

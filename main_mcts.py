@@ -19,7 +19,7 @@ os.makedirs(FIG_FOLDER, exist_ok=True)
 N_ITEM = 100
 PARAM = (0.02, 0.2)
 THR = 0.9
-N_ITER = 1000
+N_ITER = 500
 
 
 def main():
@@ -50,8 +50,8 @@ def main():
     h = np.zeros(N_ITER, dtype=int)
     np.random.seed(0)
     teacher = MCTSTeacher(
-        iteration_limit=500,
-        horizon=10,
+        iteration_limit=1000,
+        horizon=5,
         param=PARAM,
         n_item=N_ITEM,
         learnt_threshold=THR)
