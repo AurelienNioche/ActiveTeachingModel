@@ -171,7 +171,7 @@ def main():
             objective[it] = reward.reward(n_pres=n_pres, delta=delta, t=t)
             timestamps[it] = t
 
-            action = hist[t]
+            action = hist[it]
 
             n_pres[action] += 1
             delta[:] += 1
