@@ -21,7 +21,7 @@ os.makedirs(FIG_FOLDER, exist_ok=True)
 N_ITEM = 100
 PARAM = (0.02, 0.2)
 THR = 0.9
-N_ITER = 3
+N_ITER = 300
 
 N_ITER_PER_SS = 150
 N_ITER_BETWEEN_SS = 43050
@@ -163,16 +163,16 @@ def main():
                 # print("item seen", item_seen)
                 # print("p", p_t)
 
-                for idx, item in enumerate(item_seen):
-                    final_idx = seen_in_the_end.index(item)
-                    tup = (it, p_t[idx])
-                    p_item[final_idx].append(tup)
+                for idx_t, item in enumerate(item_seen):
+                    idx_in_the_end = seen_in_the_end.index(item)
+                    tup = (it, p_t[idx_t])
+                    p_item[idx_in_the_end].append(tup)
 
             objective[it] = reward.reward(n_pres=n_pres, delta=delta, t=t)
+            timestamps[it] = t
 
             action = hist[t]
 
-            timestamps[t] = t
             n_pres[action] += 1
             delta[:] += 1
 
