@@ -129,14 +129,15 @@ def fig_p_item_seen(
 
         line = None
         for coordinates in p_recall[i]:
-            x, y = np.asarray(coordinates).T
+            if len(coordinates):
+                x, y = np.asarray(coordinates).T
 
-            x /= time_scale
-            line, = ax.plot(x, y, color=color, alpha=0.5, linewidth=0.5)
-            # x_ticks = np.zeros(3, dtype=int)
-            # x_ticks[:] = np.linspace(0, len(y), 3)
-            #
-            # ax.set_xticks(x_ticks)
+                x /= time_scale
+                line, = ax.plot(x, y, color=color, alpha=0.5, linewidth=0.5)
+                # x_ticks = np.zeros(3, dtype=int)
+                # x_ticks[:] = np.linspace(0, len(y), 3)
+                #
+                # ax.set_xticks(x_ticks)
 
         if line is not None:
             line.set_label(dt)

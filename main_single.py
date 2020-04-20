@@ -144,7 +144,7 @@ def main_single():
         )
 
         data.add(
-            n_learnt=d.n_learnt,
+            objective=d.n_learnt,
             n_seen=d.n_seen,
             p_item=d.p_item,
             label=cd,

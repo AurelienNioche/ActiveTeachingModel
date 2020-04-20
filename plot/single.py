@@ -30,17 +30,17 @@ class DataFigSingle:
         self.param_labels = param_labels
         self.n_session = n_session
 
-        self.n_learnt = []
+        self.objective = []
         self.n_seen = []
         self.labels = []
         self.p_item = []
         self.post_mean = []
         self.post_std = []
 
-    def add(self, n_learnt, n_seen, p_item, label,
+    def add(self, objective, n_seen, p_item, label,
             post_mean=None, post_std=None):
 
-        self.n_learnt.append(n_learnt)
+        self.objective.append(objective)
         self.n_seen.append(n_seen)
         self.p_item.append(p_item)
         self.labels.append(label)
@@ -75,17 +75,17 @@ def fig_single(data, fig_folder, time_scale=(60*60*24)/2):
 
     fig, axes = plt.subplots(ncols=n_cols, nrows=n_rows, figsize=(12, 9))
 
-    ax_n_learnt = axes[0, 0]
+    ax_objective = axes[0, 0]
     ax_n_seen = axes[0, 1]
     # n axes := n_conditions
     ax_p_item = axes[1, :]
 
-    where_to_put_letter = [ax_n_learnt, ax_n_seen, ax_p_item[0], ]
+    where_to_put_letter = [ax_objective, ax_n_seen, ax_p_item[0], ]
 
     fig_n_against_time(
-        data=data.n_learnt, y_label="N learnt",
+        data=data.objective, y_label="Objective",
         condition_labels=data.labels,
-        ax=ax_n_learnt)
+        ax=ax_objective)
 
     for i, ax in enumerate(where_to_put_letter):
         add_letter(ax=ax, letter=string.ascii_uppercase[i])
@@ -120,4 +120,3 @@ def fig_single(data, fig_folder, time_scale=(60*60*24)/2):
 
     # fig_p_recall(data=data[P_SEEN], condition_labels=condition_labels,
     #              ax=axes[5])
-    #

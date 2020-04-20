@@ -6,33 +6,6 @@ import numpy as np
 # np.seterr(all='raise')
 
 
-def reward_sigmoid(n_pres, param, delta, k=100, x0=0.9):
-
-    seen = n_pres[:] > 0
-    n_item = len(n_pres)
-    if np.sum(seen) == 0:
-        return 0
-
-    fr = param[0] * (1 - param[1]) ** (n_pres[seen] - 1)
-    p = np.exp(-fr * delta[seen])
-
-    return np.sum(1 / (1 + np.exp(-k * (p - x0)))) / n_item
-
-
-def reward_threshold(n_pres, param, delta, tau=0.9):
-
-    seen = n_pres[:] > 0
-    n_item = len(n_pres)
-    if np.sum(seen) == 0:
-        return 0
-
-    fr = param[0] * (1 - param[1]) ** (n_pres[seen] - 1)
-    p = np.exp(-fr * delta[seen])
-
-    n_learnt = np.sum(p > tau)
-    return n_learnt / n_item
-
-
 class State:
 
     def get_possible_actions(self):
@@ -81,10 +54,9 @@ class BasicLearnerState(State):
 
 class LearnerState(State):
 
-    def __init__(self, n_pres, delta,
-                 learnt_thr,
+    def __init__(self, n_pres, delta, t,
                  horizon,
-                 param,
+                 reward,
                  c_iter_session=0,
                  n_iteration_per_session=150,
                  n_iteration_between_session=43050,
@@ -93,15 +65,16 @@ class LearnerState(State):
 
         self.n_pres = n_pres
         self.delta = delta
+        self.t = t
 
         self.c_iter_session = c_iter_session
 
         self.n_iteration_per_session = n_iteration_per_session
         self.n_iteration_between_session = n_iteration_between_session
 
-        self.param = param
-        self.learnt_thr = learnt_thr
         self.horizon = horizon
+
+        self.reward = reward
 
         self.n_item = self.n_pres.size
 
@@ -112,15 +85,15 @@ class LearnerState(State):
         self.children = dict()
 
         if parent is not None:
-            self.reward = \
-                self.parent.reward + [self.parent.get_instant_reward(), ]
-            self.action = \
-                self.parent.action + [action]
-            self.t = self.parent.t + 1
+            self.hist_reward = \
+                self.parent.hist_reward + [self.parent.get_instant_reward(), ]
+            self.hist_action = \
+                self.parent.hist_action + [action]
+            self.rel_t = self.parent.rel_t + 1
         else:
             self.t = 0
-            self.reward = []
-            self.action = []
+            self.hist_reward = []
+            self.hist_action = []
 
     def get_possible_actions(self):
         """Returns an iterable of all actions which can be taken
@@ -155,12 +128,15 @@ class LearnerState(State):
             delta[:] += self.n_iteration_between_session
             c_iter_session = 0
 
+        t = self.t + 1
+
         new_state = LearnerState(
             parent=self, delta=delta,
             n_pres=n_pres, horizon=self.horizon,
             c_iter_session=c_iter_session,
-            learnt_thr=self.learnt_thr, param=self.param,
-            action=action
+            reward=self.reward,
+            action=action,
+            t=t
         )
 
         self.children[action] = new_state
@@ -169,24 +145,25 @@ class LearnerState(State):
 
     def is_terminal(self):
         """Returns whether this state is a terminal state"""
-        return self.t >= self.horizon
+        return self.rel_t >= self.horizon
 
     def get_instant_reward(self):
         """"Returns the INSTANT reward for this state"""
 
-        self._instant_reward = \
-            reward_sigmoid(n_pres=self.n_pres, param=self.param,
-                           delta=self.delta, )
+        self._instant_reward = self.reward.reward(
+            n_pres=self.n_pres, delta=self.delta,
+            t=self.t
+        )
         return self._instant_reward
 
     def get_reward(self):
         """"Returns the MEAN reward up to this state"""
-        mean = np.mean(self.reward + [self.get_instant_reward(), ])
+        mean = np.mean(self.hist_reward + [self.get_instant_reward(), ])
         # print(f'mean: {mean}')
         return mean
 
     def reset(self):
 
-        self.t = 0
-        self.reward = []
-        self.action = []
+        self.rel_t = 0
+        self.hist_reward = []
+        self.hist_action = []

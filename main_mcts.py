@@ -9,6 +9,8 @@ from new_teacher.mcts import MCTSTeacher
 from new_teacher.threshold import ThresholdTeacher
 from new_teacher.adversarial import AdversarialTeacher
 
+from mcts.reward import RewardThreshold
+
 from plot.single import DataFigSingle, fig_single
 
 from tqdm import tqdm
@@ -19,13 +21,16 @@ os.makedirs(FIG_FOLDER, exist_ok=True)
 N_ITEM = 100
 PARAM = (0.02, 0.2)
 THR = 0.9
-N_ITER = 1000
+N_ITER = 3
+
+N_ITER_PER_SS = 150
+N_ITER_BETWEEN_SS = 43050
 
 
 def main():
 
     # Will stock the hist for each method
-    hist = {}
+    hist_all_teachers = {}
 
     # # Simulate adversarial
     # tqdm.write("Simulating Adversarial Teacher")
@@ -47,14 +52,17 @@ def main():
 
     # Simulate mcts
     tqdm.write("Simulating MCTS Teacher")
+    reward = RewardThreshold(n_item=N_ITEM, param=PARAM)
     h = np.zeros(N_ITER, dtype=int)
     np.random.seed(0)
     teacher = MCTSTeacher(
         iteration_limit=500,
-        horizon=10,
-        param=PARAM,
         n_item=N_ITEM,
-        learnt_threshold=THR)
+        reward=reward,
+        horizon=10,
+        n_iteration_per_session=N_ITER_PER_SS,
+        n_iteration_between_session=N_ITER_BETWEEN_SS,
+    )
     for t in tqdm(range(N_ITER)):
 
         action = teacher.ask()
@@ -62,7 +70,7 @@ def main():
         # print("teacher choose", action)
         # print(f"t={t}, action={action}")
 
-    hist["mcts"] = h
+    hist_all_teachers["mcts"] = h
 
     # # Simulate bruteforce
     # tqdm.write("Simulating Bruteforce Teacher")
@@ -95,7 +103,7 @@ def main():
         teacher.update(item=item, response=r)
         h[t] = item
 
-    hist["leitner"] = h
+    hist_all_teachers["leitner"] = h
 
     # Simulate Threshold Teacher
     tqdm.write("Simulating Threshold Teacher")
@@ -108,29 +116,77 @@ def main():
         item = teacher.ask(param=PARAM)
         h[t] = item
 
-    hist["threshold"] = h
+    hist_all_teachers["threshold"] = h
 
     data = DataFigSingle(learner_model=ExponentialForgetting,
                          param=PARAM,
                          param_labels=("alpha", "beta"),
                          n_session=1)
 
-    condition_labels = hist.keys()
+    condition_labels = hist_all_teachers.keys()
 
     for i, cd in enumerate(condition_labels):
 
-        d = ExponentialForgetting().stats_ex_post(
-            param=PARAM, hist=hist[cd],
-            learnt_thr=THR,
-        )
+        hist = hist_all_teachers[cd]
+        # print("hist", hist)
+
+        c_iter_session = 0
+        t = 0
+
+        seen_in_the_end = list(np.unique(hist))
+
+        n_pres = np.zeros(N_ITEM, dtype=int)
+        delta = np.zeros(N_ITEM, dtype=int)
+
+        n_seen = np.zeros(N_ITER, dtype=int)
+        timestamps = np.zeros(N_ITER, dtype=int)
+        objective = np.zeros(N_ITER, )
+
+        p_item = [[] for _ in seen_in_the_end]
+
+        for it in range(N_ITER):
+
+            # timestamps_until_it = np.asarray(timestamps)
+            hist_until_it = hist[:it]
+
+            seen = n_pres[:] > 0
+            n_seen[it] = np.sum(seen)
+
+            if n_seen[it] > 0:
+
+                fr = PARAM[0] * (1 - PARAM[1]) ** (n_pres[seen] - 1)
+                p_t = np.exp(-fr * delta[seen])
+
+                item_seen = np.unique(hist_until_it)
+                item_seen.sort()
+                #
+                # print("item seen", item_seen)
+                # print("p", p_t)
+
+                for idx, item in enumerate(item_seen):
+                    final_idx = seen_in_the_end.index(item)
+                    tup = (it, p_t[idx])
+                    p_item[final_idx].append(tup)
+
+            objective[it] = reward.reward(n_pres=n_pres, delta=delta, t=t)
+
+            action = hist[t]
+
+            timestamps[t] = t
+            n_pres[action] += 1
+            delta[:] += 1
+
+            t += 1
+            c_iter_session += 1
+            if c_iter_session >= N_ITER_PER_SS:
+                t += N_ITER_BETWEEN_SS
+                c_iter_session = 0
 
         data.add(
-            n_learnt=d.n_learnt,
-            n_seen=d.n_seen,
-            p_item=d.p_item,
-            label=cd,
-            post_mean=d.post_mean,
-            post_std=d.post_std
+            objective=objective,
+            n_seen=n_seen,
+            p_item=p_item,
+            label=cd
         )
 
     fig_single(data=data, fig_folder=FIG_FOLDER, time_scale=1)

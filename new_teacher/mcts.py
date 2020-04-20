@@ -7,7 +7,9 @@ from mcts.state import LearnerState
 class MCTSTeacher:
 
     def __init__(self,
-                 n_item, learnt_threshold, param,
+                 n_item, reward,
+                 n_iteration_per_session,
+                 n_iteration_between_session,
                  horizon=20, iteration_limit=500, verbose=0):
 
         self.t = 0
@@ -17,9 +19,12 @@ class MCTSTeacher:
             LearnerState(
                 n_pres=np.zeros(n_item, dtype=int),
                 delta=np.zeros(n_item, dtype=int),
-                learnt_thr=learnt_threshold,
                 horizon=horizon,
-                param=param)
+                reward=reward,
+                n_iteration_per_session=n_iteration_per_session,
+                n_iteration_between_session=n_iteration_between_session,
+                t=0
+            )
 
         self.verbose = verbose
 

@@ -101,11 +101,11 @@ class ExponentialForgetting(GenericLearner):
 
     def stats_ex_post(self, param,
                       hist,
-                      learnt_thr,
+                      learnt_thr=None,
                       timestamps=None,
                       timesteps=None,
                       param_labels=None,
-                      post=None,):
+                      post=None):
 
         if timestamps is None:
             timestamps = np.arange(len(hist))
@@ -154,7 +154,9 @@ class ExponentialForgetting(GenericLearner):
             for i, item in enumerate(items):
                 p_item[seen.index(item)].append((t, p_t[i]))
 
-            n_learnt.append(np.sum(p_t[:] > learnt_thr))
+            if learnt_thr is not None:
+                n_learnt.append(np.sum(p_t[:] > learnt_thr))
+
             p_recall_seen.append(p_t)
 
             idx_last_update = timestamps_list.index(np.max(timestamps_until_t))
@@ -178,10 +180,16 @@ class ExponentialForgetting(GenericLearner):
         return self
 
     @classmethod
-    def p_seen_at_t(cls, hist, timestamps, param, t, items=None):
+    def p_seen_at_t(cls, hist, timestamps, param, t=None, items=None):
 
         if items is None:
             items = np.unique(hist)
+
+        if t is None:
+            t = len(hist)
+
+        if timestamps is None:
+            timestamps = np.arange(hist)
 
         p_seen = np.zeros(len(items))
 
