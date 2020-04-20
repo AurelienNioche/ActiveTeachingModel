@@ -54,10 +54,11 @@ class BasicLearnerState(State):
 
 class LearnerState(State):
 
-    def __init__(self, n_pres, delta, t,
+    def __init__(self, n_pres, delta,
+                 c_iter_session,
+                 t,
                  horizon,
                  reward,
-                 c_iter_session=0,
                  n_iteration_per_session=150,
                  n_iteration_between_session=43050,
                  action=None,

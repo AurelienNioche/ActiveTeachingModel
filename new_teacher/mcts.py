@@ -23,7 +23,8 @@ class MCTSTeacher:
                 reward=reward,
                 n_iteration_per_session=n_iteration_per_session,
                 n_iteration_between_session=n_iteration_between_session,
-                t=0
+                t=0,
+                c_iter_session=0,
             )
 
         self.verbose = verbose

@@ -46,4 +46,5 @@ class RewardThreshold(Reward):
 
         p = self.non_zero_p_recall(n_pres=n_pres, delta=delta)
         n_learnt = np.sum(p > self.tau)
-        return n_learnt / self.n_item
+        return n_learnt
+        # return n_learnt / self.n_item
