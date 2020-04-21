@@ -259,7 +259,7 @@ class Simulation(models.Model):
 
             response = p_recall > np.random.random()
 
-            if self.teacher_model == Leitner:
+            if self.teacher_model == Leitner.__name__:
                 teacher_inst.update(item=i, response=response)
 
             # Update prior
