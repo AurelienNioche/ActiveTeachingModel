@@ -21,13 +21,13 @@ os.makedirs(FIG_FOLDER, exist_ok=True)
 PARAM = (0.02, 0.2)
 PARAM_LABELS = ("alpha", "beta")
 
-N_ITEM = 1000
+N_ITEM = 500
 
 
 N_ITER_PER_SS = 150
 N_ITER_BETWEEN_SS = 43050
 
-N_SS = 60
+N_SS = 30
 
 N_ITER = N_SS * N_ITER_PER_SS
 
@@ -37,6 +37,8 @@ MCTS_ITER_LIMIT = 150
 MCTS_HORIZON = 10
 
 SEED = 0
+
+OBS_END_OF_SS = True
 
 
 def main():
@@ -65,26 +67,26 @@ def main():
     #
     # hist["adversarial"] = h
 
-    # # Simulate mcts
-    # tqdm.write("Simulating MCTS Teacher")
-    # h = np.zeros(N_ITER, dtype=int)
-    # np.random.seed(0)
-    # teacher = MCTSTeacher(
-    #     iteration_limit=MCTS_ITER_LIMIT,
-    #     n_item=N_ITEM,
-    #     reward=reward,
-    #     horizon=MCTS_HORIZON,
-    #     n_iteration_per_session=N_ITER_PER_SS,
-    #     n_iteration_between_session=N_ITER_BETWEEN_SS,
-    # )
-    # for t in tqdm(range(N_ITER)):
-    #
-    #     action = teacher.ask()
-    #     h[t] = action
-    #     # print("teacher choose", action)
-    #     # print(f"t={t}, action={action}")
-    #
-    # hist_all_teachers["mcts"] = h
+    # Simulate mcts
+    tqdm.write("Simulating MCTS Teacher")
+    h = np.zeros(N_ITER, dtype=int)
+    np.random.seed(0)
+    teacher = MCTSTeacher(
+        iteration_limit=MCTS_ITER_LIMIT,
+        n_item=N_ITEM,
+        reward=reward,
+        horizon=MCTS_HORIZON,
+        n_iteration_per_session=N_ITER_PER_SS,
+        n_iteration_between_session=N_ITER_BETWEEN_SS,
+    )
+    for t in tqdm(range(N_ITER)):
+
+        action = teacher.ask()
+        h[t] = action
+        # print("teacher choose", action)
+        # print(f"t={t}, action={action}")
+
+    hist_all_teachers["mcts"] = h
 
     # # Simulate bruteforce
     # tqdm.write("Simulating Bruteforce Teacher")
@@ -144,55 +146,55 @@ def main():
 
     condition_labels = hist_all_teachers.keys()
 
-    learner_model = ExponentialForgetting
+    # learner_model = ExponentialForgetting
 
-    data_old_method = \
-        DataFigSingle(learner_model=learner_model,
-                      param=PARAM, param_labels=PARAM_LABELS,
-                      n_session=N_SS)
-
-    c_iter_session = 0
-    t = 0
-
-    timestamps = []
-
-    for it in range(N_ITER):
-
-        timestamps.append(t)
-
-        t += 1
-        c_iter_session += 1
-        if c_iter_session >= N_ITER_PER_SS:
-            t += N_ITER_BETWEEN_SS
-            c_iter_session = 0
-
-    timestamps = np.asarray(timestamps)
-
-    n_time_steps_per_session = N_ITER_PER_SS + N_ITER_BETWEEN_SS
-    n_time_steps = n_time_steps_per_session * N_SS
-    timesteps = np.arange(0, n_time_steps, n_time_steps_per_session)
-
-    for i, cd in enumerate(condition_labels):
-
-        hist = hist_all_teachers[cd]
-
-        d = learner_model().stats_ex_post(
-            param_labels=PARAM_LABELS,
-            param=PARAM, hist=hist, timestamps=timestamps,
-            timesteps=timesteps, learnt_thr=THR,
-        )
-
-        data_old_method.add(
-            objective=d.n_learnt,
-            n_seen=d.n_seen,
-            p_item=d.p_item,
-            label=cd,
-            post_mean=d.post_mean,
-            post_std=d.post_std
-        )
-
-    fig_single(data=data_old_method, fig_folder=FIG_FOLDER,
-               ext='_old_method')
+    # data_old_method = \
+    #     DataFigSingle(learner_model=learner_model,
+    #                   param=PARAM, param_labels=PARAM_LABELS,
+    #                   n_session=N_SS)
+    #
+    # c_iter_session = 0
+    # t = 0
+    #
+    # timestamps = []
+    #
+    # for it in range(N_ITER):
+    #
+    #     timestamps.append(t)
+    #
+    #     t += 1
+    #     c_iter_session += 1
+    #     if c_iter_session >= N_ITER_PER_SS:
+    #         t += N_ITER_BETWEEN_SS
+    #         c_iter_session = 0
+    #
+    # timestamps = np.asarray(timestamps)
+    #
+    # n_time_steps_per_session = N_ITER_PER_SS + N_ITER_BETWEEN_SS
+    # n_time_steps = n_time_steps_per_session * N_SS
+    # timesteps = np.arange(0, n_time_steps, n_time_steps_per_session)
+    #
+    # for i, cd in enumerate(condition_labels):
+    #
+    #     hist = hist_all_teachers[cd]
+    #
+    #     d = learner_model().stats_ex_post(
+    #         param_labels=PARAM_LABELS,
+    #         param=PARAM, hist=hist, timestamps=timestamps,
+    #         timesteps=timesteps, learnt_thr=THR,
+    #     )
+    #
+    #     data_old_method.add(
+    #         objective=d.n_learnt,
+    #         n_seen=d.n_seen,
+    #         p_item=d.p_item,
+    #         label=cd,
+    #         post_mean=d.post_mean,
+    #         post_std=d.post_std
+    #     )
+    #
+    # fig_single(data=data_old_method, fig_folder=FIG_FOLDER,
+    #            ext='_old_method')
 
 
     # Do the figure
@@ -200,7 +202,9 @@ def main():
     data = DataFigSingle(learner_model=ExponentialForgetting,
                          param=PARAM,
                          param_labels=PARAM_LABELS,
-                         n_session=1)
+                         n_session=N_SS)
+
+    obs_criterion = N_ITER_PER_SS-1 if OBS_END_OF_SS else 0
 
     for i, cd in enumerate(condition_labels):
 
@@ -230,7 +234,7 @@ def main():
             seen = n_pres[:] > 0
             sum_seen = np.sum(seen)
 
-            if c_iter_session == 0:#(N_ITER_PER_SS-1):
+            if c_iter_session == obs_criterion:
                 ss_idx += 1
 
                 n_seen[ss_idx] = sum_seen
@@ -282,7 +286,10 @@ def main():
             label=cd
         )
 
-    fig_single(data=data, fig_folder=FIG_FOLDER, time_scale=1)
+    fig_single(data=data, fig_folder=FIG_FOLDER, time_scale=1,
+               ext=f'_{OBS_END_OF_SS}_'
+                   f'{reward.__class__.__name__}_'
+                   f'{"_".join(condition_labels)}')
 
 
 if __name__ == "__main__":

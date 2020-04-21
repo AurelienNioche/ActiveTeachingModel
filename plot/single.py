@@ -77,6 +77,10 @@ def fig_single(data, fig_folder, time_scale=(60*60*24)/2, ext=''):
 
     ax_objective = axes[0, 0]
     ax_n_seen = axes[0, 1]
+    if len(data.labels) > 2:
+        for ax in axes[0, 2:]:
+            ax.axis('off')
+
     # n axes := n_conditions
     ax_p_item = axes[1, :]
 
@@ -99,8 +103,7 @@ def fig_single(data, fig_folder, time_scale=(60*60*24)/2, ext=''):
     fig_p_item_seen(
         p_recall=data.p_item, condition_labels=data.labels,
         axes=ax_p_item,
-        time_scale=time_scale
-        )
+        time_scale=time_scale)
 
     if None not in data.post_mean:
 
