@@ -3,13 +3,17 @@ import numpy as np
 
 class ThresholdTeacher:
 
-    def __init__(self, n_item, learnt_threshold):
+    def __init__(self, n_item, learnt_threshold,
+                 n_iter_per_session, n_iter_between_session):
 
         self.n_pres = np.zeros(n_item, dtype=int)
         self.delta = np.zeros(n_item, dtype=int)
 
         self.learnt_threshold = learnt_threshold
-        self.t = 0
+        self.n_iter_per_session = n_iter_per_session
+        self.n_iter_between_session = n_iter_between_session
+
+        self.c_iter_session = 0
 
     def ask(self, param):
 
@@ -20,7 +24,7 @@ class ThresholdTeacher:
         items = np.arange(n_item)
 
         if n_seen == 0:
-            item = 0
+            items_selected = items
 
         else:
             fr = param[0] * (1 - param[1]) ** (self.n_pres[seen] - 1)
@@ -29,11 +33,13 @@ class ThresholdTeacher:
             min_p = np.min(p)
 
             if n_seen == n_item or min_p <= self.learnt_threshold:
-                item = np.random.choice(items[seen][p[:] == min_p])
+                items_selected = items[seen][p[:] == min_p]
 
             else:
                 unseen = np.logical_not(seen)
-                item = items[unseen][0]
+                items_selected = items[unseen]
+
+        item = np.random.choice(items_selected)
 
         self.n_pres[item] += 1
 
@@ -41,5 +47,10 @@ class ThresholdTeacher:
         self.delta[:] += 1
         # ...except the one for the selected design that equal one
         self.delta[item] = 1
+
+        self.c_iter_session += 1
+        if self.c_iter_session >= self.n_iter_per_session:
+            self.delta[:] += self.n_iter_between_session
+            self.c_iter_session = 0
 
         return item

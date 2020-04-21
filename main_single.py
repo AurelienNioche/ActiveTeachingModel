@@ -63,6 +63,8 @@ def _run_n_session(kwargs):
 
 def main_single():
 
+    Simulation.objects.all().delete()
+
     param = (0.02, 0.2)
 
     seed = 2
@@ -97,7 +99,7 @@ def main_single():
         "param_labels": param_labels
     } for teacher_model in teacher_models]
 
-    with MultiProcess(n_worker=os.cpu_count()-2) as mp:
+    with MultiProcess(n_worker=os.cpu_count()) as mp:
         sim_entry_ids = mp.map(run_n_session, kwargs_list)
 
     # n_iteration = n_iteration_per_session * n_session

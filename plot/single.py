@@ -53,7 +53,7 @@ def add_letter(ax, letter):
             transform=ax.transAxes, size=20, weight='bold')
 
 
-def fig_single(data, fig_folder, time_scale=(60*60*24)/2):
+def fig_single(data, fig_folder, time_scale=(60*60*24)/2, ext=''):
 
     """
     :param time_scale: float
@@ -68,7 +68,7 @@ def fig_single(data, fig_folder, time_scale=(60*60*24)/2):
     fig_ext = \
         f"{data.learner_model.__name__}_" \
         f"{param_string}_" \
-        f"n_session={data.n_session}"
+        f"n_session={data.n_session}{ext}"
 
     n_rows = 2 + int(None not in data.post_mean)
     n_cols = len(data.labels)

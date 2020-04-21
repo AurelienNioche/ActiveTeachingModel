@@ -64,7 +64,8 @@ class ExponentialForgetting(GenericLearner):
     bounds = (0., 0.25), (0., 0.50),
     param_labels = "alpha", "beta"
 
-    def __init__(self, param=None, n_item=0):
+    def __init__(self, param=None, n_item=0, n_iter_per_session=None,
+                 n_iter_between_session=None):
         super().__init__()
 
         # For stats ex post
@@ -79,6 +80,9 @@ class ExponentialForgetting(GenericLearner):
         self.param = param
         self.n_pres = np.zeros(n_item, dtype=int)
         self.delta = np.zeros(n_item, dtype=int)
+        self.n_iter_per_session = n_iter_per_session
+        self.n_iter_between_session = n_iter_between_session
+        self.c_iter_session = 0
 
     def recall(self, item, learn=True):
 
@@ -96,6 +100,11 @@ class ExponentialForgetting(GenericLearner):
             self.delta[:] += 1
             # ...except the one for the selected design that equal one
             self.delta[item] = 1
+
+            self.c_iter_session += 1
+            if self.c_iter_session >= self.n_iter_per_session:
+                self.delta[:] += self.n_iter_between_session
+                self.c_iter_session = 0
 
         return recall
 
@@ -115,7 +124,6 @@ class ExponentialForgetting(GenericLearner):
 
         seen = list(np.unique(hist))
         total_n_seen = len(seen)
-        print("N seen", total_n_seen)
 
         p_item = [[] for _ in range(total_n_seen)]
         p_recall_seen = []
