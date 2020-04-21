@@ -18,13 +18,19 @@ from tqdm import tqdm
 FIG_FOLDER = os.path.join("fig", os.path.basename(__file__).split(".")[0])
 os.makedirs(FIG_FOLDER, exist_ok=True)
 
-N_ITEM = 100
 PARAM = (0.02, 0.2)
-THR = 0.9
-N_ITER = 1000
+
+N_ITEM = 500
+
 
 N_ITER_PER_SS = 150
 N_ITER_BETWEEN_SS = 43050
+
+N_SS = 60
+
+N_ITER = N_SS * N_ITER_PER_SS
+
+THR = 0.9
 
 
 def main():
@@ -52,26 +58,26 @@ def main():
     #
     # hist["adversarial"] = h
 
-    # # Simulate mcts
-    # tqdm.write("Simulating MCTS Teacher")
-    # h = np.zeros(N_ITER, dtype=int)
-    # np.random.seed(0)
-    # teacher = MCTSTeacher(
-    #     iteration_limit=500,
-    #     n_item=N_ITEM,
-    #     reward=reward,
-    #     horizon=10,
-    #     n_iteration_per_session=N_ITER_PER_SS,
-    #     n_iteration_between_session=N_ITER_BETWEEN_SS,
-    # )
-    # for t in tqdm(range(N_ITER)):
-    #
-    #     action = teacher.ask()
-    #     h[t] = action
-    #     # print("teacher choose", action)
-    #     # print(f"t={t}, action={action}")
-    #
-    # hist_all_teachers["mcts"] = h
+    # Simulate mcts
+    tqdm.write("Simulating MCTS Teacher")
+    h = np.zeros(N_ITER, dtype=int)
+    np.random.seed(0)
+    teacher = MCTSTeacher(
+        iteration_limit=500,
+        n_item=N_ITEM,
+        reward=reward,
+        horizon=10,
+        n_iteration_per_session=N_ITER_PER_SS,
+        n_iteration_between_session=N_ITER_BETWEEN_SS,
+    )
+    for t in tqdm(range(N_ITER)):
+
+        action = teacher.ask()
+        h[t] = action
+        # print("teacher choose", action)
+        # print(f"t={t}, action={action}")
+
+    hist_all_teachers["mcts"] = h
 
     # # Simulate bruteforce
     # tqdm.write("Simulating Bruteforce Teacher")
@@ -139,11 +145,12 @@ def main():
         n_pres = np.zeros(N_ITEM, dtype=int)
         delta = np.zeros(N_ITEM, dtype=int)
 
-        n_seen = np.zeros(N_ITER, dtype=int)
-        timestamps = np.zeros(N_ITER, dtype=int)
-        objective = np.zeros(N_ITER, )
-
+        # For the graph
+        n_seen = np.zeros(N_SS, dtype=int)
+        objective = np.zeros(N_SS, )
         p_item = [[] for _ in seen_in_the_end]
+
+        ss_idx = -1
 
         for it in range(N_ITER):
 
@@ -151,31 +158,35 @@ def main():
             # hist_until_it = hist[:it]
 
             seen = n_pres[:] > 0
-            n_seen[it] = np.sum(seen)
+            sum_seen = np.sum(seen)
 
-            if n_seen[it] > 0:
+            if c_iter_session == (N_ITER_PER_SS-1):
+                ss_idx += 1
 
-                seen_t_idx = np.arange(N_ITEM)[seen]
+                n_seen[ss_idx] = sum_seen
 
-                fr = PARAM[0] * (1 - PARAM[1]) ** (n_pres[seen] - 1)
-                p_t = np.exp(-fr * delta[seen])
+                if sum_seen > 0:
 
-                # item_seen = np.unique(hist_until_it)
-                # item_seen.sort()
-                #
-                # print("item seen", item_seen)
-                # print("p", p_t)
+                    seen_t_idx = np.arange(N_ITEM)[seen]
 
-                for idx_t, item in enumerate(seen_t_idx):
-                    idx_in_the_end = seen_in_the_end.index(item)
-                    tup = (it, p_t[idx_t])
-                    p_item[idx_in_the_end].append(tup)
+                    fr = PARAM[0] * (1 - PARAM[1]) ** (n_pres[seen] - 1)
+                    p_t = np.exp(-fr * delta[seen])
 
-                    # if c_iter_session ==0:
-                    #     print(tup)
+                    # item_seen = np.unique(hist_until_it)
+                    # item_seen.sort()
+                    #
+                    # print("item seen", item_seen)
+                    # print("p", p_t)
 
-            objective[it] = reward.reward(n_pres=n_pres, delta=delta, t=t)
-            timestamps[it] = t
+                    for idx_t, item in enumerate(seen_t_idx):
+                        idx_in_the_end = seen_in_the_end.index(item)
+                        tup = (ss_idx, p_t[idx_t])
+                        p_item[idx_in_the_end].append(tup)
+
+                        # if c_iter_session == 0:
+                        #     print(idx_t, tup, n_pres[item])
+
+                objective[ss_idx] = reward.reward(n_pres=n_pres, delta=delta, t=t)
 
             action = hist[it]
 
