@@ -42,9 +42,11 @@ class RewardThreshold(Reward):
         super().__init__(param=param, n_item=n_item)
         self.tau = tau
 
-    def reward(self, n_pres, delta, t):
+    def reward(self, n_pres, delta, t, normalize=True):
 
         p = self.non_zero_p_recall(n_pres=n_pres, delta=delta)
         n_learnt = np.sum(p > self.tau)
-        return n_learnt
-        # return n_learnt / self.n_item
+        if normalize:
+            return n_learnt / self.n_item
+        else:
+            return n_learnt

@@ -26,11 +26,14 @@ N_ITEM = 500
 N_ITER_PER_SS = 150
 N_ITER_BETWEEN_SS = 43050
 
-N_SS = 60
+N_SS = 14
 
 N_ITER = N_SS * N_ITER_PER_SS
 
 THR = 0.9
+
+MCTS_ITER_LIMIT = 150
+MCTS_HORIZON = 10
 
 
 def main():
@@ -38,7 +41,8 @@ def main():
     # Will stock the hist for each method
     hist_all_teachers = {}
 
-    reward = RewardThreshold(n_item=N_ITEM, param=PARAM)
+    reward = RewardThreshold(n_item=N_ITEM, param=PARAM,
+                             tau=THR)
 
     # # Simulate adversarial
     # tqdm.write("Simulating Adversarial Teacher")
@@ -63,10 +67,10 @@ def main():
     h = np.zeros(N_ITER, dtype=int)
     np.random.seed(0)
     teacher = MCTSTeacher(
-        iteration_limit=500,
+        iteration_limit=MCTS_ITER_LIMIT,
         n_item=N_ITEM,
         reward=reward,
-        horizon=10,
+        horizon=MCTS_HORIZON,
         n_iteration_per_session=N_ITER_PER_SS,
         n_iteration_between_session=N_ITER_BETWEEN_SS,
     )
@@ -186,7 +190,7 @@ def main():
                         # if c_iter_session == 0:
                         #     print(idx_t, tup, n_pres[item])
 
-                objective[ss_idx] = reward.reward(n_pres=n_pres, delta=delta, t=t)
+                objective[ss_idx] = reward.reward(n_pres=n_pres, delta=delta, t=t, normalize=False)
 
             action = hist[it]
 
