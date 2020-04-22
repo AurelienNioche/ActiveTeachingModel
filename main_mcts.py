@@ -9,14 +9,18 @@ from new_teacher.mcts import MCTSTeacher
 from new_teacher.threshold import ThresholdTeacher
 from new_teacher.adversarial import AdversarialTeacher
 
-from mcts.reward import RewardThreshold
+from mcts.reward import RewardThreshold, RewardHalfLife
 
 from plot.single import DataFigSingle, fig_single
 
 from tqdm import tqdm
+import pickle
 
 FIG_FOLDER = os.path.join("fig", os.path.basename(__file__).split(".")[0])
 os.makedirs(FIG_FOLDER, exist_ok=True)
+
+PICKLE_FOLDER = os.path.join("fig", os.path.basename(__file__).split(".")[0])
+os.makedirs(PICKLE_FOLDER, exist_ok=True)
 
 PARAM = (0.02, 0.2)
 PARAM_LABELS = ("alpha", "beta")
@@ -38,16 +42,17 @@ MCTS_HORIZON = 10
 
 SEED = 0
 
-OBS_END_OF_SS = True
+OBS_END_OF_SS = False
 
 
 def main():
 
     # Will stock the hist for each method
     hist_all_teachers = {}
-
-    reward = RewardThreshold(n_item=N_ITEM, param=PARAM,
-                             tau=THR)
+    #
+    # reward = RewardThreshold(n_item=N_ITEM, param=PARAM,
+    #tau=THR)
+    reward = RewardHalfLife(n_item=N_ITEM, param=PARAM)
 
     # # Simulate adversarial
     # tqdm.write("Simulating Adversarial Teacher")
@@ -195,7 +200,9 @@ def main():
     #
     # fig_single(data=data_old_method, fig_folder=FIG_FOLDER,
     #            ext='_old_method')
-
+    bkp_file = os.path.join(PICKLE_FOLDER, "results.p")
+    with open(bkp_file, 'wb') as f:
+        pickle.dump(hist_all_teachers, f)
 
     # Do the figure
 
@@ -287,7 +294,7 @@ def main():
         )
 
     fig_single(data=data, fig_folder=FIG_FOLDER, time_scale=1,
-               ext=f'_{OBS_END_OF_SS}_'
+               ext=f'_obs_end_ss={OBS_END_OF_SS}_'
                    f'{reward.__class__.__name__}_'
                    f'{"_".join(condition_labels)}')
 
