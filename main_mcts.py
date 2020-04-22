@@ -42,7 +42,7 @@ MCTS_HORIZON = 10
 
 SEED = 0
 
-OBS_END_OF_SS = False
+OBS_END_OF_SS = True
 
 
 def main():
@@ -72,26 +72,26 @@ def main():
     #
     # hist["adversarial"] = h
 
-    # Simulate mcts
-    tqdm.write("Simulating MCTS Teacher")
-    h = np.zeros(N_ITER, dtype=int)
-    np.random.seed(0)
-    teacher = MCTSTeacher(
-        iteration_limit=MCTS_ITER_LIMIT,
-        n_item=N_ITEM,
-        reward=reward,
-        horizon=MCTS_HORIZON,
-        n_iteration_per_session=N_ITER_PER_SS,
-        n_iteration_between_session=N_ITER_BETWEEN_SS,
-    )
-    for t in tqdm(range(N_ITER)):
-
-        action = teacher.ask()
-        h[t] = action
-        # print("teacher choose", action)
-        # print(f"t={t}, action={action}")
-
-    hist_all_teachers["mcts"] = h
+    # # Simulate mcts
+    # tqdm.write("Simulating MCTS Teacher")
+    # h = np.zeros(N_ITER, dtype=int)
+    # np.random.seed(0)
+    # teacher = MCTSTeacher(
+    #     iteration_limit=MCTS_ITER_LIMIT,
+    #     n_item=N_ITEM,
+    #     reward=reward,
+    #     horizon=MCTS_HORIZON,
+    #     n_iteration_per_session=N_ITER_PER_SS,
+    #     n_iteration_between_session=N_ITER_BETWEEN_SS,
+    # )
+    # for t in tqdm(range(N_ITER)):
+    #
+    #     action = teacher.ask()
+    #     h[t] = action
+    #     # print("teacher choose", action)
+    #     # print(f"t={t}, action={action}")
+    #
+    # hist_all_teachers["mcts"] = h
 
     # # Simulate bruteforce
     # tqdm.write("Simulating Bruteforce Teacher")
@@ -268,7 +268,7 @@ def main():
                         #     print(idx_t, tup, n_pres[item])
 
                 objective[ss_idx] = reward.reward(n_pres=n_pres, delta=delta,
-                                                  t=t, normalize=False)
+                                                  t=t,)# normalize=False)
 
             action = hist[it]
 
