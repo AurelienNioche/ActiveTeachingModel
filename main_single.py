@@ -14,7 +14,7 @@ from model.teacher import Teacher, Leitner, Psychologist, \
     TeacherPerfectInfo
 from model.learner import ExponentialForgetting
 
-from utils.string import dic2string
+from utils.string import dic2string, param_string
 from utils.multiprocessing import MultiProcess
 
 from plot import \
@@ -117,9 +117,7 @@ def main_single():
 
     condition_labels = [m.__name__ for m in teacher_models]
 
-    data = DataFigSingle(learner_model=learner_model,
-                         param=param, param_labels=param_labels,
-                         n_session=n_session)
+    data = DataFigSingle(param_labels=param_labels, param=param)
 
     for i, cd in enumerate(condition_labels):
 
@@ -146,7 +144,7 @@ def main_single():
         )
 
         data.add(
-            objective=d.n_learnt,
+            n_learnt=d.n_learnt,
             n_seen=d.n_seen,
             p_item=d.p_item,
             label=cd,
@@ -154,7 +152,11 @@ def main_single():
             post_std=d.post_std
         )
 
-    fig_single(data=data, fig_folder=FIG_FOLDER)
+    fig_ext = \
+        f"{learner_model.__name__}_" \
+        f"{param_string(param_labels=param_labels, param=param)}_" \
+        f"n_session={n_session}"
+    fig_single(data=data, fig_folder=FIG_FOLDER, fig_ext=fig_ext)
 
 
 if __name__ == "__main__":

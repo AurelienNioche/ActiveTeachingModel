@@ -57,10 +57,10 @@ class LearnerState(State):
     def __init__(self, n_pres, delta,
                  c_iter_session,
                  t,
-                 horizon,
                  reward,
                  n_iteration_per_session=150,
                  n_iteration_between_session=43050,
+                 horizon=None,
                  action=None,
                  parent=None):
 
@@ -146,6 +146,9 @@ class LearnerState(State):
 
     def is_terminal(self):
         """Returns whether this state is a terminal state"""
+        assert self.horizon is not None, \
+            "horizon must be given as an argument " \
+            "to call the 'is_terminal' method"
         return self.rel_t >= self.horizon
 
     def get_instant_reward(self):

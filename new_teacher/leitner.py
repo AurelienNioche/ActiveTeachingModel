@@ -1,11 +1,14 @@
 import numpy as np
+from tqdm import tqdm
+
+from . abstract import Teacher
 
 
-class Leitner:
+class Leitner(Teacher):
 
     def __init__(self, n_item,
-                 n_iter_per_session,
-                 n_iter_between_session,
+                 n_iter_per_ss,
+                 n_iter_between_ss,
                  delay_factor=2):
         """
         :param delay_factor:
@@ -20,15 +23,17 @@ class Leitner:
             of i^th item at i^th index.
         """
 
-        self.n_item = n_item
+        super().__init__(
+            n_item=n_item,
+            n_iter_per_ss=n_iter_per_ss,
+            n_iter_between_ss=n_iter_between_ss)
 
         self.delay_factor = delay_factor
+
         self.box = np.zeros(self.n_item, dtype=int)
         self.waiting_time = np.zeros(self.n_item, dtype=int)
         self.seen = np.zeros(self.n_item, dtype=bool)
 
-        self.n_iter_per_ss = n_iter_per_session
-        self.n_iter_between_ss = n_iter_between_session
         self.c_iter_session = 0
 
         self.taboo = None
@@ -153,3 +158,18 @@ class Leitner:
         self.seen[item] = True
         self._modify_sets(selected_item=item, success=response)
         self._update_wait_time(selected_item=item)
+
+    def teach(self, n_iter, seed=0, **kwargs):
+
+        np.random.seed(seed)
+        h = np.zeros(n_iter, dtype=int)
+
+        learner = kwargs['learner_model'](**kwargs['learner_kwargs'])
+
+        for t in tqdm(range(n_iter)):
+            item = self.ask()
+            r = learner.recall(item=item)
+            self.update(item=item, response=r)
+            h[t] = item
+
+        return h

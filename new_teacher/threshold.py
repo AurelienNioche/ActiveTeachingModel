@@ -1,45 +1,54 @@
 import numpy as np
 
+from . abstract import Teacher
 
-class ThresholdTeacher:
 
-    def __init__(self, n_item, learnt_threshold,
-                 n_iter_per_session, n_iter_between_session):
+class ThresholdTeacher(Teacher):
+
+    def __init__(self, n_item, n_iter_per_ss, n_iter_between_ss,
+                 param, learnt_threshold):
+
+        super().__init__(
+            n_item=n_item,
+            n_iter_per_ss=n_iter_per_ss,
+            n_iter_between_ss=n_iter_between_ss)
 
         self.n_pres = np.zeros(n_item, dtype=int)
         self.delta = np.zeros(n_item, dtype=int)
 
-        self.learnt_threshold = learnt_threshold
-        self.n_iter_per_session = n_iter_per_session
-        self.n_iter_between_session = n_iter_between_session
-
         self.c_iter_session = 0
 
-    def ask(self, param):
+        self.items = np.arange(n_item)
 
-        n_item = len(self.n_pres)
+        self.param = param
+        self.learnt_threshold = learnt_threshold
+
+    def ask(self):
+
         seen = self.n_pres[:] > 0
         n_seen = np.sum(seen)
 
-        items = np.arange(n_item)
-
         if n_seen == 0:
-            items_selected = items
+            items_selected = self.items
 
         else:
-            fr = param[0] * (1 - param[1]) ** (self.n_pres[seen] - 1)
+            fr = self.param[0] * (1 - self.param[1]) ** (self.n_pres[seen] - 1)
             p = np.exp(-fr * self.delta[seen])
 
             min_p = np.min(p)
 
-            if n_seen == n_item or min_p <= self.learnt_threshold:
-                items_selected = items[seen][p[:] == min_p]
+            if n_seen == self.n_item or min_p <= self.learnt_threshold:
+                items_selected = self.items[seen][p[:] == min_p]
 
             else:
                 unseen = np.logical_not(seen)
-                items_selected = items[unseen]
+                items_selected = self.items[unseen]
 
         item = np.random.choice(items_selected)
+        self.update(item)
+        return item
+
+    def update(self, item):
 
         self.n_pres[item] += 1
 
@@ -49,8 +58,6 @@ class ThresholdTeacher:
         self.delta[item] = 1
 
         self.c_iter_session += 1
-        if self.c_iter_session >= self.n_iter_per_session:
-            self.delta[:] += self.n_iter_between_session
+        if self.c_iter_session >= self.n_iter_per_ss:
+            self.delta[:] += self.n_iter_between_ss
             self.c_iter_session = 0
-
-        return item
