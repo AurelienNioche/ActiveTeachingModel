@@ -56,6 +56,18 @@ class RewardThreshold(Reward):
             return n_learnt
 
 
+class RewardAverage(Reward):
+
+    def __init__(self, param,  n_item):
+        super().__init__(param=param, n_item=n_item)
+
+    def reward(self, n_pres, delta, **kwargs):
+
+        p = self.non_zero_p_recall(n_pres=n_pres, delta=delta)
+        sum_p = np.sum(p)
+        return sum_p / self.n_item
+
+
 class RewardHalfLife(Reward):
 
     def __init__(self, param,  n_item, max_value=43200 * 10):
@@ -83,7 +95,7 @@ class RewardHalfLife(Reward):
             fr_is_non_zero = np.logical_not(fr_is_zero)
             hl[fr_is_zero] = self.max_value
             hl[fr_is_non_zero] = self.ln_2 / fr[fr_is_non_zero]
-            return np.sum(hl) / self.n_item
+            return np.sum(hl * p) / self.n_item
         else:
             return 0
 
@@ -98,7 +110,7 @@ class RewardIntegral(Reward):
         if t is None:
             raise ValueError('t must be defined')
 
-        print(self.t_final-t)
+        # print(self.t_final-t)
 
         seen = n_pres[:] > 0
         if np.sum(seen) == 0:
@@ -106,7 +118,30 @@ class RewardIntegral(Reward):
         n_pres_seen = n_pres[seen]
         delta_seen = delta[seen]
         fr = self.param[0] * (1 - self.param[1]) ** (n_pres_seen - 1)
-        delta_to_final = delta_seen + self.t_final-t
+        delta_to_final = delta_seen + (self.t_final - t)
         integral = - np.exp(-fr * delta_to_final) / delta_to_final + \
             np.exp(-fr*delta_seen) / delta_seen
-        return np.sum(integral)
+        return np.sum(integral) / (self.n_item * (self.t_final - t))
+
+
+class RewardGoal(Reward):
+
+    def __init__(self, param, n_item, tau, t_final):
+        super().__init__(param=param, n_item=n_item)
+        self.t_final = t_final
+        self.tau = tau
+
+    def reward(self, n_pres, delta, t=None, **kwargs):
+
+        seen = n_pres[:] > 0
+        if np.sum(seen) == 0:
+            return 0
+        n_pres_seen = n_pres[seen]
+        delta_seen = delta[seen]
+        fr = self.param[0] * (1 - self.param[1]) ** (n_pres_seen - 1)
+
+        # fr_is_zero = fr == 0
+        # fr_is_non_zero = np.logical_not(fr_is_zero)
+        delta_thr = -np.log(self.tau) / fr
+        exp_time = self.t_final - ((t - delta_seen) + delta_thr)
+        return (np.sum(1/ exp_time[exp_time > 0]) + 1 * np.sum(exp_time < 0))/self.n_item

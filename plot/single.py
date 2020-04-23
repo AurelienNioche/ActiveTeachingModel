@@ -6,7 +6,7 @@ from plot import \
 
 import matplotlib.pyplot as plt
 
-from utils.plot import save_fig
+from utils.plot import save_fig, add_letter
 
 
 class DataFigSingle:
@@ -36,15 +36,10 @@ class DataFigSingle:
         self.objective.append(objective)
 
 
-def add_letter(ax, letter):
-    ax.text(-0.1, -0.1, letter,
-            transform=ax.transAxes, size=20, weight='bold')
-
-
-def fig_single(data, fig_folder, time_scale=(60*60*24)/2, fig_ext=''):
+def fig_single(data, fig_folder, time_scale=(60*60*24)/2, fig_name=''):
 
     """
-    :param fig_ext: string
+    :param fig_name: string
     :param time_scale: float
     :param fig_folder: string
     :param data: FigDataSingle
@@ -121,4 +116,4 @@ def fig_single(data, fig_folder, time_scale=(60*60*24)/2, fig_ext=''):
                                true_param=data.param,
                                axes=ax_param_rec)
 
-    save_fig(fig_name=f"single_{fig_ext}.pdf", fig_folder=fig_folder)
+    save_fig(fig_name=f"{fig_name}.pdf", fig_folder=fig_folder)

@@ -92,7 +92,7 @@ def fig_p_recall_item(p_recall, condition_labels, fig_name=None,
 
 def fig_p_item_seen(
         p_recall, condition_labels,
-        time_scale=(60*60*24)/2,
+        time_scale=1,
         axes=None, fig_name=None, fig_folder=None):
 
     """

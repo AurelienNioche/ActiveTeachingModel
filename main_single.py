@@ -156,7 +156,7 @@ def main_single():
         f"{learner_model.__name__}_" \
         f"{param_string(param_labels=param_labels, param=param)}_" \
         f"n_session={n_session}"
-    fig_single(data=data, fig_folder=FIG_FOLDER, fig_ext=fig_ext)
+    fig_single(data=data, fig_folder=FIG_FOLDER, fig_name=fig_ext)
 
 
 if __name__ == "__main__":

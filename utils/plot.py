@@ -25,3 +25,8 @@ def save_fig(fig_name, fig_folder=None, sub_folder=None, tight_layout=True,
 
     print(f'Figure "{file_name}" created.\n')
     plt.close()
+
+
+def add_letter(ax, letter):
+    ax.text(-0.1, -0.1, letter,
+            transform=ax.transAxes, size=20, weight='bold')

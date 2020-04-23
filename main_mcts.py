@@ -7,9 +7,10 @@ from utils.string import param_string
 from model.learner.learner import ExponentialForgetting
 from new_teacher import Leitner, ThresholdTeacher, MCTSTeacher, GreedyTeacher
 
-from mcts.reward import RewardThreshold, RewardHalfLife, RewardIntegral
+from mcts.reward import RewardThreshold, RewardHalfLife, RewardIntegral, \
+    RewardAverage, RewardGoal
 
-from plot.single import DataFigSingle, fig_single
+from plot.mcts import DataFig, make_fig
 
 from tqdm import tqdm
 import pickle
@@ -29,7 +30,7 @@ N_ITEM = 500
 N_ITER_PER_SS = 150
 N_ITER_BETWEEN_SS = 43050
 
-N_SS = 10
+N_SS = 60
 
 N_ITER = N_SS * N_ITER_PER_SS
 
@@ -40,12 +41,16 @@ MCTS_HORIZON = 10
 
 SEED = 0
 
-OBS_END_OF_SS = True
+REWARD = RewardGoal(param=PARAM,
+                    n_item=N_ITEM, tau=THR, t_final=(N_ITER_PER_SS+N_ITER_BETWEEN_SS)*N_SS-N_ITER_BETWEEN_SS)
+
 
 # REWARD = RewardHalfLife(param=PARAM,
 #                         n_item=N_ITEM)
 
-REWARD = RewardThreshold(n_item=N_ITEM, param=PARAM, tau=THR)
+# REWARD = RewardAverage(n_item=N_ITEM, param=PARAM)
+
+# REWARD = RewardThreshold(n_item=N_ITEM, param=PARAM, tau=THR)
 
 # REWARD = RewardIntegral(param=PARAM, n_item=N_ITEM,
 #                         t_final=(N_ITER_PER_SS+N_ITER_BETWEEN_SS)*N_SS-N_ITER_BETWEEN_SS)
@@ -54,10 +59,11 @@ REWARD = RewardThreshold(n_item=N_ITEM, param=PARAM, tau=THR)
 def make_figure(data):
 
     condition_labels = data.keys()
+    obs_labels = np.array(["start", "end"])
+    obs_criteria = np.array([0, N_ITER_PER_SS - 1])
 
-    data_fig = DataFigSingle()
-
-    obs_criterion = N_ITER_PER_SS - 1 if OBS_END_OF_SS else 0
+    data_fig = DataFig(condition_labels=condition_labels,
+                       observation_labels=obs_labels)
 
     for i, cd in enumerate(condition_labels):
 
@@ -73,12 +79,12 @@ def make_figure(data):
         delta = np.zeros(N_ITEM, dtype=int)
 
         # For the graph
-        n_seen = np.zeros(N_SS, dtype=int)
-        objective = np.zeros(N_SS, )
-        n_learnt = np.zeros(N_SS, )
-        p_item = [[] for _ in seen_in_the_end]
+        n_seen = {k: np.zeros(N_SS, dtype=int) for k in obs_labels}
+        objective = {k: np.zeros(N_SS, ) for k in obs_labels}
+        n_learnt = {k: np.zeros(N_SS, ) for k in obs_labels}
+        p = {k: [[] for _ in seen_in_the_end] for k in obs_labels}
 
-        ss_idx = -1
+        ss_idx = {k: -1 for k in obs_labels}
 
         for it in range(N_ITER):
 
@@ -88,10 +94,12 @@ def make_figure(data):
             seen = n_pres[:] > 0
             sum_seen = np.sum(seen)
 
-            if c_iter_session == obs_criterion:
-                ss_idx += 1
+            if c_iter_session in obs_criteria:
+                k_obs = obs_labels[obs_criteria == c_iter_session][0]
 
-                n_seen[ss_idx] = sum_seen
+                ss_idx[k_obs] += 1
+
+                n_seen[k_obs][ss_idx[k_obs]] = sum_seen
 
                 if sum_seen > 0:
 
@@ -100,23 +108,15 @@ def make_figure(data):
                     fr = PARAM[0] * (1 - PARAM[1]) ** (n_pres[seen] - 1)
                     p_t = np.exp(-fr * delta[seen])
 
-                    # item_seen = np.unique(hist_until_it)
-                    # item_seen.sort()
-                    #
-                    # print("item seen", item_seen)
-                    # print("p", p_t)
-
                     for idx_t, item in enumerate(seen_t_idx):
                         idx_in_the_end = seen_in_the_end.index(item)
-                        tup = (ss_idx, p_t[idx_t])
-                        p_item[idx_in_the_end].append(tup)
+                        tup = (ss_idx[k_obs], p_t[idx_t])
+                        p[k_obs][idx_in_the_end].append(tup)
 
-                        # if c_iter_ss == 0:
-                        #     print(idx_t, tup, n_pres[item])
-
-                objective[ss_idx] = REWARD.reward(n_pres=n_pres, delta=delta,
-                                                  t=t, )  # normalize=False)
-                n_learnt[ss_idx] = \
+                objective[k_obs][ss_idx[k_obs]] = \
+                    REWARD.reward(n_pres=n_pres, delta=delta, t=t, )
+                # normalize=False)
+                n_learnt[k_obs][ss_idx[k_obs]] = \
                     RewardThreshold(n_item=N_ITEM, tau=THR, param=PARAM)\
                     .reward(n_pres=n_pres, delta=delta, normalize=False)
 
@@ -140,18 +140,21 @@ def make_figure(data):
             objective=objective,
             n_learnt=n_learnt,
             n_seen=n_seen,
-            p_item=p_item,
-            label=cd
+            p=p,
         )
 
-    fig_ext = \
-          f"{param_string(param_labels=PARAM_LABELS, param=PARAM)}_" \
-          f"n_session={N_SS}"f'_obs_end_ss={OBS_END_OF_SS}_' \
-          f'{REWARD.__class__.__name__}_' \
-          f'{"_".join(condition_labels)}'
+    pr_str = \
+        param_string(param_labels=PARAM_LABELS, param=PARAM,
+                     first_letter_only=True)
 
-    fig_single(data=data_fig, fig_folder=FIG_FOLDER, time_scale=1,
-               fig_ext=fig_ext)
+    fig_ext = \
+        f'{pr_str}_' \
+        f'n_ss={N_SS}_' \
+        f'{REWARD.__class__.__name__}_' \
+        f'{"_".join(condition_labels)}_' \
+        f'seed={SEED}'
+
+    make_fig(data=data_fig, fig_folder=FIG_FOLDER, fig_name=fig_ext)
 
 
 def make_data():
@@ -180,7 +183,8 @@ def make_data():
                learner_kwargs={"param": PARAM,
                                "n_item": N_ITEM,
                                "n_iter_per_session": N_ITER_PER_SS,
-                               "n_iter_between_session": N_ITER_BETWEEN_SS})
+                               "n_iter_between_session": N_ITER_BETWEEN_SS},
+               seed=SEED)
 
     # Simulate Threshold Teacher
     tqdm.write("Simulating Threshold Teacher")
@@ -190,7 +194,7 @@ def make_data():
         n_iter_between_ss=N_ITER_BETWEEN_SS,
         param=PARAM,
         learnt_threshold=THR,)\
-        .teach(n_iter=N_ITER)
+        .teach(n_iter=N_ITER, seed=SEED)
 
     # Simulate Greedy Teacher
     tqdm.write("Simulating Greedy Teacher")
@@ -199,7 +203,7 @@ def make_data():
         n_iter_per_ss=N_ITER_PER_SS,
         n_iter_between_ss=N_ITER_BETWEEN_SS,
         reward=REWARD,)\
-        .teach(n_iter=N_ITER)
+        .teach(n_iter=N_ITER, seed=SEED)
 
     bkp_file = os.path.join(PICKLE_FOLDER, "results.p")
     with open(bkp_file, 'wb') as f:
