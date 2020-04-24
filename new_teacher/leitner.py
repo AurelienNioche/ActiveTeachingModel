@@ -138,8 +138,11 @@ class Leitner(Teacher):
             if np.sum(due) == 0:
                 # Present a new item
                 unseen = np.logical_not(self.seen)
-                selection = np.arange(self.n_item)[unseen]
-
+                if np.sum(unseen) > 0:
+                    selection = np.arange(self.n_item)[unseen]
+                else:
+                    b = self.waiting_time == np.max(self.waiting_time)
+                    selection = np.arange(self.n_item)[b]
             else:
                 # select maximum waiting time
                 max_wait = self._find_max_waiting(due)

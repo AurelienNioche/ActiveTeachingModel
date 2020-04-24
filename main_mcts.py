@@ -5,7 +5,7 @@ import numpy as np
 from utils.string import param_string
 
 from model.learner.learner import ExponentialForgetting
-from new_teacher import Leitner, ThresholdTeacher, MCTSTeacher, GreedyTeacher
+from new_teacher import Leitner, ThresholdTeacher, MCTSTeacher, GreedyTeacher, FixedNTeacher
 
 from mcts.reward import RewardThreshold, RewardHalfLife, RewardIntegral, \
     RewardAverage, RewardGoal
@@ -27,10 +27,10 @@ PARAM_LABELS = ("alpha", "beta")
 N_ITEM = 500
 
 
-N_ITER_PER_SS = 150
-N_ITER_BETWEEN_SS = 43050
+N_ITER_PER_SS = 1 # 1 150
+N_ITER_BETWEEN_SS = 0 #43050
 
-N_SS = 60
+N_SS = 1000
 
 N_ITER = N_SS * N_ITER_PER_SS
 
@@ -41,8 +41,8 @@ MCTS_HORIZON = 10
 
 SEED = 0
 
-REWARD = RewardGoal(param=PARAM,
-                    n_item=N_ITEM, tau=THR, t_final=(N_ITER_PER_SS+N_ITER_BETWEEN_SS)*N_SS-N_ITER_BETWEEN_SS)
+# REWARD = RewardGoal(param=PARAM,
+#                     n_item=N_ITEM, tau=THR, t_final=(N_ITER_PER_SS+N_ITER_BETWEEN_SS)*N_SS-N_ITER_BETWEEN_SS)
 
 
 # REWARD = RewardHalfLife(param=PARAM,
@@ -50,7 +50,7 @@ REWARD = RewardGoal(param=PARAM,
 
 # REWARD = RewardAverage(n_item=N_ITEM, param=PARAM)
 
-# REWARD = RewardThreshold(n_item=N_ITEM, param=PARAM, tau=THR)
+REWARD = RewardThreshold(n_item=N_ITEM, param=PARAM, tau=THR)
 
 # REWARD = RewardIntegral(param=PARAM, n_item=N_ITEM,
 #                         t_final=(N_ITER_PER_SS+N_ITER_BETWEEN_SS)*N_SS-N_ITER_BETWEEN_SS)
@@ -173,7 +173,6 @@ def make_data():
     #     iteration_limit=MCTS_ITER_LIMIT,
     # ).teach(n_iter=N_ITER)
 
-    # Simulate Leitner
     tqdm.write("Simulating Leitner Teacher")
     data["leitner"] = Leitner(
         n_item=N_ITEM,
@@ -186,7 +185,6 @@ def make_data():
                                "n_iter_between_session": N_ITER_BETWEEN_SS},
                seed=SEED)
 
-    # Simulate Threshold Teacher
     tqdm.write("Simulating Threshold Teacher")
     data["threshold"] = ThresholdTeacher(
         n_item=N_ITEM,
@@ -196,14 +194,21 @@ def make_data():
         learnt_threshold=THR,)\
         .teach(n_iter=N_ITER, seed=SEED)
 
-    # Simulate Greedy Teacher
-    tqdm.write("Simulating Greedy Teacher")
-    data["greedy"] = GreedyTeacher(
+    tqdm.write("Simulating Optimal N Teacher")
+    data["FixedN"] = FixedNTeacher(
         n_item=N_ITEM,
         n_iter_per_ss=N_ITER_PER_SS,
-        n_iter_between_ss=N_ITER_BETWEEN_SS,
-        reward=REWARD,)\
+        n_iter_between_ss=N_ITER_BETWEEN_SS)\
         .teach(n_iter=N_ITER, seed=SEED)
+
+    # # Simulate Greedy Teacher
+    # tqdm.write("Simulating Greedy Teacher")
+    # data["greedy"] = GreedyTeacher(
+    #     n_item=N_ITEM,
+    #     n_iter_per_ss=N_ITER_PER_SS,
+    #     n_iter_between_ss=N_ITER_BETWEEN_SS,
+    #     reward=REWARD,)\
+    #     .teach(n_iter=N_ITER, seed=SEED)
 
     bkp_file = os.path.join(PICKLE_FOLDER, "results.p")
     with open(bkp_file, 'wb') as f:
