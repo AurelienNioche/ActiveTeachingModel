@@ -55,8 +55,9 @@ def make_fig(data, fig_folder, fig_name=''):
     """
 
     n_cond = len(data.condition_labels)
+    n_obs = len(data.observation_labels)
 
-    n_rows = 4
+    n_rows = 2 * n_obs
     n_cols_per_row_type = {
         "objective": 3,
         "p": n_cond

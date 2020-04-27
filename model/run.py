@@ -49,8 +49,8 @@ def run_n_session_legacy(
     sim_parameters = {
             "n_item": n_item,
             "n_session": n_session,
-            "n_iteration_per_session": n_iteration_per_session,
-            "n_iteration_between_session": n_iteration_between_session,
+            "n_iter_per_ss": n_iteration_per_session,
+            "n_iter_between_ss": n_iteration_between_session,
             "teacher_model": teacher_model.__name__,
             "learner_model": learner_model.__name__,
             "param_labels": list(param_labels),

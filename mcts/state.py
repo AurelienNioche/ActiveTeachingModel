@@ -58,11 +58,14 @@ class LearnerState(State):
                  c_iter_session,
                  t,
                  reward,
-                 n_iteration_per_session=150,
-                 n_iteration_between_session=43050,
-                 horizon=None,
-                 action=None,
-                 parent=None):
+                 terminal_t,
+                 n_iter_per_ss,
+                 n_iter_between_ss,
+                 # horizon=None,
+                 # terminal_t=None,
+                 # action=None,
+                 # parent=None
+                 ):
 
         self.n_pres = n_pres
         self.delta = delta
@@ -70,31 +73,40 @@ class LearnerState(State):
 
         self.c_iter_session = c_iter_session
 
-        self.n_iteration_per_session = n_iteration_per_session
-        self.n_iteration_between_session = n_iteration_between_session
+        self.n_iter_per_ss = n_iter_per_ss
+        self.n_iter_between_ss = n_iter_between_ss
 
-        self.horizon = horizon
+        # self.horizon = horizon
+        self.terminal_t = terminal_t
+        #
+        # if self.horizon is not None:
+        #     self._is_terminal = self.rel_t >= self.horizon
+        # if self.terminal_t is not None:
+        #     self._is_terminal = self.t == self.terminal_t
+        # else:
+        #     raise ValueError("Either 'horizon' of 't_final' should be defined")
 
         self.reward = reward
 
         self.n_item = self.n_pres.size
 
         self._instant_reward = None
+        self._mean_reward = None
         self._possible_actions = None
 
-        self.parent = parent
+        # self.parent = parent
         self.children = dict()
 
-        if parent is not None:
-            self.hist_reward = \
-                self.parent.hist_reward + [self.parent.get_instant_reward(), ]
-            self.hist_action = \
-                self.parent.hist_action + [action]
-            self.rel_t = self.parent.rel_t + 1
-        else:
-            self.t = 0
-            self.hist_reward = []
-            self.hist_action = []
+        # if parent is not None:
+        #     self.hist_reward = \
+        #         self.parent.hist_reward + [self.parent.get_instant_reward(), ]
+        #     self.hist_action = \
+        #         self.parent.hist_action + [action]
+        #     self.rel_t = self.parent.rel_t + 1
+        # else:
+        #     self.t = 0
+        #     self.hist_reward = []
+        #     self.hist_action = []
 
     def get_possible_actions(self):
         """Returns an iterable of all actions which can be taken
@@ -114,60 +126,79 @@ class LearnerState(State):
 
     def take_action(self, action):
         """Returns the state which results from taking action 'action'"""
-        n_pres = self.n_pres.copy()
-        delta = self.delta.copy()
 
-        n_pres[action] += 1
+        if action in self.children:
+            new_state = self.children[action]
 
-        # Increment delta for all items
-        delta[:] += 1
-        # ...except the one for the selected design that equal one
-        delta[action] = 1
+        else:
+            n_pres = self.n_pres.copy()
+            delta = self.delta.copy()
 
-        c_iter_session = self.c_iter_session + 1
-        if c_iter_session >= self.n_iteration_per_session:
-            delta[:] += self.n_iteration_between_session
-            c_iter_session = 0
+            n_pres[action] += 1
 
-        t = self.t + 1
+            # Increment delta for all items
+            delta[:] += 1
+            # ...except the one for the selected design that equal one
+            delta[action] = 1
 
-        new_state = LearnerState(
-            parent=self, delta=delta,
-            n_pres=n_pres, horizon=self.horizon,
-            c_iter_session=c_iter_session,
-            reward=self.reward,
-            action=action,
-            t=t
-        )
+            t = self.t + 1
 
-        self.children[action] = new_state
+            c_iter_session = self.c_iter_session + 1
+            if c_iter_session >= self.n_iter_per_ss:
+                delta[:] += self.n_iter_between_ss
+                t += self.n_iter_between_ss
+                c_iter_session = 0
+
+            new_state = LearnerState(
+                #parent=self,
+                delta=delta,
+                n_pres=n_pres,
+                # horizon=self.horizon,
+                c_iter_session=c_iter_session,
+                reward=self.reward,
+                n_iter_between_ss=self.n_iter_between_ss,
+                n_iter_per_ss=self.n_iter_per_ss,
+                # action=action,
+                t=t,
+                terminal_t=self.terminal_t
+            )
+
+            self.children[action] = new_state
 
         return new_state
 
     def is_terminal(self):
         """Returns whether this state is a terminal state"""
-        assert self.horizon is not None, \
-            "horizon must be given as an argument " \
-            "to call the 'is_terminal' method"
-        return self.rel_t >= self.horizon
+        if self.t > self.terminal_t:
+            raise ValueError(f"{self.t} > {self.terminal_t}")
+        return self.t == self.terminal_t
 
     def get_instant_reward(self):
         """"Returns the INSTANT reward for this state"""
-
-        self._instant_reward = self.reward.reward(
-            n_pres=self.n_pres, delta=self.delta,
-            t=self.t
-        )
+        if self._instant_reward is None:
+            self._instant_reward = self.reward.reward(
+                n_pres=self.n_pres, delta=self.delta,
+                t=self.t
+            )
         return self._instant_reward
 
+    # def get_mean_reward(self):
+    #     """"Returns the MEAN reward up to this state"""
+    #     if self._mean_reward is None:
+    #         self._mean_reward = np.mean(
+    #             self.hist_reward + [self.get_instant_reward(), ])
+    #
+    #     return self._mean_reward
+
     def get_reward(self):
-        """"Returns the MEAN reward up to this state"""
-        mean = np.mean(self.hist_reward + [self.get_instant_reward(), ])
+
+        return self.get_instant_reward()
+        # else:
+        #     return self.get_mean_reward()
         # print(f'mean: {mean}')
-        return mean
 
-    def reset(self):
-
-        self.rel_t = 0
-        self.hist_reward = []
-        self.hist_action = []
+    # def reset(self):
+    #
+    #     self.rel_t = 0
+    #     self.hist_reward = []
+    #     self.hist_action = []

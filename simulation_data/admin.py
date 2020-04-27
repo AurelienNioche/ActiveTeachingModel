@@ -5,8 +5,8 @@ from . models import Simulation, Post
 
 class SimulationAdmin(admin.ModelAdmin):
     list_display = (
-        "id", "n_session", "n_iteration_per_session",
-        "n_iteration_between_session", "grid_size", "teacher_model",
+        "id", "n_session", "n_iter_per_ss",
+        "n_iter_between_ss", "grid_size", "teacher_model",
         "learner_model", "param_labels", "param_values",
         "param_lower_bounds", "param_upper_bounds",
         "seed"

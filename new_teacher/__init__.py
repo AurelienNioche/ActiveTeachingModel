@@ -2,4 +2,4 @@ from . greedy import GreedyTeacher
 from . leitner import Leitner
 from . mcts import MCTSTeacher
 from . threshold import ThresholdTeacher
-from . backward import FixedNTeacher
+from . fixed_n import FixedNTeacher

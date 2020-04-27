@@ -143,8 +143,8 @@ def main_grid(
         "n_item": n_item,
         "grid_size": grid_size,
         "seed": seed,
-        "n_iteration_per_session": n_iteration_per_session,
-        "n_iteration_between_session": n_iteration_between_session,
+        "n_iter_per_ss": n_iteration_per_session,
+        "n_iter_between_ss": n_iteration_between_session,
         "bounds": bounds,
         "param_labels": param_labels,
     }

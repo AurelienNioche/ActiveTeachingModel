@@ -18,7 +18,7 @@ import pickle
 FIG_FOLDER = os.path.join("fig", os.path.basename(__file__).split(".")[0])
 os.makedirs(FIG_FOLDER, exist_ok=True)
 
-PICKLE_FOLDER = os.path.join("fig", os.path.basename(__file__).split(".")[0])
+PICKLE_FOLDER = os.path.join("pickle", os.path.basename(__file__).split(".")[0])
 os.makedirs(PICKLE_FOLDER, exist_ok=True)
 
 PARAM = (0.02, 0.2)
@@ -27,19 +27,23 @@ PARAM_LABELS = ("alpha", "beta")
 N_ITEM = 500
 
 
-N_ITER_PER_SS = 1 # 1 150
-N_ITER_BETWEEN_SS = 0 #43050
+N_ITER_PER_SS = 100
+N_ITER_BETWEEN_SS = 1000  # 43050
 
-N_SS = 1000
+N_SS = 2
 
 N_ITER = N_SS * N_ITER_PER_SS
 
 THR = 0.9
 
 MCTS_ITER_LIMIT = 150
-MCTS_HORIZON = 10
+# MCTS_HORIZON = 10
 
 SEED = 0
+
+TERMINAL_T = N_SS * (N_ITER_PER_SS + N_ITER_BETWEEN_SS)
+
+print("TERMINAL T", TERMINAL_T)
 
 # REWARD = RewardGoal(param=PARAM,
 #                     n_item=N_ITEM, tau=THR, t_final=(N_ITER_PER_SS+N_ITER_BETWEEN_SS)*N_SS-N_ITER_BETWEEN_SS)
@@ -59,8 +63,8 @@ REWARD = RewardThreshold(n_item=N_ITEM, param=PARAM, tau=THR)
 def make_figure(data):
 
     condition_labels = data.keys()
-    obs_labels = np.array(["start", "end"])
-    obs_criteria = np.array([0, N_ITER_PER_SS - 1])
+    obs_labels = "t"  # np.array(["start", "end"])
+    obs_criteria = None #np.array([0, N_ITER_PER_SS - 1])
 
     data_fig = DataFig(condition_labels=condition_labels,
                        observation_labels=obs_labels)
@@ -70,8 +74,8 @@ def make_figure(data):
         hist = data[cd]
         # print("hist", hist)
 
-        c_iter_session = 0
-        t = 0
+
+        # t = 0
 
         seen_in_the_end = list(np.unique(hist))
 
@@ -79,14 +83,23 @@ def make_figure(data):
         delta = np.zeros(N_ITEM, dtype=int)
 
         # For the graph
-        n_seen = {k: np.zeros(N_SS, dtype=int) for k in obs_labels}
-        objective = {k: np.zeros(N_SS, ) for k in obs_labels}
-        n_learnt = {k: np.zeros(N_SS, ) for k in obs_labels}
+        n_obs = TERMINAL_T
+        n_seen = {k: np.zeros(n_obs, dtype=int) for k in obs_labels}
+        objective = {k: np.zeros(n_obs, ) for k in obs_labels}
+        n_learnt = {k: np.zeros(n_obs, dtype=int) for k in obs_labels}
         p = {k: [[] for _ in seen_in_the_end] for k in obs_labels}
 
-        ss_idx = {k: -1 for k in obs_labels}
+        it = 0
+        c_iter_session = 0
+        c_between_session = 0
+        t_is_teaching = True
 
-        for it in range(N_ITER):
+        # if c_iter_session in obs_criteria:
+        k_obs = "t"  # obs_labels[obs_criteria == c_iter_session][0]
+
+        for t in range(TERMINAL_T+1):
+
+            obs_idx = t
 
             # timestamps_until_it = np.asarray(timestamps)
             # hist_until_it = hist[:it]
@@ -94,47 +107,59 @@ def make_figure(data):
             seen = n_pres[:] > 0
             sum_seen = np.sum(seen)
 
-            if c_iter_session in obs_criteria:
-                k_obs = obs_labels[obs_criteria == c_iter_session][0]
+            # ss_idx[k_obs] += 1
 
-                ss_idx[k_obs] += 1
+            n_seen[k_obs][obs_idx] = sum_seen
 
-                n_seen[k_obs][ss_idx[k_obs]] = sum_seen
+            if sum_seen > 0:
 
-                if sum_seen > 0:
+                seen_t_idx = np.arange(N_ITEM)[seen]
 
-                    seen_t_idx = np.arange(N_ITEM)[seen]
+                fr = PARAM[0] * (1 - PARAM[1]) ** (n_pres[seen] - 1)
+                p_t = np.exp(-fr * delta[seen])
 
-                    fr = PARAM[0] * (1 - PARAM[1]) ** (n_pres[seen] - 1)
-                    p_t = np.exp(-fr * delta[seen])
+                for idx_t, item in enumerate(seen_t_idx):
+                    idx_in_the_end = seen_in_the_end.index(item)
+                    tup = (obs_idx, p_t[idx_t])
+                    p[k_obs][idx_in_the_end].append(tup)
 
-                    for idx_t, item in enumerate(seen_t_idx):
-                        idx_in_the_end = seen_in_the_end.index(item)
-                        tup = (ss_idx[k_obs], p_t[idx_t])
-                        p[k_obs][idx_in_the_end].append(tup)
-
-                objective[k_obs][ss_idx[k_obs]] = \
-                    REWARD.reward(n_pres=n_pres, delta=delta, t=t, )
-                # normalize=False)
-                n_learnt[k_obs][ss_idx[k_obs]] = \
-                    RewardThreshold(n_item=N_ITEM, tau=THR, param=PARAM)\
-                    .reward(n_pres=n_pres, delta=delta, normalize=False)
-
-            action = hist[it]
-
-            n_pres[action] += 1
+            objective[k_obs][obs_idx] = \
+                REWARD.reward(n_pres=n_pres, delta=delta, t=t, )
+            # normalize=False)
+            n_learnt[k_obs][obs_idx] = \
+                RewardThreshold(n_item=N_ITEM, tau=THR, param=PARAM)\
+                .reward(n_pres=n_pres, delta=delta, normalize=False)
 
             # Increment delta for all items
             delta[:] += 1
-            # ...except the one for the selected design that equal one
-            delta[action] = 1
-
             t += 1
-            c_iter_session += 1
-            if c_iter_session >= N_ITER_PER_SS:
-                delta[:] += N_ITER_BETWEEN_SS
-                t += N_ITER_BETWEEN_SS
-                c_iter_session = 0
+
+            if t == TERMINAL_T:
+                break
+
+            if t_is_teaching:
+
+                action = hist[it]
+
+                n_pres[action] += 1
+                # ...except the one for the selected design that equal one
+                delta[action] = 1
+
+                c_iter_session += 1
+
+                it += 1
+
+                if c_iter_session >= N_ITER_PER_SS:
+                    # delta[:] += N_ITER_BETWEEN_SS
+                    # t += N_ITER_BETWEEN_SS
+                    c_iter_session = 0
+                    if N_ITER_BETWEEN_SS > 0:
+                        t_is_teaching = False
+            else:
+                c_between_session += 1
+                if c_between_session >= N_ITER_BETWEEN_SS:
+                    c_between_session = 0
+                    t_is_teaching = True
 
         data_fig.add(
             objective=objective,
@@ -157,21 +182,15 @@ def make_figure(data):
     make_fig(data=data_fig, fig_folder=FIG_FOLDER, fig_name=fig_ext)
 
 
-def make_data():
+def make_data(force=True):
+    bkp_file = os.path.join(PICKLE_FOLDER, "results.p")
+    if os.path.exists(bkp_file) and not force:
+        with open(bkp_file, 'rb') as f:
+            data = pickle.load(f)
+        return data
 
     # Will stock the hist for each method
     data = {}
-
-    # # Simulate mcts
-    # tqdm.write("Simulating MCTS Teacher")
-    # hist_all_teachers["mcts"] = MCTSTeacher(
-    #     n_item=N_ITEM,
-    #     n_iteration_per_session=N_ITER_PER_SS,
-    #     n_iteration_between_session=N_ITER_BETWEEN_SS,
-    #     reward=REWARD,
-    #     horizon=MCTS_HORIZON,
-    #     iteration_limit=MCTS_ITER_LIMIT,
-    # ).teach(n_iter=N_ITER)
 
     tqdm.write("Simulating Leitner Teacher")
     data["leitner"] = Leitner(
@@ -194,12 +213,24 @@ def make_data():
         learnt_threshold=THR,)\
         .teach(n_iter=N_ITER, seed=SEED)
 
-    tqdm.write("Simulating Optimal N Teacher")
-    data["FixedN"] = FixedNTeacher(
+    # Simulate mcts
+    tqdm.write("Simulating MCTS Teacher")
+    data["mcts"] = MCTSTeacher(
         n_item=N_ITEM,
         n_iter_per_ss=N_ITER_PER_SS,
-        n_iter_between_ss=N_ITER_BETWEEN_SS)\
-        .teach(n_iter=N_ITER, seed=SEED)
+        n_iter_between_ss=N_ITER_BETWEEN_SS,
+        reward=REWARD,
+        terminal_t=TERMINAL_T,
+        # horizon=MCTS_HORIZON,
+        iteration_limit=MCTS_ITER_LIMIT,
+    ).teach(n_iter=N_ITER)
+
+    # tqdm.write("Simulating Fixed N Teacher")
+    # data["FixedN"] = FixedNTeacher(
+    #     n_item=N_ITEM,
+    #     n_iter_per_ss=N_ITER_PER_SS,
+    #     n_iter_between_ss=N_ITER_BETWEEN_SS)\
+    #     .teach(n_iter=N_ITER, seed=SEED)
 
     # # Simulate Greedy Teacher
     # tqdm.write("Simulating Greedy Teacher")
@@ -210,7 +241,7 @@ def make_data():
     #     reward=REWARD,)\
     #     .teach(n_iter=N_ITER, seed=SEED)
 
-    bkp_file = os.path.join(PICKLE_FOLDER, "results.p")
+
     with open(bkp_file, 'wb') as f:
         pickle.dump(data, f)
 

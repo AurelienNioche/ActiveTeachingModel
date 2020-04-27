@@ -10,30 +10,32 @@ class MCTSTeacher(Teacher):
 
     def __init__(self, n_item, reward,
                  n_iter_per_ss, n_iter_between_ss,
-                 horizon=20, iteration_limit=500):
+                 terminal_t,
+                 # horizon=20,
+                 iteration_limit=500):
         super().__init__(
             n_item=n_item,
             n_iter_per_ss=n_iter_per_ss,
             n_iter_between_ss=n_iter_between_ss)
 
-        self.t = 0
         self.iteration_limit = iteration_limit
 
         self.learner_state = \
             LearnerState(
                 n_pres=np.zeros(self.n_item, dtype=int),
                 delta=np.zeros(self.n_item, dtype=int),
-                horizon=horizon,
+                # horizon=horizon,
                 reward=reward,
-                n_iteration_per_session=self.n_iter_per_ss,
-                n_iteration_between_session=self.n_iter_between_ss,
+                n_iter_per_ss=self.n_iter_per_ss,
+                n_iter_between_ss=self.n_iter_between_ss,
                 t=0,
                 c_iter_session=0,
+                terminal_t=terminal_t
             )
 
     def ask(self):
 
-        self.learner_state.reset()
+        # self.learner_state.reset()
 
         m = MCTS(iteration_limit=self.iteration_limit)
         best_action = m.run(initial_state=self.learner_state)

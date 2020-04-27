@@ -29,5 +29,4 @@ class Teacher:
         for t in tqdm(range(n_iter)):
             item = self.ask()
             h[t] = item
-
         return h

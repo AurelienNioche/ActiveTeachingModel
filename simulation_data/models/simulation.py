@@ -148,7 +148,7 @@ class Simulation(models.Model):
         self.c_iter_session = 0
 
         # print("old n session", previous_n_session)
-        # print("n iter per session", self.n_iteration_per_session)
+        # print("n iter per session", self.n_iter_per_ss)
         current_it = self.n_iteration_per_session * previous_n_session
         # print("current it", current_it)
         self.iterator = range(
@@ -341,8 +341,8 @@ class Simulation(models.Model):
 
         kwargs = {
             "n_item": n_item,
-            "n_iteration_per_session": n_iteration_per_session,
-            "n_iteration_between_session": n_iteration_between_session,
+            "n_iter_per_ss": n_iteration_per_session,
+            "n_iter_between_ss": n_iteration_between_session,
             "teacher_model": teacher_model.__name__,
             "learner_model": learner_model.__name__,
             "param_labels": list(param_labels),
@@ -374,7 +374,7 @@ class Simulation(models.Model):
     @classmethod
     def as_shorter(cls, sim, n_session):
 
-        n_iteration = n_session * sim.n_iteration_per_session
+        n_iteration = n_session * sim.n_iter_per_ss
 
         sim.n_session = n_session
 

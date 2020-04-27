@@ -20,8 +20,8 @@ class GreedyTeacher(Teacher):
                 n_pres=np.zeros(self.n_item, dtype=int),
                 delta=np.zeros(self.n_item, dtype=int),
                 reward=reward,
-                n_iteration_per_session=self.n_iter_per_ss,
-                n_iteration_between_session=self.n_iter_between_ss,
+                n_iter_per_ss=self.n_iter_per_ss,
+                n_iter_between_ss=self.n_iter_between_ss,
                 t=0,
                 c_iter_session=0,
             )

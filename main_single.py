@@ -93,8 +93,8 @@ def main_single():
         "grid_size": grid_size,
         "param": param,
         "seed": seed,
-        "n_iteration_per_session": n_iteration_per_session,
-        "n_iteration_between_session": n_iteration_between_session,
+        "n_iter_per_ss": n_iteration_per_session,
+        "n_iter_between_ss": n_iteration_between_session,
         "bounds": bounds,
         "param_labels": param_labels
     } for teacher_model in teacher_models]
@@ -102,7 +102,7 @@ def main_single():
     with MultiProcess(n_worker=os.cpu_count()) as mp:
         sim_entry_ids = mp.map(run_n_session, kwargs_list)
 
-    # n_iteration = n_iteration_per_session * n_session
+    # n_iteration = n_iter_per_ss * n_session
 
     n_time_steps = \
         (n_iteration_per_session + n_iteration_between_session) * n_session

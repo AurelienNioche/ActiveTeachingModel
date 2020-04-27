@@ -72,8 +72,8 @@ def main():
             # sim_entries = main_grid(
             #     n_item=n_item,
             #     n_session=n_session,
-            #     n_iteration_per_session=n_iteration_per_session,
-            #     n_iteration_between_session=n_iteration_between_session,
+            #     n_iter_per_ss=n_iter_per_ss,
+            #     n_iter_between_ss=n_iter_between_ss,
             #     grid_size=grid_size,
             #     teacher_models=[teacher_model, ],
             #     learner_model=ExponentialForgetting,
