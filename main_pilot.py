@@ -158,10 +158,11 @@ def main():
     data = analysis.tools.data.get()
 
     list_model_to_fit = \
-        QLearner,  ActR, \
-        ExponentialForgetting, ExponentialForgettingAsymmetric, \
-        ActRMeaning, \
-        ActRGraphic, \
+        ExponentialForgetting,
+        # QLearner,  ActR, \
+        # ExponentialForgettingAsymmetric, \
+        # ActRMeaning, \
+        # ActRGraphic, \
 
     kanji = data["kanji"]
     meaning = data["meaning"]

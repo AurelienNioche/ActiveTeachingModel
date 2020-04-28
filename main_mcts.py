@@ -5,7 +5,8 @@ import numpy as np
 from utils.string import param_string
 
 from model.learner.learner import ExponentialForgetting
-from new_teacher import Leitner, ThresholdTeacher, MCTSTeacher, GreedyTeacher, FixedNTeacher
+from new_teacher import Leitner, ThresholdTeacher, MCTSTeacher, \
+    GreedyTeacher, FixedNTeacher
 
 from mcts.reward import RewardThreshold, RewardHalfLife, RewardIntegral, \
     RewardAverage, RewardGoal
@@ -21,7 +22,7 @@ os.makedirs(FIG_FOLDER, exist_ok=True)
 PICKLE_FOLDER = os.path.join("pickle", os.path.basename(__file__).split(".")[0])
 os.makedirs(PICKLE_FOLDER, exist_ok=True)
 
-PARAM = (0.02, 0.2)
+PARAM = (0.021, 0.44)
 PARAM_LABELS = ("alpha", "beta")
 
 N_ITEM = 500
@@ -59,12 +60,31 @@ REWARD = RewardThreshold(n_item=N_ITEM, param=PARAM, tau=THR)
 # REWARD = RewardIntegral(param=PARAM, n_item=N_ITEM,
 #                         t_final=(N_ITER_PER_SS+N_ITER_BETWEEN_SS)*N_SS-N_ITER_BETWEEN_SS)
 
+CONDITIONS = Leitner.__name__, ThresholdTeacher.__name__, MCTSTeacher.__name__,
+
+
+PR_STR = \
+    param_string(param_labels=PARAM_LABELS, param=PARAM,
+                 first_letter_only=True)
+
+
+EXTENSION = \
+        f'n_ss={N_SS}_' \
+        f'n_iter_per_ss={N_ITER_PER_SS}_' \
+        f'n_iter_between_ss={N_ITER_BETWEEN_SS}_' \
+        f'{REWARD.__class__.__name__}_' \
+        f'{"_".join(CONDITIONS)}_' \
+        f'{PR_STR}_' \
+        f'seed={SEED}'
+
+BKP_FILE = os.path.join(PICKLE_FOLDER, f"{EXTENSION}.p")
+
 
 def make_figure(data):
 
     condition_labels = data.keys()
     obs_labels = "t"  # np.array(["start", "end"])
-    obs_criteria = None #np.array([0, N_ITER_PER_SS - 1])
+    # obs_criteria = None #np.array([0, N_ITER_PER_SS - 1])
 
     data_fig = DataFig(condition_labels=condition_labels,
                        observation_labels=obs_labels)
@@ -168,24 +188,13 @@ def make_figure(data):
             p=p,
         )
 
-    pr_str = \
-        param_string(param_labels=PARAM_LABELS, param=PARAM,
-                     first_letter_only=True)
-
-    fig_ext = \
-        f'{pr_str}_' \
-        f'n_ss={N_SS}_' \
-        f'{REWARD.__class__.__name__}_' \
-        f'{"_".join(condition_labels)}_' \
-        f'seed={SEED}'
-
-    make_fig(data=data_fig, fig_folder=FIG_FOLDER, fig_name=fig_ext)
+    make_fig(data=data_fig, fig_folder=FIG_FOLDER, fig_name=EXTENSION)
 
 
 def make_data(force=True):
-    bkp_file = os.path.join(PICKLE_FOLDER, "results.p")
-    if os.path.exists(bkp_file) and not force:
-        with open(bkp_file, 'rb') as f:
+
+    if os.path.exists(BKP_FILE) and not force:
+        with open(BKP_FILE, 'rb') as f:
             data = pickle.load(f)
         return data
 
@@ -241,8 +250,7 @@ def make_data(force=True):
     #     reward=REWARD,)\
     #     .teach(n_iter=N_ITER, seed=SEED)
 
-
-    with open(bkp_file, 'wb') as f:
+    with open(BKP_FILE, 'wb') as f:
         pickle.dump(data, f)
 
     return data
