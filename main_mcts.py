@@ -16,10 +16,11 @@ from plot.mcts import DataFig, make_fig
 from tqdm import tqdm
 import pickle
 
-FIG_FOLDER = os.path.join("fig", os.path.basename(__file__).split(".")[0])
-os.makedirs(FIG_FOLDER, exist_ok=True)
+SCRIPT_NAME = os.path.basename(__file__).split(".")[0]
 
-PICKLE_FOLDER = os.path.join("pickle", os.path.basename(__file__).split(".")[0])
+FIG_FOLDER = os.path.join("fig", SCRIPT_NAME)
+os.makedirs(FIG_FOLDER, exist_ok=True)
+PICKLE_FOLDER = os.path.join("pickle", SCRIPT_NAME)
 os.makedirs(PICKLE_FOLDER, exist_ok=True)
 
 PARAM = (0.021, 0.44)
@@ -29,7 +30,7 @@ N_ITEM = 500
 
 
 N_ITER_PER_SS = 100
-N_ITER_BETWEEN_SS = 1000  # 43050
+N_ITER_BETWEEN_SS = 1000  # 0  # 43050
 
 N_SS = 2
 
@@ -37,8 +38,8 @@ N_ITER = N_SS * N_ITER_PER_SS
 
 THR = 0.9
 
-MCTS_ITER_LIMIT = 150
-# MCTS_HORIZON = 10
+MCTS_ITER_LIMIT = 500
+MCTS_HORIZON = None
 
 SEED = 0
 
@@ -72,6 +73,7 @@ EXTENSION = \
         f'n_ss={N_SS}_' \
         f'n_iter_per_ss={N_ITER_PER_SS}_' \
         f'n_iter_between_ss={N_ITER_BETWEEN_SS}_' \
+        f'mcts_h={MCTS_HORIZON}_' \
         f'{REWARD.__class__.__name__}_' \
         f'{"_".join(CONDITIONS)}_' \
         f'{PR_STR}_' \
@@ -80,22 +82,36 @@ EXTENSION = \
 BKP_FILE = os.path.join(PICKLE_FOLDER, f"{EXTENSION}.p")
 
 
+def info():
+    param_str_list = []
+    for (k, v) in zip(PARAM_LABELS, PARAM):
+        s = '$\\' + k + f"={v:.2f}$"
+        param_str_list.append(s)
+
+    param_str = ', '.join(param_str_list)
+
+    return \
+        r'$n_{\mathrm{session}}=' + str(N_SS) + '$\n\n' \
+        r'$n_{\mathrm{iter\,per\,session}}=' + str(N_ITER_PER_SS) + '$\n' \
+        r'$n_{\mathrm{iter\,between\,session}}=' + str(N_ITER_BETWEEN_SS) + '$\n\n' \
+        r'$\mathrm{MCTS}_{\mathrm{horizon}}=' + str(MCTS_HORIZON) + '$\n' \
+        r'$\mathrm{MCTS}_{\mathrm{iter\,limit}}=' + str(MCTS_ITER_LIMIT) + '$\n\n' \
+        + param_str + '\n\n' + \
+        r'$\mathrm{seed}=' + str(SEED) + '$'
+
+
 def make_figure(data):
 
     condition_labels = data.keys()
-    obs_labels = "t"  # np.array(["start", "end"])
-    # obs_criteria = None #np.array([0, N_ITER_PER_SS - 1])
-
+    training = np.zeros(TERMINAL_T, dtype=bool)
+    training[:] = np.tile([1, ]*N_ITER_PER_SS + [0, ]*N_ITER_BETWEEN_SS, N_SS)
     data_fig = DataFig(condition_labels=condition_labels,
-                       observation_labels=obs_labels)
+                       training=training, info=info(), threshold=THR,
+                       exam=TERMINAL_T)
 
     for i, cd in enumerate(condition_labels):
 
         hist = data[cd]
-        # print("hist", hist)
-
-
-        # t = 0
 
         seen_in_the_end = list(np.unique(hist))
 
@@ -104,32 +120,24 @@ def make_figure(data):
 
         # For the graph
         n_obs = TERMINAL_T
-        n_seen = {k: np.zeros(n_obs, dtype=int) for k in obs_labels}
-        objective = {k: np.zeros(n_obs, ) for k in obs_labels}
-        n_learnt = {k: np.zeros(n_obs, dtype=int) for k in obs_labels}
-        p = {k: [[] for _ in seen_in_the_end] for k in obs_labels}
+        n_seen = np.zeros(n_obs, dtype=int)
+        # objective = np.zeros(n_obs, )
+        n_learnt = np.zeros(n_obs, dtype=int)
+        p = [[] for _ in seen_in_the_end]
 
         it = 0
         c_iter_session = 0
         c_between_session = 0
         t_is_teaching = True
 
-        # if c_iter_session in obs_criteria:
-        k_obs = "t"  # obs_labels[obs_criteria == c_iter_session][0]
-
         for t in range(TERMINAL_T+1):
 
             obs_idx = t
 
-            # timestamps_until_it = np.asarray(timestamps)
-            # hist_until_it = hist[:it]
-
             seen = n_pres[:] > 0
             sum_seen = np.sum(seen)
 
-            # ss_idx[k_obs] += 1
-
-            n_seen[k_obs][obs_idx] = sum_seen
+            n_seen[obs_idx] = sum_seen
 
             if sum_seen > 0:
 
@@ -141,12 +149,12 @@ def make_figure(data):
                 for idx_t, item in enumerate(seen_t_idx):
                     idx_in_the_end = seen_in_the_end.index(item)
                     tup = (obs_idx, p_t[idx_t])
-                    p[k_obs][idx_in_the_end].append(tup)
+                    p[idx_in_the_end].append(tup)
 
-            objective[k_obs][obs_idx] = \
-                REWARD.reward(n_pres=n_pres, delta=delta, t=t, )
+            # objective[obs_idx] = \
+            #     REWARD.reward(n_pres=n_pres, delta=delta, t=t, )
             # normalize=False)
-            n_learnt[k_obs][obs_idx] = \
+            n_learnt[obs_idx] = \
                 RewardThreshold(n_item=N_ITEM, tau=THR, param=PARAM)\
                 .reward(n_pres=n_pres, delta=delta, normalize=False)
 
@@ -170,8 +178,6 @@ def make_figure(data):
                 it += 1
 
                 if c_iter_session >= N_ITER_PER_SS:
-                    # delta[:] += N_ITER_BETWEEN_SS
-                    # t += N_ITER_BETWEEN_SS
                     c_iter_session = 0
                     if N_ITER_BETWEEN_SS > 0:
                         t_is_teaching = False
@@ -182,7 +188,6 @@ def make_figure(data):
                     t_is_teaching = True
 
         data_fig.add(
-            objective=objective,
             n_learnt=n_learnt,
             n_seen=n_seen,
             p=p,
@@ -198,48 +203,41 @@ def make_data(force=True):
             data = pickle.load(f)
         return data
 
-    # Will stock the hist for each method
     data = {}
 
-    tqdm.write("Simulating Leitner Teacher")
-    data["leitner"] = Leitner(
-        n_item=N_ITEM,
-        n_iter_per_ss=N_ITER_PER_SS,
-        n_iter_between_ss=N_ITER_BETWEEN_SS, ) \
-        .teach(n_iter=N_ITER, learner_model=ExponentialForgetting,
-               learner_kwargs={"param": PARAM,
-                               "n_item": N_ITEM,
-                               "n_iter_per_session": N_ITER_PER_SS,
-                               "n_iter_between_session": N_ITER_BETWEEN_SS},
-               seed=SEED)
+    if Leitner.__name__ in CONDITIONS:
+        tqdm.write("Simulating Leitner Teacher")
+        data[Leitner.__name__] = Leitner(
+            n_item=N_ITEM,
+            n_iter_per_ss=N_ITER_PER_SS,
+            n_iter_between_ss=N_ITER_BETWEEN_SS, ) \
+            .teach(n_iter=N_ITER, learner_model=ExponentialForgetting,
+                   learner_kwargs={"param": PARAM,
+                                   "n_item": N_ITEM,
+                                   "n_iter_per_session": N_ITER_PER_SS,
+                                   "n_iter_between_session": N_ITER_BETWEEN_SS},
+                   seed=SEED)
+    if ThresholdTeacher.__name__ in CONDITIONS:
+        tqdm.write("Simulating Threshold Teacher")
+        data["threshold"] = ThresholdTeacher(
+            n_item=N_ITEM,
+            n_iter_per_ss=N_ITER_PER_SS,
+            n_iter_between_ss=N_ITER_BETWEEN_SS,
+            param=PARAM,
+            learnt_threshold=THR,)\
+            .teach(n_iter=N_ITER, seed=SEED)
 
-    tqdm.write("Simulating Threshold Teacher")
-    data["threshold"] = ThresholdTeacher(
-        n_item=N_ITEM,
-        n_iter_per_ss=N_ITER_PER_SS,
-        n_iter_between_ss=N_ITER_BETWEEN_SS,
-        param=PARAM,
-        learnt_threshold=THR,)\
-        .teach(n_iter=N_ITER, seed=SEED)
-
-    # Simulate mcts
-    tqdm.write("Simulating MCTS Teacher")
-    data["mcts"] = MCTSTeacher(
-        n_item=N_ITEM,
-        n_iter_per_ss=N_ITER_PER_SS,
-        n_iter_between_ss=N_ITER_BETWEEN_SS,
-        reward=REWARD,
-        terminal_t=TERMINAL_T,
-        # horizon=MCTS_HORIZON,
-        iteration_limit=MCTS_ITER_LIMIT,
-    ).teach(n_iter=N_ITER)
-
-    # tqdm.write("Simulating Fixed N Teacher")
-    # data["FixedN"] = FixedNTeacher(
-    #     n_item=N_ITEM,
-    #     n_iter_per_ss=N_ITER_PER_SS,
-    #     n_iter_between_ss=N_ITER_BETWEEN_SS)\
-    #     .teach(n_iter=N_ITER, seed=SEED)
+    if MCTSTeacher.__name__ in CONDITIONS:
+        tqdm.write("Simulating MCTS Teacher")
+        data["mcts"] = MCTSTeacher(
+            n_item=N_ITEM,
+            n_iter_per_ss=N_ITER_PER_SS,
+            n_iter_between_ss=N_ITER_BETWEEN_SS,
+            reward=REWARD,
+            terminal_t=TERMINAL_T,
+            horizon=MCTS_HORIZON,
+            iteration_limit=MCTS_ITER_LIMIT,
+        ).teach(n_iter=N_ITER)
 
     # # Simulate Greedy Teacher
     # tqdm.write("Simulating Greedy Teacher")
@@ -254,94 +252,6 @@ def make_data(force=True):
         pickle.dump(data, f)
 
     return data
-
-    # # Simulate adversarial
-    # tqdm.write("Simulating Adversarial Teacher")
-    # h = np.zeros(N_ITER, dtype=int)
-    # np.random.seed(0)
-    # teacher = AdversarialTeacher(
-    #     horizon=0,
-    #     param=PARAM,
-    #     n_item=N_ITEM,
-    #     learnt_threshold=THR)
-    # for t in tqdm(range(N_ITER)):
-    #
-    #     action = teacher.ask()
-    #     h[t] = action
-    #     # print("teacher choose", action)
-    #     # print(f"t={t}, action={action}")
-    #
-    # hist["adversarial"] = h
-
-    # # Simulate bruteforce
-    # tqdm.write("Simulating Bruteforce Teacher")
-    # h = np.zeros(N_ITER, dtype=int)
-    # np.random.seed(0)
-    # teacher = BruteForceTeacher(
-    #     horizon=4,
-    #     param=PARAM,
-    #     n_item=N_ITEM,
-    #     learnt_threshold=THR)
-    # for t in tqdm(range(N_ITER)):
-    #
-    #     action = teacher.ask()
-    #     h[t] = action
-    #     # print("teacher choose", action)
-    #     # print(f"t={t}, action={action}")
-    #
-    # hist["bruteforce"] = h
-
-    # Do the figures
-
-    # learner_model = ExponentialForgetting
-
-    # data_old_method = \
-    #     DataFigSingle(learner_model=learner_model,
-    #                   param=PARAM, param_labels=PARAM_LABELS,
-    #                   n_session=N_SS)
-    #
-    # c_iter_ss = 0
-    # t = 0
-    #
-    # timestamps = []
-    #
-    # for it in range(N_ITER):
-    #
-    #     timestamps.append(t)
-    #
-    #     t += 1
-    #     c_iter_ss += 1
-    #     if c_iter_ss >= N_ITER_PER_SS:
-    #         t += N_ITER_BETWEEN_SS
-    #         c_iter_ss = 0
-    #
-    # timestamps = np.asarray(timestamps)
-    #
-    # n_time_steps_per_session = N_ITER_PER_SS + N_ITER_BETWEEN_SS
-    # n_time_steps = n_time_steps_per_session * N_SS
-    # timesteps = np.arange(0, n_time_steps, n_time_steps_per_session)
-    #
-    # for i, cd in enumerate(condition_labels):
-    #
-    #     hist = hist_all_teachers[cd]
-    #
-    #     d = learner_model().stats_ex_post(
-    #         param_labels=PARAM_LABELS,
-    #         param=PARAM, hist=hist, timestamps=timestamps,
-    #         timesteps=timesteps, learnt_thr=THR,
-    #     )
-    #
-    #     data_old_method.add(
-    #         objective=d.n_learnt,
-    #         n_seen=d.n_seen,
-    #         p_item=d.p_item,
-    #         label=cd,
-    #         post_mean=d.post_mean,
-    #         post_std=d.post_std
-    #     )
-    #
-    # fig_single(data=data_old_method, fig_folder=FIG_FOLDER,
-    #            ext='_old_method')
 
 
 def main():

@@ -23,7 +23,7 @@ class GreedyTeacher(Teacher):
                 n_iter_per_ss=self.n_iter_per_ss,
                 n_iter_between_ss=self.n_iter_between_ss,
                 t=0,
-                c_iter_session=0,
+                c_iter_ss=0,
             )
 
     def ask(self):

@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+from matplotlib.transforms import blended_transform_factory
 import numpy as np
 
 from utils.plot import save_fig
@@ -92,6 +93,9 @@ def fig_p_recall_item(p_recall, condition_labels, fig_name=None,
 
 def fig_p_item_seen(
         p_recall, condition_labels,
+        vline=None,
+        hline=None,
+        background=None,
         time_scale=1,
         axes=None, fig_name=None, fig_folder=None):
 
@@ -115,6 +119,23 @@ def fig_p_item_seen(
 
         ax = axes[i]
         color = colors[i]
+
+        if background is not None:
+            trans = blended_transform_factory(ax.transData,
+                                                  ax.transAxes)
+
+            ax.fill_between(range(len(background)), 0, 1,
+                            where=background == 1,
+                            facecolor='whitesmoke',
+                            edgecolor='lightgrey',
+                            transform=trans,
+                            label='Training')
+        if hline is not None:
+            ax.axhline(hline, color='grey', linestyle='--', lw=0.5,
+                       label='Learnt threshold')
+
+        if vline is not None:
+            ax.axvline(vline, color='red', linestyle=':', lw=4, label='Exam')
 
         # n_trial = p_recall[dt].shape[1]
         #

@@ -32,7 +32,6 @@ class MCTS:
         :param time_limit: int (seconds)
         :param iteration_limit: int
         :param exploration_constant: float
-        :param horizon: int
         :param verbose: bool
         """
 
@@ -109,6 +108,7 @@ class MCTS:
             print(f"Expand node {node}")
 
         actions = node.state.get_possible_actions()
+        # print(str(node))
         for action in actions:
             if action not in node.children:
                 new_node = Node(node.state.take_action(action), node)
@@ -125,7 +125,8 @@ class MCTS:
     def _get_best_child(self, node, exploration_value):
 
         if self.verbose:
-            print(f"Get best child of node {node}")
+            print(f"Get best child of node {node} in childs: "
+                  f"{node.children.values()}")
         best_value = - np.inf
         best_nodes = []
         for child in node.children.values():
@@ -133,11 +134,13 @@ class MCTS:
                 child.total_reward / child.num_visits \
                 + exploration_value * np.sqrt(
                     2 * np.log(node.num_visits) / child.num_visits)
+            # print(node_value)
             if node_value > best_value:
                 best_value = node_value
                 best_nodes = [child]
             elif node_value == best_value:
                 best_nodes.append(child)
+        # print("best nodes", best_nodes)
         best_node = np.random.choice(best_nodes)
         if self.verbose:
             print(f"Best node is: {best_node}")

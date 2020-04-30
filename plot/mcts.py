@@ -7,42 +7,63 @@ from utils.plot import save_fig
 
 class DataFig:
 
-    def __init__(self, observation_labels, condition_labels):
+    def __init__(self, condition_labels, info, exam,
+                 training, threshold):  # observation_labels,
 
         self.condition_labels = condition_labels
-        self.observation_labels = observation_labels
-        self.data = {k: {} for k in observation_labels}
+        self.info = info
+        self.exam = exam
+        self.training = training
+        self.threshold = threshold
+        # self.observation_labels = observation_labels
+        self.data = {}  # {k: {} for k in observation_labels}
 
     def add(self, **kwargs):
         for data_type, d in kwargs.items():
-            for k_obs, v in d.items():
-                if data_type not in self.data[k_obs].keys():
-                    self.data[k_obs][data_type] = []
-                self.data[k_obs][data_type].append(v)
+            # for k_obs, v in d.items():
+            #     if data_type not in self.data[k_obs].keys():
+            #         self.data[k_obs][data_type] = []
+            #     self.data[k_obs][data_type].append(v)
+            if data_type not in self.data.keys():
+                self.data[data_type] = []
+            self.data[data_type].append(d)
 
     def __getitem__(self, key):
         return self.data[key]
 
 
+def plot_info(ax, info):
+
+    ax.text(0.5, 0.5, info, fontsize=10, wrap=True, ha='center',
+            va='center')
+
+    ax.set_axis_off()
+
+
 def fig_objective(axes, n_learnt,
                   n_seen,
-                  objective,
+                  training,
+                  info,
+                  exam,
+                  # objective,
                   condition_labels):
 
     fig_n_against_time(
         data=n_learnt, y_label="N learnt",
         condition_labels=condition_labels,
-        ax=axes[0])
+        ax=axes[0], background=training, vline=exam)
 
-    fig_n_against_time(
-        data=objective, y_label="Objective",
-        condition_labels=condition_labels,
-        ax=axes[1])
+    # fig_n_against_time(
+    #     data=objective, y_label="Objective",
+    #     condition_labels=condition_labels,
+    #     ax=axes[1])
 
     fig_n_against_time(
         data=n_seen, y_label="N seen",
         condition_labels=condition_labels,
-        ax=axes[2])
+        ax=axes[1], background=training, vline=exam)
+
+    plot_info(ax=axes[2], info=info)
 
 
 def make_fig(data, fig_folder, fig_name=''):
@@ -55,9 +76,9 @@ def make_fig(data, fig_folder, fig_name=''):
     """
 
     n_cond = len(data.condition_labels)
-    n_obs = len(data.observation_labels)
+    # n_obs = len(data.observation_labels)
 
-    n_rows = 2 * n_obs
+    n_rows = 2  # * n_obs
     n_cols_per_row_type = {
         "objective": 3,
         "p": n_cond
@@ -75,21 +96,27 @@ def make_fig(data, fig_folder, fig_name=''):
             for ax in axes[i, n:]:
                 ax.axis('off')
 
-    i = 0
-    for k_obs in data.observation_labels:
+    # i = 0
+    # for k_obs in data.observation_labels:
 
-        fig_objective(
-            axes=axes[i, :],
-            n_learnt=data[k_obs]["n_learnt"],
-            n_seen=data[k_obs]["n_seen"],
-            objective=data[k_obs]["objective"],
-            condition_labels=data.condition_labels)
+    fig_objective(
+        axes=axes[0, :],
+        n_learnt=data["n_learnt"],
+        n_seen=data["n_seen"],
+        training=data.training,
+        info=data.info,
+        exam=data.exam,
+        # objective=data["objective"],
+        condition_labels=data.condition_labels)
 
-        fig_p_item_seen(
-            axes=axes[i + 1, :],
-            p_recall=data[k_obs]["p"],
-            condition_labels=data.condition_labels)
+    fig_p_item_seen(
+        axes=axes[1, :],
+        p_recall=data["p"],
+        background=data.training,
+        vline=data.exam,
+        hline=data.threshold,
+        condition_labels=data.condition_labels)
 
-        i += 2
+        # i += 2
 
     save_fig(fig_name=f"{fig_name}.pdf", fig_folder=fig_folder)

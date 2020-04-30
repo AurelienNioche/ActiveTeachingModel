@@ -55,13 +55,15 @@ class BasicLearnerState(State):
 class LearnerState(State):
 
     def __init__(self, n_pres, delta,
-                 c_iter_session,
+                 c_iter_ss,
                  t,
+                 c_iter,
                  reward,
                  terminal_t,
                  n_iter_per_ss,
                  n_iter_between_ss,
-                 # horizon=None,
+                 horizon=None,
+                 ref_point=None,
                  # terminal_t=None,
                  # action=None,
                  # parent=None
@@ -69,16 +71,18 @@ class LearnerState(State):
 
         self.n_pres = n_pres
         self.delta = delta
-        self.t = t
 
-        self.c_iter_session = c_iter_session
+        self.t = t
+        self.c_iter = c_iter
+        self.c_iter_ss = c_iter_ss
 
         self.n_iter_per_ss = n_iter_per_ss
         self.n_iter_between_ss = n_iter_between_ss
 
-        # self.horizon = horizon
         self.terminal_t = terminal_t
-        #
+        self.horizon = horizon
+        self.ref_point = ref_point
+
         # if self.horizon is not None:
         #     self._is_terminal = self.rel_t >= self.horizon
         # if self.terminal_t is not None:
@@ -142,24 +146,25 @@ class LearnerState(State):
             delta[action] = 1
 
             t = self.t + 1
+            c_iter = self.c_iter + 1
 
-            c_iter_session = self.c_iter_session + 1
+            c_iter_session = self.c_iter_ss + 1
             if c_iter_session >= self.n_iter_per_ss:
                 delta[:] += self.n_iter_between_ss
                 t += self.n_iter_between_ss
                 c_iter_session = 0
 
             new_state = LearnerState(
-                #parent=self,
                 delta=delta,
                 n_pres=n_pres,
-                # horizon=self.horizon,
-                c_iter_session=c_iter_session,
+                horizon=self.horizon,
+                ref_point=self.ref_point,
+                c_iter_ss=c_iter_session,
                 reward=self.reward,
                 n_iter_between_ss=self.n_iter_between_ss,
                 n_iter_per_ss=self.n_iter_per_ss,
-                # action=action,
                 t=t,
+                c_iter=c_iter,
                 terminal_t=self.terminal_t
             )
 
@@ -169,9 +174,19 @@ class LearnerState(State):
 
     def is_terminal(self):
         """Returns whether this state is a terminal state"""
+        # print("ref point", self.ref_point.c_iter)
+        # print("c_iter", self.c_iter)
+        # print("terminal t", self.terminal_t)
         if self.t > self.terminal_t:
             raise ValueError(f"{self.t} > {self.terminal_t}")
-        return self.t == self.terminal_t
+        elif self.t == self.terminal_t:
+            return True
+        elif self.horizon is not None \
+                and (self.c_iter - self.ref_point.c_iter) >= self.horizon:
+            # print("Horizon reached")
+            return True
+        else:
+            return False
 
     def get_instant_reward(self):
         """"Returns the INSTANT reward for this state"""
@@ -193,6 +208,9 @@ class LearnerState(State):
     def get_reward(self):
 
         return self.get_instant_reward()
+
+    def __str__(self):
+        return f"State: {self.t}, possible actions: {self.get_possible_actions()}"
         # else:
         #     return self.get_mean_reward()
         # print(f'mean: {mean}')
