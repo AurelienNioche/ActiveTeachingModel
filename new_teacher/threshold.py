@@ -1,6 +1,7 @@
 import numpy as np
 
 from . abstract import Teacher
+from . psychologist import Psychologist
 
 
 class ThresholdTeacher(Teacher):
@@ -61,3 +62,30 @@ class ThresholdTeacher(Teacher):
         if self.c_iter_session >= self.n_iter_per_ss:
             self.delta[:] += self.n_iter_between_ss
             self.c_iter_session = 0
+
+
+class ThresholdPsychologist(ThresholdTeacher):
+
+    def __init__(self, n_item, n_iter_per_ss, n_iter_between_ss,
+                 learnt_threshold, n_ss, param=None):
+        super().__init__(n_item=n_item,
+                         n_iter_per_ss=n_iter_per_ss,
+                         param=param,
+                         n_iter_between_ss=n_iter_between_ss,
+                         learnt_threshold=learnt_threshold)
+        self.psychologist = Psychologist(
+            n_item=n_item,
+            n_iter_per_ss=n_iter_per_ss,
+            n_iter_between_ss=n_iter_between_ss,
+            n_ss=n_ss,
+            true_param=param,
+        )
+
+    def ask(self):
+        self.param = self.psychologist.pm
+        return super().ask()
+
+    def update(self, item):
+
+        super().update(item)
+        self.psychologist.update(item=item, response=None)

@@ -1,4 +1,4 @@
-from plot import fig_n_against_time, fig_p_item_seen
+from plot import fig_n_against_time, fig_p_item_seen, fig_parameter_recovery
 
 import matplotlib.pyplot as plt
 
@@ -7,15 +7,19 @@ from utils.plot import save_fig
 
 class DataFig:
 
-    def __init__(self, condition_labels, info, exam,
-                 training, threshold):  # observation_labels,
+    def __init__(self, cond_labels, info, exam,
+                 training, threshold, param=None, param_labels=None,
+                 cond_labels_param_recovery=None):
 
-        self.condition_labels = condition_labels
+        self.cond_labels = cond_labels
         self.info = info
         self.exam = exam
         self.training = training
         self.threshold = threshold
         # self.observation_labels = observation_labels
+        self.cond_labels_param_recovery = cond_labels_param_recovery
+        self.param = param
+        self.param_labels = param_labels
         self.data = {}  # {k: {} for k in observation_labels}
 
     def add(self, **kwargs):
@@ -30,6 +34,9 @@ class DataFig:
 
     def __getitem__(self, key):
         return self.data[key]
+
+    def keys(self):
+        return self.data.keys()
 
 
 def plot_info(ax, info):
@@ -46,21 +53,21 @@ def fig_objective(axes, n_learnt,
                   info,
                   exam,
                   # objective,
-                  condition_labels):
+                  cond_labels):
 
     fig_n_against_time(
         data=n_learnt, y_label="N learnt",
-        condition_labels=condition_labels,
+        cond_labels=cond_labels,
         ax=axes[0], background=training, vline=exam)
 
     # fig_n_against_time(
     #     data=objective, y_label="Objective",
-    #     condition_labels=condition_labels,
+    #     cond_labels=cond_labels,
     #     ax=axes[1])
 
     fig_n_against_time(
         data=n_seen, y_label="N seen",
-        condition_labels=condition_labels,
+        cond_labels=cond_labels,
         ax=axes[1], background=training, vline=exam)
 
     plot_info(ax=axes[2], info=info)
@@ -75,10 +82,12 @@ def make_fig(data, fig_folder, fig_name=''):
     :return: None
     """
 
-    n_cond = len(data.condition_labels)
+    n_cond = len(data.cond_labels)
     # n_obs = len(data.observation_labels)
 
-    n_rows = 2  # * n_obs
+    plot_param_recovery = len(data.cond_labels_param_recovery) > 0
+
+    n_rows = 2 + int(plot_param_recovery)  # * n_obs
     n_cols_per_row_type = {
         "objective": 3,
         "p": n_cond
@@ -96,9 +105,6 @@ def make_fig(data, fig_folder, fig_name=''):
             for ax in axes[i, n:]:
                 ax.axis('off')
 
-    # i = 0
-    # for k_obs in data.observation_labels:
-
     fig_objective(
         axes=axes[0, :],
         n_learnt=data["n_learnt"],
@@ -107,7 +113,7 @@ def make_fig(data, fig_folder, fig_name=''):
         info=data.info,
         exam=data.exam,
         # objective=data["objective"],
-        condition_labels=data.condition_labels)
+        cond_labels=data.cond_labels)
 
     fig_p_item_seen(
         axes=axes[1, :],
@@ -115,8 +121,16 @@ def make_fig(data, fig_folder, fig_name=''):
         background=data.training,
         vline=data.exam,
         hline=data.threshold,
-        condition_labels=data.condition_labels)
+        cond_labels=data.cond_labels)
 
-        # i += 2
+    if plot_param_recovery:
+
+        # n axes := n_parameters
+        fig_parameter_recovery(cond_labels=data.cond_labels_param_recovery,
+                               param_labels=data.param_labels,
+                               post_means=data["post_mean"],
+                               post_sds=data["post_std"],
+                               true_param=data.param,
+                               axes=axes[2, :])
 
     save_fig(fig_name=f"{fig_name}.pdf", fig_folder=fig_folder)

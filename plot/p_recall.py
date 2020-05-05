@@ -92,7 +92,7 @@ def fig_p_recall_item(p_recall, condition_labels, fig_name=None,
 
 
 def fig_p_item_seen(
-        p_recall, condition_labels,
+        p_recall, cond_labels,
         vline=None,
         hline=None,
         background=None,
@@ -101,7 +101,7 @@ def fig_p_item_seen(
 
     """
     :param p_recall: list of np.array
-    :param condition_labels: list of string
+    :param cond_labels: list of string
     :param time_scale: float
     :param axes: plt.axes (optional)
     :param fig_name: string (optional)
@@ -110,12 +110,12 @@ def fig_p_item_seen(
     """
 
     if axes is None:
-        n_row = len(condition_labels)
+        n_row = len(cond_labels)
         fig, axes = plt.subplots(nrows=n_row, figsize=(5, 4*n_row))
 
-    colors = [f'C{i}' for i in range(len(condition_labels))]
+    colors = [f'C{i}' for i in range(len(cond_labels))]
 
-    for i, dt in enumerate(condition_labels):
+    for i, dt in enumerate(cond_labels):
 
         ax = axes[i]
         color = colors[i]

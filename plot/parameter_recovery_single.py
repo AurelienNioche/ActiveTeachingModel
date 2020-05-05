@@ -3,25 +3,35 @@ import matplotlib.pyplot as plt
 from utils.plot import save_fig
 
 
-def fig_parameter_recovery(param_labels, condition_labels, post_means, post_sds,
+def fig_parameter_recovery(param_labels, cond_labels, post_means, post_sds,
                            true_param, axes=None,
                            fig_name=None, colors=None,
                            fig_folder=None):
 
+    n_param = len(param_labels)
+    n_cond = len(cond_labels)
+
     if axes is None:
-        fig, axes = plt.subplots(ncols=len(param_labels), figsize=(12, 6))
+        fig, axes = plt.subplots(ncols=n_param, figsize=(12, 6))
 
     if colors is None:
-        colors = [f'C{i}' for i in range(len(condition_labels))]
+        colors = [f'C{i}' for i in range(n_cond)]
 
-    for i, ax in enumerate(axes):
+    for i in range(n_param):
 
-        for j, dt in enumerate(condition_labels):
+        ax = axes[i]
+        pr = param_labels[i]
 
-            pr = param_labels[i]
+        for j in range(n_cond):
 
-            means = post_means[j][pr]
-            stds = post_sds[j][pr]
+            dt = cond_labels[j]
+
+            if isinstance(post_means[j], dict):
+                means = post_means[j][pr]
+                stds = post_sds[j][pr]
+            else:
+                means = post_means[j][:, param_labels.index(pr)]
+                stds = post_sds[j][:, param_labels.index(pr)]
 
             if isinstance(true_param, dict):
                 true_p = true_param[pr]

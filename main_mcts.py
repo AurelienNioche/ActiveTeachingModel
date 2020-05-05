@@ -6,7 +6,7 @@ from utils.string import param_string
 
 from model.learner.learner import ExponentialForgetting
 from new_teacher import Leitner, ThresholdTeacher, MCTSTeacher, \
-    GreedyTeacher, FixedNTeacher
+    GreedyTeacher, FixedNTeacher, ThresholdPsychologist
 
 from mcts.reward import RewardThreshold, RewardHalfLife, RewardIntegral, \
     RewardAverage, RewardGoal
@@ -29,8 +29,8 @@ PARAM_LABELS = ("alpha", "beta")
 N_ITEM = 500
 
 
-N_ITER_PER_SS = 100
-N_ITER_BETWEEN_SS = 1000  # 0  # 43050
+N_ITER_PER_SS = 2000  # 100 # 150
+N_ITER_BETWEEN_SS = 0 # 1000   # 43050
 
 N_SS = 2
 
@@ -61,8 +61,11 @@ REWARD = RewardThreshold(n_item=N_ITEM, param=PARAM, tau=THR)
 # REWARD = RewardIntegral(param=PARAM, n_item=N_ITEM,
 #                         t_final=(N_ITER_PER_SS+N_ITER_BETWEEN_SS)*N_SS-N_ITER_BETWEEN_SS)
 
-CONDITIONS = Leitner.__name__, ThresholdTeacher.__name__, MCTSTeacher.__name__,
+PSY = 'psy'
 
+CONDITIONS = Leitner.__name__, ThresholdTeacher.__name__, \
+             ThresholdPsychologist.__name__
+             # MCTSTeacher.__name__, \
 
 PR_STR = \
     param_string(param_labels=PARAM_LABELS, param=PARAM,
@@ -100,16 +103,42 @@ def info():
         r'$\mathrm{seed}=' + str(SEED) + '$'
 
 
-def make_figure(data):
+def make_figure(data, parameter_recovery):
 
-    condition_labels = data.keys()
+    n_obs = TERMINAL_T
     training = np.zeros(TERMINAL_T, dtype=bool)
     training[:] = np.tile([1, ]*N_ITER_PER_SS + [0, ]*N_ITER_BETWEEN_SS, N_SS)
-    data_fig = DataFig(condition_labels=condition_labels,
-                       training=training, info=info(), threshold=THR,
-                       exam=TERMINAL_T)
 
-    for i, cd in enumerate(condition_labels):
+    cond_labels = list(data.keys())
+    cond_labels_param_recovery = list(parameter_recovery.keys()) \
+        if parameter_recovery is not None else []
+
+    data_fig = DataFig(cond_labels=cond_labels,
+                       training=training, info=info(), threshold=THR,
+                       exam=TERMINAL_T,
+                       param=PARAM,
+                       param_labels=PARAM_LABELS,
+                       cond_labels_param_recovery=cond_labels_param_recovery)
+
+    for i, cd in enumerate(cond_labels_param_recovery):
+        hist_pm = np.zeros((TERMINAL_T, len(PARAM)))
+        hist_psd = np.zeros((TERMINAL_T, len(PARAM)))
+        pm = None
+        psd = None
+        c_iter = 0
+        for t, t_is_teaching in enumerate(training):
+            if t_is_teaching:
+                pm = parameter_recovery[cd]['post_mean'][c_iter, :]
+                psd = parameter_recovery[cd]['post_std'][c_iter, :]
+                c_iter += 1
+            hist_pm[t] = pm
+            hist_psd[t] = psd
+        data_fig.add(
+            post_mean=hist_pm,
+            post_std=hist_psd,
+        )
+
+    for i, cd in enumerate(cond_labels):
 
         hist = data[cd]
 
@@ -118,8 +147,6 @@ def make_figure(data):
         n_pres = np.zeros(N_ITEM, dtype=int)
         delta = np.zeros(N_ITEM, dtype=int)
 
-        # For the graph
-        n_obs = TERMINAL_T
         n_seen = np.zeros(n_obs, dtype=int)
         # objective = np.zeros(n_obs, )
         n_learnt = np.zeros(n_obs, dtype=int)
@@ -128,16 +155,15 @@ def make_figure(data):
         it = 0
         c_iter_session = 0
         c_between_session = 0
-        t_is_teaching = True
 
-        for t in range(TERMINAL_T+1):
+        for t in range(TERMINAL_T):
 
-            obs_idx = t
+            t_is_teaching = training[t]
 
             seen = n_pres[:] > 0
             sum_seen = np.sum(seen)
 
-            n_seen[obs_idx] = sum_seen
+            n_seen[t] = sum_seen
 
             if sum_seen > 0:
 
@@ -148,22 +174,18 @@ def make_figure(data):
 
                 for idx_t, item in enumerate(seen_t_idx):
                     idx_in_the_end = seen_in_the_end.index(item)
-                    tup = (obs_idx, p_t[idx_t])
+                    tup = (t, p_t[idx_t])
                     p[idx_in_the_end].append(tup)
 
             # objective[obs_idx] = \
             #     REWARD.reward(n_pres=n_pres, delta=delta, t=t, )
             # normalize=False)
-            n_learnt[obs_idx] = \
+            n_learnt[t] = \
                 RewardThreshold(n_item=N_ITEM, tau=THR, param=PARAM)\
                 .reward(n_pres=n_pres, delta=delta, normalize=False)
 
             # Increment delta for all items
             delta[:] += 1
-            t += 1
-
-            if t == TERMINAL_T:
-                break
 
             if t_is_teaching:
 
@@ -179,13 +201,10 @@ def make_figure(data):
 
                 if c_iter_session >= N_ITER_PER_SS:
                     c_iter_session = 0
-                    if N_ITER_BETWEEN_SS > 0:
-                        t_is_teaching = False
             else:
                 c_between_session += 1
                 if c_between_session >= N_ITER_BETWEEN_SS:
                     c_between_session = 0
-                    t_is_teaching = True
 
         data_fig.add(
             n_learnt=n_learnt,
@@ -204,6 +223,7 @@ def make_data(force=True):
         return data
 
     data = {}
+    parameter_recovery = {}
 
     if Leitner.__name__ in CONDITIONS:
         tqdm.write("Simulating Leitner Teacher")
@@ -239,6 +259,21 @@ def make_data(force=True):
             iteration_limit=MCTS_ITER_LIMIT,
         ).teach(n_iter=N_ITER)
 
+    if ThresholdPsychologist.__name__ in CONDITIONS:
+        tqdm.write("Simulating Threshold Teacher + PSY")
+        teacher = ThresholdPsychologist(
+            n_item=N_ITEM,
+            n_iter_per_ss=N_ITER_PER_SS,
+            n_iter_between_ss=N_ITER_BETWEEN_SS,
+            learnt_threshold=THR,
+            n_ss=N_SS,
+            param=PARAM,
+        )
+        data["threshold_psy"] = teacher.teach(n_iter=N_ITER, seed=SEED)
+        parameter_recovery[ThresholdPsychologist.__name__] = {
+            'post_mean': teacher.psychologist.hist_pm,
+            'post_std': teacher.psychologist.hist_psd}
+
     # # Simulate Greedy Teacher
     # tqdm.write("Simulating Greedy Teacher")
     # data["greedy"] = GreedyTeacher(
@@ -249,13 +284,13 @@ def make_data(force=True):
     #     .teach(n_iter=N_ITER, seed=SEED)
 
     with open(BKP_FILE, 'wb') as f:
-        pickle.dump(data, f)
+        pickle.dump((data, parameter_recovery), f)
 
-    return data
+    return data, parameter_recovery
 
 
-def main():
-    make_figure(make_data())
+def main(force=True):
+    make_figure(*make_data(force=force))
 
 
 if __name__ == "__main__":

@@ -81,24 +81,24 @@ def fig_single(data, fig_folder, time_scale=(60*60*24)/2, fig_name=''):
 
     fig_n_against_time(
         data=data.n_learnt, y_label="N learnt",
-        condition_labels=data.labels,
+        cond_labels=data.labels,
         ax=ax_n_learnt)
 
     if data_for_objective:
 
         fig_n_against_time(
             data=data.objective, y_label="Objective",
-            condition_labels=data.labels,
+            cond_labels=data.labels,
             ax=ax_objective)
 
     fig_n_against_time(
         data=data.n_seen, y_label="N seen",
-        condition_labels=data.labels,
+        cond_labels=data.labels,
         ax=ax_n_seen)
 
     # n axes := n_conditions
     fig_p_item_seen(
-        p_recall=data.p_item, condition_labels=data.labels,
+        p_recall=data.p_item, cond_labels=data.labels,
         axes=ax_p_item,
         time_scale=time_scale)
 
@@ -109,7 +109,7 @@ def fig_single(data, fig_folder, time_scale=(60*60*24)/2, fig_name=''):
         where_to_put_letter.append(ax_param_rec[0])
 
         # n axes := n_parameters
-        fig_parameter_recovery(condition_labels=data.labels,
+        fig_parameter_recovery(cond_labels=data.labels,
                                param_labels=data.param_labels,
                                post_means=data.post_mean,
                                post_sds=data.post_std,

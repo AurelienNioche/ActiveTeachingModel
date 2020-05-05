@@ -8,7 +8,7 @@ from utils.plot import save_fig
 
 
 def fig_n_against_time(
-        data, condition_labels, background=None,
+        data, cond_labels, background=None,
         vline=None,
         ax=None,
         fig_name=None, fig_folder=None,
@@ -30,9 +30,9 @@ def fig_n_against_time(
         ax.axvline(vline, color='red', linestyle=':', lw=4, label='Exam')
 
     if colors is None:
-        colors = [f'C{i}' for i in range(len(condition_labels))]
+        colors = [f'C{i}' for i in range(len(cond_labels))]
 
-    for i, dt in enumerate(condition_labels):
+    for i, dt in enumerate(cond_labels):
 
         ax.plot(data[i], color=colors[i], label=dt)
 

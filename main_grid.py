@@ -54,7 +54,7 @@ def make_figures(
             data[t_name][i] = objective(sim_entries[j], learn_thr)
             j += 1
 
-    # data = {cd: np.zeros(n) for cd in condition_labels}
+    # data = {cd: np.zeros(n) for cd in cond_labels}
 
     # constant_param.pop("bounds")
     # constant_param.update({
@@ -63,7 +63,7 @@ def make_figures(
     #       "learner_model": learner_model.__name__
     #                       })
     #
-    # for cd in condition_labels:
+    # for cd in cond_labels:
     #
     #     for i, param in enumerate(param_grid):
     #         e = Simulation.objects.get(
