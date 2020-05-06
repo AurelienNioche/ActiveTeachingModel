@@ -101,6 +101,8 @@ class LearnerState(State):
         # self.parent = parent
         self.children = dict()
 
+        self._learner_param = None
+
         # if parent is not None:
         #     self.hist_reward = \
         #         self.parent.hist_reward + [self.parent.get_instant_reward(), ]
@@ -214,6 +216,13 @@ class LearnerState(State):
         # else:
         #     return self.get_mean_reward()
         # print(f'mean: {mean}')
+
+    def reset(self):
+
+        self._instant_reward = None
+        self.children = {}
+
+
 
     # def reset(self):
     #

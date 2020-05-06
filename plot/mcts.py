@@ -90,14 +90,16 @@ def make_fig(data, fig_folder, fig_name=''):
     n_rows = 2 + int(plot_param_recovery)  # * n_obs
     n_cols_per_row_type = {
         "objective": 3,
-        "p": n_cond
+        "p": n_cond,
+        "param_recovery": len(data.param) if data.param is not None else 0
     }
 
-    row_types = ["objective", "p", "objective", "p"]
+    row_types = ["objective", "p", "param_recovery"]
 
     n_cols = max(n_cols_per_row_type.values())
 
-    fig, axes = plt.subplots(ncols=n_cols, nrows=n_rows, figsize=(12, 9))
+    fig, axes = plt.subplots(ncols=n_cols, nrows=n_rows,
+                             figsize=(6*n_cols, 6*n_rows))
 
     for i in range(n_rows):
         n = n_cols_per_row_type[row_types[i]]

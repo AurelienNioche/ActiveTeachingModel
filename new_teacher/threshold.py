@@ -67,7 +67,7 @@ class ThresholdTeacher(Teacher):
 class ThresholdPsychologist(ThresholdTeacher):
 
     def __init__(self, n_item, n_iter_per_ss, n_iter_between_ss,
-                 learnt_threshold, n_ss, param=None):
+                 learnt_threshold, n_ss, param):
         super().__init__(n_item=n_item,
                          n_iter_per_ss=n_iter_per_ss,
                          param=param,
@@ -78,8 +78,7 @@ class ThresholdPsychologist(ThresholdTeacher):
             n_iter_per_ss=n_iter_per_ss,
             n_iter_between_ss=n_iter_between_ss,
             n_ss=n_ss,
-            true_param=param,
-        )
+            true_param=param)
 
     def ask(self):
         self.param = self.psychologist.pm

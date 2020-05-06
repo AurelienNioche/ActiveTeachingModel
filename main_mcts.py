@@ -6,7 +6,7 @@ from utils.string import param_string
 
 from model.learner.learner import ExponentialForgetting
 from new_teacher import Leitner, ThresholdTeacher, MCTSTeacher, \
-    GreedyTeacher, FixedNTeacher, ThresholdPsychologist
+    GreedyTeacher, FixedNTeacher, ThresholdPsychologist, MCTSPsychologist
 
 from mcts.reward import RewardThreshold, RewardHalfLife, RewardIntegral, \
     RewardAverage, RewardGoal
@@ -29,8 +29,8 @@ PARAM_LABELS = ("alpha", "beta")
 N_ITEM = 500
 
 
-N_ITER_PER_SS = 2000  # 100 # 150
-N_ITER_BETWEEN_SS = 0 # 1000   # 43050
+N_ITER_PER_SS = 100  # 2000  # 100 # 150
+N_ITER_BETWEEN_SS = 1000  # 1000   # 43050
 
 N_SS = 2
 
@@ -39,7 +39,7 @@ N_ITER = N_SS * N_ITER_PER_SS
 THR = 0.9
 
 MCTS_ITER_LIMIT = 500
-MCTS_HORIZON = None
+MCTS_HORIZON = 10   # None
 
 SEED = 0
 
@@ -56,16 +56,16 @@ print("TERMINAL T", TERMINAL_T)
 
 # REWARD = RewardAverage(n_item=N_ITEM, param=PARAM)
 
-REWARD = RewardThreshold(n_item=N_ITEM, param=PARAM, tau=THR)
+REWARD_CLASS = RewardThreshold
 
 # REWARD = RewardIntegral(param=PARAM, n_item=N_ITEM,
 #                         t_final=(N_ITER_PER_SS+N_ITER_BETWEEN_SS)*N_SS-N_ITER_BETWEEN_SS)
 
-PSY = 'psy'
-
 CONDITIONS = Leitner.__name__, ThresholdTeacher.__name__, \
-             ThresholdPsychologist.__name__
-             # MCTSTeacher.__name__, \
+             MCTSTeacher.__name__, \
+             ThresholdPsychologist.__name__, \
+             MCTSPsychologist.__name__,
+
 
 PR_STR = \
     param_string(param_labels=PARAM_LABELS, param=PARAM,
@@ -77,7 +77,7 @@ EXTENSION = \
         f'n_iter_per_ss={N_ITER_PER_SS}_' \
         f'n_iter_between_ss={N_ITER_BETWEEN_SS}_' \
         f'mcts_h={MCTS_HORIZON}_' \
-        f'{REWARD.__class__.__name__}_' \
+        f'{REWARD_CLASS.__name__}_' \
         f'{"_".join(CONDITIONS)}_' \
         f'{PR_STR}_' \
         f'seed={SEED}'
@@ -249,11 +249,12 @@ def make_data(force=True):
 
     if MCTSTeacher.__name__ in CONDITIONS:
         tqdm.write("Simulating MCTS Teacher")
+        reward = REWARD_CLASS(n_item=N_ITEM, param=PARAM, tau=THR)
         data["mcts"] = MCTSTeacher(
             n_item=N_ITEM,
             n_iter_per_ss=N_ITER_PER_SS,
             n_iter_between_ss=N_ITER_BETWEEN_SS,
-            reward=REWARD,
+            reward=reward,
             terminal_t=TERMINAL_T,
             horizon=MCTS_HORIZON,
             iteration_limit=MCTS_ITER_LIMIT,
@@ -271,6 +272,24 @@ def make_data(force=True):
         )
         data["threshold_psy"] = teacher.teach(n_iter=N_ITER, seed=SEED)
         parameter_recovery[ThresholdPsychologist.__name__] = {
+            'post_mean': teacher.psychologist.hist_pm,
+            'post_std': teacher.psychologist.hist_psd}
+
+    if MCTSPsychologist.__name__ in CONDITIONS:
+        tqdm.write("Simulating MCTS Teacher + PSY")
+        reward = REWARD_CLASS(n_item=N_ITEM, param=PARAM, tau=THR)
+        teacher = MCTSPsychologist(
+            n_item=N_ITEM,
+            n_iter_per_ss=N_ITER_PER_SS,
+            n_iter_between_ss=N_ITER_BETWEEN_SS,
+            reward=reward,
+            terminal_t=TERMINAL_T,
+            horizon=MCTS_HORIZON,
+            iteration_limit=MCTS_ITER_LIMIT,
+            n_ss=N_SS,
+            param=PARAM)
+        data["mcts_psy"] = teacher.teach(n_iter=N_ITER, seed=SEED)
+        parameter_recovery[MCTSPsychologist.__name__] = {
             'post_mean': teacher.psychologist.hist_pm,
             'post_std': teacher.psychologist.hist_psd}
 
