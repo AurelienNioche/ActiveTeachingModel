@@ -2,5 +2,3 @@ numpy
 scipy
 matplotlib
 tqdm
-django
-psycopg2-binary
