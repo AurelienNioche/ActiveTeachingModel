@@ -28,8 +28,6 @@ class LearnerState(State):
 
     def __init__(self,
                  learner,
-                 t,
-                 c_iter,
                  reward,
                  terminal_t,
                  horizon=None,
@@ -39,9 +37,6 @@ class LearnerState(State):
                  ):
 
         self.learner = learner
-
-        self.t = t
-        self.c_iter = c_iter
 
         self.terminal_t = terminal_t
         self.horizon = horizon
@@ -102,15 +97,11 @@ class LearnerState(State):
         else:
             new_learner = deepcopy(self.learner)
             new_learner.update(item=action)
-            new_c_iter = self.c_iter + 1
-            new_t = self.t + 1
             new_state = LearnerState(
                 horizon=self.horizon,
                 ref_point=self.ref_point,
                 reward=self.reward,
                 learner=new_learner,
-                t=new_t,
-                c_iter=new_c_iter,
                 terminal_t=self.terminal_t
             )
 
@@ -121,12 +112,13 @@ class LearnerState(State):
     def is_terminal(self):
         """Returns whether this state is a terminal state"""
         if self._is_terminal is None:
-            if self.t > self.terminal_t:
-                raise ValueError(f"{self.t} > {self.terminal_t}")
-            elif self.t == self.terminal_t:
+            if self.learner.t > self.terminal_t:
+                raise ValueError(f"{self.learner.t} > {self.terminal_t}")
+            elif self.learner.t == self.terminal_t:
                 return True
             elif self.horizon is not None \
-                    and (self.c_iter - self.ref_point.c_iter) >= self.horizon:
+                    and (self.learner.c_iter - self.ref_point.c_iter) \
+                    >= self.horizon:
                 return True
             else:
                 return False

@@ -13,6 +13,7 @@ class Learner:
 
         self.c_iter_ss = 0
         self.c_iter = 0
+        self.t = 0
 
         self.n_pres = np.zeros(n_item, dtype=int)
         self.delta = np.zeros(n_item, dtype=int)
@@ -22,7 +23,7 @@ class Learner:
         self.n_iter_between_ss = n_iter_between_ss
         self.n_iter_per_ss = n_iter_per_ss
 
-        self.param = param
+        self.param = np.asarray(param)
 
         self.heterogeneous_param = len(self.param.shape) > 1
 
@@ -37,8 +38,10 @@ class Learner:
 
         self.c_iter += 1
         self.c_iter_ss += 1
+        self.t += 1
         if self.c_iter_ss >= self.n_iter_per_ss:
             self.delta[:] += self.n_iter_between_ss
+            self.t += self.n_iter_between_ss
             self.c_iter_ss = 0
 
         self.seen[item] = True
@@ -103,3 +106,12 @@ class Learner:
 
         log_lik = np.log(p_failure_success + EPS)
         return log_lik
+
+    @classmethod
+    def get(cls, tk):
+
+        return cls(
+            n_item=tk.n_item,
+            n_iter_per_ss=tk.n_iter_per_ss,
+            n_iter_between_ss=tk.n_iter_per_ss,
+            tk=tk.param)

@@ -1,6 +1,7 @@
 import numpy as np
 from tqdm import tqdm
 
+from learner.learner import Learner
 from psychologist.psychologist import Psychologist
 
 
@@ -51,6 +52,12 @@ class ThresholdTeacher:
             h[t] = item
         return h
 
+    @classmethod
+    def run(cls, tk):
+        learner = Learner.get(tk)
+        teacher = cls(learner=learner, learnt_threshold=tk.thr)
+        return teacher.teach(n_iter=tk.n_iter, seed=tk.seed)
+
 
 class ThresholdPsychologist(ThresholdTeacher):
 
@@ -69,3 +76,17 @@ class ThresholdPsychologist(ThresholdTeacher):
         response = self.learner.reply(item)
         self.psychologist.update(item=item, response=response)
         self.learner.update(item)
+
+    @classmethod
+    def run(cls, tk):
+        learner = Learner.get(tk)
+        psychologist = Psychologist(n_iter=tk.n_iter, learner=learner)
+        teacher = ThresholdPsychologist(
+            learner=learner,
+            learnt_threshold=tk.thr,
+            psychologist=psychologist)
+        hist = teacher.teach(n_iter=tk.n_iter, seed=tk.seed)
+        param_recovery = {
+            'post_mean': teacher.psychologist.hist_pm,
+            'post_std': teacher.psychologist.hist_psd}
+        return hist, param_recovery

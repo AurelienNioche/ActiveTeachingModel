@@ -2,8 +2,12 @@ import numpy as np
 from tqdm import tqdm
 from copy import deepcopy
 
+from learner.learner import Learner
+from psychologist.psychologist import Psychologist
+
 from . mcts.mcts import MCTS
 from . mcts.state import LearnerState
+from . mcts.reward import RewardThreshold
 
 
 class ReferencePoint:
@@ -29,8 +33,6 @@ class MCTSTeacher:
         self.learner_state = \
             LearnerState(
                 learner=learner,
-                t=0,
-                c_iter=0,
                 horizon=horizon,
                 ref_point=self.reference_point,
                 reward=reward,
@@ -62,6 +64,18 @@ class MCTSTeacher:
             self.update(item)
             h[t] = item
         return h
+
+    @classmethod
+    def run(cls, tk):
+        reward = RewardThreshold(n_item=tk.n_item, tau=tk.THR)
+        learner = Learner.get(tk)
+        teacher = cls(
+            learner=learner,
+            reward=reward,
+            terminal_t=tk.terminal_t,
+            horizon=tk.mcts_horizon,
+            iteration_limit=tk.mcts_iter_limit)
+        return teacher.teach(n_iter=tk.n_iter, seed=tk.seed)
 
 
 class MCTSPsychologist(MCTSTeacher):
@@ -102,3 +116,22 @@ class MCTSPsychologist(MCTSTeacher):
         self.psychologist.update(item=item, response=response)
         self.learner.update(item)
         self.c_iter += 1
+
+    @classmethod
+    def run(cls, tk):
+        learner = Learner.get(tk)
+        psychologist = Psychologist(n_iter=tk.n_iter, learner=learner)
+        reward = RewardThreshold(n_item=tk.n_item, tau=tk.THR)
+        teacher = cls(
+            learner=learner,
+            psychologist=psychologist,
+            reward=reward,
+            terminal_t=tk.terminal_t,
+            horizon=tk.mcts_horizon,
+            iteration_limit=tk.mcts_iter_limit)
+        hist = teacher.teach(n_iter=tk.n_iter, seed=tk.seed)
+        param_recovery = {
+            'post_mean': teacher.psychologist.hist_pm,
+            'post_std': teacher.psychologist.hist_psd}
+        return hist, param_recovery
+

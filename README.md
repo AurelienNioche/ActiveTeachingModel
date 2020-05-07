@@ -20,3 +20,7 @@ Using brew on mac:
 
         pip3 install -r requirements.txt
  
+ 
+ ## Notes
+ 
+ 43050

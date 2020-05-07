@@ -66,7 +66,7 @@ def fig_objective(axes, n_learnt,
     plot_info(ax=axes[2], info=info)
 
 
-def make_fig(data, fig_folder, fig_name=''):
+def plot(data, fig_folder, fig_name=''):
 
     """
     :param fig_name: string

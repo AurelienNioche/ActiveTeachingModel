@@ -1,15 +1,12 @@
 import numpy as np
 from tqdm import tqdm
 
-from . abstract import Teacher
+from learner.learner import Learner
 
 
-class Leitner(Teacher):
+class Leitner:
 
-    def __init__(self, n_item,
-                 n_iter_per_ss,
-                 n_iter_between_ss,
-                 delay_factor=2):
+    def __init__(self, learner, delay_factor=2):
         """
         :param delay_factor:
         :var self.taboo:
@@ -23,12 +20,10 @@ class Leitner(Teacher):
             of i^th item at i^th index.
         """
 
-        super().__init__(
-            n_item=n_item,
-            n_iter_per_ss=n_iter_per_ss,
-            n_iter_between_ss=n_iter_between_ss)
-
+        self.learner = learner
         self.delay_factor = delay_factor
+
+        self.n_item = self.learner.n_item
 
         self.box = np.zeros(self.n_item, dtype=int)
         self.waiting_time = np.zeros(self.n_item, dtype=int)
@@ -64,8 +59,8 @@ class Leitner(Teacher):
             - self.delay_factor**self.box[selected_item]
 
         self.c_iter_session += 1
-        if self.c_iter_session >= self.n_iter_per_ss:
-            self.waiting_time[:] += self.n_iter_between_ss
+        if self.c_iter_session >= self.learner.n_iter_per_ss:
+            self.waiting_time[:] += self.learner.n_iter_between_ss
             self.c_iter_session = 0
 
     def _find_due_items(self):
@@ -157,12 +152,14 @@ class Leitner(Teacher):
 
     def update(self, item, response):
 
+        self.learner.update(item)
+
         self.taboo = item
         self.seen[item] = True
         self._modify_sets(selected_item=item, success=response)
         self._update_wait_time(selected_item=item)
 
-    def teach(self, n_iter, learner=None, seed=0, **kwargs):
+    def teach(self, n_iter, seed=0):
 
         np.random.seed(seed)
         h = np.zeros(n_iter, dtype=int)
@@ -170,12 +167,15 @@ class Leitner(Teacher):
         for t in tqdm(range(n_iter)):
             item = self.ask()
 
-            r = learner.reply(item)
-            learner.update(item)
-
+            r = self.learner.reply(item)
             self.update(item=item, response=r)
 
             h[t] = item
 
         return h
 
+    @classmethod
+    def run(cls, tk):
+        learner = Learner.get(tk)
+        teacher = cls(learner=learner)
+        return teacher.teach(n_iter=tk.n_iter, seed=tk.seed)
