@@ -67,7 +67,7 @@ class MCTSTeacher:
 
     @classmethod
     def run(cls, tk):
-        reward = RewardThreshold(n_item=tk.n_item, tau=tk.THR)
+        reward = RewardThreshold(n_item=tk.n_item, tau=tk.thr)
         learner = Learner.get(tk)
         teacher = cls(
             learner=learner,

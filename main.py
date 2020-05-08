@@ -36,16 +36,17 @@ class TaskParam:
                          first_letter_only=True)
 
         self.extension = \
-                f'n_ss={n_ss}_' \
-                f'n_iter_per_ss={n_iter_per_ss}_' \
-                f'n_iter_between_ss={n_iter_between_ss}_' \
-                f'mcts_h={mcts_horizon}_' \
-                f'{pr_str}_' \
-                f'seed={seed}'
+            f'n_ss={n_ss}_' \
+            f'n_iter_per_ss={n_iter_per_ss}_' \
+            f'n_iter_between_ss={n_iter_between_ss}_' \
+            f'mcts_h={mcts_horizon}_' \
+            f'{pr_str}_' \
+            f'seed={seed}'
 
 
 def main(force=True):
-    task_param = TaskParam(**json.load(open('config/task_param.json')))
+    with open('config/task_param.json') as f:
+        task_param = TaskParam(**json.load(f))
     teachers = \
         (Leitner, ThresholdTeacher, MCTSTeacher,
          ThresholdPsychologist, MCTSPsychologist)

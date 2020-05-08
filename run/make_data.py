@@ -17,7 +17,7 @@ def _make_data(tk, teachers):
 
         tqdm.write(f"Simulating '{teacher_class.__name__}'...")
         r = teacher_class.run(tk)
-        if len(r) > 1:
+        if isinstance(r, tuple):
             data[teacher_class.__name__], \
                 param_recovery[teacher_class.__name__] = r
         else:
