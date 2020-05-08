@@ -1,5 +1,3 @@
-import json
-
 from task_param.task_param import TaskParam
 
 from teacher import Leitner, ThresholdTeacher, MCTSTeacher, \

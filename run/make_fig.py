@@ -1,6 +1,7 @@
 import os
 
 import numpy as np
+from tqdm import tqdm
 
 from learner.learner import Learner
 
@@ -22,6 +23,7 @@ def make_fig(data, param_recovery, tk):
     n_iter_between_ss = tk.n_iter_between_ss
 
     training = np.zeros(tk.terminal_t, dtype=bool)
+
     training[:] = np.tile([1, ]*tk.n_iter_per_ss
                           + [0, ]*tk.n_iter_between_ss,
                           tk.n_ss)
@@ -31,14 +33,14 @@ def make_fig(data, param_recovery, tk):
         if param_recovery is not None else []
 
     data_fig = DataFig(cond_labels=cond_labels,
-                       training=training, info=tk.info(), threshold=tk.thr,
+                       training=training, info=tk.info, threshold=tk.thr,
                        exam=tk.terminal_t,
                        param=tk.param,
                        param_labels=tk.param_labels,
                        cond_labels_param_recovery=cond_labels_param_recovery)
 
     for i, cd in enumerate(cond_labels_param_recovery):
-        hist = \
+        hist_pr = \
             {
                 "post_mean": np.zeros((n_obs, n_param)),
                 "post_std": np.zeros((n_obs, n_param))
@@ -46,15 +48,15 @@ def make_fig(data, param_recovery, tk):
         c_iter_ss = 0
         for begin_ss in np.arange(0, n_iter, n_iter_per_ss):
 
-            for key in hist.keys():
+            for key in hist_pr.keys():
                 split = \
                     param_recovery[cd][key][begin_ss:begin_ss+n_iter_per_ss]
                 last = split[-1, :]
                 t = c_iter_ss*(n_iter_per_ss+n_iter_between_ss)
                 start, end = t, t + n_iter_per_ss
-                hist[key][start: end] = split
+                hist_pr[key][start: end] = split
                 start, end = end, end+n_iter_between_ss
-                hist[key][start: end] = last
+                hist_pr[key][start: end] = last
 
             c_iter_ss += 1
         # for t, t_is_teaching in enumerate(training):
@@ -65,9 +67,11 @@ def make_fig(data, param_recovery, tk):
         #     hist_pm[t] = pm
         #     hist_psd[t] = psd
         data_fig.add(
-            post_mean=hist["post_mean"],
-            post_std=hist["post_std"],
+            post_mean=hist_pr["post_mean"],
+            post_std=hist_pr["post_std"],
         )
+
+    tqdm.write("Computing probabilities of recalls...")
 
     for i, cd in enumerate(cond_labels):
 
@@ -83,7 +87,7 @@ def make_fig(data, param_recovery, tk):
 
         learner = Learner.get(tk)
 
-        for t in range(tk.terminal_t):
+        for t in tqdm(range(tk.terminal_t)):
 
             t_is_teaching = training[t]
 

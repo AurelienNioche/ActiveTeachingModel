@@ -84,7 +84,7 @@ def plot(data, fig_folder, fig_name=''):
     n_cols_per_row_type = {
         "objective": 3,
         "p": n_cond,
-        "param_recovery": len(data.param) if data.param is not None else 0
+        "param_recovery": data.param.shape[-1] if data.param is not None else 0
     }
 
     row_types = ["objective", "p", "param_recovery"]
