@@ -5,9 +5,8 @@ EPS = np.finfo(np.float).eps
 
 class Learner:
 
-    bounds = ((0.001, 0.04), (0.2, 0.5))
-
-    def __init__(self, n_item, n_iter_between_ss, n_iter_per_ss, param):
+    def __init__(self, n_item, n_iter_between_ss, n_iter_per_ss, param,
+                 bounds):
 
         self.n_item = n_item
 
@@ -24,6 +23,7 @@ class Learner:
         self.n_iter_per_ss = n_iter_per_ss
 
         self.param = np.asarray(param)
+        self.bounds = np.asarray(bounds)
 
         self.heterogeneous_param = len(self.param.shape) > 1
 
@@ -89,8 +89,6 @@ class Learner:
 
     def log_lik(self, item, grid_param):
 
-        assert self.heterogeneous_param is False
-
         n_param_set = len(grid_param)
 
         p = np.zeros(n_param_set)
@@ -110,8 +108,16 @@ class Learner:
     @classmethod
     def get(cls, tk):
 
+        if isinstance(tk.param, str):
+            param = np.zeros((tk.n_item, len(tk.bounds)))
+            for i, b in enumerate(tk.bounds):
+                param[:, i] = np.random.uniform(b[0], b[1], size=tk.n_item)
+        else:
+            param = tk.param
+
         return cls(
-            param=tk.param,
+            bounds=tk.bounds,
+            param=param,
             n_item=tk.n_item,
             n_iter_per_ss=tk.n_iter_per_ss,
             n_iter_between_ss=tk.n_iter_between_ss)

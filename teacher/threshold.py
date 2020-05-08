@@ -67,7 +67,7 @@ class ThresholdPsychologist(ThresholdTeacher):
         self.true_param = self.learner.param
 
     def ask(self):
-        self.learner.param = self.psychologist.pm
+        self.learner.param = self.psychologist.post_mean
         return super().ask()
 
     def update(self, item):
@@ -80,13 +80,17 @@ class ThresholdPsychologist(ThresholdTeacher):
     @classmethod
     def run(cls, tk):
         learner = Learner.get(tk)
-        psychologist = Psychologist(n_iter=tk.n_iter, learner=learner)
+        psychologist = Psychologist.get(n_iter=tk.n_iter, learner=learner)
         teacher = ThresholdPsychologist(
             learner=learner,
             learnt_threshold=tk.thr,
             psychologist=psychologist)
         hist = teacher.teach(n_iter=tk.n_iter, seed=tk.seed)
-        param_recovery = {
-            'post_mean': teacher.psychologist.hist_pm,
-            'post_std': teacher.psychologist.hist_psd}
-        return hist, param_recovery
+        if psychologist.hist_pm is not None \
+                and psychologist.hist_psd is not None:
+            param_recovery = {
+                'post_mean': psychologist.hist_pm,
+                'post_std': psychologist.hist_psd}
+            return hist, param_recovery
+        else:
+            return hist

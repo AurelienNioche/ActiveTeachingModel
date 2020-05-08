@@ -13,6 +13,7 @@ def main(force=True):
     task_param = TaskParam.get('config/task_param.json')
     teachers = \
         (Leitner, ThresholdTeacher, ThresholdPsychologist,
+         # )
          MCTSTeacher, MCTSPsychologist)
     make_fig(**make_data(tk=task_param, teachers=teachers,
                          force=force))

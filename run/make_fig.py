@@ -12,28 +12,6 @@ FIG_FOLDER = os.path.join("fig", SCRIPT_NAME)
 os.makedirs(FIG_FOLDER, exist_ok=True)
 
 
-def info(tk):
-    param_str_list = []
-    for (k, v) in zip(tk.param_labels, tk.param):
-        s = '$\\' + k + f"={v:.2f}$"
-        param_str_list.append(s)
-
-    param_str = ', '.join(param_str_list)
-
-    return \
-        r'$n_{\mathrm{session}}=' + str(tk.n_ss) + '$\n\n' \
-        r'$n_{\mathrm{iter\,per\,session}}=' + str(
-            tk.n_iter_per_ss) + '$\n' \
-        r'$n_{\mathrm{iter\,between\,session}}=' + str(
-            tk.n_iter_between_ss) + '$\n\n' \
-        r'$\mathrm{MCTS}_{\mathrm{horizon}}=' + str(
-            tk.mcts_horizon) + '$\n' \
-        r'$\mathrm{MCTS}_{\mathrm{iter\,limit}}=' + str(
-            tk.mcts_iter_limit) + '$\n\n' \
-        + param_str + '\n\n' + \
-        r'$\mathrm{seed}=' + str(tk.seed) + '$'
-
-
 def make_fig(data, param_recovery, tk):
 
     n_obs = tk.terminal_t
@@ -53,7 +31,7 @@ def make_fig(data, param_recovery, tk):
         if param_recovery is not None else []
 
     data_fig = DataFig(cond_labels=cond_labels,
-                       training=training, info=info(tk), threshold=tk.thr,
+                       training=training, info=tk.info(), threshold=tk.thr,
                        exam=tk.terminal_t,
                        param=tk.param,
                        param_labels=tk.param_labels,

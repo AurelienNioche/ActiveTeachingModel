@@ -105,7 +105,7 @@ class MCTSPsychologist(MCTSTeacher):
         m = MCTS(iteration_limit=self.iteration_limit)
 
         self.learner_state.reset()
-        self.learner_state.learner.param = self.psychologist.pm
+        self.learner_state.learner.param = self.psychologist.post_mean
         self.reference_point.c_iter = self.c_iter
         item = m.run(initial_state=self.learner_state)
         return item
@@ -120,7 +120,7 @@ class MCTSPsychologist(MCTSTeacher):
     @classmethod
     def run(cls, tk):
         learner = Learner.get(tk)
-        psychologist = Psychologist(n_iter=tk.n_iter, learner=learner)
+        psychologist = Psychologist.get(n_iter=tk.n_iter, learner=learner)
         reward = RewardThreshold(n_item=tk.n_item, tau=tk.thr)
         teacher = cls(
             learner=learner,
@@ -130,8 +130,12 @@ class MCTSPsychologist(MCTSTeacher):
             horizon=tk.mcts_horizon,
             iteration_limit=tk.mcts_iter_limit)
         hist = teacher.teach(n_iter=tk.n_iter, seed=tk.seed)
-        param_recovery = {
-            'post_mean': teacher.psychologist.hist_pm,
-            'post_std': teacher.psychologist.hist_psd}
-        return hist, param_recovery
+        if psychologist.hist_pm is not None \
+                and psychologist.hist_psd is not None:
+            param_recovery = {
+                'post_mean': psychologist.hist_pm,
+                'post_std': psychologist.hist_psd}
+            return hist, param_recovery
+        else:
+            return hist
 
