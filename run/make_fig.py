@@ -34,7 +34,7 @@ def info(tk):
         r'$\mathrm{seed}=' + str(tk.seed) + '$'
 
 
-def make_fig(data, parameter_recovery, tk):
+def make_fig(data, param_recovery, tk):
 
     n_obs = tk.terminal_t
     n_param = len(tk.param)
@@ -49,11 +49,11 @@ def make_fig(data, parameter_recovery, tk):
                           tk.n_ss)
 
     cond_labels = list(data.keys())
-    cond_labels_param_recovery = list(parameter_recovery.keys()) \
-        if parameter_recovery is not None else []
+    cond_labels_param_recovery = list(param_recovery.keys()) \
+        if param_recovery is not None else []
 
     data_fig = DataFig(cond_labels=cond_labels,
-                       training=training, info=info(), threshold=tk.thr,
+                       training=training, info=info(tk), threshold=tk.thr,
                        exam=tk.terminal_t,
                        param=tk.param,
                        param_labels=tk.param_labels,
@@ -70,11 +70,13 @@ def make_fig(data, parameter_recovery, tk):
 
             for key in hist.keys():
                 split = \
-                    parameter_recovery[cd][key][begin_ss:begin_ss+n_iter_per_ss]
+                    param_recovery[cd][key][begin_ss:begin_ss+n_iter_per_ss]
                 last = split[-1, :]
                 t = c_iter_ss*(n_iter_per_ss+n_iter_between_ss)
-                hist[key][t:t+n_iter_per_ss] = split
-                hist[key][t+n_iter_per_ss: t+n_iter_per_ss+n_iter_between_ss] = last
+                start, end = t, t + n_iter_per_ss
+                hist[key][start: end] = split
+                start, end = end, end+n_iter_between_ss
+                hist[key][start: end] = last
 
             c_iter_ss += 1
         # for t, t_is_teaching in enumerate(training):

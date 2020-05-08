@@ -23,7 +23,7 @@ def _make_data(tk, teachers):
         else:
             data[teacher_class.__name__] = r
 
-    return data, param_recovery
+    return {"tk": tk, "data": data, "param_recovery": param_recovery}
 
 
 def make_data(tk, teachers, force=True):
@@ -32,11 +32,11 @@ def make_data(tk, teachers, force=True):
 
     if os.path.exists(bkp_file) and not force:
         with open(bkp_file, 'rb') as f:
-            data, param_recovery = pickle.load(f)
+            data = pickle.load(f)
 
     else:
-        data, param_recovery = _make_data(tk=tk, teachers=teachers)
+        data = _make_data(tk=tk, teachers=teachers)
         with open(bkp_file, 'wb') as f:
-            pickle.dump((data, param_recovery), f)
+            pickle.dump(data, f)
 
-    return data, param_recovery
+    return data

@@ -115,13 +115,13 @@ class MCTSPsychologist(MCTSTeacher):
         response = self.learner.reply(item)
         self.psychologist.update(item=item, response=response)
         self.learner.update(item)
-        self.c_iter += 1
+        super().update(item)
 
     @classmethod
     def run(cls, tk):
         learner = Learner.get(tk)
         psychologist = Psychologist(n_iter=tk.n_iter, learner=learner)
-        reward = RewardThreshold(n_item=tk.n_item, tau=tk.THR)
+        reward = RewardThreshold(n_item=tk.n_item, tau=tk.thr)
         teacher = cls(
             learner=learner,
             psychologist=psychologist,
