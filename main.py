@@ -7,15 +7,14 @@ from run.make_fig import make_fig
 from run.make_data import make_data
 
 
-def main(force=True):
-    task_param = TaskParam.get('config/task_param.json')
+def main(force=False):
+    task_param = TaskParam.get('config/trial.json')
     teachers = \
-        (Leitner, ThresholdTeacher, ThresholdPsychologist,
-         # )
-         MCTSTeacher, MCTSPsychologist)
+        (Leitner, ThresholdTeacher, ThresholdPsychologist,)
+         # MCTSTeacher, MCTSPsychologist)
     make_fig(**make_data(tk=task_param, teachers=teachers,
                          force=force))
 
 
 if __name__ == "__main__":
-    main()
+    main(force=True)

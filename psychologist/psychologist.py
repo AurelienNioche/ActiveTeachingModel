@@ -148,6 +148,8 @@ class PsychologistHeterogeneous(Psychologist):
         # self.hist_psd = np.zeros((n_iter, n_param))
         # self.c_iter = 0
 
+        self.hist_pm = [[] for _ in range(self.learner.n_item)]
+
     @staticmethod
     def compute_grid_param(grid_size, bounds):
         return np.asarray(list(
@@ -173,3 +175,5 @@ class PsychologistHeterogeneous(Psychologist):
 
             self.post_mean[item] = pm
             self.log_post[item] = lp
+
+            self.hist_pm[item].append((self.learner.c_iter, *pm))

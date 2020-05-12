@@ -86,11 +86,7 @@ class ThresholdPsychologist(ThresholdTeacher):
             learnt_threshold=tk.thr,
             psychologist=psychologist)
         hist = teacher.teach(n_iter=tk.n_iter, seed=tk.seed)
-        if psychologist.hist_pm is not None \
-                and psychologist.hist_psd is not None:
-            param_recovery = {
-                'post_mean': psychologist.hist_pm,
-                'post_std': psychologist.hist_psd}
-            return hist, param_recovery
-        else:
-            return hist
+        param_recovery = {
+            'post_mean': psychologist.hist_pm,
+            'post_std': psychologist.hist_psd}
+        return hist, param_recovery

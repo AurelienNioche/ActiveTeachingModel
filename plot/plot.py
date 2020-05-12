@@ -2,7 +2,8 @@ import matplotlib.pyplot as plt
 
 from . subplot.n_against_time import fig_n_against_time
 from . subplot.p_recall import fig_p_item_seen
-from . subplot.param_recovery import fig_parameter_recovery
+from . subplot.param_recovery import \
+    fig_parameter_recovery, fig_parameter_recovery_heterogeneous
 
 from utils.plot import save_fig
 
@@ -79,15 +80,27 @@ def plot(data, fig_folder, fig_name=''):
     # n_obs = len(data.observation_labels)
 
     plot_param_recovery = len(data.cond_labels_param_recovery) > 0
+    heterogeneous_param = len(data.param.shape) > 1
 
-    n_rows = 2 + int(plot_param_recovery)  # * n_obs
+    if plot_param_recovery:
+        if heterogeneous_param:
+            len_param_recovery_row = n_cond
+            n_row_param_recovery = data.param.shape[-1]
+        else:
+            len_param_recovery_row = data.param.shape[-1]
+            n_row_param_recovery = 1
+    else:
+        n_row_param_recovery = 0
+        len_param_recovery_row = 0
+
+    n_rows = 2 + n_row_param_recovery
     n_cols_per_row_type = {
         "objective": 3,
         "p": n_cond,
-        "param_recovery": data.param.shape[-1] if data.param is not None else 0
+        "param_recovery": len_param_recovery_row
     }
 
-    row_types = ["objective", "p", "param_recovery"]
+    row_types = ["objective", "p", "param_recovery", "param_recovery"]
 
     n_cols = max(n_cols_per_row_type.values())
 
@@ -120,12 +133,22 @@ def plot(data, fig_folder, fig_name=''):
 
     if plot_param_recovery:
 
-        # n axes := n_parameters
-        fig_parameter_recovery(cond_labels=data.cond_labels_param_recovery,
-                               param_labels=data.param_labels,
-                               post_means=data["post_mean"],
-                               post_sds=data["post_std"],
-                               true_param=data.param,
-                               axes=axes[2, :])
+        if heterogeneous_param:
+            fig_parameter_recovery_heterogeneous(
+                cond_labels=data.cond_labels_param_recovery,
+                param_labels=data.param_labels,
+                post_means=data["post_mean"],
+                true_param=data.param,
+                axes=axes[2:, :]
+            )
+        else:
+            # n axes := n_parameters
+            fig_parameter_recovery(
+                cond_labels=data.cond_labels_param_recovery,
+                param_labels=data.param_labels,
+                post_means=data["post_mean"],
+                post_sds=data["post_std"],
+                true_param=data.param,
+                axes=axes[2, :])
 
     save_fig(fig_name=f"{fig_name}.pdf", fig_folder=fig_folder)

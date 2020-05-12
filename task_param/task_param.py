@@ -12,7 +12,7 @@ class TaskParam:
     def __init__(self, bounds, param, param_labels, n_item,
                  n_iter_per_ss, n_iter_between_ss,
                  n_ss, thr, mcts_iter_limit, mcts_horizon,
-                 seed,):
+                 seed, name=None):
 
         self.bounds = np.asarray(bounds)
         self.param = Learner.generate_param(param=param, bounds=bounds,
@@ -47,6 +47,7 @@ class TaskParam:
                               for (k, v) in zip(param_labels, param))
 
         self.extension = \
+            f'{name}_' \
             f'n_ss={n_ss}_' \
             f'n_iter_per_ss={n_iter_per_ss}_' \
             f'n_iter_between_ss={n_iter_between_ss}_' \
