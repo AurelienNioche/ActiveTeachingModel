@@ -81,6 +81,10 @@ class Psychologist:
     def update(self, item, response):
         return
 
+    @abstractmethod
+    def get_estimate(self):
+        return
+
 
 class PsychologistHomogeneous(Psychologist):
 
@@ -88,7 +92,7 @@ class PsychologistHomogeneous(Psychologist):
 
         super().__init__(learner=learner, n_iter=n_iter, grid_size=grid_size)
 
-        lp = np.ones(self.n_param_set)
+        lp = np.ones(self.n_param_set)  #np.log(np.zeros(self.n_param_set) + EPS)
         self.log_post = lp - logsumexp(lp)
 
         self.post_mean = self.cp_post_mean(grid_param=self.grid_param,
@@ -108,24 +112,34 @@ class PsychologistHomogeneous(Psychologist):
             pass
         else:
             log_lik = self.learner.log_lik(item=item,
-                                           grid_param=self.grid_param)
+                                           grid_param=self.grid_param,
+                                           response=response)
 
             # Update prior
-            self.log_post += log_lik[:, int(response)].flatten()
+            self.log_post += log_lik
             self.log_post -= logsumexp(self.log_post)
 
             # Compute post mean and std
-            self.post_mean = self.cp_post_mean(grid_param=self.grid_param,
-                                               log_post=self.log_post)
-            self.post_std = self.cp_post_sd(grid_param=self.grid_param,
-                                            log_post=self.log_post,
-                                            post_mean=self.post_mean)
+            self.post_mean = self.grid_param[np.argmax(self.log_post)]
+            # self.post_mean = self.cp_post_mean(grid_param=self.grid_param,
+            #                                    log_post=self.log_post)
+            # self.post_std = self.cp_post_sd(grid_param=self.grid_param,
+            #                                 log_post=self.log_post,
+            #                                 post_mean=self.post_mean)
 
         # Backup
         self.hist_pm[self.c_iter] = self.post_mean
         self.hist_psd[self.c_iter] = self.post_std
 
         self.c_iter += 1
+
+    def get_estimate(self):
+
+        # pm = np.zeros(2)
+        # pm[0] = self.post_mean[0] + self.post_std[0]
+        # pm[1] = max(0, self.post_mean[1] - self.post_std[1])
+        # return pm
+        return self.post_mean
 
 
 class PsychologistHeterogeneous(Psychologist):
@@ -141,8 +155,11 @@ class PsychologistHeterogeneous(Psychologist):
         self.log_post = np.tile(lp, (n_item, 1))
 
         pm = self.cp_post_mean(log_post=lp, grid_param=self.grid_param)
+        print("Initial pm", pm)
+        sd = self.cp_post_sd(grid_param=self.grid_param, log_post=lp,
+                             post_mean=pm)
         self.post_mean = np.tile(pm, (n_item, 1))
-
+        self.post_std = np.tile(sd, (n_item, 1))
         # n_param = len(bounds)
         # self.hist_pm = np.zeros((n_iter, n_param))
         # self.hist_psd = np.zeros((n_iter, n_param))
@@ -158,22 +175,65 @@ class PsychologistHeterogeneous(Psychologist):
                 for b in bounds])))
 
     def update(self, item, response):
+        # print()
+        # print("c iter", self.learner.c_iter)
+        # print("item", item, "response", response, "p", self.learner.p(item, self.learner.param[item]))
 
-        if self.learner.n_pres[item] == 0 or self.learner.delta[item] == 0:
+        if self.learner.n_pres[item] == 0:
+            # print("Skip update NEVER SEEN")
+            pass
+        elif self.learner.delta[item] == 0:
+            # print("Skip update DELTA=0")
             pass
         else:
+            # print("previous pm", self.post_mean[item], "p", self.learner.p(item, self.post_mean[item]))
             log_lik = self.learner.log_lik(item=item,
-                                           grid_param=self.grid_param)
+                                           grid_param=self.grid_param,
+                                           response=response)
             lp = self.log_post[item]
 
             # Update prior
-            lp += log_lik[:, int(response)].flatten()
+            lp += log_lik
             lp -= logsumexp(self.log_post)
 
             # Compute post mean and std
             pm = self.cp_post_mean(grid_param=self.grid_param, log_post=lp)
+            sd = self.cp_post_sd(grid_param=self.grid_param, log_post=lp,
+                                 post_mean=pm)
 
-            self.post_mean[item] = pm
+            self.post_mean[item] = self.grid_param[np.argmax(lp)]
+            self.post_std[item] = sd
             self.log_post[item] = lp
 
-            self.hist_pm[item].append((self.learner.c_iter, *pm))
+            # print("pm", pm, "p", self.learner.p(item, self.post_mean[item]))
+            # est = np.array([pm[0]+sd[0], pm[1]-sd[1]])
+            # print(f"pm-sd : {est}", "p", self.learner.p(item, est))
+            # print("true", self.learner.param[item], "p", self.learner.p(item))
+            # print("best ll", self.grid_param[np.argmax(log_lik)], "p", self.learner.p(item, self.grid_param[np.argmax(log_lik)]))
+            # print("best pm", self.grid_param[np.argmax(lp)], "p",
+            #       self.learner.p(item, self.grid_param[np.argmax(lp)]))
+
+        if self.learner.c_iter == 0:
+            # print("UPdate for ALL")
+            for i in range(self.learner.n_item):
+                self.hist_pm[i].append([self.learner.t,
+                                        *self.post_mean[i]])
+        elif self.learner.c_iter == (self.learner.n_ss
+                                     * self.learner.n_iter_per_ss)-1:
+            self.hist_pm[item].append([self.learner.t,
+                                       *self.post_mean[item]])
+            for i in range(self.learner.n_item):
+
+                self.hist_pm[i].append([self.learner.terminal_t,
+                                        *self.post_mean[i]])
+
+        else:
+            self.hist_pm[item].append([self.learner.c_iter,
+                                       *self.post_mean[item]])
+
+    def get_estimate(self):
+
+        #pm = np.zeros((self.learner.n_item, 2))
+        #pm[:, 0] = self.post_mean[:, 0] + 2*self.post_std[:, 0]
+        #pm[:, 1] = self.post_mean[:, 1] - 2*self.post_std[:, 1]
+        return self.post_mean

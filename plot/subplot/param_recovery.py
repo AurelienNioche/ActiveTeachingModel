@@ -71,36 +71,52 @@ def fig_parameter_recovery_heterogeneous(
     if colors is None:
         colors = [f'C{i}' for i in range(n_cond)]
 
-    n_item = len(post_means)
-
     for idx_cond in range(n_cond):
 
         cd = cond_labels[idx_cond]
 
-        for idx_param in range(n_param):
+        pm_cond = post_means[idx_cond]
+        n_item = len(pm_cond)
 
-            ax = axes[idx_param, idx_cond]
+        print("Cond", cd)
+        print("*" * 40)
 
-            for item in range(n_item):
+        for item in range(n_item):
+
+            pm_cond_item = np.array(post_means[idx_cond][item]).T
+            print(f"item {item}")
+            print("-" * 40)
+
+            if pm_cond_item.size == 0:
+                print("skip")
+                continue
+
+            x = np.asarray(pm_cond_item[0, :], dtype=int)
+            v = pm_cond_item[1:, :]
+            print("x", x)
+
+            for idx_param in range(n_param):
+
+                ax = axes[idx_param, idx_cond]
 
                 true_pr = true_param[item, idx_param]
 
-                a = np.array(post_means[idx_cond][item]).T
-
-                x = a[0]
-                y = a[1+idx_param]
+                y = v[idx_param]
+                print(f"recov pr {idx_param}: {y}")
 
                 y = np.abs(true_pr-y)
+                print(f"error pr {idx_param}: {y}")
 
-                ax.plot(x, y, color=colors[idx_cond], label=cd,
-                        drawstyle="steps-post",
-                        alpha=0.5, linewidth=0.5)
+                ax.plot(
+                    x, y, color=colors[idx_cond],
+                    drawstyle="steps-post",
+                    alpha=0.5, linewidth=0.5)
 
-            ax.set_title(param_labels[idx_param])
-            ax.set_xlabel("Time")
-            ax.set_ylabel(f"Error")
+                # ax.legend(loc='upper right')
 
-            ax.legend(loc='upper right')
+                ax.set_title(param_labels[idx_param])
+                ax.set_xlabel("Time")
+                ax.set_ylabel(f"Error")
 
     if fig_name is not None and fig_folder is not None:
         save_fig(fig_folder=fig_folder, fig_name=fig_name)

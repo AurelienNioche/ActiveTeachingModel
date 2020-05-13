@@ -5,10 +5,17 @@ EPS = np.finfo(np.float).eps
 
 class Learner:
 
-    def __init__(self, n_item, n_iter_between_ss, n_iter_per_ss, param,
+    def __init__(self,
+                 n_ss,
+                 terminal_t,
+                 n_item, n_iter_between_ss, n_iter_per_ss, param,
                  bounds):
 
         self.n_item = n_item
+        self.terminal_t = terminal_t
+        self.n_iter_between_ss = n_iter_between_ss
+        self.n_iter_per_ss = n_iter_per_ss
+        self.n_ss = n_ss
 
         self.c_iter_ss = 0
         self.c_iter = 0
@@ -18,9 +25,6 @@ class Learner:
         self.delta = np.zeros(n_item, dtype=int)
 
         self.seen = np.zeros(n_item, dtype=bool)
-
-        self.n_iter_between_ss = n_iter_between_ss
-        self.n_iter_per_ss = n_iter_per_ss
 
         self.param = np.asarray(param)
         self.bounds = np.asarray(bounds)
@@ -57,25 +61,33 @@ class Learner:
 
     def reply(self, item):
 
+        p = self.p(item)
+        return np.random.choice([0, 1], p=[1 - p, p])
+
+    def p(self, item, param=None):
+
         if self.n_pres[item] == 0:
-            return 0
+            p = 0
 
         elif self.delta[item] == 0:
-            return 1
+            p = 1
 
         else:
-            if self.heterogeneous_param:
-                init_forget, rep_effect = self.param[item, :]
+            if param is not None:
+                init_forget, rep_effect = param
             else:
-                init_forget, rep_effect = self.param
+                if self.heterogeneous_param:
+                    init_forget, rep_effect = self.param[item, :]
+                else:
+                    init_forget, rep_effect = self.param
 
             fr = init_forget \
                 * (1 - rep_effect) ** (self.n_pres[item] - 1)
             p = np.exp(- fr * self.delta[item])
-
-        return np.random.choice([0, 1], p=[1 - p, p])
+        return p
 
     def p_seen(self):
+
         if self.heterogeneous_param:
             init_forget = self.param[self.seen, 0]
             rep_effect = self.param[self.seen, 1]
@@ -87,22 +99,21 @@ class Learner:
         p = np.exp(-fr * self.delta[self.seen])
         return p
 
-    def log_lik(self, item, grid_param):
-
-        n_param_set = len(grid_param)
-
-        p = np.zeros(n_param_set)
+    def log_lik(self, item, grid_param, response):
 
         fr = grid_param[:, 0] \
             * (1 - grid_param[:, 1]) ** (self.n_pres[item] - 1)
 
-        p[:] = np.exp(- fr * self.delta[item])
+        p_success = np.exp(- fr * self.delta[item])
 
-        p_failure_success = np.zeros((n_param_set, 2))
-        p_failure_success[:, 0] = 1 - p
-        p_failure_success[:, 1] = p
+        if response == 1:
+            p = p_success
+        elif response == 0:
+            p = 1 - p_success
+        else:
+            raise ValueError
 
-        log_lik = np.log(p_failure_success + EPS)
+        log_lik = np.log(p + EPS)
         return log_lik
 
     @classmethod
@@ -127,5 +138,8 @@ class Learner:
             bounds=tk.bounds,
             param=tk.param,
             n_item=tk.n_item,
+            n_ss=tk.n_ss,
             n_iter_per_ss=tk.n_iter_per_ss,
-            n_iter_between_ss=tk.n_iter_between_ss)
+            n_iter_between_ss=tk.n_iter_between_ss,
+            terminal_t=tk.terminal_t
+        )

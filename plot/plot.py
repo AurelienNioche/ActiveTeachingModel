@@ -84,7 +84,7 @@ def plot(data, fig_folder, fig_name=''):
 
     if plot_param_recovery:
         if heterogeneous_param:
-            len_param_recovery_row = n_cond
+            len_param_recovery_row = len(data.cond_labels_param_recovery)
             n_row_param_recovery = data.param.shape[-1]
         else:
             len_param_recovery_row = data.param.shape[-1]

@@ -67,7 +67,7 @@ class ThresholdPsychologist(ThresholdTeacher):
         self.true_param = self.learner.param
 
     def ask(self):
-        self.learner.param = self.psychologist.post_mean
+        self.learner.param = self.psychologist.get_estimate()
         return super().ask()
 
     def update(self, item):
