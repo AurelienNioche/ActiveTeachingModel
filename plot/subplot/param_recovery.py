@@ -78,22 +78,22 @@ def fig_parameter_recovery_heterogeneous(
         pm_cond = post_means[idx_cond]
         n_item = len(pm_cond)
 
-        print("Cond", cd)
-        print("*" * 40)
+        # print("Cond", cd)
+        # print("*" * 40)
 
         for item in range(n_item):
 
             pm_cond_item = np.array(post_means[idx_cond][item]).T
-            print(f"item {item}")
-            print("-" * 40)
+            # print(f"item {item}")
+            # print("-" * 40)
 
             if pm_cond_item.size == 0:
-                print("skip")
+                # print("skip")
                 continue
 
             x = np.asarray(pm_cond_item[0, :], dtype=int)
             v = pm_cond_item[1:, :]
-            print("x", x)
+            # print("x", x)
 
             for idx_param in range(n_param):
 
@@ -102,17 +102,20 @@ def fig_parameter_recovery_heterogeneous(
                 true_pr = true_param[item, idx_param]
 
                 y = v[idx_param]
-                print(f"recov pr {idx_param}: {y}")
+                # print(f"recov pr {idx_param}: {y}")
 
                 y = np.abs(true_pr-y)
-                print(f"error pr {idx_param}: {y}")
+                # print(f"error pr {idx_param}: {y}")
 
                 ax.plot(
                     x, y, color=colors[idx_cond],
                     drawstyle="steps-post",
-                    alpha=0.5, linewidth=0.5)
+                    alpha=0.5, linewidth=0.5, label=cd)
 
-                # ax.legend(loc='upper right')
+                handles, labels = ax.get_legend_handles_labels()
+                by_label = dict(zip(labels, handles))
+                ax.legend(by_label.values(), by_label.keys(),
+                          loc='upper right')
 
                 ax.set_title(param_labels[idx_param])
                 ax.set_xlabel("Time")

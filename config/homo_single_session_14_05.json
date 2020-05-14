@@ -1,5 +1,4 @@
 {
-    "name": "trial_homo_14_05",
     "param": [0.02, 0.44],
     "param_labels": ["alpha", "beta"],
     "n_item": 500,

@@ -12,7 +12,7 @@ class TaskParam:
     def __init__(self, bounds, param, param_labels, n_item,
                  n_iter_per_ss, n_iter_between_ss,
                  n_ss, thr, mcts_iter_limit, mcts_horizon,
-                 seed, name=None):
+                 seed, name):
 
         self.bounds = np.asarray(bounds)
         self.param = Learner.generate_param(param=param, bounds=bounds,
@@ -40,20 +40,19 @@ class TaskParam:
         self.terminal_t = n_ss * (n_iter_per_ss + n_iter_between_ss)
 
         n_param = len(self.bounds)
-        if self.param.shape == (n_item, n_param):
-            pr_str = f"het_param"
-        else:
-            pr_str = '_'.join(f'{k[0]}={v:.2f}'
-                              for (k, v) in zip(param_labels, param))
+        # if self.param.shape == (n_item, n_param):
+        #     pr_str = f"het_param"
+        # else:
+        #     pr_str = '_'.join(f'{k[0]}={v:.2f}'
+        #                       for (k, v) in zip(param_labels, param))
 
-        self.extension = \
-            f'{name}_' \
-            f'n_ss={n_ss}_' \
-            f'n_iter_per_ss={n_iter_per_ss}_' \
-            f'n_iter_between_ss={n_iter_between_ss}_' \
-            f'mcts_h={mcts_horizon}_' \
-            f'{pr_str}_' \
-            f'seed={seed}'
+        self.extension = name
+            # f'n_ss={n_ss}_' \
+            # f'n_iter_per_ss={n_iter_per_ss}_' \
+            # f'n_iter_between_ss={n_iter_between_ss}_' \
+            # f'mcts_h={mcts_horizon}_' \
+            # f'{pr_str}_' \
+            # f'seed={seed}'
 
         # print("extension:\n", self.extension, "\n")
 
@@ -86,6 +85,7 @@ class TaskParam:
 
     @classmethod
     def get(cls, file):
+        print(f"I will use the file '{file}'")
         with open(file) as f:
-            tk = cls(**json.load(f))
+            tk = cls(name=file.split(".")[0].split('/')[-1], **json.load(f))
         return tk

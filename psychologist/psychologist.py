@@ -123,9 +123,9 @@ class PsychologistHomogeneous(Psychologist):
             self.post_mean = self.grid_param[np.argmax(self.log_post)]
             # self.post_mean = self.cp_post_mean(grid_param=self.grid_param,
             #                                    log_post=self.log_post)
-            # self.post_std = self.cp_post_sd(grid_param=self.grid_param,
-            #                                 log_post=self.log_post,
-            #                                 post_mean=self.post_mean)
+            self.post_std = self.cp_post_sd(grid_param=self.grid_param,
+                                            log_post=self.log_post,
+                                            post_mean=self.post_mean)
 
         # Backup
         self.hist_pm[self.c_iter] = self.post_mean
@@ -155,11 +155,11 @@ class PsychologistHeterogeneous(Psychologist):
         self.log_post = np.tile(lp, (n_item, 1))
 
         pm = self.cp_post_mean(log_post=lp, grid_param=self.grid_param)
-        print("Initial pm", pm)
-        sd = self.cp_post_sd(grid_param=self.grid_param, log_post=lp,
-                             post_mean=pm)
+        # print("Initial pm", pm)
+        # sd = self.cp_post_sd(grid_param=self.grid_param, log_post=lp,
+        #                      post_mean=pm)
         self.post_mean = np.tile(pm, (n_item, 1))
-        self.post_std = np.tile(sd, (n_item, 1))
+        # self.post_std = np.tile(sd, (n_item, 1))
         # n_param = len(bounds)
         # self.hist_pm = np.zeros((n_iter, n_param))
         # self.hist_psd = np.zeros((n_iter, n_param))
@@ -196,13 +196,13 @@ class PsychologistHeterogeneous(Psychologist):
             lp += log_lik
             lp -= logsumexp(self.log_post)
 
-            # Compute post mean and std
-            pm = self.cp_post_mean(grid_param=self.grid_param, log_post=lp)
-            sd = self.cp_post_sd(grid_param=self.grid_param, log_post=lp,
-                                 post_mean=pm)
+            # # Compute post mean and std
+            # pm = self.cp_post_mean(grid_param=self.grid_param, log_post=lp)
+            # sd = self.cp_post_sd(grid_param=self.grid_param, log_post=lp,
+            #                      post_mean=pm)
 
             self.post_mean[item] = self.grid_param[np.argmax(lp)]
-            self.post_std[item] = sd
+            # self.post_std[item] = sd
             self.log_post[item] = lp
 
             # print("pm", pm, "p", self.learner.p(item, self.post_mean[item]))

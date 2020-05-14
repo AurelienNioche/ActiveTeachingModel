@@ -26,7 +26,7 @@ def _make_data(tk, teachers):
     return {"tk": tk, "data": data, "param_recovery": param_recovery}
 
 
-def make_data(tk, teachers, force=True):
+def make_data(tk, teachers, force=False):
 
     bkp_file = os.path.join(PICKLE_FOLDER, f"{tk.extension}.p")
 
