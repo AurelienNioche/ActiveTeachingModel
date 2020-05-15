@@ -159,7 +159,7 @@ class MCTS:
 
         while not state.is_terminal():
             try:
-                action = np.random.choice(state.get_possible_actions())
+                action = state.get_rollout_action()
             except IndexError:
                 raise Exception(
                     "Non-terminal state has no possible actions: " + str(

@@ -2,6 +2,7 @@
 Adapted from: https://github.com/pbsinclair42/MCTS/blob/master/mcts.py
 """
 import numpy as np
+from abc import abstractmethod
 
 from copy import deepcopy
 
@@ -10,18 +11,26 @@ from copy import deepcopy
 
 class State:
 
+    @abstractmethod
     def get_possible_actions(self):
         """Returns an iterable of all actions which can be taken
         from this state"""
 
+    @abstractmethod
     def take_action(self, action):
         """Returns the state which results from taking action 'action'"""
 
+    @abstractmethod
     def is_terminal(self, ):
         """Returns whether this state is a terminal state"""
 
+    @abstractmethod
     def get_reward(self):
         """"Returns the reward for this state"""
+
+    @abstractmethod
+    def get_rollout_action(self):
+        """"Returns one rollout action for this state"""
 
 
 class LearnerState(State):
@@ -29,6 +38,7 @@ class LearnerState(State):
     def __init__(self,
                  learner,
                  reward,
+                 rollout,
                  terminal_t,
                  horizon=None,
                  ref_point=None,
@@ -50,6 +60,7 @@ class LearnerState(State):
         #     raise ValueError("Either 'horizon' of 't_final' should be defined")
 
         self.reward = reward
+        self.rollout = rollout
 
         self.n_item = self.learner.n_item
 
@@ -102,6 +113,7 @@ class LearnerState(State):
                 ref_point=self.ref_point,
                 reward=self.reward,
                 learner=new_learner,
+                rollout=self.rollout,
                 terminal_t=self.terminal_t
             )
 
@@ -128,6 +140,9 @@ class LearnerState(State):
         if self._instant_reward is None:
             self._instant_reward = self.reward.reward(learner=self.learner)
         return self._instant_reward
+
+    def get_rollout_action(self):
+        return self.rollout.get_action()
 
     def reset(self):
         self._instant_reward = None

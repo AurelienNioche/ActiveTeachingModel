@@ -8,6 +8,7 @@ from psychologist.psychologist import Psychologist
 from . mcts.mcts import MCTS
 from . mcts.state import LearnerState
 from . mcts.reward import RewardThreshold
+from .mcts.rollout import RolloutThreshold
 
 
 class ReferencePoint:
@@ -22,6 +23,7 @@ class MCTSTeacher:
     def __init__(self,
                  learner,
                  reward,
+                 rollout,
                  terminal_t,
                  horizon=20,
                  iteration_limit=500):
@@ -33,9 +35,10 @@ class MCTSTeacher:
         self.learner_state = \
             LearnerState(
                 learner=learner,
+                rollout=rollout,
                 horizon=horizon,
-                ref_point=self.reference_point,
                 reward=reward,
+                ref_point=self.reference_point,
                 terminal_t=terminal_t)
 
         self.c_iter = 0
@@ -67,11 +70,14 @@ class MCTSTeacher:
 
     @classmethod
     def run(cls, tk):
+
         reward = RewardThreshold(n_item=tk.n_item, tau=tk.thr)
+        rollout = RolloutThreshold(tau=tk.thr)
         learner = Learner.get(tk)
         teacher = cls(
             learner=learner,
             reward=reward,
+            rollout=rollout,
             terminal_t=tk.terminal_t,
             horizon=tk.mcts_horizon,
             iteration_limit=tk.mcts_iter_limit)
@@ -84,6 +90,7 @@ class MCTSPsychologist(MCTSTeacher):
                  psychologist,
                  learner,
                  reward,
+                 rollout,
                  terminal_t,
                  horizon=20,
                  iteration_limit=500):
@@ -94,6 +101,7 @@ class MCTSPsychologist(MCTSTeacher):
         super().__init__(
             learner=deepcopy(learner),
             reward=reward,
+            rollout=rollout,
             terminal_t=terminal_t,
             horizon=horizon,
             iteration_limit=iteration_limit)
@@ -122,10 +130,12 @@ class MCTSPsychologist(MCTSTeacher):
         learner = Learner.get(tk)
         psychologist = Psychologist.get(n_iter=tk.n_iter, learner=learner)
         reward = RewardThreshold(n_item=tk.n_item, tau=tk.thr)
+        rollout = RolloutThreshold(tau=tk.thr)
         teacher = cls(
-            learner=learner,
             psychologist=psychologist,
+            learner=learner,
             reward=reward,
+            rollout=rollout,
             terminal_t=tk.terminal_t,
             horizon=tk.mcts_horizon,
             iteration_limit=tk.mcts_iter_limit)
@@ -138,4 +148,3 @@ class MCTSPsychologist(MCTSTeacher):
             return hist, param_recovery
         else:
             return hist
-
