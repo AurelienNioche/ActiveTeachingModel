@@ -11,16 +11,11 @@ from run.make_data import make_data
 
 def main(force=False):
     for name in (
-        'het_days_14_05',
-        'het_single_session_14_05',
-        'homo_days_14_05',
-        'homo_single_session_14_05',
-
+        'homo_single_session_15_05',
     ):
         task_param = TaskParam.get(os.path.join("config", f"{name}.json"))
         teachers = \
-            (Leitner, ThresholdTeacher, ThresholdPsychologist,
-             MCTSTeacher, MCTSPsychologist)
+            (Leitner, ThresholdTeacher, MCTSTeacher,)
         make_fig(**make_data(tk=task_param, teachers=teachers,
                              force=force))
 

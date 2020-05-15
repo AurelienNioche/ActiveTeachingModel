@@ -72,7 +72,7 @@ class MCTSTeacher:
     def run(cls, tk):
 
         reward = RewardThreshold(n_item=tk.n_item, tau=tk.thr)
-        rollout = RolloutThreshold(tau=tk.thr)
+        rollout = RolloutThreshold(n_item=tk.n_item, tau=tk.thr)
         learner = Learner.get(tk)
         teacher = cls(
             learner=learner,
@@ -130,7 +130,7 @@ class MCTSPsychologist(MCTSTeacher):
         learner = Learner.get(tk)
         psychologist = Psychologist.get(n_iter=tk.n_iter, learner=learner)
         reward = RewardThreshold(n_item=tk.n_item, tau=tk.thr)
-        rollout = RolloutThreshold(tau=tk.thr)
+        rollout = RolloutThreshold(n_item=tk.n_item, tau=tk.thr)
         teacher = cls(
             psychologist=psychologist,
             learner=learner,

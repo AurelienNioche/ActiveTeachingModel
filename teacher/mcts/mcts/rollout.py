@@ -3,15 +3,29 @@ import numpy as np
 
 class RolloutThreshold:
 
-    def __init__(self,  n_item=None, tau=0.9):
+    def __init__(self, n_item, tau):
         self.tau = tau
         self.n_item = n_item
+        self.items = np.arange(self.n_item)
 
-    def action(self, learner, normalize=True):
+    def get_action(self, learner_p_seen, learner_seen):
 
-        p = learner.p_seen()
-        n_learnt = np.sum(p > self.tau)
-        if normalize:
-            return n_learnt / self.n_item
+        n_seen = np.sum(learner_seen)
+
+        if n_seen == 0:
+            items_selected = self.items
+
         else:
-            return n_learnt
+
+            min_p = np.min(learner_p_seen)
+
+            if n_seen == self.n_item or min_p <= self.tau:
+                is_min = learner_p_seen[:] == min_p
+                items_selected = self.items[learner_seen][is_min]
+
+            else:
+                unseen = np.logical_not(learner_seen)
+                items_selected = self.items[unseen]
+
+        item = np.random.choice(items_selected)
+        return item

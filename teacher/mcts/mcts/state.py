@@ -67,6 +67,7 @@ class LearnerState(State):
         self._instant_reward = None
         self._possible_actions = None
         self._is_terminal = None
+        self._learner_p_seen = None
         # self._mean_reward = None
 
         # self.parent = parent
@@ -138,11 +139,20 @@ class LearnerState(State):
 
     def get_reward(self):
         if self._instant_reward is None:
-            self._instant_reward = self.reward.reward(learner=self.learner)
+            self._instant_reward = \
+                self.reward.reward(learner_p_seen=self.get_learner_p_seen())
         return self._instant_reward
 
     def get_rollout_action(self):
-        return self.rollout.get_action()
+        return self.rollout.get_action(
+            learner_seen=self.learner.seen,
+            learner_p_seen=self.get_learner_p_seen())
+
+    def get_learner_p_seen(self):
+
+        if self._learner_p_seen is None:
+            self._learner_p_seen = self.learner.p_seen()
+        return self._learner_p_seen
 
     def reset(self):
         self._instant_reward = None
