@@ -1,7 +1,7 @@
 import numpy as np
 
 
-class RewardThreshold:
+class Reward:
 
     def __init__(self,  n_item, tau):
         self.tau = tau

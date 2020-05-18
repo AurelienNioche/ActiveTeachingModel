@@ -7,8 +7,8 @@ from psychologist.psychologist import Psychologist
 
 from . mcts.mcts import MCTS
 from . mcts.state import LearnerState
-from . mcts.reward import RewardThreshold
-from .mcts.rollout import RolloutThreshold
+from . mcts.reward import Reward
+from .mcts.rollout import Rollout
 
 
 class ReferencePoint:
@@ -71,8 +71,8 @@ class MCTSTeacher:
     @classmethod
     def run(cls, tk):
 
-        reward = RewardThreshold(n_item=tk.n_item, tau=tk.thr)
-        rollout = RolloutThreshold(n_item=tk.n_item, tau=tk.thr)
+        reward = Reward(n_item=tk.n_item, tau=tk.thr)
+        rollout = Rollout(n_item=tk.n_item, tau=tk.thr)
         learner = Learner.get(tk)
         teacher = cls(
             learner=learner,
@@ -129,8 +129,8 @@ class MCTSPsychologist(MCTSTeacher):
     def run(cls, tk):
         learner = Learner.get(tk)
         psychologist = Psychologist.get(n_iter=tk.n_iter, learner=learner)
-        reward = RewardThreshold(n_item=tk.n_item, tau=tk.thr)
-        rollout = RolloutThreshold(n_item=tk.n_item, tau=tk.thr)
+        reward = Reward(n_item=tk.n_item, tau=tk.thr)
+        rollout = Rollout(n_item=tk.n_item, tau=tk.thr)
         teacher = cls(
             psychologist=psychologist,
             learner=learner,

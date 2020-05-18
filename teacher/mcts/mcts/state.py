@@ -1,7 +1,7 @@
 """
 Adapted from: https://github.com/pbsinclair42/MCTS/blob/master/mcts.py
 """
-import numpy as np
+# import numpy as np
 from abc import abstractmethod
 
 from copy import deepcopy
@@ -88,16 +88,9 @@ class LearnerState(State):
         """Returns an iterable of all actions which can be taken
         from this state"""
         if self._possible_actions is None:
-            seen = self.learner.seen
-            n_seen = np.sum(seen)
-            if n_seen == 0:
-                self._possible_actions = np.arange(1)
-            elif n_seen == self.n_item:
-                self._possible_actions = np.arange(self.n_item)
-            else:
-                already_seen = np.arange(self.n_item)[seen]
-                new = np.max(already_seen) + 1
-                self._possible_actions = list(already_seen) + [new]
+            self._possible_actions = \
+                self.rollout.get_possible_actions(
+                    learner_seen=self.learner.seen)
         return self._possible_actions
 
     def take_action(self, action):
@@ -144,10 +137,8 @@ class LearnerState(State):
         return self._instant_reward
 
     def get_rollout_action(self):
-        return np.random.choice(self.get_possible_actions())
-        # return self.rollout.get_action(
-        #     learner_seen=self.learner.seen,
-        #     learner_p_seen=self.get_learner_p_seen())
+        # return np.random.choice(self.get_possible_actions())
+        return self.rollout.get_action(learner_seen=self.learner.seen)
 
     def get_learner_p_seen(self):
 
