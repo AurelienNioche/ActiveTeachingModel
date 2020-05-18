@@ -11,7 +11,8 @@ from run.make_data import make_data
 
 def main(force=False):
     for name in (
-        'homo_single_session_15_05',
+        'homo_single_session_18_05_long_horizon',
+        'homo_day_18_05_long_horizon'
     ):
         task_param = TaskParam.get(os.path.join("config", f"{name}.json"))
         teachers = \

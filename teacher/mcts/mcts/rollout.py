@@ -25,7 +25,7 @@ class RolloutThreshold:
 
             else:
                 unseen = np.logical_not(learner_seen)
-                items_selected = self.items[unseen]
+                items_selected = [self.items[unseen][0]]
 
         item = np.random.choice(items_selected)
         return item

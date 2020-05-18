@@ -154,18 +154,22 @@ class MCTS:
         :return:
         """
 
-        if self.verbose:
-            print(f"Rollout for state {state}")
+        # if self.verbose:
+        # print(f"Rollout for state {state}")
 
         while not state.is_terminal():
-            try:
-                action = state.get_rollout_action()
-            except IndexError:
-                raise Exception(
-                    "Non-terminal state has no possible actions: " + str(
-                        state))
+            # try:
+            action = state.get_rollout_action()
+            # except IndexError:
+            #     raise Exception(
+            #         "Non-terminal state has no possible actions: " + str(
+            #             state))
+            # print("action", action)
+            # assert action in state.get_possible_actions()
             state = state.take_action(action)
-        return state.get_reward()
+        r = state.get_reward()
+        # print("reward", r)
+        return r
 
     @classmethod
     def _backpropogate(cls, node, reward):
