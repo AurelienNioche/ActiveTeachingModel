@@ -138,7 +138,8 @@ class LearnerState(State):
 
     def get_rollout_action(self):
         # return np.random.choice(self.get_possible_actions())
-        return self.rollout.get_action(learner_seen=self.learner.seen)
+        return self.rollout.get_action(learner_seen=self.learner.seen,
+                                       learner_p_seen=self.get_learner_p_seen())
 
     def get_learner_p_seen(self):
 
