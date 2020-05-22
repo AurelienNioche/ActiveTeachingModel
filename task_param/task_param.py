@@ -11,7 +11,7 @@ class TaskParam:
 
     def __init__(self, bounds, param, param_labels, n_item,
                  n_iter_per_ss, n_iter_between_ss,
-                 n_ss, thr, mcts_iter_limit, mcts_horizon,
+                 n_ss, thr, mcts,
                  seed, name):
 
         self.bounds = np.asarray(bounds)
@@ -32,8 +32,7 @@ class TaskParam:
 
         self.n_ss = n_ss
         self.thr = thr
-        self.mcts_iter_limit = mcts_iter_limit
-        self.mcts_horizon = mcts_horizon
+        self.mcts_kwargs = mcts
         self.seed = seed
 
         self.n_iter = n_ss * n_iter_per_ss
@@ -66,6 +65,13 @@ class TaskParam:
 
             pr_str = ', '.join(param_str_list)
 
+        mcts_pr_str_list = []
+        for (k, v) in self.mcts_kwargs.items():
+            s = f"{k} = ${v:.2f}$\n"
+            mcts_pr_str_list.append(s)
+
+        mcts_pr_str = ', '.join(mcts_pr_str_list)
+
         self.info = \
             r'$n_{\mathrm{session}}=' \
             + str(self.n_ss) + '$\n\n' \
@@ -73,10 +79,8 @@ class TaskParam:
             + str(self.n_iter_per_ss) + '$\n' \
             r'$n_{\mathrm{iter\,between\,session}}=' \
             + str(self.n_iter_between_ss) + '$\n\n' \
-            r'$\mathrm{MCTS}_{\mathrm{horizon}}=' \
-            + str(self.mcts_horizon) + '$\n' \
-            r'$\mathrm{MCTS}_{\mathrm{iter\,limit}}=' \
-            + str(self.mcts_iter_limit) + '$\n\n' \
+            'MCTS:\n' \
+            + mcts_pr_str + '\n' \
             + pr_str + '\n\n' + \
             r'$\mathrm{seed}=' \
             + str(self.seed) + '$'

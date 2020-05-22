@@ -10,15 +10,12 @@ from run.make_data import make_data
 
 
 def main(force=False):
-    for name in (
-        'homo_day_18_05_long_horizon_threshold_rollout',
-        'homo_single_session_18_05_long_horizon_threshold_rollout'
-    ):
-        task_param = TaskParam.get(os.path.join("config", f"{name}.json"))
-        teachers = \
-            (Leitner, ThresholdTeacher, MCTSTeacher,)
-        make_fig(**make_data(tk=task_param, teachers=teachers,
-                             force=force))
+
+    task_param = TaskParam.get("config/2020_05_22_hom_single_ss_rollout_thr_fixed_window.json")
+    teachers = \
+        (Leitner, ThresholdTeacher, MCTSTeacher,)
+    make_fig(**make_data(tk=task_param, teachers=teachers,
+                         force=force))
 
 
 if __name__ == "__main__":

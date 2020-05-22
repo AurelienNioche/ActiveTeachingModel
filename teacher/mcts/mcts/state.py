@@ -39,18 +39,18 @@ class LearnerState(State):
                  learner,
                  reward,
                  rollout,
-                 terminal_t,
+                 # terminal_t,
                  horizon=None,
-                 ref_point=None,
+                 dyn_param=None,
                  # action=None,
                  # parent=None
                  ):
 
         self.learner = learner
 
-        self.terminal_t = terminal_t
+        # self.terminal_t = terminal_t
         self.horizon = horizon
-        self.ref_point = ref_point
+        self.dyn_param = dyn_param
 
         # if self.horizon is not None:
         #     self._is_terminal = self.rel_t >= self.horizon
@@ -104,11 +104,11 @@ class LearnerState(State):
             new_learner.update(item=action)
             new_state = LearnerState(
                 horizon=self.horizon,
-                ref_point=self.ref_point,
+                dyn_param=self.dyn_param,
                 reward=self.reward,
                 learner=new_learner,
                 rollout=self.rollout,
-                terminal_t=self.terminal_t
+                # terminal_t=self.terminal_t
             )
 
             self.children[action] = new_state
@@ -118,14 +118,17 @@ class LearnerState(State):
     def is_terminal(self):
         """Returns whether this state is a terminal state"""
         if self._is_terminal is None:
-            if self.learner.t > self.terminal_t:
-                raise ValueError(f"{self.learner.t} > {self.terminal_t}")
-            elif self.learner.t == self.terminal_t:
+            if self.learner.t > self.dyn_param.terminal_t:
+                msg = f"learner T > terminal T\n" \
+                      f"({self.learner.t} > {self.dyn_param.terminal_t})"
+                raise ValueError(msg)
+            elif self.learner.t == self.dyn_param.terminal_t:
                 return True
-            elif self.horizon is not None \
-                    and (self.learner.c_iter - self.ref_point.c_iter) \
-                    >= self.horizon:
-                return True
+            elif self.horizon is not None:
+                if self.learner.c_iter - self.dyn_param.c_iter >= self.horizon:
+                    return True
+                else:
+                    return False
             else:
                 return False
         return self._is_terminal

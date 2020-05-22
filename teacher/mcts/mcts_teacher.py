@@ -11,11 +11,12 @@ from . mcts.reward import Reward
 from .mcts.rollout import Rollout
 
 
-class ReferencePoint:
+class DynamicParam:
 
     def __init__(self):
         self.t = 0
-        self.c_iter = 0
+        self.c_iter = None
+        self.terminal_t = None
 
 
 class MCTSTeacher:
@@ -26,11 +27,16 @@ class MCTSTeacher:
                  rollout,
                  terminal_t,
                  horizon=20,
-                 iteration_limit=500):
+                 iter_limit=500,
+                 fixed_window=False):
 
-        self.iteration_limit = iteration_limit
+        self.iter_limit = iter_limit
+        self.fixed_window = fixed_window
 
-        self.reference_point = ReferencePoint()
+        self.dyn_param = DynamicParam()
+        self.terminal_t = terminal_t
+
+        self.horizon = horizon
 
         self.learner_state = \
             LearnerState(
@@ -38,15 +44,27 @@ class MCTSTeacher:
                 rollout=rollout,
                 horizon=horizon,
                 reward=reward,
-                ref_point=self.reference_point,
-                terminal_t=terminal_t)
+                dyn_param=self.dyn_param,
+            )
+                # terminal_t=terminal_t)
 
         self.c_iter = 0
 
     def ask(self):
-        m = MCTS(iteration_limit=self.iteration_limit)
 
-        self.reference_point.c_iter = self.c_iter
+        m = MCTS(iteration_limit=self.iter_limit)
+
+        self.dyn_param.c_iter = self.c_iter
+
+        if not self.fixed_window:
+            self.dyn_param.terminal_t = self.terminal_t
+        else:
+            if self.dyn_param.terminal_t is None:
+                self.dyn_param.terminal_t = self.horizon
+            elif self.dyn_param.terminal_t == self.learner_state.learner.t:
+                self.dyn_param.terminal_t += self.horizon
+            else:
+                pass
 
         self.learner_state.reset()
         best_action = m.run(initial_state=self.learner_state)
@@ -55,6 +73,7 @@ class MCTSTeacher:
         return best_action
 
     def update(self, item):
+
         self.c_iter += 1
 
     def teach(self, n_iter, seed=0):
@@ -79,8 +98,7 @@ class MCTSTeacher:
             reward=reward,
             rollout=rollout,
             terminal_t=tk.terminal_t,
-            horizon=tk.mcts_horizon,
-            iteration_limit=tk.mcts_iter_limit)
+            **tk.mcts_kwargs)
         return teacher.teach(n_iter=tk.n_iter, seed=tk.seed)
 
 
@@ -94,8 +112,8 @@ class MCTSPsychologist(MCTSTeacher):
                  terminal_t,
                  horizon=20,
                  iteration_limit=500):
-        self.reward = reward
 
+        self.reward = reward
         self.learner = learner
 
         super().__init__(
@@ -119,6 +137,7 @@ class MCTSPsychologist(MCTSTeacher):
         return item
 
     def update(self, item):
+
         self.learner_state = self.learner_state.take_action(item)
         response = self.learner.reply(item)
         self.psychologist.update(item=item, response=response)
@@ -127,6 +146,7 @@ class MCTSPsychologist(MCTSTeacher):
 
     @classmethod
     def run(cls, tk):
+
         learner = Learner.get(tk)
         psychologist = Psychologist.get(n_iter=tk.n_iter, learner=learner)
         reward = Reward(n_item=tk.n_item, tau=tk.thr)
