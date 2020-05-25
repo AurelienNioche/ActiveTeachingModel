@@ -8,7 +8,7 @@ from psychologist.psychologist import Psychologist
 from . mcts.mcts import MCTS
 from . mcts.state import LearnerState
 from . mcts.reward import Reward
-from .mcts.rollout import Rollout
+from . mcts.rollout import Rollout
 
 
 class DynamicParam:
@@ -59,10 +59,23 @@ class MCTSTeacher:
         if not self.fixed_window:
             self.dyn_param.terminal_t = self.terminal_t
         else:
-            if self.dyn_param.terminal_t is None:
-                self.dyn_param.terminal_t = self.horizon
-            elif self.dyn_param.terminal_t == self.learner_state.learner.t:
-                self.dyn_param.terminal_t += self.horizon
+            if self.dyn_param.terminal_t is None or self.dyn_param.terminal_t == self.learner_state.learner.t:
+                if self.dyn_param.terminal_t is None:
+                    self.dyn_param.terminal_t = 0
+
+                c_iter_ss = self.learner_state.learner.c_iter_ss
+                n_breaks = (c_iter_ss + self.horizon) // self.learner_state.learner.n_iter_per_ss
+                print("n breaks", n_breaks)
+                to_add = self.horizon + n_breaks * self.learner_state.learner.n_iter_between_ss
+                self.dyn_param.terminal_t += to_add
+                print(f"add {to_add} to goal")
+                print("New terminal t", self.dyn_param.terminal_t)
+                # for i in range(self.horizon):
+                #     self.dyn_param.terminal_t += 1
+                #     c_iter_ss += 1
+                #     if c_iter_ss >= self.learner_state.learner.n_iter_per_ss:
+                #         self.dyn_param.terminal_t += self.learner_state.learner.n_iter_between_ss
+                #         c_iter_ss = 0
             else:
                 pass
 

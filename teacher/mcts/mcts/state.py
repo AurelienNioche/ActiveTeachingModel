@@ -153,7 +153,7 @@ class LearnerState(State):
     def reset(self):
         self._instant_reward = None
         self._is_terminal = None
-        self.children = {}
+        self.children.clear()
 
     # def get_instant_reward(self):
     #     """"Returns the INSTANT reward for this state"""
