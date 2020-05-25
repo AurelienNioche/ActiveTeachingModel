@@ -2,17 +2,34 @@ import json
 import numpy as np
 
 from learner.learner import Learner
+from teacher import Leitner, ThresholdTeacher, MCTSTeacher
+    # ThresholdPsychologist, MCTSPsychologist
 
 N_SEC_PER_DAY = 86400
 N_SEC_PER_ITER = 2
+
+
+TEACHERS = {
+    'leitner': Leitner,
+    'mcts': MCTSTeacher,
+    'threshold': ThresholdTeacher
+}
 
 
 class TaskParam:
 
     def __init__(self, bounds, param, param_labels, n_item,
                  n_iter_per_ss, n_iter_between_ss,
-                 n_ss, thr, mcts,
+                 n_ss, thr, mcts, teachers,
                  seed, name):
+
+        self.teachers = []
+        for str_t in teachers:
+            try:
+                t = TEACHERS[str_t]
+            except KeyError:
+                raise ValueError(f'Teacher type not recognized: {str_t}')
+            self.teachers.append(t)
 
         self.bounds = np.asarray(bounds)
         self.param = Learner.generate_param(param=param, bounds=bounds,
@@ -67,10 +84,13 @@ class TaskParam:
 
         mcts_pr_str_list = []
         for (k, v) in self.mcts_kwargs.items():
-            s = f"{k} = ${v:.2f}$\n"
+            if not isinstance(v, str):
+                s = f"{k} = ${v:.2f}$\n"
+            else:
+                s = f"{k} = {v}\n"
             mcts_pr_str_list.append(s)
 
-        mcts_pr_str = ', '.join(mcts_pr_str_list)
+        mcts_pr_str = ''.join(mcts_pr_str_list)
 
         self.info = \
             r'$n_{\mathrm{session}}=' \

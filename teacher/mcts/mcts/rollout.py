@@ -1,12 +1,38 @@
 import numpy as np
 
 
-class Rollout:
+class RolloutRandom:
 
     def __init__(self, n_item, tau):
-        self.tau = tau
         self.n_item = n_item
+        self.tau = tau
         self.items = np.arange(self.n_item)
+
+    def get_possible_actions(self, learner_seen):
+
+        seen = learner_seen
+        n_seen = np.sum(seen)
+        if n_seen == 0:
+            possible_actions = np.arange(1)
+        elif n_seen == self.n_item:
+            possible_actions = np.arange(self.n_item)
+        else:
+            already_seen = np.arange(self.n_item)[seen]
+            new = np.max(already_seen) + 1
+            possible_actions = list(already_seen) + [new]
+
+        return possible_actions
+
+    def get_action(self, learner_seen, learner_p_seen):
+
+        return np.random.choice(self.get_possible_actions(learner_seen=learner_seen))
+
+
+class RolloutThreshold(RolloutRandom):
+
+    def __init__(self, n_item, tau):
+
+        super().__init__(n_item=n_item, tau=tau)
 
     def get_action(self, learner_seen, learner_p_seen):
         n_seen = np.sum(learner_seen)
@@ -30,17 +56,4 @@ class Rollout:
         # item = np.random.choice(self.items[learner_seen])
         return item
 
-    def get_possible_actions(self, learner_seen):
 
-        seen = learner_seen
-        n_seen = np.sum(seen)
-        if n_seen == 0:
-            possible_actions = np.arange(1)
-        elif n_seen == self.n_item:
-            possible_actions = np.arange(self.n_item)
-        else:
-            already_seen = np.arange(self.n_item)[seen]
-            new = np.max(already_seen) + 1
-            possible_actions = list(already_seen) + [new]
-
-        return possible_actions

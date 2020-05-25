@@ -8,12 +8,12 @@ PICKLE_FOLDER = os.path.join("pickle", SCRIPT_NAME)
 os.makedirs(PICKLE_FOLDER, exist_ok=True)
 
 
-def _make_data(tk, teachers):
+def _make_data(tk):
 
     data = {}
     param_recovery = {}
 
-    for teacher_class in teachers:
+    for teacher_class in tk.teachers:
 
         tqdm.write(f"Simulating '{teacher_class.__name__}'...")
         r = teacher_class.run(tk)
@@ -26,7 +26,7 @@ def _make_data(tk, teachers):
     return {"tk": tk, "data": data, "param_recovery": param_recovery}
 
 
-def make_data(tk, teachers, force=False):
+def make_data(tk, force=False):
 
     bkp_file = os.path.join(PICKLE_FOLDER, f"{tk.extension}.p")
 
@@ -35,7 +35,7 @@ def make_data(tk, teachers, force=False):
             data = pickle.load(f)
 
     else:
-        data = _make_data(tk=tk, teachers=teachers)
+        data = _make_data(tk=tk)
         with open(bkp_file, 'wb') as f:
             pickle.dump(data, f)
 

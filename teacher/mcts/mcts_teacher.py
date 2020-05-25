@@ -8,7 +8,7 @@ from psychologist.psychologist import Psychologist
 from . mcts.mcts import MCTS
 from . mcts.state import LearnerState
 from . mcts.reward import Reward
-from . mcts.rollout import Rollout
+from . mcts.rollout import RolloutRandom, RolloutThreshold
 
 
 class DynamicParam:
@@ -24,11 +24,13 @@ class MCTSTeacher:
     def __init__(self,
                  learner,
                  reward,
-                 rollout,
                  terminal_t,
+                 n_item,
+                 thr,
                  horizon=20,
                  iter_limit=500,
-                 fixed_window=False):
+                 fixed_window=False,
+                 rollout='threshold'):
 
         self.iter_limit = iter_limit
         self.fixed_window = fixed_window
@@ -37,6 +39,11 @@ class MCTSTeacher:
         self.terminal_t = terminal_t
 
         self.horizon = horizon
+
+        if rollout == 'threshold':
+            rollout = RolloutThreshold(n_item=n_item, tau=thr)
+        elif rollout == 'random':
+            rollout = RolloutRandom(n_item=n_item, tau=thr)
 
         self.learner_state = \
             LearnerState(
@@ -65,11 +72,11 @@ class MCTSTeacher:
 
                 c_iter_ss = self.learner_state.learner.c_iter_ss
                 n_breaks = (c_iter_ss + self.horizon) // self.learner_state.learner.n_iter_per_ss
-                print("n breaks", n_breaks)
                 to_add = self.horizon + n_breaks * self.learner_state.learner.n_iter_between_ss
                 self.dyn_param.terminal_t += to_add
-                print(f"add {to_add} to goal")
-                print("New terminal t", self.dyn_param.terminal_t)
+                # print("n breaks", n_breaks)
+                # print(f"add {to_add} to goal")
+                # print("New terminal t", self.dyn_param.terminal_t)
                 # for i in range(self.horizon):
                 #     self.dyn_param.terminal_t += 1
                 #     c_iter_ss += 1
@@ -104,80 +111,80 @@ class MCTSTeacher:
     def run(cls, tk):
 
         reward = Reward(n_item=tk.n_item, tau=tk.thr)
-        rollout = Rollout(n_item=tk.n_item, tau=tk.thr)
         learner = Learner.get(tk)
         teacher = cls(
             learner=learner,
             reward=reward,
-            rollout=rollout,
             terminal_t=tk.terminal_t,
+            n_item=tk.n_item,
+            thr=tk.thr,
             **tk.mcts_kwargs)
         return teacher.teach(n_iter=tk.n_iter, seed=tk.seed)
 
 
-class MCTSPsychologist(MCTSTeacher):
-
-    def __init__(self,
-                 psychologist,
-                 learner,
-                 reward,
-                 rollout,
-                 terminal_t,
-                 horizon=20,
-                 iteration_limit=500):
-
-        self.reward = reward
-        self.learner = learner
-
-        super().__init__(
-            learner=deepcopy(learner),
-            reward=reward,
-            rollout=rollout,
-            terminal_t=terminal_t,
-            horizon=horizon,
-            iteration_limit=iteration_limit)
-
-        self.psychologist = psychologist
-
-    def ask(self):
-
-        m = MCTS(iteration_limit=self.iteration_limit)
-
-        self.learner_state.reset()
-        self.learner_state.learner.param = self.psychologist.post_mean
-        self.reference_point.c_iter = self.c_iter
-        item = m.run(initial_state=self.learner_state)
-        return item
-
-    def update(self, item):
-
-        self.learner_state = self.learner_state.take_action(item)
-        response = self.learner.reply(item)
-        self.psychologist.update(item=item, response=response)
-        self.learner.update(item)
-        super().update(item)
-
-    @classmethod
-    def run(cls, tk):
-
-        learner = Learner.get(tk)
-        psychologist = Psychologist.get(n_iter=tk.n_iter, learner=learner)
-        reward = Reward(n_item=tk.n_item, tau=tk.thr)
-        rollout = Rollout(n_item=tk.n_item, tau=tk.thr)
-        teacher = cls(
-            psychologist=psychologist,
-            learner=learner,
-            reward=reward,
-            rollout=rollout,
-            terminal_t=tk.terminal_t,
-            horizon=tk.mcts_horizon,
-            iteration_limit=tk.mcts_iter_limit)
-        hist = teacher.teach(n_iter=tk.n_iter, seed=tk.seed)
-        if psychologist.hist_pm is not None \
-                and psychologist.hist_psd is not None:
-            param_recovery = {
-                'post_mean': psychologist.hist_pm,
-                'post_std': psychologist.hist_psd}
-            return hist, param_recovery
-        else:
-            return hist
+# class MCTSPsychologist(MCTSTeacher):
+#
+#     def __init__(self,
+#                  psychologist,
+#                  learner,
+#                  reward,
+#                  rollout,
+#                  terminal_t,
+#                  horizon=20,
+#                  iteration_limit=500):
+#
+#         self.reward = reward
+#         self.learner = learner
+#
+#         super().__init__(
+#             learner=deepcopy(learner),
+#             reward=reward,
+#             rollout=rollout,
+#             terminal_t=terminal_t,
+#             horizon=horizon,
+#             iteration_limit=iteration_limit)
+#
+#         self.psychologist = psychologist
+#
+#     def ask(self):
+#
+#         m = MCTS(iteration_limit=self.iteration_limit)
+#
+#         self.learner_state.reset()
+#         self.learner_state.learner.param = self.psychologist.post_mean
+#         self.reference_point.c_iter = self.c_iter
+#         item = m.run(initial_state=self.learner_state)
+#         return item
+#
+#     def update(self, item):
+#
+#         self.learner_state = self.learner_state.take_action(item)
+#         response = self.learner.reply(item)
+#         self.psychologist.update(item=item, response=response)
+#         self.learner.update(item)
+#         super().update(item)
+#
+#     @classmethod
+#     def run(cls, tk):
+#
+#         learner = Learner.get(tk)
+#         psychologist = Psychologist.get(n_iter=tk.n_iter, learner=learner)
+#         reward = Reward(n_item=tk.n_item, tau=tk.thr)
+#         rollout = Rollout(n_item=tk.n_item, tau=tk.thr)
+#         teacher = cls(
+#             psychologist=psychologist,
+#             learner=learner,
+#             reward=reward,
+#             rollout=rollout,
+#             terminal_t=tk.terminal_t,
+#             horizon=tk.mcts_horizon,
+#             iteration_limit=tk.mcts_iter_limit)
+#         hist = teacher.teach(n_iter=tk.n_iter, seed=tk.seed)
+#         if psychologist.hist_pm is not None \
+#                 and psychologist.hist_psd is not None:
+#             param_recovery = {
+#                 'post_mean': psychologist.hist_pm,
+#                 'post_std': psychologist.hist_psd}
+#             return hist, param_recovery
+#         else:
+#             return hist
