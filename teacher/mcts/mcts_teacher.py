@@ -125,23 +125,27 @@ class MCTSPsychologist(MCTSTeacher):
                  psychologist,
                  learner,
                  reward,
-                 rollout,
                  terminal_t,
+                 n_item,
+                 thr,
                  horizon=20,
-                 iteration_limit=500):
+                 iter_limit=500,
+                 fixed_window=False,
+                 rollout='threshold'):
 
-        self.reward = reward
         self.learner = learner
+        self.psychologist = psychologist
 
         super().__init__(
+            n_item=n_item,
+            thr=thr,
+            horizon=horizon,
+            iter_limit=iter_limit,
+            fixed_window=fixed_window,
+            rollout=rollout,
             learner=deepcopy(learner),
             reward=reward,
-            rollout=rollout,
-            terminal_t=terminal_t,
-            horizon=horizon,
-            iteration_limit=iteration_limit)
-
-        self.psychologist = psychologist
+            terminal_t=terminal_t)
 
     def ask(self):
 
@@ -161,7 +165,7 @@ class MCTSPsychologist(MCTSTeacher):
         response = self.learner.reply(item)
         self.psychologist.update(item=item, response=response)
         self.learner.update(item)
-        super().update(item)
+        self.c_iter += 1
 
     @classmethod
     def run(cls, tk):
