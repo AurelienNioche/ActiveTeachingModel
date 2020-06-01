@@ -6,8 +6,9 @@
     "n_iter_between_ss": 0,
     "n_ss": 1,
     "thr": 0.9,
-    "mcts_iter_limit": 500,
-    "mcts_horizon": 5,
+    "mcts": {"iter_limit": 500, "horizon": 100, "fixed_window":  true,
+             "rollout":  "threshold"},
+    "teachers": ["leitner", "threshold", "mcts", "mcts-psy", "threshold-psy"],
     "bounds": [[0.001, 0.04], [0.2, 0.5]],
     "seed": 0
 }

@@ -9,6 +9,6 @@
     "mcts": {"iter_limit": 500, "horizon": 100, "fixed_window":  true,
              "rollout":  "threshold"},
     "bounds": [[0.001, 0.04], [0.2, 0.5]],
-    "teachers": ["leitner", "threshold", "mcts"],
+    "teachers": ["leitner", "threshold", "mcts", "mcts-psy", "threshold-psy"],
     "seed": 0
 }

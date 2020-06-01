@@ -2,8 +2,8 @@ import json
 import numpy as np
 
 from learner.learner import Learner
-from teacher import Leitner, ThresholdTeacher, MCTSTeacher
-    # ThresholdPsychologist, MCTSPsychologist
+from teacher import Leitner, ThresholdTeacher, MCTSTeacher, \
+    ThresholdPsychologist, MCTSPsychologist
 
 N_SEC_PER_DAY = 86400
 N_SEC_PER_ITER = 2
@@ -12,7 +12,9 @@ N_SEC_PER_ITER = 2
 TEACHERS = {
     'leitner': Leitner,
     'mcts': MCTSTeacher,
-    'threshold': ThresholdTeacher
+    'threshold': ThresholdTeacher,
+    'mcts-psy': MCTSPsychologist,
+    'threshold-psy': ThresholdPsychologist
 }
 
 
