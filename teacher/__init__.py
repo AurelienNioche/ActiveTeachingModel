@@ -1,4 +1,5 @@
 from . leitner import Leitner
-from . mcts.mcts_teacher import MCTSTeacher, MCTSPsychologist
-from . threshold import ThresholdTeacher, ThresholdPsychologist
+from . mcts import MCTSTeacher
+from . threshold import Threshold
+from . psychologist import Psychologist
 

@@ -117,21 +117,6 @@ class Learner:
         return log_lik
 
     @classmethod
-    def generate_param(cls, param, bounds, n_item):
-
-        if isinstance(param, str):
-            if param in ("heterogeneous", "het"):
-                param = np.zeros((n_item, len(bounds)))
-                for i, b in enumerate(bounds):
-                    param[:, i] = np.random.uniform(b[0], b[1], size=n_item)
-
-            else:
-                raise ValueError
-        else:
-            param = np.asarray(param)
-        return param
-
-    @classmethod
     def get(cls, tk):
 
         return cls(

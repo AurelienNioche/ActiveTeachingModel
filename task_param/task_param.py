@@ -1,9 +1,7 @@
 import json
 import numpy as np
 
-from learner.learner import Learner
-from teacher import Leitner, ThresholdTeacher, MCTSTeacher, \
-    ThresholdPsychologist, MCTSPsychologist
+from teacher import Leitner, Threshold, MCTSTeacher, Psychologist
 
 N_SEC_PER_DAY = 86400
 N_SEC_PER_ITER = 2
@@ -12,9 +10,6 @@ N_SEC_PER_ITER = 2
 TEACHERS = {
     'leitner': Leitner,
     'mcts': MCTSTeacher,
-    'threshold': ThresholdTeacher,
-    'mcts-psy': MCTSPsychologist,
-    'threshold-psy': ThresholdPsychologist
 }
 
 
@@ -34,8 +29,8 @@ class TaskParam:
             self.teachers.append(t)
 
         self.bounds = np.asarray(bounds)
-        self.param = Learner.generate_param(param=param, bounds=bounds,
-                                            n_item=n_item)
+        self.param = Psychologist.generate_param(param=param, bounds=bounds,
+                                                 n_item=n_item)
         self.param_labels = param_labels
         self.n_item = n_item
         self.n_iter_per_ss = n_iter_per_ss
