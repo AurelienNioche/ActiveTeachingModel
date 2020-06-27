@@ -3,7 +3,7 @@ import os
 import numpy as np
 from tqdm import tqdm
 
-from learner.learner import Learner
+from teacher.psychologist import Psychologist
 
 from plot.plot import DataFig, plot
 
@@ -19,8 +19,8 @@ def _format_parameter_recovery(param_recovery_cond, tk):
     n_param = len(tk.param)
 
     n_iter = tk.n_iter
-    n_iter_per_ss = tk.n_iter_per_ss
-    n_iter_between_ss = tk.n_iter_between_ss
+    n_iter_per_ss = tk.ss_n_iter
+    n_iter_between_ss = tk.ss_n_iter_between
 
     hist_pr = \
         {
@@ -58,13 +58,18 @@ def _format_data(data_cond, training, tk):
 
     it = 0
 
-    learner = Learner.get(tk)
+    psychologist = Psychologist.create(tk)
+
+    now = 0
 
     for t in tqdm(range(tk.terminal_t)):
 
         t_is_teaching = training[t]
 
-        seen = learner.seen
+        p_at_t, seen = psychologist.p_seen(
+            now=now,
+            param=tk.param)
+
         sum_seen = np.sum(seen)
 
         n_seen[t] = sum_seen
@@ -72,21 +77,21 @@ def _format_data(data_cond, training, tk):
         if sum_seen > 0:
 
             items_seen_at_t = np.arange(tk.n_item)[seen]
-            p_at_t = learner.p_seen()
 
             for item, p_item in zip(items_seen_at_t, p_at_t):
                 idx_in_the_end = seen_in_the_end.index(item)
                 tup = (t, p_item)
                 p[idx_in_the_end].append(tup)
 
-            n_learnt[t] = np.sum(p_at_t > tk.thr)
+            n_learnt[t] = np.sum(p_at_t > tk.learnt_threshold)
 
-        item = None
         if t_is_teaching:
             item = hist[it]
+            psychologist.update_minimal(item=item, timestamp=now)
             it += 1
-
-        learner.update_one_step_only(item=item)
+            now += tk.time_per_iter
+        else:
+            now += tk.time_per_iter * tk.ss_n_iter_between
 
     return {'n_learnt': n_learnt, 'p': p, 'n_seen': n_seen}
 
@@ -95,8 +100,8 @@ def make_fig(data, param_recovery, tk):
 
     # training = np.zeros(tk.terminal_t, dtype=bool)
     training = np.tile(
-        [1, ]*tk.n_iter_per_ss
-        + [0, ]*tk.n_iter_between_ss,
+        [1, ]*tk.ss_n_iter
+        + [0, ]*tk.ss_n_iter_between,
         tk.n_ss)
 
     cond_labels = list(data.keys())
@@ -108,22 +113,22 @@ def make_fig(data, param_recovery, tk):
     data_fig = DataFig(cond_labels=cond_labels,
                        training=training,
                        info=tk.info,
-                       threshold=tk.thr,
+                       threshold=tk.learnt_threshold,
                        exam=tk.terminal_t,
                        param=tk.param,
                        param_labels=tk.param_labels,
                        cond_labels_param_recovery=cond_labels_param_recovery)
 
     for i, cd in enumerate(cond_labels_param_recovery):
-        if len(tk.param.shape) > 1:  # Heterogeneous parameters
-            hist_pr = {
-                "post_mean": param_recovery[cd]['post_mean'],
-                "post_std": None
-            }
-        else:
-            hist_pr = _format_parameter_recovery(
-                tk=tk,
-                param_recovery_cond=param_recovery[cd])
+        # if len(tk.param.shape) > 1:  # Heterogeneous parameters
+        hist_pr = {
+            "post_mean": param_recovery[cd],
+            "post_std": None
+        }
+        # else:
+        #     hist_pr = _format_parameter_recovery(
+        #         tk=tk,
+        #         param_recovery_cond=param_recovery[cd])
 
         data_fig.add(
             post_mean=hist_pr["post_mean"],

@@ -124,7 +124,7 @@ class Learner:
             param=tk.param,
             n_item=tk.n_item,
             n_ss=tk.n_ss,
-            n_iter_per_ss=tk.n_iter_per_ss,
-            n_iter_between_ss=tk.n_iter_between_ss,
+            n_iter_per_ss=tk.ss_n_iter,
+            n_iter_between_ss=tk.ss_n_iter_between,
             terminal_t=tk.terminal_t
         )

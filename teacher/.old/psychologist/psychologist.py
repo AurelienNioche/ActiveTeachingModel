@@ -86,6 +86,7 @@ class Psychologist:
         return
 
 
+
 class PsychologistHomogeneous(Psychologist):
 
     def __init__(self, n_iter, learner, grid_size=20):
@@ -219,7 +220,7 @@ class PsychologistHeterogeneous(Psychologist):
                 self.hist_pm[i].append([self.learner.t,
                                         *self.post_mean[i]])
         elif self.learner.c_iter == (self.learner.n_ss
-                                     * self.learner.n_iter_per_ss)-1:
+                                     * self.learner.ss_n_iter)-1:
             self.hist_pm[item].append([self.learner.t,
                                        *self.post_mean[item]])
             for i in range(self.learner.n_item):

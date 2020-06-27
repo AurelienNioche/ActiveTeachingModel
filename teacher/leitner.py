@@ -3,11 +3,12 @@ import numpy as np
 
 class Leitner:
 
-    def __init__(self, n_item, delay_factor=2):
+    def __init__(self, n_item, delay_factor=2, delay_min=60):
 
         self.n_item = n_item
 
         self.delay_factor = delay_factor
+        self.delay_min = delay_min
 
         self.box = np.full(n_item, -1, dtype=int)
         self.due = np.full(n_item, -1, dtype=int)
@@ -24,7 +25,7 @@ class Leitner:
         delay = self.delay_factor ** self.box[last_idx]
         # Delay is 1, 2, 4, 8, 16, 32, 64, 128, 256, 512 ... minutes
         self.due[last_idx] = \
-            last_time_reply + 60 * delay
+            last_time_reply + self.delay_min * delay
 
     def _pickup_item(self, now):
 
@@ -62,3 +63,9 @@ class Leitner:
             item_idx = self._pickup_item(now)
 
         return item_idx
+
+    @classmethod
+    def create(cls, tk, omniscient):
+        return cls(n_item=tk.n_item,
+                   delay_factor=tk.delay_factor,
+                   delay_min=tk.delay_min)

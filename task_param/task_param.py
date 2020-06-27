@@ -8,6 +8,7 @@ N_SEC_PER_ITER = 2
 
 
 TEACHERS = {
+    'threshold': Threshold,
     'leitner': Leitner,
     'mcts': MCTSTeacher,
 }
@@ -16,9 +17,15 @@ TEACHERS = {
 class TaskParam:
 
     def __init__(self, bounds, param, param_labels, n_item,
-                 n_iter_per_ss, n_iter_between_ss,
+                 ss_n_iter, ss_n_iter_between,
+                 is_item_specific, time_per_iter,
                  n_ss, thr, mcts, teachers,
-                 seed, name):
+                 grid_size,
+                 seed, name, delay_factor, delay_min,
+                 omniscient):
+
+        self.delay_factor = delay_factor
+        self.delay_min = delay_min
 
         self.teachers = []
         for str_t in teachers:
@@ -33,24 +40,35 @@ class TaskParam:
                                                  n_item=n_item)
         self.param_labels = param_labels
         self.n_item = n_item
-        self.n_iter_per_ss = n_iter_per_ss
+        self.ss_n_iter = ss_n_iter
 
-        if isinstance(n_iter_between_ss, str):
-            if n_iter_between_ss == 'day':
-                n_iter_between_ss = int(
-                    N_SEC_PER_DAY/N_SEC_PER_ITER - self.n_iter_per_ss)
+        self.time_per_iter = time_per_iter
+
+        self.is_item_specific = is_item_specific
+        self.grid_size = grid_size
+
+        if isinstance(ss_n_iter_between, str):
+            if ss_n_iter_between == 'day':
+                ss_n_iter_between = int(
+                    N_SEC_PER_DAY/N_SEC_PER_ITER - self.ss_n_iter)
             else:
                 raise ValueError
 
-        self.n_iter_between_ss = n_iter_between_ss
+        self.ss_n_iter_between = ss_n_iter_between
 
         self.n_ss = n_ss
-        self.thr = thr
-        self.mcts_kwargs = mcts
+        self.learnt_threshold = thr
+
+        self.iter_limit = mcts["iter_limit"]
+        self.time_limit = mcts["time_limit"]
+        self.horizon = mcts["horizon"]
+
+        self.omniscient = omniscient
+
         self.seed = seed
 
-        self.n_iter = n_ss * n_iter_per_ss
-        self.terminal_t = n_ss * (n_iter_per_ss + n_iter_between_ss)
+        self.n_iter = n_ss * ss_n_iter
+        self.terminal_t = n_ss * (ss_n_iter + ss_n_iter_between)
 
         n_param = len(self.bounds)
         # if self.param.shape == (n_item, n_param):
@@ -61,8 +79,8 @@ class TaskParam:
 
         self.extension = name
             # f'n_ss={n_ss}_' \
-            # f'n_iter_per_ss={n_iter_per_ss}_' \
-            # f'n_iter_between_ss={n_iter_between_ss}_' \
+            # f'ss_n_iter={ss_n_iter}_' \
+            # f'ss_n_iter_between={ss_n_iter_between}_' \
             # f'mcts_h={mcts_horizon}_' \
             # f'{pr_str}_' \
             # f'seed={seed}'
@@ -80,8 +98,8 @@ class TaskParam:
             pr_str = ', '.join(param_str_list)
 
         mcts_pr_str_list = []
-        for (k, v) in self.mcts_kwargs.items():
-            if not isinstance(v, str):
+        for (k, v) in mcts.items():
+            if isinstance(v, float):
                 s = f"{k} = ${v:.2f}$\n"
             else:
                 s = f"{k} = {v}\n"
@@ -93,9 +111,9 @@ class TaskParam:
             r'$n_{\mathrm{session}}=' \
             + str(self.n_ss) + '$\n\n' \
             r'$n_{\mathrm{iter\,per\,session}}=' \
-            + str(self.n_iter_per_ss) + '$\n' \
+            + str(self.ss_n_iter) + '$\n' \
             r'$n_{\mathrm{iter\,between\,session}}=' \
-            + str(self.n_iter_between_ss) + '$\n\n' \
+            + str(self.ss_n_iter_between) + '$\n\n' \
             'MCTS:\n' \
             + mcts_pr_str + '\n' \
             + pr_str + '\n\n' + \

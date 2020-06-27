@@ -1,12 +1,6 @@
-from django.db import models
-from django.contrib.postgres.fields import ArrayField
-from django.utils import timezone
-
 import numpy as np
-import pandas as pd
 
 from . psychologist import Psychologist, Learner
-
 from . mcts_tools.mcts import MCTS
 
 
@@ -108,7 +102,8 @@ class MCTSTeacher:
 
     def __init__(self, n_item, learnt_threshold, bounds, grid_size,
                  is_item_specific, iter_limit, time_limit, horizon,
-                 time_per_iter, ss_n_iter, ss_n_iter_between):
+                 time_per_iter, ss_n_iter, ss_n_iter_between,
+                 param=None):
 
         self.psychologist = Psychologist(
             n_item=n_item,
@@ -131,12 +126,14 @@ class MCTSTeacher:
         self.iter = 0
         self.ss_it = 0
 
+        self.param = param
+
     def _revise_goal(self):
 
         remain = self.ss_n_iter - self.ss_it
 
-        print("iter", self.iter)
-        print("horizon", self.horizon)
+        # print("iter", self.iter)
+        # print("horizon", self.horizon)
 
         if self.iter < self.horizon:
             h = self.horizon - self.iter
@@ -144,8 +141,8 @@ class MCTSTeacher:
             self.iter = 0
             h = self.horizon
 
-        print("iter", self.iter)
-        print("h", h)
+        # print("iter", self.iter)
+        # print("h", h)
 
         if remain > h:
             delta_timestep = np.ones(h, dtype=int) * self.time_per_iter
@@ -178,9 +175,11 @@ class MCTSTeacher:
         sc = now - last_pres
         delta = np.full(self.n_item, -1, dtype=int)
         delta[seen] = sc
+
+        param = self.param if self.param is not None else self.psychologist.inferred_learner_param()
         learner_state = LearnerState(
             param=LearnerStateParam(
-                learner_param=self.psychologist.inferred_learner_param(),
+                learner_param=param,
                 is_item_specific=self.psychologist.is_item_specific,
                 learnt_threshold=self.learnt_threshold,
                 n_item=self.n_item,
@@ -208,3 +207,21 @@ class MCTSTeacher:
 
             item_idx = self._select_item(now)
         return item_idx
+
+    @classmethod
+    def create(cls, tk, omniscient):
+        return cls(
+            n_item=tk.n_item,
+            learnt_threshold=tk.learnt_threshold,
+            bounds=tk.bounds,
+            grid_size=tk.grid_size,
+            is_item_specific=tk.is_item_specific,
+            iter_limit=tk.iter_limit,
+            time_limit=tk.time_limit,
+            horizon=tk.horizon,
+            time_per_iter=tk.time_per_iter,
+            ss_n_iter=tk.ss_n_iter,
+            ss_n_iter_between=tk.ss_n_iter_between,
+            param=tk.param if omniscient else None
+        )
+

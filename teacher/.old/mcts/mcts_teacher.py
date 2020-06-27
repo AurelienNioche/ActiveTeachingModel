@@ -71,8 +71,8 @@ class MCTSTeacher:
                     self.dyn_param.terminal_t = 0
 
                 c_iter_ss = self.learner_state.learner.c_iter_ss
-                n_breaks = (c_iter_ss + self.horizon) // self.learner_state.learner.n_iter_per_ss
-                to_add = self.horizon + n_breaks * self.learner_state.learner.n_iter_between_ss
+                n_breaks = (c_iter_ss + self.horizon) // self.learner_state.learner.ss_n_iter
+                to_add = self.horizon + n_breaks * self.learner_state.learner.ss_n_iter_between
                 self.dyn_param.terminal_t += to_add
             else:
                 pass

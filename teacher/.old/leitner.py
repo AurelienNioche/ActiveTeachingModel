@@ -59,8 +59,8 @@ class Leitner:
             - self.delay_factor**self.box[selected_item]
 
         self.c_iter_session += 1
-        if self.c_iter_session >= self.learner.n_iter_per_ss:
-            self.waiting_time[:] += self.learner.n_iter_between_ss
+        if self.c_iter_session >= self.learner.ss_n_iter:
+            self.waiting_time[:] += self.learner.ss_n_iter_between
             self.c_iter_session = 0
 
     def _find_due_items(self):

@@ -29,10 +29,10 @@ def fig_parameter_recovery(param_labels, cond_labels, post_means, post_sds,
 
             if isinstance(post_means[j], dict):
                 means = post_means[j][pr]
-                stds = post_sds[j][pr]
+                # stds = post_sds[j][pr]
             else:
                 means = post_means[j][:, param_labels.index(pr)]
-                stds = post_sds[j][:, param_labels.index(pr)]
+                # stds = post_sds[j][:, param_labels.index(pr)]
 
             if isinstance(true_param, dict):
                 true_p = true_param[pr]
@@ -42,9 +42,9 @@ def fig_parameter_recovery(param_labels, cond_labels, post_means, post_sds,
                        alpha=.2)
 
             ax.plot(means, color=colors[j], label=dt)
-            ax.fill_between(range(len(means)),
-                            means-stds,
-                            means+stds, alpha=.2, color=colors[j])
+            # ax.fill_between(range(len(means)),
+            #                 means-stds,
+            #                 means+stds, alpha=.2, color=colors[j])
 
             ax.set_title(pr)
             ax.set_xlabel("Time")
