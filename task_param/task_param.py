@@ -1,7 +1,10 @@
 import json
 import numpy as np
 
-from teacher import Leitner, Threshold, MCTSTeacher, Psychologist
+from teacher import Leitner, Threshold, MCTSTeacher
+from teacher.psychologist.psychologist import Psychologist
+from teacher.psychologist.learner.exponential_n_delta import ExponentialNDelta
+from teacher.psychologist.learner.power_law import PowerLaw
 
 N_SEC_PER_DAY = 86400
 N_SEC_PER_ITER = 2
@@ -13,19 +16,26 @@ TEACHERS = {
     'mcts': MCTSTeacher,
 }
 
+LEARNER = {
+    'exponential_n_delta': ExponentialNDelta,
+    'power_law': PowerLaw
+}
+
 
 class TaskParam:
 
     def __init__(self, bounds, param, param_labels, n_item,
                  ss_n_iter, ss_n_iter_between,
                  is_item_specific, time_per_iter,
-                 n_ss, thr, mcts, teachers,
+                 n_ss, thr, mcts,
+                 learner_model,
+                 teachers,
                  grid_size,
-                 seed, name, delay_factor, delay_min,
+                 seed, name, leitner,
                  omniscient):
 
-        self.delay_factor = delay_factor
-        self.delay_min = delay_min
+        assert len(teachers) == len(omniscient), \
+            "'teachers' and 'omniscient' lists should be of equal size"
 
         self.teachers = []
         for str_t in teachers:
@@ -35,9 +45,12 @@ class TaskParam:
                 raise ValueError(f'Teacher type not recognized: {str_t}')
             self.teachers.append(t)
 
+        self.learner_model = LEARNER[learner_model]
+
         self.bounds = np.asarray(bounds)
-        self.param = Psychologist.generate_param(param=param, bounds=bounds,
-                                                 n_item=n_item)
+        self.param = Psychologist.generate_param(
+            param=param, bounds=bounds,
+            n_item=n_item)
         self.param_labels = param_labels
         self.n_item = n_item
         self.ss_n_iter = ss_n_iter
@@ -62,6 +75,9 @@ class TaskParam:
         self.iter_limit = mcts["iter_limit"]
         self.time_limit = mcts["time_limit"]
         self.horizon = mcts["horizon"]
+
+        self.delay_factor = leitner["delay_factor"]
+        self.delay_min = leitner["delay_min"]
 
         self.omniscient = omniscient
 
@@ -92,7 +108,7 @@ class TaskParam:
         else:
             param_str_list = []
             for (k, v) in zip(self.param_labels, self.param):
-                s = '$\\' + k + f"={v:.2f}$"
+                s = '$' + k + f"={v:.2f}$"
                 param_str_list.append(s)
 
             pr_str = ', '.join(param_str_list)

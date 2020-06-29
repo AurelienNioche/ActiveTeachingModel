@@ -1,17 +1,18 @@
 import numpy as np
+from . generic import Teacher
 
 
-class Leitner:
+class Leitner(Teacher):
 
-    def __init__(self, n_item, delay_factor=2, delay_min=60):
+    def __init__(self, n_item, delay_factor, delay_min, box, due):
 
         self.n_item = n_item
 
         self.delay_factor = delay_factor
         self.delay_min = delay_min
 
-        self.box = np.full(n_item, -1, dtype=int)
-        self.due = np.full(n_item, -1, dtype=int)
+        self.box = box
+        self.due = due
 
     def update_box_and_due_time(self, last_idx,
                                 last_was_success, last_time_reply):
@@ -66,6 +67,10 @@ class Leitner:
 
     @classmethod
     def create(cls, tk, omniscient):
+        box = np.full(tk.n_item, -1)
+        due = np.full(tk.n_item, -1)
         return cls(n_item=tk.n_item,
                    delay_factor=tk.delay_factor,
-                   delay_min=tk.delay_min)
+                   delay_min=tk.delay_min,
+                   box=box,
+                   due=due)

@@ -3,7 +3,7 @@ from tqdm import tqdm
 import pickle
 import numpy as np
 
-from teacher.psychologist import Psychologist
+from teacher.psychologist.psychologist import Psychologist
 
 SCRIPT_NAME = os.path.basename(__file__).split(".")[0]
 PICKLE_FOLDER = os.path.join("pickle", SCRIPT_NAME)
@@ -17,7 +17,7 @@ def run(teacher, tk, omniscient):
     if use_teacher_psy:
         psychologist = teacher.psychologist
     else:
-        psychologist = Psychologist.create(tk)
+        psychologist = Psychologist.create(tk=tk, omniscient=True)
 
     np.random.seed(tk.seed)
     hist = np.zeros(tk.n_ss * tk.ss_n_iter, dtype=int)
@@ -43,14 +43,14 @@ def run(teacher, tk, omniscient):
                     psychologist.p(
                         item=item,
                         param=tk.param,
-                        timestamp=timestamp)
+                        now=timestamp)
                 hist[itr] = item
 
                 if use_teacher_psy:
                     inferred_param.append(
                         teacher.psychologist.inferred_param)
                 else:
-                    psychologist.update_minimal(item=item, timestamp=timestamp)
+                    psychologist.update_learner(item=item, timestamp=timestamp)
 
                 now += tk.time_per_iter
                 itr += 1
@@ -73,7 +73,6 @@ def _make_data(tk):
 
         tqdm.write(f"Simulating '{teacher_class.__name__}'...")
         teacher = teacher_class.create(tk=tk, omniscient=omniscient)
-
         r = run(teacher=teacher, tk=tk, omniscient=omniscient)
 
         cond_label = teacher_class.__name__
@@ -89,15 +88,17 @@ def _make_data(tk):
     return {"tk": tk, "data": data, "param_recovery": param_recovery}
 
 
-def make_data(tk, force=False):
+def make_data(tk, force):
 
     bkp_file = os.path.join(PICKLE_FOLDER, f"{tk.extension}.p")
 
     if os.path.exists(bkp_file) and not force:
+        print("Loading from backup file...")
         with open(bkp_file, 'rb') as f:
             data = pickle.load(f)
 
     else:
+        print("Running...")
         data = _make_data(tk=tk)
         with open(bkp_file, 'wb') as f:
             pickle.dump(data, f)

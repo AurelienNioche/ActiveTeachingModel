@@ -3,7 +3,7 @@ import os
 import numpy as np
 from tqdm import tqdm
 
-from teacher.psychologist import Psychologist
+from teacher.psychologist.psychologist import Psychologist
 
 from plot.plot import DataFig, plot
 
@@ -58,7 +58,7 @@ def _format_data(data_cond, training, tk):
 
     it = 0
 
-    psychologist = Psychologist.create(tk)
+    psychologist = Psychologist.create(tk=tk, omniscient=True)
 
     now = 0
 
@@ -66,9 +66,7 @@ def _format_data(data_cond, training, tk):
 
         t_is_teaching = training[t]
 
-        p_at_t, seen = psychologist.p_seen(
-            now=now,
-            param=tk.param)
+        p_at_t, seen = psychologist.p_seen(now=now)
 
         sum_seen = np.sum(seen)
 
@@ -87,7 +85,7 @@ def _format_data(data_cond, training, tk):
 
         if t_is_teaching:
             item = hist[it]
-            psychologist.update_minimal(item=item, timestamp=now)
+            psychologist.update_learner(item=item, timestamp=now)
             it += 1
             now += tk.time_per_iter
         else:
