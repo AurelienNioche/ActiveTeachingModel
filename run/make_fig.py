@@ -74,7 +74,7 @@ def _format_data(data_cond, training, tk):
 
         if sum_seen > 0:
 
-            items_seen_at_t = np.arange(tk.n_item)[seen]
+            items_seen_at_t = np.flatnonzero(seen)
 
             for item, p_item in zip(items_seen_at_t, p_at_t):
                 idx_in_the_end = seen_in_the_end.index(item)
@@ -87,9 +87,8 @@ def _format_data(data_cond, training, tk):
             item = hist[it]
             psychologist.update_learner(item=item, timestamp=now)
             it += 1
-            now += tk.time_per_iter
-        else:
-            now += tk.time_per_iter * tk.ss_n_iter_between
+
+        now += tk.time_per_iter
 
     return {'n_learnt': n_learnt, 'p': p, 'n_seen': n_seen}
 

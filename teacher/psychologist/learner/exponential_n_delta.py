@@ -40,12 +40,7 @@ class ExponentialNDelta(Learner):
         delta = timestamp - self.last_pres[item]
         p_success = np.exp(- fr * delta)
 
-        if response == 1:
-            p = p_success
-        elif response == 0:
-            p = 1 - p_success
-        else:
-            raise ValueError
+        p = p_success if response else 1-p_success
 
         log_lik = np.log(p + EPS)
         return log_lik

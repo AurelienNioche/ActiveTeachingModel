@@ -4,7 +4,8 @@ import numpy as np
 from teacher import Leitner, Threshold, MCTSTeacher
 from teacher.psychologist.psychologist import Psychologist
 from teacher.psychologist.learner.exponential_n_delta import ExponentialNDelta
-from teacher.psychologist.learner.power_law import PowerLaw
+from teacher.psychologist.learner.act_r2005 import ActR2005
+from teacher.psychologist.learner.act_r import ActR
 
 N_SEC_PER_DAY = 86400
 N_SEC_PER_ITER = 2
@@ -18,7 +19,8 @@ TEACHERS = {
 
 LEARNER = {
     'exponential_n_delta': ExponentialNDelta,
-    'power_law': PowerLaw
+    'act_r2005': ActR2005,
+    'act_r': ActR
 }
 
 
@@ -132,6 +134,7 @@ class TaskParam:
             + str(self.ss_n_iter_between) + '$\n\n' \
             'MCTS:\n' \
             + mcts_pr_str + '\n' \
+            + f'Learner: {self.learner_model.__class__.__name__}\n' \
             + pr_str + '\n\n' + \
             r'$\mathrm{seed}=' \
             + str(self.seed) + '$'
