@@ -14,6 +14,7 @@ class ActR2005(Learner):
         self.timestamps[:] = [[] for _ in range(n_item)]
 
     def p_seen(self, param, is_item_specific, now):
+
         param = param[self.seen, :] if is_item_specific else param
 
         p = np.zeros(np.sum(self.seen))
@@ -51,7 +52,7 @@ class ActR2005(Learner):
 
         with np.errstate(over='ignore'):
             m = np.log(np.sum(np.power(delta, -a)))
-        x = (tau + m) / s
+        x = (-tau + m) / s
         p = expit(x)
         return p
 

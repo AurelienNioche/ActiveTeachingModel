@@ -6,6 +6,7 @@ EPS = np.finfo(np.float).eps
 
 
 class Psychologist:
+
     def __init__(self, n_item, is_item_specific, learner_model,
                  bounds, grid_size, omniscient, param):
 
@@ -149,7 +150,3 @@ class Psychologist:
             is_item_specific=tk.is_item_specific,
             param=tk.param
         )
-
-    def get_learner_state(self):
-
-        return

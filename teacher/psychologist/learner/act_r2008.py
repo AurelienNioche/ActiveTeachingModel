@@ -5,7 +5,7 @@ from scipy.special import expit
 EPS = np.finfo(np.float).eps
 
 
-class ActR(Learner):
+class ActR2008(Learner):
 
     def __init__(self, n_item):
 
@@ -14,6 +14,7 @@ class ActR(Learner):
         self.timestamps[:] = [[] for _ in range(n_item)]
 
     def p_seen(self, param, is_item_specific, now):
+
         param = param[self.seen, :] if is_item_specific else param
 
         p = np.zeros(np.sum(self.seen))
@@ -50,14 +51,14 @@ class ActR(Learner):
             return 1
 
         d = np.full(n, a)
-        m = np.zeros(n)
+        e_m = np.zeros(n)
 
         for i in range(n):
             if i > 0:
-                d[i] += c * np.exp(m[i - 1])
+                d[i] += c * e_m[i - 1]
             with np.errstate(over='ignore'):
-                m[i] = np.log(np.sum(np.power(delta[:i + 1]/10, -d[:i + 1])))
-        x = (tau + m[-1]) / s
+                e_m[i] = np.sum(np.power(delta[:i + 1], -d[:i + 1]))
+        x = (-tau + np.log(e_m[-1])) / s
         p = expit(x)
         return p
 

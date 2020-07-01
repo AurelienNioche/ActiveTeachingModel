@@ -2,24 +2,75 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.special import expit
 
-from teacher.psychologist.learner.act_r2005 import ActR2005
-from teacher.psychologist.learner.act_r import ActR
+from datetime import datetime
 
 
-class PowerLawOriginal:
+class ExponentialDecay:
 
-    def __init__(self, n_item):
+    def __init__(self, n_item, param):
+        self.n_item = n_item
+        self.param = param
+
+        self.n_pres = np.zeros(n_item, dtype=int)
+        self.last_pres = np.zeros(n_item, dtype=int)
+
+    def p(self, item, now):
+        fr = self.param[0] * (1-self.param[1])**(self.n_pres[item]-1)
+        delta = now - self.last_pres[item]
+        return np.exp(-fr * delta)
+
+    def update(self, item, timestamp):
+        self.n_pres[item] += 1
+        self.last_pres[item] = timestamp
+
+
+class PowerLaw:
+
+    def __init__(self, n_item, param):
+
+        self.param = param
 
         self.seen = np.zeros(n_item, dtype=bool)
         self.timestamps = np.zeros(n_item, dtype=object)
         self.timestamps[:] = [[] for _ in range(n_item)]
 
-        self.m = np.zeros(n_item, dtype=object)
-        self.m[:] = [[] for _ in range(n_item)]
+    def p(self, item, now):
 
-    def p(self, item, param, now, is_item_specific):
+        a, d = self.param
 
-        tau, s, a = param[item, :] if is_item_specific else param
+        rep = np.asarray(self.timestamps[item])
+        n = len(rep)
+        if n == 0:
+            return 0
+
+        delta = now - rep
+        if np.min(delta) == 0:
+            return 1
+
+        with np.errstate(over='ignore'):
+            m = np.sum(a*np.power(delta, -d))
+        p = m / (1+m)
+        return p
+
+    def update(self, item, timestamp):
+
+        self.seen[item] = True
+        self.timestamps[item].append(timestamp)
+
+
+class ActR2005:
+
+    def __init__(self, n_item, param):
+
+        self.param = param
+
+        self.seen = np.zeros(n_item, dtype=bool)
+        self.timestamps = np.zeros(n_item, dtype=object)
+        self.timestamps[:] = [[] for _ in range(n_item)]
+
+    def p(self, item, now):
+
+        tau, s, a = self.param
 
         rep = np.asarray(self.timestamps[item])
         n = len(rep)
@@ -32,9 +83,8 @@ class PowerLawOriginal:
 
         with np.errstate(over='ignore'):
             m = np.log(np.sum(np.power(delta, -a)))
-        x = (tau + m) / s
+        x = (-tau + m) / s
         p = expit(x)
-        # print(p)
         return p
 
     def update(self, item, timestamp):
@@ -43,17 +93,19 @@ class PowerLawOriginal:
         self.timestamps[item].append(timestamp)
 
 
-class PowerLawPlus:
+class ActR2008:
 
-    def __init__(self, n_item):
+    def __init__(self, n_item, param):
+
+        self.param = param
 
         self.seen = np.zeros(n_item, dtype=bool)
         self.timestamps = np.zeros(n_item, dtype=object)
         self.timestamps[:] = [[] for _ in range(n_item)]
 
-    def p(self, item, param, now, is_item_specific):
+    def p(self, item, now):
 
-        tau, s, c, a = param[item, :] if is_item_specific else param
+        tau, s, c, a = self.param
 
         rep = np.asarray(self.timestamps[item])
         n = len(rep)
@@ -65,18 +117,58 @@ class PowerLawPlus:
             return 1
 
         d = np.full(n, a)
-        m = np.zeros(n)
+        e_m = np.zeros(n)
 
         for i in range(n):
             if i > 0:
-                d[i] += c*np.exp(m[i-1])
-            print("d", d[i])
+                d[i] += c*e_m[i-1]
             with np.errstate(over='ignore'):
-                m[i] = np.log(np.sum(np.power(delta[:i+1]/60, -d[:i+1])))
-            print("m", m[i])
-        x = (tau + m[-1]) / s
+                e_m[i] = np.sum(np.power(delta[:i+1], -d[:i+1]))
+        x = (-tau + np.log(e_m[-1])) / s
         p = expit(x)
-        # print(p)
+        return p
+
+    def update(self, item, timestamp):
+
+        self.seen[item] = True
+        self.timestamps[item].append(timestamp)
+
+
+class ActR2008Fast:
+
+    def __init__(self, n_item, param):
+
+        tau, s, c, a = param
+
+        self.cst0 = np.exp(tau/s)
+        self.cst1 = - c * np.exp(tau)
+        self.min_s = -s
+        self.min_inv_s = -1/s
+        self.min_a = -a
+
+        self.seen = np.zeros(n_item, dtype=bool)
+        self.timestamps = np.zeros(n_item, dtype=object)
+        self.timestamps[:] = [[] for _ in range(n_item)]
+
+    def p(self, item, now):
+
+        rep = np.asarray(self.timestamps[item])
+        n = len(rep)
+        if n == 0:
+            return 0
+
+        delta = now - rep
+        if np.min(delta) == 0:
+            return 1
+
+        tk_sum = delta[0]**self.min_a
+        one_minus_p = 1 + self.cst0 * tk_sum**self.min_inv_s
+        with np.errstate(invalid='ignore'):
+            for i in range(1, n):
+                tk_sum += self.cst1 * one_minus_p**self.min_s + self.min_a
+                one_minus_p = 1 + self.cst0 * tk_sum**self.min_inv_s
+
+        p = 1/one_minus_p
         return p
 
     def update(self, item, timestamp):
@@ -86,36 +178,48 @@ class PowerLawPlus:
 
 
 def main():
-    t = np.arange(0, 1000, 1)
-    # learner = ActR2005(n_item=1)
 
-    #
-    # param = -0.704, 0.0786, 0.279,  0.177,
-    # tau, s, c, a = param
+    tau, s, c, a = [-0.704, 0.0786, 0.279, 0.177]   # [-0.704, 0.0786, 0.279, 0.177]
 
-    param = [
-        [-0.704, 0.0786, 0.279, 0.177],
-        [-0.704, 0.0786, 0.279, 0.177],
-        # [-0.704, 0.0786, 0.177],
+    t = np.arange(0, 5000, 1)
 
-    ]
-    rep =np.arange(0, 500, 20)
+    rep_mass = list(np.arange(12)) + [3000, ]
+    rep_spaced = list(2**np.arange(12)) + [3000,]
+    linestyles = '-', '--'
+    labels = "spaced", "mass",
 
-    learners = (ActR(n_item=1), PowerLawPlus(n_item=1))
-    p_recall = [[] for _ in learners]
+    for k, rep in enumerate((rep_spaced, rep_mass )):
 
-    for i in t:
-        if i in rep:
-            for l in learners:
-                l.update(item=0, timestamp=i)
-        for j, l in enumerate(learners):
-            p_r = l.p(item=0, param=param[j], is_item_specific=False,
-                      now=i)
-            p_recall[j].append(p_r)
+        learners = (
+            ActR2008Fast(n_item=1, param=(tau, s, c, a)),
+            # PowerLaw(n_item=1, param=(1, 0.02, )),
+            # ExponentialDecay(n_item=1, param=(0.015, 0.92)),
+            # ActR2005(n_item=1, param=(tau, s, a)),
+            ActR2008(n_item=1, param=(tau, s, c, a))
+        )
+        colors = [f'C{i}'for i in range(len(learners))]
 
-    for j, pr in enumerate(p_recall):
-        plt.plot(t, pr, label=learners[j].__class__.__name__)
-    plt.plot(t, np.exp(-0.02*t))
+        p_recall = [[] for _ in learners]
+
+        for i in t:
+            if i in rep:
+                for l in learners:
+                    dt_ = datetime.now()
+                    l.update(item=0, timestamp=i*60)
+                    print( l.__class__.__name__, datetime.now()-dt_)
+                print()
+            for j, l in enumerate(learners):
+                p_r = l.p(item=0, now=i*60)
+                p_recall[j].append(p_r)
+
+        for j, pr in enumerate(p_recall):
+            plt.plot(t, pr,
+                     linestyle=linestyles[k],
+                     label=learners[j].__class__.__name__ + labels[k],
+                     color=colors[j])
+    plt.ylabel("p recall")
+    plt.xlabel("time (minutes)")
+    plt.ylim(0, 1.01)
     plt.legend()
     plt.show()
     # for i in t:

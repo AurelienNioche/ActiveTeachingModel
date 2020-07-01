@@ -5,7 +5,7 @@ from teacher import Leitner, Threshold, MCTSTeacher
 from teacher.psychologist.psychologist import Psychologist
 from teacher.psychologist.learner.exponential_n_delta import ExponentialNDelta
 from teacher.psychologist.learner.act_r2005 import ActR2005
-from teacher.psychologist.learner.act_r import ActR
+from teacher.psychologist.learner.act_r2008 import ActR2008
 
 N_SEC_PER_DAY = 86400
 N_SEC_PER_ITER = 2
@@ -20,7 +20,7 @@ TEACHERS = {
 LEARNER = {
     'exponential_n_delta': ExponentialNDelta,
     'act_r2005': ActR2005,
-    'act_r': ActR
+    'act_r2008': ActR2008
 }
 
 
