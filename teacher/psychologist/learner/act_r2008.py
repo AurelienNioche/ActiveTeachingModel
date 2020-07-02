@@ -7,78 +7,95 @@ EPS = np.finfo(np.float).eps
 
 class ActR2008(Learner):
 
-    def __init__(self, n_item):
+    def __init__(self, n_item, param):
+
+        self.tau, self.s, self.c, self.a = param
 
         self.seen = np.zeros(n_item, dtype=bool)
         self.ts = []
         self.hist = []
+        self.ds = []
 
     def p_seen(self, param, is_item_specific, now):
 
-        param = param[self.seen, :] if is_item_specific else param
-
         ts = np.asarray(self.ts)
         hist = np.asarray(self.hist)
+        ds = np.asarray(self.ds)
 
         p = np.zeros(np.sum(self.seen))
         for i, item in enumerate(np.flatnonzero(self.seen)):
-            p[i] = self.p(item=item, param=param, now=now,
-                          # We already select a single set of parameter
-                          is_item_specific=False,
-                          rep=ts[hist == item])
+            p[i] = self._p(item=item, now=now,
+                           ts=ts, hist=hist, ds=ds)
         return p, self.seen
 
     def log_lik(self, item, grid_param, response, timestamp):
+        raise NotImplementedError
+        # ts = np.asarray(self.ts)
+        # hist = np.asarray(self.hist)
+        # ds = np.asarray(self.ds)
+        #
+        # p = np.zeros(len(grid_param))
+        # for i, param in enumerate(grid_param):
+        #     p[i] = self._p(
+        #         item=item, param=param, now=timestamp,
+        #         ts=ts, hist=hist, ds=ds)
+        #
+        # p = p if response else 1-p
+        # log_lik = np.log(p + EPS)
+        # return log_lik
 
-        ts = np.asarray(self.ts)
+    def _p(self, item, now, ts, hist, ds):
+        b = hist == item
+        rep = ts[b]
+        d = ds[b]
+
+        delta = (now - rep)
+
+        e_m = np.sum(np.power(delta, -d))
+
+        x = (-self.tau + np.log(e_m)) / self.s
+        p = expit(x)
+        return p
+
+    def p(self, item, param, now, is_item_specific):
+
         hist = np.asarray(self.hist)
-        rep = ts[hist == item]
-
-        p = np.zeros(len(grid_param))
-        for i, param in enumerate(grid_param):
-            p[i] = self.p(
-                item=item, param=param, now=timestamp,
-                # In this case, we consider one single set of parameter
-                is_item_specific=False, rep=rep)
-
-        p = p if response else 1-p
-        log_lik = np.log(p + EPS)
-        return log_lik
-
-    def p(self, item, param, now, is_item_specific, rep=None):
-
-        if rep is None:
-            rep = np.asarray(self.ts)[np.asarray(self.hist) == item]
-
-        tau, s, c, a = param[item, :] if is_item_specific else param
-
+        ts = np.asarray(self.ts)
+        ds = np.asarray(self.ds)
+        b = hist == item
+        rep = ts[b]
+        d = ds[b]
         n = len(rep)
         if n == 0:
             return 0
 
-        delta = now - rep
+        delta = (now - rep)
         if np.min(delta) == 0:
             return 1
 
-        d = np.full(n, a)
-        e_m = np.zeros(n)
+        e_m = np.sum(np.power(delta, -d))
 
-        for i in range(n):
-            if i > 0:
-                d[i] += c * e_m[i - 1]
-            with np.errstate(over='ignore'):
-                e_m[i] = np.sum(np.power(delta[:i + 1], -d[:i + 1]))
-        x = (-tau + np.log(e_m[-1])) / s
+        x = (-self.tau + np.log(e_m)) / self.s
         p = expit(x)
         return p
 
     def update(self, item, timestamp):
 
         self.seen[item] = True
-        self.ts.append(timestamp)
-        self.hist.append(item)
 
-    @classmethod
-    def f(cls, delta, d):
-        with np.errstate(over='ignore'):
-            return delta ** -d
+        hist = np.asarray(self.hist)
+        ts = np.asarray(self.ts)
+        ds = np.asarray(self.ds)
+        b = hist == item
+        rep = ts[b]
+        d = ds[b]
+        if len(rep) == 0:
+            self.ds.append(self.a)
+        else:
+            delta = (timestamp - rep)
+            e_m = np.sum(np.power(delta, -d))
+            d = self.c * e_m + self.a
+            self.ds.append(d)
+
+        self.hist.append(item)
+        self.ts.append(timestamp)

@@ -2,6 +2,8 @@ import numpy as np
 from scipy.special import logsumexp
 from itertools import product
 
+from . learner.act_r2008 import ActR2008
+
 EPS = np.finfo(np.float).eps
 
 
@@ -140,8 +142,16 @@ class Psychologist:
 
     @classmethod
     def create(cls, tk, omniscient):
-        # if 'ActR' not in tk.learner_model.__class__.__name__:
-        learner = tk.learner_model(tk.n_item)
+        if tk.learner_model == ActR2008:
+            if not omniscient:
+                raise NotImplementedError
+            elif tk.is_item_specific:
+                raise NotImplementedError
+            else:
+                learner = tk.learner_model(n_item=tk.n_item,
+                                           param=tk.param)
+        else:
+            learner = tk.learner_model(tk.n_item)
         # else:
         #     learner = tk.learner_model(tk.n_ss * tk.ss_n_iter)
         return cls(
