@@ -150,3 +150,9 @@ dmypy.json
 /data
 
 ActiveTeachingModel/credentials.py
+/user_data/bkp/
+/fit_pilot.txt
+/.old/
+pickle/
+/data.zip
+/user_data.zip

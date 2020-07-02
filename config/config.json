@@ -1,0 +1,24 @@
+{
+    "param": [-0.704, 0.0786,  0.279, 0.177],
+    "param_labels": ["tau", "s", "c", "a"],
+    "is_item_specific": false,
+    "n_item": 200,
+    "ss_n_iter": 200,
+    "ss_n_iter_between": 400,
+    "n_ss": 4,
+    "thr": 0.9,
+    "mcts": {
+        "iter_limit": 500, "time_limit": null,
+        "horizon": 10},
+    "leitner": {
+        "delay_factor": 2,
+        "delay_min": 2
+    },
+    "bounds": [[-1.00, 1.00], [0.0, 1.00], [0.0, 1.00],[0.0, 1.0]],
+    "learner_model": "act_r2008",
+    "teachers": ["leitner", "threshold", "mcts"],
+    "omniscient": [true, true, true],
+    "time_per_iter": 2,
+    "grid_size": 20,
+    "seed": 0
+}

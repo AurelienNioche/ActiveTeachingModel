@@ -1,0 +1,25 @@
+{
+    "param": [0.02, 0.44],
+    "param_labels": ["alpha", "beta"],
+    "is_item_specific": false,
+    "n_item": 500,
+    "ss_n_iter": 1000,
+    "ss_n_iter_between": 0,
+    "n_ss": 1,
+    "thr": 0.9,
+    "mcts": {
+        "iter_limit": 500, "time_limit": null,
+        "horizon": 100, "fixed_window":  true,
+        "rollout":  "threshold"},
+    "leitner": {
+        "delay_factor": 2,
+        "delay_min": 2
+    },
+    "bounds": [[0.001, 0.04], [0.2, 0.5]],
+    "learner_model": "exponential_n_delta",
+    "teachers": ["leitner", "threshold", "mcts"],
+    "omniscient": [true, true, true],
+    "time_per_iter": 2,
+    "grid_size": 20,
+    "seed": 0
+}
