@@ -9,7 +9,7 @@
     "thr": 0.9,
     "mcts": {
         "iter_limit": 500, "time_limit": null,
-        "horizon": 10},
+        "horizon": 100},
     "leitner": {
         "delay_factor": 2,
         "delay_min": 2
