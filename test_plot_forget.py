@@ -136,6 +136,45 @@ class ActR2008:
 
 class ActR2008Fast:
 
+    def __init__(self, param):
+
+        self.param = param
+
+        self.hist = []
+        self.ts = []
+
+    def p(self, item, now):
+
+        tau, s, c, a = self.param
+
+        rep = np.asarray(self.ts)[np.asarray(self.hist) == item]
+        n = len(rep)
+        if n == 0:
+            return 0
+
+        delta = now - rep
+        if np.min(delta) == 0:
+            return 1
+
+        d = np.full(n, a)
+        e_m = np.zeros(n)
+
+        for i in range(n):
+            if i > 0:
+                d[i] += c * e_m[i - 1]
+            with np.errstate(over='ignore'):
+                e_m[i] = np.sum(np.power(delta[:i + 1], -d[:i + 1]))
+        x = (-tau + np.log(e_m[-1])) / s
+        p = expit(x)
+        return p
+
+    def update(self, item, timestamp):
+        self.hist.append(item)
+        self.ts.append(timestamp)
+
+
+class ActR2008PA:
+
     def __init__(self, n_item, param):
 
         tau, s, c, a = param
@@ -181,21 +220,18 @@ def main():
 
     tau, s, c, a = [-0.704, 0.0786, 0.279, 0.177]   # [-0.704, 0.0786, 0.279, 0.177]
 
-    t = np.arange(0, 5000, 1)
+    t = np.arange(0, 10000, 1)
 
-    rep_mass = list(np.arange(12)) + [3000, ]
-    rep_spaced = list(2**np.arange(12)) + [3000,]
+    rep_mass = list(np.arange(12)) + [5000, ]
+    rep_spaced = list(4**np.arange(12)) + [5000, ]
     linestyles = '-', '--'
     labels = "spaced", "mass",
 
     for k, rep in enumerate((rep_spaced, rep_mass )):
 
         learners = (
-            ActR2008Fast(n_item=1, param=(tau, s, c, a)),
-            # PowerLaw(n_item=1, param=(1, 0.02, )),
-            # ExponentialDecay(n_item=1, param=(0.015, 0.92)),
-            # ActR2005(n_item=1, param=(tau, s, a)),
-            ActR2008(n_item=1, param=(tau, s, c, a))
+            ActR2008(n_item=1, param=(tau, s, c, a)),
+            ActR2008Fast(param=(tau, s, c, a))
         )
         colors = [f'C{i}'for i in range(len(learners))]
 
@@ -222,38 +258,21 @@ def main():
     plt.ylim(0, 1.01)
     plt.legend()
     plt.show()
-    # for i in t:
-    #     strength = np.log(i ** -d)
-    #     x = (- tau + strength) / temp
-    #     # p_r = expit(x)
-    #     p_r = a / (a+np.exp((-strength + tau)/temp))
-    #
-    #     # p_r = learner.p(item=0, param=[1.0, 1, 0, 1], is_item_specific=False,
-    #     #                 now=i)
-    #     p_recall.append(p_r)
-    #
-    # # t = np.arange(1, 1000)
-    # #
-    # # p_recall = 2*(t ** (-0.5))
-    # # p_recall = p_recall / (1+p_recall)
-    # plt.plot(p_recall)
-    #
-    #
-    # a = 12
-    # d = 0.45
-    #
-    # p_recall = []
-    # for i in t:
-    #     strength = a * i ** -d
-    #     p_r = strength / (1+strength)
-    #     p_recall.append(p_r)
-    #
-    # plt.plot(p_recall)
-    #
-    # p_recall = np.exp(-0.002*t)
-    # plt.plot(p_recall)
-    # plt.show()
 
+
+# def timeclock():
+#
+#     tau, s, c, a = [-0.704, 0.0786, 0.279, 0.177]
+#     from datetime import datetime
+#
+#     learners = (
+#         ActR2008(n_item=1, param=(tau, s, c, a)),
+#     )
+#
+#         a = datetime.now()
+#
+#         l = ActR2008(n_item=1, param=(tau, s, c, a))
+#         for i in range()
 
 if __name__ == "__main__":
     main()

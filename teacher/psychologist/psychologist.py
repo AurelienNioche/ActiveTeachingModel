@@ -7,7 +7,7 @@ EPS = np.finfo(np.float).eps
 
 class Psychologist:
 
-    def __init__(self, n_item, is_item_specific, learner_model,
+    def __init__(self, n_item, is_item_specific, learner,
                  bounds, grid_size, omniscient, param):
 
         self.omniscient = omniscient
@@ -40,7 +40,7 @@ class Psychologist:
             self.inferred_param = param
 
         self.is_item_specific = is_item_specific
-        self.learner = learner_model(n_item)
+        self.learner = learner
 
     @staticmethod
     def cp_grid_param(grid_size, bounds):
@@ -140,13 +140,16 @@ class Psychologist:
 
     @classmethod
     def create(cls, tk, omniscient):
-
+        # if 'ActR' not in tk.learner_model.__class__.__name__:
+        learner = tk.learner_model(tk.n_item)
+        # else:
+        #     learner = tk.learner_model(tk.n_ss * tk.ss_n_iter)
         return cls(
             omniscient=omniscient,
-            learner_model=tk.learner_model,
             n_item=tk.n_item,
             bounds=tk.bounds,
             grid_size=tk.grid_size,
             is_item_specific=tk.is_item_specific,
-            param=tk.param
+            param=tk.param,
+            learner=learner
         )
