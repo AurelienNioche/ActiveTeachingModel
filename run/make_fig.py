@@ -1,4 +1,5 @@
 import os
+import sys
 
 import numpy as np
 from tqdm import tqdm
@@ -62,7 +63,7 @@ def _format_data(data_cond, training, tk):
 
     now = 0
 
-    for t in tqdm(range(tk.terminal_t)):
+    for t in tqdm(range(tk.terminal_t), file=sys.stdout):
 
         t_is_teaching = training[t]
 

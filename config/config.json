@@ -2,9 +2,9 @@
     "param": [-0.704, 0.0786,  0.279, 0.177],
     "param_labels": ["tau", "s", "c", "a"],
     "is_item_specific": false,
-    "n_item": 200,
+    "n_item": 500,
     "ss_n_iter": 200,
-    "ss_n_iter_between": 400,
+    "ss_n_iter_between": "day",
     "n_ss": 4,
     "thr": 0.9,
     "mcts": {

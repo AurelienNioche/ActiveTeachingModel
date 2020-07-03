@@ -149,6 +149,8 @@ class Psychologist:
                 raise NotImplementedError
             else:
                 learner = tk.learner_model(n_item=tk.n_item,
+                                           n_iter=tk.n_ss*tk.ss_n_iter
+                                           + tk.horizon,
                                            param=tk.param)
         else:
             learner = tk.learner_model(tk.n_item)

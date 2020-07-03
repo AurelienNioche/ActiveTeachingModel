@@ -7,25 +7,25 @@ EPS = np.finfo(np.float).eps
 
 class ActR2008(Learner):
 
-    def __init__(self, n_item, param):
+    def __init__(self, n_item, n_iter, param):
 
         self.tau, self.s, self.c, self.a = param
 
         self.seen = np.zeros(n_item, dtype=bool)
-        self.ts = []
-        self.hist = []
-        self.ds = []
+        self.ts = np.full(n_iter, -1, dtype=int)
+        self.hist = np.full(n_iter, -1, dtype=int)
+        self.ds = np.full(n_iter, -1, dtype=float)
+
+        self.i = 0
 
     def p_seen(self, param, is_item_specific, now):
 
-        ts = np.asarray(self.ts)
-        hist = np.asarray(self.hist)
-        ds = np.asarray(self.ds)
-
-        p = np.zeros(np.sum(self.seen))
+        e_m = np.zeros(np.sum(self.seen))
         for i, item in enumerate(np.flatnonzero(self.seen)):
-            p[i] = self._p(item=item, now=now,
-                           ts=ts, hist=hist, ds=ds)
+            e_m[i] = self._e_m(item=item, now=now)
+
+        x = (-self.tau + np.log(e_m)) / self.s
+        p = expit(x)
         return p, self.seen
 
     def log_lik(self, item, grid_param, response, timestamp):
@@ -44,27 +44,21 @@ class ActR2008(Learner):
         # log_lik = np.log(p + EPS)
         # return log_lik
 
-    def _p(self, item, now, ts, hist, ds):
-        b = hist == item
-        rep = ts[b]
-        d = ds[b]
+    def _e_m(self, item, now):
+        b = self.hist == item
+        rep = self.ts[b]
+        d = self.ds[b]
 
         delta = (now - rep)
 
         e_m = np.sum(np.power(delta, -d))
-
-        x = (-self.tau + np.log(e_m)) / self.s
-        p = expit(x)
-        return p
+        return e_m
 
     def p(self, item, param, now, is_item_specific):
 
-        hist = np.asarray(self.hist)
-        ts = np.asarray(self.ts)
-        ds = np.asarray(self.ds)
-        b = hist == item
-        rep = ts[b]
-        d = ds[b]
+        b = self.hist == item
+        rep = self.ts[b]
+        d = self.ds[b]
         n = len(rep)
         if n == 0:
             return 0
@@ -82,20 +76,18 @@ class ActR2008(Learner):
     def update(self, item, timestamp):
 
         self.seen[item] = True
-
-        hist = np.asarray(self.hist)
-        ts = np.asarray(self.ts)
-        b = hist == item
-        rep = ts[b]
+        b = self.hist == item
+        rep = self.ts[b]
         if len(rep) == 0:
-            self.ds.append(self.a)
+            self.ds[self.i] = self.a
         else:
-            ds = np.asarray(self.ds)
-            d = ds[b]
+            d = self.ds[b]
             delta = (timestamp - rep)
             e_m = np.sum(np.power(delta, -d))
             d = self.c * e_m + self.a
-            self.ds.append(d)
+            self.ds[self.i] = d
 
-        self.hist.append(item)
-        self.ts.append(timestamp)
+        self.hist[self.i] = item
+        self.ts[self.i] = timestamp
+
+        self.i += 1

@@ -2,6 +2,7 @@ import os
 from tqdm import tqdm
 import pickle
 import numpy as np
+import sys
 
 from teacher.psychologist.psychologist import Psychologist
 
@@ -31,7 +32,7 @@ def run(teacher, tk, omniscient):
 
     itr = 0
 
-    with tqdm(total=tk.ss_n_iter*tk.n_ss) as pbar:
+    with tqdm(total=tk.ss_n_iter*tk.n_ss, file=sys.stdout) as pbar:
         for _ in range(tk.n_ss):
             for _ in range(tk.ss_n_iter):
                 item = teacher.ask(now=now,
