@@ -4,7 +4,7 @@
     "is_item_specific": false,
     "n_item": 500,
     "ss_n_iter": 200,
-    "ss_n_iter_between": "day",
+    "ss_n_iter_between": 2000,
     "n_ss": 4,
     "thr": 0.9,
     "mcts": {
