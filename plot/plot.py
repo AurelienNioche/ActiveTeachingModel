@@ -11,9 +11,11 @@ from utils.plot import save_fig
 class DataFig:
 
     def __init__(self, cond_labels, info, exam,
+                 time_per_iter,
                  training, threshold, param=None, param_labels=None,
                  cond_labels_param_recovery=None):
 
+        self.time_per_iter = time_per_iter
         self.cond_labels = cond_labels
         self.info = info
         self.exam = exam
@@ -46,7 +48,10 @@ def plot_info(ax, info):
     ax.set_axis_off()
 
 
-def fig_objective(axes, n_learnt,
+def fig_objective(axes,
+                  timestamps,
+                  time_per_iter,
+                  n_learnt,
                   n_seen,
                   training,
                   info,
@@ -55,11 +60,15 @@ def fig_objective(axes, n_learnt,
                   cond_labels):
 
     fig_n_against_time(
+        time_per_iter=time_per_iter,
+        timestamps=timestamps,
         data=n_learnt, y_label="N learnt",
         cond_labels=cond_labels,
         ax=axes[0], background=training, vline=exam)
 
     fig_n_against_time(
+        time_per_iter=time_per_iter,
+        timestamps=timestamps,
         data=n_seen, y_label="N seen",
         cond_labels=cond_labels,
         ax=axes[1], background=training, vline=exam)
@@ -115,8 +124,10 @@ def plot(data, fig_folder, fig_name=''):
 
     fig_objective(
         axes=axes[0, :],
+        timestamps=data['timestamps'],
         n_learnt=data["n_learnt"],
         n_seen=data["n_seen"],
+        time_per_iter=data.time_per_iter,
         training=data.training,
         info=data.info,
         exam=data.exam,
@@ -126,6 +137,7 @@ def plot(data, fig_folder, fig_name=''):
     fig_p_item_seen(
         axes=axes[1, :],
         p_recall=data["p"],
+        time_per_iter=data.time_per_iter,
         background=data.training,
         vline=data.exam,
         hline=data.threshold,

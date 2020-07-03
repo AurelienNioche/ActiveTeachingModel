@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from matplotlib.transforms import blended_transform_factory
+import matplotlib.transforms as trs
 import numpy as np
 
 from utils.plot import save_fig
@@ -10,6 +10,7 @@ def fig_p_item_seen(
         vline=None,
         hline=None,
         background=None,
+        time_per_iter=None,
         time_scale=1,
         axes=None, fig_name=None, fig_folder=None):
 
@@ -25,10 +26,11 @@ def fig_p_item_seen(
         color = colors[i]
 
         if background is not None:
-            trans = blended_transform_factory(ax.transData,
-                                              ax.transAxes)
+            trans = trs.blended_transform_factory(ax.transData,
+                                                  ax.transAxes)
 
-            ax.fill_between(range(len(background)), 0, 1,
+            x = np.arange(0, background.size * time_per_iter, time_per_iter)
+            ax.fill_between(x, 0, 1,
                             where=background == 1,
                             facecolor='whitesmoke',
                             edgecolor='lightgrey',

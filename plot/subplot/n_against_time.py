@@ -2,13 +2,16 @@ import matplotlib.pyplot as plt
 import matplotlib.transforms as trs
 # from matplotlib.patches import Patch
 # from matplotlib.lines import Line2D
-# import numpy as np
+import numpy as np
 
 from utils.plot import save_fig
 
 
 def fig_n_against_time(
-        data, cond_labels, background=None,
+        timestamps,
+        data, cond_labels,
+        background=None,
+        time_per_iter=None,
         vline=None,
         ax=None,
         fig_name=None, fig_folder=None,
@@ -21,7 +24,9 @@ def fig_n_against_time(
         trans = trs.blended_transform_factory(ax.transData,
                                               ax.transAxes)
 
-        ax.fill_between(range(len(background)), 0, 1, where=background == 1,
+        x = np.arange(0, background.size*time_per_iter, time_per_iter)
+        ax.fill_between(x, 0, 1,
+                        where=background == 1,
                         facecolor='whitesmoke',
                         edgecolor='lightgrey',
                         transform=trans,
@@ -34,7 +39,7 @@ def fig_n_against_time(
 
     for i, dt in enumerate(cond_labels):
 
-        ax.plot(data[i], color=colors[i], label=dt)
+        ax.plot(timestamps[i], data[i], color=colors[i], label=dt)
 
     ax.set_xlabel("Time")
     ax.set_ylabel(y_label)
