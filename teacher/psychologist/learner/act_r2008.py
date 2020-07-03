@@ -85,13 +85,13 @@ class ActR2008(Learner):
 
         hist = np.asarray(self.hist)
         ts = np.asarray(self.ts)
-        ds = np.asarray(self.ds)
         b = hist == item
         rep = ts[b]
-        d = ds[b]
         if len(rep) == 0:
             self.ds.append(self.a)
         else:
+            ds = np.asarray(self.ds)
+            d = ds[b]
             delta = (timestamp - rep)
             e_m = np.sum(np.power(delta, -d))
             d = self.c * e_m + self.a
