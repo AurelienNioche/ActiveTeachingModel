@@ -1,61 +1,44 @@
-import matplotlib.pyplot as plt
-import matplotlib.transforms as trs
-# from matplotlib.patches import Patch
-# from matplotlib.lines import Line2D
 import numpy as np
-
-from utils.plot import save_fig
+from utils.brokenaxes import brokenaxes
 
 
 def fig_n_against_time(
+        gs,
+        fig,
         timestamps,
+        xlims,
         data, cond_labels,
-        background=None,
-        time_per_iter=None,
-        vline=None,
-        ax=None,
-        fig_name=None, fig_folder=None,
-        y_label=None, colors=None):
+        background,
+        time_per_iter,
+        colors,
+        ylabel,
+        vline=None):
 
-    if ax is None:
-        fig, ax = plt.subplots(figsize=(4, 4))
+    if xlims is None:
+        ax = fig.add_subplot(gs)
+    else:
+        ax = brokenaxes(fig=fig, subplot_spec=gs, xlims=xlims)
 
-    if background is not None:
-        trans = trs.blended_transform_factory(ax.transData,
-                                              ax.transAxes)
-
-        x = np.arange(0, background.size*time_per_iter, time_per_iter)
-        ax.fill_between(x, 0, 1,
-                        where=background == 1,
-                        facecolor='whitesmoke',
-                        edgecolor='lightgrey',
-                        transform=trans,
-                        label='Training')
     if vline is not None:
         ax.axvline(vline, color='red', linestyle=':', lw=4, label='Exam')
 
-    if colors is None:
-        colors = [f'C{i}' for i in range(len(cond_labels))]
-
     for i, dt in enumerate(cond_labels):
-
         ax.plot(timestamps[i], data[i], color=colors[i], label=dt)
 
     ax.set_xlabel("Time")
-    ax.set_ylabel(y_label)
+    ax.set_ylabel(ylabel)
 
-    ax.legend()
+    if xlims is None:
+        y2, y1 = ax.get_ylim()
+    else:
+        y2, y1 = ax.get_ylim()[0]
 
-    if fig_folder is not None and fig_name is not None:
-        save_fig(fig_folder=fig_folder, fig_name=fig_name)
+    x = np.arange(0, background.size*time_per_iter, time_per_iter)
+    ax.fill_between(x, y1, y2,
+                    where=background == 1,
+                    facecolor='whitesmoke',
+                    edgecolor='lightgrey',
+                    label='Training')
+    ax.set_ylim(y2, y1)
 
-    # legend_elements = [Line2D([0], [0], color='red', linestyle=':', lw=4,
-    #                           label='Exam'),
-    #                    # Line2D([0], [0], marker='o', color='w', label='Scatter',
-    #                    #        markerfacecolor='g', markersize=15),
-    #                    Patch(facecolor='lightgrey', edgecolor='darkgrey',
-    #                          label='Training')]
-    # handles, labels = ax.get_legend_handles_labels()
-    # for le in legend_elements:
-    #     handles.append(le)
-    # ax.legend(handles=handles)
+    ax.legend(loc='upper left')
