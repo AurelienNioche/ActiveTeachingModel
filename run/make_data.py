@@ -5,6 +5,7 @@ import numpy as np
 import sys
 
 from teacher.psychologist.psychologist import Psychologist
+from teacher.psychologist.learner.act_r2008 import ActR2008
 
 SCRIPT_NAME = os.path.basename(__file__).split(".")[0]
 PICKLE_FOLDER = os.path.join("pickle", SCRIPT_NAME)
@@ -35,16 +36,19 @@ def run(teacher, tk, omniscient):
     with tqdm(total=tk.ss_n_iter*tk.n_ss, file=sys.stdout) as pbar:
         for _ in range(tk.n_ss):
             for _ in range(tk.ss_n_iter):
+
                 item = teacher.ask(now=now,
                                    last_was_success=was_success,
                                    last_time_reply=timestamp,
                                    idx_last_q=item)
+
                 timestamp = now
-                was_success = np.random.random() < \
-                    psychologist.p(
+                p = psychologist.p(
                         item=item,
                         param=tk.param,
                         now=timestamp)
+
+                was_success = np.random.random() < p
                 hist[itr] = item
 
                 if use_teacher_psy:

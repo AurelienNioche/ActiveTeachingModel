@@ -4,8 +4,8 @@
     "is_item_specific": false,
     "n_item": 500,
     "ss_n_iter": 200,
-    "ss_n_iter_between": 2000,
-    "n_ss": 4,
+    "ss_n_iter_between": "day",
+    "n_ss": 15,
     "thr": 0.9,
     "mcts": {
         "iter_limit": 500, "time_limit": null,
@@ -16,8 +16,8 @@
     },
     "bounds": [[-1.00, 1.00], [0.0, 1.00], [0.0, 1.00],[0.0, 1.0]],
     "learner_model": "act_r2008",
-    "teachers": ["leitner", "threshold"],
-    "omniscient": [true, true],
+    "teachers": ["threshold","leitner", "threshold"],
+    "omniscient": [false, true, true],
     "time_per_iter": 2,
     "grid_size": 20,
     "seed": 0

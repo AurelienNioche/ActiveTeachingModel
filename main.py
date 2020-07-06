@@ -17,4 +17,4 @@ def main(force):
 
 if __name__ == "__main__":
 
-    main(force=False)
+    main(force=True)

@@ -143,9 +143,7 @@ class Psychologist:
     @classmethod
     def create(cls, tk, omniscient):
         if tk.learner_model == ActR2008:
-            if not omniscient:
-                raise NotImplementedError
-            elif tk.is_item_specific:
+            if tk.is_item_specific:
                 raise NotImplementedError
             else:
                 learner = tk.learner_model(n_item=tk.n_item,

@@ -77,13 +77,12 @@ def _format_data(data_cond, training, tk, limit_dsp_btn):
         jump = 1
         t_is_teaching = training[c_t]
 
-        p_at_t, seen = psychologist.p_seen(now=now)
+        if c_obs == 0:
+            n_seen[c_obs] = 0
 
-        sum_seen = np.sum(seen)
-
-        n_seen[c_obs] = sum_seen
-
-        if sum_seen > 0:
+        else:
+            p_at_t, seen = psychologist.p_seen(now=now)
+            n_seen[c_obs] = np.sum(seen)
 
             items_seen_at_t = np.flatnonzero(seen)
 
