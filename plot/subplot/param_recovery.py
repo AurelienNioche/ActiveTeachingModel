@@ -21,14 +21,16 @@ def fig_parameter_recovery(
 
     for j in range(n_cond):
 
+        i_pr = param_labels.index(pr)
+
         dt = cond_labels[j]
-        means = inferred_param[j][:, param_labels.index(pr)]
-        true_p = true_param[param_labels.index(pr)]
+        means = inferred_param[j][:, i_pr]
+        true_p = true_param[i_pr]
 
         ax.axhline(true_p, linestyle='--', color='black',
                    alpha=.2)
 
-        ax.plot(timestamps, means, color=colors[j], label=dt)
+        ax.plot(timestamps[j], means, color=colors[j], label=dt)
         # ax.fill_between(range(len(means)),
         #                 means-stds,
         #                 means+stds, alpha=.2, color=colors[j])

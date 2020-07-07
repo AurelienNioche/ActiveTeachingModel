@@ -58,13 +58,16 @@ class Psychologist:
             if self.n_pres[item] == 0:
                 pass
             else:
+                from datetime import datetime
                 gp = np.reshape(self.grid_param, (-1, self.n_param))
+
+                t = datetime.now()
                 log_lik = self.learner.log_lik(
                     item=item,
                     grid_param=gp,
                     response=response,
                     timestamp=timestamp)
-
+                print("log_lik", datetime.now()-t)
                 # Update prior
                 if self.is_item_specific:
                     log_post = np.reshape(self.log_post, (self.n_item, -1))
@@ -72,12 +75,12 @@ class Psychologist:
                     lp += log_lik
                     lp -= logsumexp(lp)
                     log_post[item] = lp
-                    self.log_post = list(log_post.flatten())
+                    self.log_post = log_post.flatten()
                 else:
                     lp = np.asarray(self.log_post)
                     lp += log_lik
                     lp -= logsumexp(lp)
-                    self.log_post = list(lp)
+                    self.log_post = lp
 
             self.n_pres[item] += 1
         self.update_learner(item=item, timestamp=timestamp)

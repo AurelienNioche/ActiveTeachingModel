@@ -15,15 +15,17 @@ os.makedirs(PICKLE_FOLDER, exist_ok=True)
 
 def run(teacher, tk, omniscient):
 
+    n_iter = tk.n_ss * tk.ss_n_iter
+
     use_teacher_psy = hasattr(teacher, 'psychologist') and not omniscient
     if use_teacher_psy:
         psychologist = teacher.psychologist
+        inferred_param = np.zeros((n_iter, len(tk.param)))
     else:
         psychologist = Psychologist.create(tk=tk, omniscient=True)
 
     np.random.seed(tk.seed)
-    hist = np.zeros(tk.n_ss * tk.ss_n_iter, dtype=int)
-    inferred_param = []
+    hist = np.zeros(n_iter, dtype=int)
 
     now = 0
 
@@ -52,8 +54,8 @@ def run(teacher, tk, omniscient):
                 hist[itr] = item
 
                 if use_teacher_psy:
-                    inferred_param.append(
-                        teacher.psychologist.inferred_param)
+                    inferred_param[itr] = \
+                        teacher.psychologist.inferred_param
                 else:
                     psychologist.update_learner(item=item, timestamp=timestamp)
 
@@ -63,7 +65,7 @@ def run(teacher, tk, omniscient):
 
             now += tk.time_per_iter * tk.ss_n_iter_between
     if use_teacher_psy:
-        return hist, np.asarray(inferred_param)
+        return hist, inferred_param
 
     else:
         return hist

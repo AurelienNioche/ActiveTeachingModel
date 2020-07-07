@@ -55,7 +55,6 @@ def _format_data(data_cond, training, tk, limit_dsp_btn):
 
     c_tch = 0        # Counter teaching iteration
     c_t = 0          # Counter time step
-    c_obs = 0        # Counter observation
     c_slice_btn = 0  # Counter slice between
     now = 0          # 'now' (sec)
 
@@ -155,10 +154,15 @@ def make_fig(data, param_recovery, tk, limit_dsp_btn=200):
         cond_labels_param_recovery=cond_labels_param_recovery)
 
     for i, cd in enumerate(cond_labels_param_recovery):
-        timestamps_recovery = np.flatnonzero(training) * tk.time_per_iter
+        pr = param_recovery[cd]
+        tr = np.flatnonzero(training)
+        if training[-1] == 0:
+            tr = np.hstack((tr, len(training)-1))
+            pr = np.vstack((pr, np.tile(pr[-1], 1)))
+        tr *= tk.time_per_iter
         data_fig.add(
-            timestamps_recovery=timestamps_recovery,
-            inferred_param=param_recovery[cd])
+            timestamps_recovery=tr,
+            inferred_param=pr)
 
     tqdm.write("Computing probabilities of recalls...")
 

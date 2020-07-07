@@ -3,9 +3,9 @@
     "param_labels": ["tau", "s", "c", "a"],
     "is_item_specific": false,
     "n_item": 500,
-    "ss_n_iter": 200,
+    "ss_n_iter": 20,
     "ss_n_iter_between": "day",
-    "n_ss": 15,
+    "n_ss": 2,
     "thr": 0.9,
     "mcts": {
         "iter_limit": 500, "time_limit": null,
@@ -19,6 +19,6 @@
     "teachers": ["threshold","leitner", "threshold"],
     "omniscient": [false, true, true],
     "time_per_iter": 2,
-    "grid_size": 20,
+    "grid_size": 4,
     "seed": 0
 }
