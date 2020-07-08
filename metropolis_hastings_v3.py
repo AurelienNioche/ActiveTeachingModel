@@ -1,6 +1,8 @@
 import numpy as np
 import scipy.stats
 import matplotlib.pyplot as plt
+from tqdm import tqdm
+import seaborn as sns
 
 # The transition model defines how to move from sigma_current to sigma_new
 def transition_model(x):
@@ -61,7 +63,7 @@ def metropolis_hastings(likelihood_computer, prior, transition_model,
     x = param_init
     accepted = []
     rejected = []
-    for i in range(iterations):
+    for i in tqdm(range(iterations)):
         x_new = transition_model(x)
         x_lik = likelihood_computer(x, data)
         x_new_lik = likelihood_computer(x_new, data)
@@ -76,7 +78,7 @@ def metropolis_hastings(likelihood_computer, prior, transition_model,
 
 
 def main():
-    n_iter = 5000
+    n_iter = 1000
     true_x = 10, 2
     observation = np.random.normal(*true_x, size=1000)
     accepted, rejected = \
@@ -88,6 +90,18 @@ def main():
             observation,
             acceptance)
 
+    print("plotting...")
+
+    print("computing mean and covariance matrix...")
+    burn = len(accepted) // 2
+    samples = accepted[burn:]
+    mu = np.mean(samples, axis=0)
+    cov = np.cov(samples, rowvar=False)
+    sns.jointplot(samples[:, 0], samples[:, 1], alpha=0.1)
+    plt.show()
+    print("mu", mu)
+    print("cov", cov)
+
     colors = ["green", "red"]
     ms = ['o', 'x']
     for i, d in enumerate((accepted, rejected)):
@@ -95,10 +109,6 @@ def main():
             plt.scatter(x, y, color=colors[i], alpha=0.1, marker=ms[i])
     plt.scatter([true_x[0],], [true_x[1], ], color="blue")
     plt.show()
-
-    burn = len(accepted) // 2
-    print(np.mean(accepted[burn:, 0]), np.mean(accepted[burn:, 1]))
-
 
 
 if __name__ == "__main__":
