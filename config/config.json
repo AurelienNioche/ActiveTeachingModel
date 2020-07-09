@@ -16,6 +16,7 @@
     },
     "bounds": [[-1.00, 1.00], [0.0, 1.00], [0.0, 1.00],[0.0, 1.0]],
     "learner_model": "act_r2008",
+    "psychologist_model": "psy_grid",
     "teachers": ["threshold","leitner", "threshold"],
     "omniscient": [false, true, true],
     "time_per_iter": 2,

@@ -4,8 +4,6 @@ import pickle
 import numpy as np
 import sys
 
-from teacher.psychologist.psychologist import Psychologist
-from teacher.psychologist.learner.act_r2008 import ActR2008
 
 SCRIPT_NAME = os.path.basename(__file__).split(".")[0]
 PICKLE_FOLDER = os.path.join("pickle", SCRIPT_NAME)
@@ -22,7 +20,7 @@ def run(teacher, tk, omniscient):
         psychologist = teacher.psychologist
         inferred_param = np.zeros((n_iter, len(tk.param)))
     else:
-        psychologist = Psychologist.create(tk=tk, omniscient=True)
+        psychologist = tk.psychologist_model.create(tk=tk, omniscient=True)
 
     np.random.seed(tk.seed)
     hist = np.zeros(n_iter, dtype=int)

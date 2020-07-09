@@ -2,12 +2,13 @@ import numpy as np
 from scipy.special import logsumexp
 from itertools import product
 
-from . learner.act_r2008 import ActR2008
+from model.learner.act_r2008 import ActR2008
+from . generic import Psychologist
 
 EPS = np.finfo(np.float).eps
 
 
-class Psychologist:
+class PsychologistGrid(Psychologist):
 
     def __init__(self, n_item, is_item_specific, learner,
                  bounds, grid_size, omniscient, param):

@@ -13,7 +13,7 @@ class MCMC:
         The transition model defines how to move from sigma_current
         to sigma_new
         """
-        return x + np.random.normal(size=len(x)) * 0.01
+        return x + np.random.normal(0, 0.01, size=len(x))
 
     @staticmethod
     def acceptance(x, x_new):
@@ -47,10 +47,8 @@ class MCMC:
         rejected = []
         for _ in tqdm(range(n_iter)):
             x_new = cls.transition_model(x)
-            x_lik = likelihood_computer(
-                param=x, data=data)
-            x_new_lik = likelihood_computer(
-                param=x_new, data=data)
+            x_lik = likelihood_computer(x, *data)
+            x_new_lik = likelihood_computer(x_new, *data)
             if cls.acceptance(
                     x_lik + np.log(prior(x)),
                     x_new_lik + np.log(prior(x_new))):

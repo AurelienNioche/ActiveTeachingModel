@@ -4,8 +4,6 @@ import sys
 import numpy as np
 from tqdm import tqdm
 
-from teacher.psychologist.psychologist import Psychologist
-
 from plot.plot import DataFig, plot
 
 SCRIPT_NAME = os.path.basename(__file__).split(".")[0]
@@ -69,7 +67,7 @@ def _format_data(data_cond, training, tk, limit_dsp_btn):
     timestamps = np.zeros(n_obs, dtype=int)
     p = [[] for _ in seen_in_the_end]
 
-    psychologist = Psychologist.create(tk=tk, omniscient=True)
+    psychologist = tk.psychologist_model.create(tk=tk, omniscient=True)
 
     for c_obs in tqdm(range(n_obs), file=sys.stdout):
 

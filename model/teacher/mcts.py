@@ -1,7 +1,6 @@
 import numpy as np
 from copy import deepcopy
 
-from . psychologist.psychologist import Psychologist
 from . mcts_tools.mcts import MCTS
 from . mcts_tools.learner_state import LearnerState, StateParam
 from . generic import Teacher
@@ -97,8 +96,9 @@ class MCTSTeacher(Teacher):
     @classmethod
     def create(cls, tk, omniscient):
 
-        psychologist = Psychologist.create(tk=tk,
-                                           omniscient=omniscient)
+        psychologist = tk.psychologist_model.create(
+            tk=tk,
+            omniscient=omniscient)
         return cls(
             psychologist=psychologist,
             n_item=tk.n_item,

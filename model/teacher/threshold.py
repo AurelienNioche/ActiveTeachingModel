@@ -1,5 +1,4 @@
 import numpy as np
-from .psychologist.psychologist import Psychologist
 from .generic import Teacher
 
 
@@ -43,9 +42,9 @@ class Threshold(Teacher):
     @classmethod
     def create(cls, tk, omniscient):
 
-        psychologist = Psychologist.create(tk=tk, omniscient=omniscient)
+        psy = tk.psychologist_model.create(tk=tk, omniscient=omniscient)
 
         return cls(
             n_item=tk.n_item,
             learnt_threshold=tk.learnt_threshold,
-            psychologist=psychologist)
+            psychologist=psy)

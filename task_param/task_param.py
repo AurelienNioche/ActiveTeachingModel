@@ -1,17 +1,22 @@
 import json
 import numpy as np
 
-from teacher import Leitner, Threshold, MCTSTeacher
-from teacher.psychologist.psychologist import Psychologist
-from teacher.psychologist.learner.exponential_n_delta import ExponentialNDelta
-from teacher.psychologist.learner.act_r2005 import ActR2005
-from teacher.psychologist.learner.act_r2008 import ActR2008
+from model.teacher.leitner import Leitner
+from model.teacher.threshold import Threshold
+from model.teacher.mcts import MCTSTeacher
+
+from model.psychologist.psychologist_grid import PsychologistGrid
+from model.psychologist.psychologist_gradient import PsychologistGradient
+
+from model.learner.exponential_n_delta import ExponentialNDelta
+from model.learner.act_r2005 import ActR2005
+from model.learner.act_r2008 import ActR2008
 
 N_SEC_PER_DAY = 86400
 N_SEC_PER_ITER = 2
 
 
-TEACHERS = {
+TEACHER = {
     'threshold': Threshold,
     'leitner': Leitner,
     'mcts': MCTSTeacher,
@@ -23,6 +28,11 @@ LEARNER = {
     'act_r2008': ActR2008
 }
 
+PSYCHOLOGIST = {
+    'psy_grid': PsychologistGrid,
+    'psy_gradient': PsychologistGradient
+}
+
 
 class TaskParam:
 
@@ -31,6 +41,7 @@ class TaskParam:
                  is_item_specific, time_per_iter,
                  n_ss, thr, mcts,
                  learner_model,
+                 psychologist_model,
                  teachers,
                  grid_size,
                  seed, name, leitner,
@@ -42,15 +53,16 @@ class TaskParam:
         self.teachers = []
         for str_t in teachers:
             try:
-                t = TEACHERS[str_t]
+                t = TEACHER[str_t]
             except KeyError:
                 raise ValueError(f'Teacher type not recognized: {str_t}')
             self.teachers.append(t)
 
         self.learner_model = LEARNER[learner_model]
+        self.psychologist_model = PSYCHOLOGIST[psychologist_model]
 
         self.bounds = np.asarray(bounds)
-        self.param = Psychologist.generate_param(
+        self.param = self.psychologist_model.generate_param(
             param=param, bounds=bounds,
             n_item=n_item)
         self.param_labels = param_labels

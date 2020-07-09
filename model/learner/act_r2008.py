@@ -51,7 +51,8 @@ class ActR2008(Learner):
             delta = now - rep
             e_m[i] = self._e_m(delta=delta, rep=rep, n=n, c=c, a=a)
 
-        x = (-tau + np.log(e_m)) / s
+        with np.errstate(divide="ignore"):
+            x = (-tau + np.log(e_m)) / s
         p = expit(x)
         return p, self.seen
 
@@ -65,7 +66,9 @@ class ActR2008(Learner):
             e_m_rep = np.sum(np.power(delta_rep, -d[:i]))
             d[i] = c * e_m_rep + a  # Using previous em
 
-        return np.sum(np.power(delta, -d))
+        with np.errstate(divide="ignore"):
+            em = np.sum(np.power(delta, -d))
+        return em
 
     def update(self, item, timestamp):
 
@@ -95,7 +98,8 @@ class ActR2008(Learner):
         tau = grid_param[:, 0]
         s = grid_param[:, 1]
 
-        x = (-tau + np.log(e_m)) / s
+        with np.errstate(divide="ignore"):
+            x = (-tau + np.log(e_m)) / s
         p = expit(x)
 
         p = p if response else 1-p

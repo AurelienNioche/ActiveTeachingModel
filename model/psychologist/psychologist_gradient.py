@@ -2,12 +2,13 @@ import numpy as np
 from scipy.special import logsumexp
 from itertools import product
 
-from . learner.act_r2008 import ActR2008
+from model.learner.act_r2008 import ActR2008
+from . generic import Psychologist
 
 EPS = np.finfo(np.float).eps
 
 
-class PsychologistMCMC:
+class PsychologistGradient(Psychologist):
 
     def __init__(self, n_item, is_item_specific, learner,
                  omniscient, param, init_guess):
@@ -62,21 +63,6 @@ class PsychologistMCMC:
             now=now)
 
     @classmethod
-    def generate_param(cls, param, bounds, n_item):
-
-        if isinstance(param, str):
-            if param in ("heterogeneous", "het"):
-                param = np.zeros((n_item, len(bounds)))
-                for i, b in enumerate(bounds):
-                    param[:, i] = np.random.uniform(b[0], b[1], size=n_item)
-
-            else:
-                raise ValueError
-        else:
-            param = np.asarray(param)
-        return param
-
-    @classmethod
     def create(cls, tk, omniscient):
         if tk.learner_model == ActR2008:
             if tk.is_item_specific:
@@ -88,8 +74,7 @@ class PsychologistMCMC:
                                            param=tk.param)
         else:
             learner = tk.learner_model(tk.n_item)
-        # else:
-        #     learner = tk.learner_model(tk.n_ss * tk.ss_n_iter)
+
         return cls(
             omniscient=omniscient,
             n_item=tk.n_item,
