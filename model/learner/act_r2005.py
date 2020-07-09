@@ -24,7 +24,7 @@ class ActR2005(Learner):
                           is_item_specific=False)
         return p, self.seen
 
-    def log_lik(self, item, grid_param, response, timestamp):
+    def log_lik_grid(self, item, grid_param, response, timestamp):
 
         p = np.zeros(len(grid_param))
         for i, param in enumerate(grid_param):

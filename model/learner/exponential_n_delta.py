@@ -32,7 +32,7 @@ class ExponentialNDelta(Learner):
         p = np.exp(-fr * delta)
         return p, seen
 
-    def log_lik(self, item, grid_param, response, timestamp):
+    def log_lik_grid(self, item, grid_param, response, timestamp):
 
         fr = grid_param[:, 0] \
              * (1 - grid_param[:, 1]) ** (self.n_pres[item] - 1)

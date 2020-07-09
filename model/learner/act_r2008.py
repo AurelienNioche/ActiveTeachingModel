@@ -81,7 +81,7 @@ class ActR2008(Learner):
 
         self.i += 1
 
-    def log_lik(self, item, grid_param, response, timestamp):
+    def log_lik_grid(self, item, grid_param, response, timestamp):
 
         b = self.hist == item
         rep = np.hstack((self.ts[b], np.array([timestamp, ])))
@@ -105,6 +105,39 @@ class ActR2008(Learner):
         p = p if response else 1-p
         log_lik = np.log(p + EPS)
         return log_lik
+
+    @staticmethod
+    def log_lik(param, hist, success, timestamp):
+        tau, s, c, a = param
+
+        e_m = np.zeros(len(hist))
+
+        for item in np.unique(hist):
+
+            b = hist == item
+            rep = timestamp[b]
+            n = len(rep)
+
+            e_m_item = np.zeros(n)
+
+            d = np.zeros(n - 1)
+            e_m_item[0] = 0  # To adapt for xp
+            if n > 1:
+                d[0] = a
+                for i in range(1, n):
+                    delta_rep = rep[i] - rep[:i]
+                    e_m_item[i] = np.sum(np.power(delta_rep, -d[:i]))
+                    if i < n - 1:
+                        d[i] = c * e_m[i] + a  # Using previous em
+
+            e_m[b] = e_m_item
+        with np.errstate(divide="ignore", invalid="ignore"):
+            x = - (tau + np.log(e_m)) / s
+        p = expit(x)
+        failure = np.invert(success)
+        p[failure] = 1 - p[failure]
+        log_lik = np.log(p + EPS)
+        return log_lik.sum()
 
     def p_seen_static_param(self, now):
 

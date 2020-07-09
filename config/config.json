@@ -3,9 +3,9 @@
     "param_labels": ["tau", "s", "c", "a"],
     "is_item_specific": false,
     "n_item": 500,
-    "ss_n_iter": 20,
+    "ss_n_iter": 200,
     "ss_n_iter_between": "day",
-    "n_ss": 2,
+    "n_ss": 10,
     "thr": 0.9,
     "mcts": {
         "iter_limit": 500, "time_limit": null,
@@ -15,8 +15,9 @@
         "delay_min": 2
     },
     "bounds": [[-1.00, 1.00], [0.0, 1.00], [0.0, 1.00],[0.0, 1.0]],
+    "init_guess": [0.00, 1.00, 1.00, 1.00],
     "learner_model": "act_r2008",
-    "psychologist_model": "psy_grid",
+    "psychologist_model": "psy_gradient",
     "teachers": ["threshold","leitner", "threshold"],
     "omniscient": [false, true, true],
     "time_per_iter": 2,

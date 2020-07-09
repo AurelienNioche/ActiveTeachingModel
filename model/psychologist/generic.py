@@ -40,5 +40,6 @@ class Psychologist:
         return param
 
     @classmethod
+    @abstractmethod
     def create(cls, tk, omniscient):
         raise NotImplementedError

@@ -45,7 +45,8 @@ class TaskParam:
                  teachers,
                  grid_size,
                  seed, name, leitner,
-                 omniscient):
+                 omniscient,
+                 init_guess):
 
         assert len(teachers) == len(omniscient), \
             "'teachers' and 'omniscient' lists should be of equal size"
@@ -62,6 +63,8 @@ class TaskParam:
         self.psychologist_model = PSYCHOLOGIST[psychologist_model]
 
         self.bounds = np.asarray(bounds)
+        self.init_guess = np.asarray(init_guess)
+
         self.param = self.psychologist_model.generate_param(
             param=param, bounds=bounds,
             n_item=n_item)

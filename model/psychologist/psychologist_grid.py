@@ -63,7 +63,7 @@ class PsychologistGrid(Psychologist):
                 gp = np.reshape(self.grid_param, (-1, self.n_param))
 
                 t = datetime.now()
-                log_lik = self.learner.log_lik(
+                log_lik = self.learner.log_lik_grid(
                     item=item,
                     grid_param=gp,
                     response=response,
