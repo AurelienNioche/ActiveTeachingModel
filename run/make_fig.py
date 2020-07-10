@@ -92,7 +92,7 @@ def _format_data(data_cond, training, tk, limit_dsp_btn):
 
         if t_is_teaching:
             item = hist[c_tch]
-            psychologist.update_learner(item=item, timestamp=now)
+            psychologist.learner.update(item=item, timestamp=now)
             c_tch += 1
 
         elif clip_size is not None:

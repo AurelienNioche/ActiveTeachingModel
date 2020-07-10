@@ -23,11 +23,12 @@ class MCMC:
         if x_new > x:
             return True
         else:
-            accept = np.random.uniform(0, 1)
+            accept = np.random.uniform(0, 0.5)
             # Since we did a log likelihood, we need to exponentiate
             # in order to compare to the random number
             # less likely x_new are less likely to be accepted
-            return accept < np.exp(x_new - x)
+            q = np.exp(x_new - x)
+            return accept < q
 
     @classmethod
     def run(cls, likelihood_computer, prior, param_init, n_iter, data):

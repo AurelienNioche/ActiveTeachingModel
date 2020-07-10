@@ -4,11 +4,11 @@ from scipy.special import expit
 EPS = np.finfo(np.float).eps
 
 
-class ActR2008:
+class ActRSimplified:
 
     def __init__(self, n_item, n_iter, param):
 
-        self.tau, self.s, self.c, self.a = param
+        self.c, self.a = param
 
         self.seen = np.zeros(n_item, dtype=bool)
         self.ts = np.full(n_iter, -1, dtype=int)
@@ -23,7 +23,7 @@ class ActR2008:
 
     @staticmethod
     def log_lik(param, hist, success, timestamp):
-        tau, s, c, a = param
+        c, a = param
 
         e_m = np.zeros(len(hist))
 
@@ -47,7 +47,7 @@ class ActR2008:
 
             e_m[b] = e_m_item
         with np.errstate(divide="ignore", invalid="ignore"):
-            x = tau + np.log(e_m) * s
+            x = np.log(e_m)
         p = expit(x)
         failure = np.invert(success)
         p[failure] = 1 - p[failure]
@@ -91,7 +91,7 @@ class ActR2008:
 
         e_m = np.sum(np.power(delta, -d))
 
-        x = self.tau + np.log(e_m) * self.s
+        x = np.log(e_m)
         p = expit(x)
         return p
 
@@ -101,10 +101,8 @@ class ActR2008:
 
     @staticmethod
     def prior(param):
-        tau, s, c, a = param
-        if s <= 0:
-            return 0
-        elif c <= 0:
+        c, a = param
+        if c <= 0:
             return 0
 
         elif a <= 0:

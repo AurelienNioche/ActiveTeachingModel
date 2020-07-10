@@ -5,11 +5,9 @@ from scipy.special import expit
 EPS = np.finfo(np.float).eps
 
 
-class ActR2008(Learner):
+class ActR2param(Learner):
 
-    def __init__(self, n_item, n_iter, param):
-
-        self.tau, self.s, self.c, self.a = param
+    def __init__(self, n_item, n_iter, *args, **kwargs):
 
         self.seen = np.zeros(n_item, dtype=bool)
         self.ts = np.full(n_iter, -1, dtype=int)
@@ -24,7 +22,7 @@ class ActR2008(Learner):
 
     def p(self, item, param, now, is_item_specific):
 
-        tau, s, c, a = param
+        c, a = param
 
         b = self.hist == item
         rep = self.ts[b]
@@ -43,13 +41,13 @@ class ActR2008(Learner):
             with np.errstate(divide="ignore"):
                 em = np.sum(np.power(delta, -d))
 
-            x = (-tau + np.log(em)) / s
+            x = np.log(em)
             p = expit(x)
         return p
 
     def p_seen(self, param, is_item_specific, now):
 
-        tau, s, c, a = param
+        c, a = param
 
         e_m = np.zeros(self.n_seen)
         for i_it, item in enumerate(self.seen_item):
@@ -67,7 +65,7 @@ class ActR2008(Learner):
                 e_m[i_it] = np.sum(np.power(delta, -d))
 
         with np.errstate(divide="ignore"):
-            x = (-tau + np.log(e_m)) / s
+            x = np.log(e_m)
         p = expit(x)
         return p, self.seen
 
@@ -93,7 +91,7 @@ class ActR2008(Learner):
         e_m = np.zeros(len(grid_param))
 
         for i_pr, param in enumerate(grid_param):
-            _, _, c, a = param
+            c, a = param
             d = np.zeros(n)
             d[0] = a
             for i_r in range(1, n):
@@ -103,11 +101,8 @@ class ActR2008(Learner):
             with np.errstate(divide="ignore"):
                 e_m[i_pr] = np.sum(np.power(delta, -d))
 
-        tau = grid_param[:, 0]
-        s = grid_param[:, 1]
-
         with np.errstate(divide="ignore"):
-            x = (-tau + np.log(e_m)) / s
+            x = np.log(e_m)
         p = expit(x)
 
         p = p if response else 1-p
@@ -116,7 +111,7 @@ class ActR2008(Learner):
 
     @staticmethod
     def log_lik(param, hist, success, timestamp):
-        tau, s, c, a = param
+        c, a = param
 
         e_m = np.zeros(len(hist))
 
@@ -141,65 +136,10 @@ class ActR2008(Learner):
             e_m[b] = e_m_item
 
         with np.errstate(divide="ignore", invalid="ignore"):
-            x = (-tau + np.log(e_m)) / s
+            x = np.log(e_m)
 
         p = expit(x)
         failure = np.invert(success)
         p[failure] = 1 - p[failure]
         log_lik = np.log(p + EPS)
         return log_lik.sum()
-
-    # def p_seen_static_param(self, now):
-    #
-    #     e_m = np.zeros(self.n_seen)
-    #     for i, item in enumerate(self.seen_item):
-    #         b = self.hist == item
-    #         rep = self.ts[b]
-    #         d = self.ds[b]
-    #         delta = now - rep
-    #         e_m[i] = np.sum(np.power(delta, -d))
-    #
-    #     x = (-self.tau + np.log(e_m)) / self.s
-    #     p = expit(x)
-    #     return p, self.seen
-    #
-    # def update_static_param(self, item, timestamp):
-    #
-    #     self.seen[item] = True
-    #     b = self.hist == item
-    #     rep = self.ts[b]
-    #     if len(rep) == 0:
-    #         self.ds[self.i] = self.a
-    #     else:
-    #         d = self.ds[b]
-    #         delta = timestamp - rep
-    #         e_m = np.sum(np.power(delta, -d))
-    #         d = self.c * e_m + self.a
-    #         self.ds[self.i] = d
-    #
-    #     self.hist[self.i] = item
-    #     self.ts[self.i] = timestamp
-    #
-    #     self.n_seen = np.sum(self.seen)
-    #     self.seen_item = np.flatnonzero(self.seen)
-    #
-    #     self.i += 1
-    #
-    # def p_static_param(self, item, now):
-    #
-    #     b = self.hist == item
-    #     rep = self.ts[b]
-    #     d = self.ds[b]
-    #     n = len(rep)
-    #     if n == 0:
-    #         return 0
-    #
-    #     delta = now - rep
-    #     if np.min(delta) == 0:
-    #         return 1
-    #
-    #     e_m = np.sum(np.power(delta, -d))
-    #
-    #     x = (-self.tau + np.log(e_m)) / self.s
-    #     p = expit(x)
-    #     return p

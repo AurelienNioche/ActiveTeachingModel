@@ -10,17 +10,23 @@ class Threshold(Teacher):
         self.n_item = n_item
         self.learnt_threshold = learnt_threshold
 
+        self.new_item_counter = 0
+
+        self.limit_new_item = 5
+
     def _select_item(self, now):
 
         p, seen = self.psychologist.p_seen(now)
 
         min_p = np.min(p)
 
-        if np.sum(seen) == self.n_item or min_p <= self.learnt_threshold:
+        if np.sum(seen) == self.n_item or min_p <= self.learnt_threshold \
+                or self.new_item_counter >= self.limit_new_item:
             item_idx = np.arange(self.n_item)[seen][np.argmin(p)]
-
+            self.new_item_counter = 0
         else:
             item_idx = np.argmin(seen)
+            self.new_item_counter += 1
 
         return item_idx
 

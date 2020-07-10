@@ -11,6 +11,7 @@ from model.psychologist.psychologist_gradient import PsychologistGradient
 from model.learner.exponential_n_delta import ExponentialNDelta
 from model.learner.act_r2005 import ActR2005
 from model.learner.act_r2008 import ActR2008
+from model.learner.act_r_2param import ActR2param
 
 N_SEC_PER_DAY = 86400
 N_SEC_PER_ITER = 2
@@ -23,9 +24,10 @@ TEACHER = {
 }
 
 LEARNER = {
-    'exponential_n_delta': ExponentialNDelta,
+    'exp_decay': ExponentialNDelta,
     'act_r2005': ActR2005,
-    'act_r2008': ActR2008
+    'act_r2008': ActR2008,
+    'act_r2param': ActR2param,
 }
 
 PSYCHOLOGIST = {
@@ -63,7 +65,10 @@ class TaskParam:
         self.psychologist_model = PSYCHOLOGIST[psychologist_model]
 
         self.bounds = np.asarray(bounds)
-        self.init_guess = np.asarray(init_guess)
+        if init_guess is not None:
+            self.init_guess = np.asarray(init_guess)
+        else:
+            self.init_guess = np.array([np.mean(b) for b in bounds], dtype=float)
 
         self.param = self.psychologist_model.generate_param(
             param=param, bounds=bounds,
@@ -149,8 +154,9 @@ class TaskParam:
             + str(self.ss_n_iter_between) + '$\n\n' \
             'MCTS:\n' \
             + mcts_pr_str + '\n' \
-            + f'Learner: {self.learner_model.__class__.__name__}\n' \
-            + pr_str + '\n\n' + \
+            + f'Learner: {self.learner_model.__name__}\n' \
+            + pr_str + '\n\n' \
+            + f'Psychologist: {self.psychologist_model.__name__}\n\n' \
             r'$\mathrm{seed}=' \
             + str(self.seed) + '$'
 

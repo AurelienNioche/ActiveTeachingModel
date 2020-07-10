@@ -45,6 +45,35 @@ class ExponentialNDelta(Learner):
         log_lik = np.log(p + EPS)
         return log_lik
 
+    @classmethod
+    def log_lik(cls, param, hist, success, timestamp):
+        a, b = param
+
+        log_p_hist = np.zeros(len(hist))
+
+        for item in np.unique(hist):
+
+            is_item = hist == item
+            rep = timestamp[is_item]
+            n = len(rep)
+
+            log_p_item = np.zeros(n)
+            # !!! To adapt for xp
+            log_p_item[0] = -np.inf  # whatever the model, p=0
+            # !!! To adapt for xp
+            for i in range(1, n):
+                delta_rep = rep[i] - rep[i-1]
+                fr = a * (1 - b) ** (i - 1)
+                log_p_item[i] = -fr * delta_rep
+
+            log_p_hist[is_item] = log_p_item
+        p_hist = np.exp(log_p_hist)
+        failure = np.invert(success)
+        p_hist[failure] = 1 - p_hist[failure]
+        log_lik = np.log(p_hist + EPS)
+        sum_ll = log_lik.sum()
+        return sum_ll
+
     def p(self, item, param, now, is_item_specific):
 
         if is_item_specific:

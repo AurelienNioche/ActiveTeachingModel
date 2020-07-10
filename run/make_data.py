@@ -53,9 +53,9 @@ def run(teacher, tk, omniscient):
 
                 if use_teacher_psy:
                     inferred_param[itr] = \
-                        teacher.psychologist.inferred_param
+                        teacher.psychologist.inferred_learner_param()
                 else:
-                    psychologist.update_learner(item=item, timestamp=timestamp)
+                    psychologist.learner.update(item=item, timestamp=timestamp)
 
                 now += tk.time_per_iter
                 itr += 1

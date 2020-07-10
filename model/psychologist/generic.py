@@ -9,10 +9,6 @@ class Psychologist:
         raise NotImplementedError
 
     @abstractmethod
-    def update_learner(self, item, timestamp):
-        raise NotImplementedError
-
-    @abstractmethod
     def p_seen(self, now):
         raise NotImplementedError
 

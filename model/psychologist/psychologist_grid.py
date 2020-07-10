@@ -3,6 +3,7 @@ from scipy.special import logsumexp
 from itertools import product
 
 from model.learner.act_r2008 import ActR2008
+from model.learner.act_r_2param import ActR2param
 from . generic import Psychologist
 
 EPS = np.finfo(np.float).eps
@@ -68,7 +69,7 @@ class PsychologistGrid(Psychologist):
                     grid_param=gp,
                     response=response,
                     timestamp=timestamp)
-                print("log_lik", datetime.now()-t)
+                # print("log_lik", datetime.now()-t)
                 # Update prior
                 if self.is_item_specific:
                     log_post = np.reshape(self.log_post, (self.n_item, -1))
@@ -84,10 +85,6 @@ class PsychologistGrid(Psychologist):
                     self.log_post = lp
 
             self.n_pres[item] += 1
-        self.update_learner(item=item, timestamp=timestamp)
-
-    def update_learner(self, item, timestamp):
-
         self.learner.update(timestamp=timestamp, item=item)
 
     def p_seen(self, now):
@@ -146,7 +143,7 @@ class PsychologistGrid(Psychologist):
 
     @classmethod
     def create(cls, tk, omniscient):
-        if tk.learner_model == ActR2008:
+        if tk.learner_model in (ActR2008, ActR2param):
             if tk.is_item_specific:
                 raise NotImplementedError
             else:

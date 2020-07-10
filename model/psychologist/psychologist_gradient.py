@@ -2,6 +2,7 @@ import numpy as np
 from scipy.optimize import minimize
 
 from model.learner.act_r2008 import ActR2008
+from model.learner.act_r_2param import ActR2param
 from . generic import Psychologist
 
 EPS = np.finfo(np.float).eps
@@ -23,7 +24,7 @@ class PsychologistGradient(Psychologist):
 
         else:
             self.inferred_param = param
-
+        self.true_param = param
         self.is_item_specific = is_item_specific
         self.learner = learner
 
@@ -46,25 +47,24 @@ class PsychologistGradient(Psychologist):
                 )
 
             self.n_pres[item] += 1
-        self.update_learner(item=item, timestamp=timestamp)
-
-    def update_learner(self, item, timestamp):
 
         self.learner.update(timestamp=timestamp, item=item)
 
     def p_seen(self, now):
 
-        param = self.inferred_learner_param()
-        return self.learner.p_seen(
-            param=param,
+        p_seen, seen = self.learner.p_seen(
+            param=self.inferred_param,
             is_item_specific=self.is_item_specific,
             now=now)
+        # print("hist", self.hist)
+        # print("success", self.success)
+        # print("p_seen", p_seen)
+        return p_seen, seen
 
     def inferred_learner_param(self):
         return self.inferred_param
 
-    @staticmethod
-    def fit(inv_log_lik, init_guess,
+    def fit(self, inv_log_lik, init_guess,
             hist, success, timestamp, bounds):
         # relevant = hist != -1
         # hist = hist[relevant]
@@ -77,21 +77,33 @@ class PsychologistGradient(Psychologist):
                            timestamp),
                      bounds=bounds,
                      method='SLSQP')
-        return r.x
+        param = r.x
+        # print("inf param", r.x)
+        # print("inf param LLS", - r.fun)
+        # print("true param", self.true_param)
+        # print("true param LLS", self.learner.log_lik(
+        #     param=self.true_param,
+        #     hist=hist,
+        #     success=success,
+        #     timestamp=timestamp))
+        # print()
+        return param
 
     def p(self, param, item, now):
-        return self.learner.p(
+
+        p = self.learner.p(
             item=item,
             is_item_specific=self.is_item_specific,
             param=param,
             now=now)
+        return p
 
     @classmethod
     def create(cls, tk, omniscient):
         if tk.is_item_specific:
             raise NotImplementedError
 
-        if tk.learner_model == ActR2008:
+        if tk.learner_model in (ActR2008, ActR2param):
             if tk.is_item_specific:
                 raise NotImplementedError
             else:
