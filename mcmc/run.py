@@ -132,7 +132,7 @@ def main():
             bounds=bounds
         )
 
-        inf_param_gradient[itr] = MCMC.inferred_param(
+        inf_param_mcmc[itr] = MCMC.inferred_param(
             learner=learner,
             init_guess=init_guess,
             hist=hist, success=success,

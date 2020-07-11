@@ -1,6 +1,6 @@
 import numpy as np
 from tqdm import tqdm
-
+import sys
 
 class MCMC:
 
@@ -46,7 +46,7 @@ class MCMC:
         x = param_init
         accepted = []
         rejected = []
-        for _ in tqdm(range(n_iter)):
+        for _ in tqdm(range(n_iter), file=sys.stdout):
             x_new = cls.transition_model(x)
             x_lik = likelihood_computer(x, *data)
             x_new_lik = likelihood_computer(x_new, *data)
