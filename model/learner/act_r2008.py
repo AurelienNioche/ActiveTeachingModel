@@ -7,16 +7,11 @@ EPS = np.finfo(np.float).eps
 
 class ActR2008(Learner):
 
-    def __init__(self, n_item, n_iter, param):
-
-        self.tau, self.s, self.c, self.a = param
+    def __init__(self, n_item, n_iter):
 
         self.seen = np.zeros(n_item, dtype=bool)
         self.ts = np.full(n_iter, -1, dtype=int)
         self.hist = np.full(n_iter, -1, dtype=int)
-
-        # Only for static param
-        # self.ds = np.full(n_iter, -1, dtype=float)
 
         self.seen_item = None
         self.n_seen = 0

@@ -5,28 +5,39 @@ from tqdm import tqdm
 # from datetime import datetime
 
 from model_for_testing.act_r2008 import ActR2008
+from model_for_testing.walsh2018 import Walsh2018
 
 
 def main():
 
     # [-0.704, 0.0786, 0.279, 0.177]
-    tau, s, c, a = [-0.704, 0.0786, 0.279, 0.177]
+    # ActR2008(param=(tau, s, c, a, 60))
+    # tau, s, c, a = [-0.704, 0.0786, 0.279, 0.177]
 
-    t = np.arange(0, 1000, 1)
+    learners_models = [
+        (Walsh2018, {
+            "tau": 0.9,
+            "s": 0.04,
+            "b": 0.04,
+            "m": 0.08,
+            "c": 0.1,
+            "x": 0.6,
+            "dt": 1})
+    ]
 
-    n = 6
+    t = np.linspace(0, 100, 10000)
 
-    rep_mass = list(np.arange(n))
+    n = np.inf
+
+    rep_mass = list(np.arange(2))
     linestyles = '-', '--'
-    labels = "spaced", "mass",
+    labels = "threshold", #"mass",
 
     counter = 0
 
     for k, cond in enumerate(labels):
 
-        learners = (
-            ActR2008(param=(tau, s, c, a, 60)),
-        )
+        learners = [m(**kwargs) for (m, kwargs) in learners_models]
         colors = [f'C{i}'for i in range(len(learners))]
 
         p_recall = [[] for _ in learners]
@@ -37,11 +48,11 @@ def main():
                 if ts in rep_mass:
                     teach = True
 
-            elif cond == "spaced" and ts < 500 and counter < n:
+            elif cond == "threshold" and ts < 500 and counter < n:
                 p = learners[0].p(item=0, now=ts)
                 if p < 0.90:
                     counter += 1
-                    teach=True
+                    teach = True
 
             if teach:
                 for le in learners:
@@ -56,9 +67,8 @@ def main():
                      label=learners[j].__class__.__name__ + labels[k],
                      color=colors[j])
 
-        print(cond, learners[0].ds)
     plt.ylabel("p recall")
-    plt.xlabel("time (minutes)")
+    plt.xlabel("time")
     plt.ylim(0, 1.01)
     plt.legend()
     plt.show()
