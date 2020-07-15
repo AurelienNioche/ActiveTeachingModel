@@ -49,6 +49,9 @@ def run(teacher, tk, omniscient):
                         now=timestamp)
 
                 was_success = np.random.random() < p
+
+                # print("itr", itr, "item", item, "p", p, "success", was_success)
+
                 hist[itr] = item
 
                 if use_teacher_psy:

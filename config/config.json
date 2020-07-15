@@ -21,18 +21,18 @@
         "delay_min": 2
     },
     "bounds": [
-        [0.5, 1.5],
-        [0.00, 0.10],
-        [0.00, 0.20],
-        [0.00, 0.20],
+        [0.9, 0.9],
+        [0.04, 0.04],
+        [0.02, 0.02],
+        [0.08, 0.08],
         [0.1, 0.1],
         [0.6, 0.6]],
     "init_guess": null,
     "learner_model": "walsh2018",
-    "psychologist_model": "psy_gradient",
-    "teachers": ["threshold","leitner", "threshold"],
-    "omniscient": [false, true, true],
+    "psychologist_model": "psy_grid",
+    "teachers": ["threshold"],
+    "omniscient": [false],
     "time_per_iter": 2,
-    "grid_size": 20,
+    "grid_size": 3,
     "seed": 0
 }

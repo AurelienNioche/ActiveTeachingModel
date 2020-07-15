@@ -20,10 +20,10 @@ class Walsh2018(Learner):
 
         self.tau = None
         self.s = None
-        self.c = None
-        self.x = None
         self.b = None
         self.m = None
+        self.c = None
+        self.x = None
 
     def p(self, item, param, now, is_item_specific):
 
@@ -65,8 +65,6 @@ class Walsh2018(Learner):
             is_item = self.hist == item
             rep = self.ts[is_item]
             n = len(rep)
-
-            n = len(rep)
             delta = (now - rep)
 
             if np.min(delta) == 0:
@@ -90,6 +88,13 @@ class Walsh2018(Learner):
             v = (-self.tau + _m_) / self.s
             p = expit(v)
         return p, self.seen
+
+    def log_lik_grid(self, item, grid_param, response, timestamp):
+        p = np.zeros(len(grid_param))
+        for i, param in enumerate(grid_param):
+            p[i] = self.p(item=item, param=param, now=timestamp,
+                          is_item_specific=False)
+        return np.log(p+EPS)
 
     @staticmethod
     def log_lik(param, hist, success, timestamp):
@@ -133,6 +138,8 @@ class Walsh2018(Learner):
         p = expit(v)
         failure = np.invert(success)
         p[failure] = 1 - p[failure]
+        print("hist", hist, "success", success)
+        print("param", param, "p", p)
         log_lik = np.log(p + EPS)
         return log_lik.sum()
 

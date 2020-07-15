@@ -48,12 +48,30 @@ class PsychologistGrid(Psychologist):
         self.learner = learner
 
     @staticmethod
-    def cp_grid_param(grid_size, bounds):
+    def cartesian_product(*arrays):
+        la = len(arrays)
+        dtype = np.result_type(*arrays)
+        arr = np.empty([len(a) for a in arrays] + [la], dtype=dtype)
+        for i, a in enumerate(np.ix_(*arrays)):
+            arr[..., i] = a
+        return arr.reshape(-1, la)
 
-        return np.asarray(list(
-            product(*[
-                np.linspace(*b, grid_size)
-                for b in bounds])))
+    @classmethod
+    def cp_grid_param(cls, grid_size, bounds):
+        bounds = np.asarray(bounds)
+        diff = bounds[:, 1] - bounds[:, 0] > 0
+        not_diff = np.invert(diff)
+
+        values = np.atleast_2d([np.linspace(*b, num=grid_size)
+                                for b in bounds[diff]])
+        var = cls.cartesian_product(*values)
+        grid = np.zeros((max(1, len(var)), len(bounds)))
+        if np.sum(diff):
+            grid[:, diff] = var
+        if np.sum(not_diff):
+            grid[:, not_diff] = bounds[not_diff, 0]
+
+        return grid
 
     def update(self, item, response, timestamp):
 
@@ -61,10 +79,10 @@ class PsychologistGrid(Psychologist):
             if self.n_pres[item] == 0:
                 pass
             else:
-                from datetime import datetime
+                # from datetime import datetime
                 gp = np.reshape(self.grid_param, (-1, self.n_param))
 
-                t = datetime.now()
+                # t = datetime.now()
                 log_lik = self.learner.log_lik_grid(
                     item=item,
                     grid_param=gp,
