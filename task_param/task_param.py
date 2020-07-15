@@ -11,7 +11,7 @@ from model.psychologist.psychologist_gradient import PsychologistGradient
 from model.learner.exponential_n_delta import ExponentialNDelta
 from model.learner.act_r2005 import ActR2005
 from model.learner.act_r2008 import ActR2008
-from model.learner.act_r_2param import ActR2param
+from model.learner.walsh2018 import Walsh2018
 
 N_SEC_PER_DAY = 86400
 N_SEC_PER_ITER = 2
@@ -27,7 +27,7 @@ LEARNER = {
     'exp_decay': ExponentialNDelta,
     'act_r2005': ActR2005,
     'act_r2008': ActR2008,
-    'act_r2param': ActR2param,
+    'walsh2018': Walsh2018
 }
 
 PSYCHOLOGIST = {

@@ -2,7 +2,8 @@ import numpy as np
 from scipy.optimize import minimize
 
 from model.learner.act_r2008 import ActR2008
-from model.learner.act_r_2param import ActR2param
+from model.learner.walsh2018 import Walsh2018
+# from model.learner.act_r_2param import ActR2param
 from . generic import Psychologist
 
 EPS = np.finfo(np.float).eps
@@ -103,14 +104,13 @@ class PsychologistGradient(Psychologist):
         if tk.is_item_specific:
             raise NotImplementedError
 
-        if tk.learner_model in (ActR2008, ActR2param):
+        if tk.learner_model in (ActR2008, Walsh2018):
             if tk.is_item_specific:
                 raise NotImplementedError
             else:
                 learner = tk.learner_model(n_item=tk.n_item,
                                            n_iter=tk.n_ss*tk.ss_n_iter
-                                           + tk.horizon,
-                                           param=tk.param)
+                                           + tk.horizon)
         else:
             learner = tk.learner_model(tk.n_item)
 

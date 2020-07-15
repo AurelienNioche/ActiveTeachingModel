@@ -6,12 +6,13 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import scipy.stats
 
-from teacher import Leitner
-from learner_act_r2008 import ActR2008
+from model.teacher.leitner import Leitner
+# from learner_act_r2008 import ActR2008
 from learner_act_r2005 import ActR2005
 from learner_act_r_simplified import ActRSimplified
 from learner_exp_decay import ExpDecay
 from mcmc import MCMC as MCMCTool
+from model.learner.walsh2018 import Walsh2018
 
 
 class Gradient:
@@ -69,13 +70,32 @@ def main():
     # ss_n_iter_between = 0
     n_item = 500
     time_per_iter = 2
-    n_iter = 1000  # n_ss*ss_n_iter
+    n_iter = 300  # n_ss*ss_n_iter
+
+    learner = Walsh2018(n_iter=n_iter, n_item=n_item)
+    param = (
+         0.9,   # Tau
+         0.04,  # s
+         0.04,  # b
+         0.08,  # m
+         0.1,   # c
+         0.6    # x
+    )
+
+    bounds = (
+        (0.5, 1.5),    # Tau
+        (0.00, 0.10),  # s
+        (0.00, 0.20),  # b
+        (0.00, 0.20),  # m
+        (0.1, 0.1),    # c
+        (0.6, 0.6),    # x
+    )
 
     # -0.704, 0.0786,0.279, 0.177
-    param = [-0.704, 0.0786, 0.279, 0.3]
-    bounds = ((-1.0, 0.0), (0.0, 1.0), (0., 1.), (0., 1.))
-    learner = ActR2008(n_item=n_item, n_iter=n_iter,
-                       param=param)
+    # param = [-0.704, 0.0786, 0.279, 0.3]
+    # bounds = ((-1.0, 0.0), (0.0, 1.0), (0., 1.), (0., 1.))
+    # learner = ActR2008(n_item=n_item, n_iter=n_iter,
+    #                    param=param)
 
     # param = [0.04, 0.1]
     # learner = ExpDecay(param=param, n_iter=n_iter)
@@ -96,13 +116,13 @@ def main():
 
     init_guess = np.array([np.mean(b) for b in bounds], dtype=float)
 
-    teacher = Leitner.create(n_item=n_item, delay_factor=2, delay_min=2)
+    teacher = Leitner(n_item=n_item, delay_factor=2, delay_min=2)
 
     hist = np.full(n_iter, -1, dtype=int)
     success = np.zeros(n_iter, dtype=bool)
     timestamp = np.zeros(n_iter, dtype=int)
     inf_param_gradient = np.zeros((n_iter, len(param)))
-    inf_param_mcmc = np.zeros((n_iter, len(param)))
+    # inf_param_mcmc = np.zeros((n_iter, len(param)))
 
     now = 0
     was_success = None
@@ -116,7 +136,8 @@ def main():
                            idx_last_q=item)
 
         previous_ts = now
-        p = learner.p(item=item, now=now)
+        p = learner.p(item=item, now=now, param=param,
+                      is_item_specific=False)
 
         was_success = np.random.random() < p
         # print(f"itr={itr}, p={p:.3f}, s={was_success}")
@@ -132,15 +153,15 @@ def main():
             bounds=bounds
         )
 
-        inf_param_mcmc[itr] = MCMC.inferred_param(
-            learner=learner,
-            init_guess=init_guess,
-            hist=hist, success=success,
-            timestamp=timestamp,
-            bounds=bounds
-        )
+        # inf_param_mcmc[itr] = MCMC.inferred_param(
+        #     learner=learner,
+        #     init_guess=init_guess,
+        #     hist=hist, success=success,
+        #     timestamp=timestamp,
+        #     bounds=bounds
+        # )
 
-        learner.update(item=item, now=now)
+        learner.update(item=item, timestamp=now)
 
         # time_per_iter = #np.random.randint(2, 1000)
 
@@ -157,8 +178,8 @@ def main():
 
     # plt.show()
     print("true param", param)
-    print("LLS true param", learner.log_lik(
-        param=param, success=success, timestamp=timestamp, hist=hist))
+    # print("LLS true param", learner.log_lik(
+    #     param=param, success=success, timestamp=timestamp, hist=hist))
 
     # r = minimize(learner.inv_log_lik, x0=init_guess,
     #              args=(hist, success, timestamp),
@@ -193,11 +214,12 @@ def main():
     # samples = accepted[int(len(accepted)/2):, :]
     # print(np.mean(samples, axis=0))
 
-    for inf_param in (inf_param_mcmc, inf_param_gradient):
+    for inf_param in (inf_param_gradient, ):
         fig, axes = plt.subplots(nrows=len(param))
 
         for i in range(len(param)):
             axes[i].plot(inf_param[:, i])
+            axes[i].plot(param[i], )
         plt.show()
 
 

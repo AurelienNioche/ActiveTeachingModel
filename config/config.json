@@ -1,6 +1,12 @@
 {
-    "param": [-0.704, 0.0786,  0.279, 0.177],
-    "param_labels": ["tau", "s", "c", "a"],
+    "param": [
+        0.9,
+        0.04,
+        0.04,
+        0.08,
+        0.1,
+        0.6],
+    "param_labels": ["tau", "s", "b", "m", "c", "x"],
     "is_item_specific": false,
     "n_item": 500,
     "ss_n_iter": 1000,
@@ -14,13 +20,19 @@
         "delay_factor": 2,
         "delay_min": 2
     },
-    "bounds": [[-1.00, 0.0], [0.05, 0.1], [0.1, 0.5],[0.1, 0.5]],
+    "bounds": [
+        [0.5, 1.5],
+        [0.00, 0.10],
+        [0.00, 0.20],
+        [0.00, 0.20],
+        [0.1, 0.1],
+        [0.6, 0.6]],
     "init_guess": null,
-    "learner_model": "act_r2008",
+    "learner_model": "walsh2018",
     "psychologist_model": "psy_gradient",
     "teachers": ["threshold","leitner", "threshold"],
     "omniscient": [false, true, true],
     "time_per_iter": 2,
-    "grid_size": 4,
+    "grid_size": 20,
     "seed": 0
 }

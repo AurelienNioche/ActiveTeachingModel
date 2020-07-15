@@ -11,7 +11,7 @@ class Walsh2018(Learner):
     def __init__(self, n_item, n_iter):
 
         self.seen = np.zeros(n_item, dtype=bool)
-        self.ts = np.full(n_iter, -1, dtype=int)
+        self.ts = np.full(n_iter, -1, dtype=float)
         self.hist = np.full(n_iter, -1, dtype=int)
 
         self.seen_item = None
@@ -29,11 +29,8 @@ class Walsh2018(Learner):
 
         self.set_param(param=param)
 
-        hist = np.asarray(self.hist)
-        ts = np.asarray(self.ts)
-
-        relevant = hist == item
-        rep = ts[relevant]
+        relevant = self.hist == item
+        rep = self.ts[relevant]
         n = len(rep)
         delta = (now - rep)
 
@@ -59,22 +56,63 @@ class Walsh2018(Learner):
             p = expit(v)
             return p
 
+    def p_seen(self, param, is_item_specific, now):
+
+        self.set_param(param=param)
+        _m_ = np.zeros(self.n_seen)
+        for i_it, item in enumerate(self.seen_item):
+
+            is_item = self.hist == item
+            rep = self.ts[is_item]
+            n = len(rep)
+
+            n = len(rep)
+            delta = (now - rep)
+
+            if np.min(delta) == 0:
+                _m_item = np.inf
+            else:
+                w = delta ** -self.x
+                w /= np.sum(w)
+
+                _t_ = np.sum(w * delta)
+                if n > 1:
+                    lag = rep[1:] - rep[:-1]
+                    d = self.b + self.m * np.mean(1 / np.log(lag + math.e))
+                else:
+                    d = self.b
+
+                _m_item = n ** self.c * _t_ ** -d
+
+            _m_[i_it] = _m_item
+
+        with np.errstate(divide="ignore", invalid="ignore"):
+            v = (-self.tau + _m_) / self.s
+            p = expit(v)
+        return p, self.seen
+
     @staticmethod
     def log_lik(param, hist, success, timestamp):
-        tau, s, b, m, c, x = param
+        if isinstance(param, dict):
+            tau, s, b, m, c, x = \
+                param["tau"], param["s"], param["b"], \
+                param["m"], param["c"], param["x"]
+        else:
+            tau, s, b, m, c, x = param
 
         _m_ = np.zeros(len(hist))
 
         for item in np.unique(hist):
 
-            relevant = hist == item
-            rep = timestamp[relevant]
+            is_item = hist == item
+            rep = timestamp[is_item]
             n = len(rep)
 
             _m_item = np.zeros(n)
 
             _m_item[0] = - np.inf  # To adapt for xp
-            _m_item[1] = (rep[1]-rep[0])**-b
+            if n > 1:
+                _m_item[1] = (rep[1]-rep[0])**-b
             for i in range(2, n):
                 delta = rep[i] - rep[:i]
 
@@ -87,7 +125,7 @@ class Walsh2018(Learner):
                 d = b + m * np.mean(1 / np.log(lag + math.e))
                 _m_item[i] = i ** c * _t_ ** -d
 
-            _m_[b] = _m_item
+            _m_[is_item] = _m_item
 
         with np.errstate(divide="ignore", invalid="ignore"):
             v = (-tau + _m_) / s
@@ -111,4 +149,8 @@ class Walsh2018(Learner):
 
     def set_param(self, param):
 
-        self.tau, self.s, self.b, self.m, self.c, self.x = param
+        if isinstance(param, dict):
+            for k, v in param.items():
+                setattr(self, k, v)
+        else:
+            self.tau, self.s, self.b, self.m, self.c, self.x = param

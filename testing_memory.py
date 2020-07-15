@@ -5,7 +5,7 @@ from tqdm import tqdm
 # from datetime import datetime
 
 from model_for_testing.act_r2008 import ActR2008
-from model_for_testing.walsh2018 import Walsh2018
+from model.learner.walsh2018 import Walsh2018
 
 
 def main():
@@ -15,14 +15,15 @@ def main():
     # tau, s, c, a = [-0.704, 0.0786, 0.279, 0.177]
 
     learners_models = [
-        (Walsh2018, {
+        {"model": Walsh2018,
+         "kwargs": {
             "tau": 0.9,
             "s": 0.04,
             "b": 0.04,
             "m": 0.08,
             "c": 0.1,
-            "x": 0.6,
-            "dt": 1})
+            "x": 0.6}
+         }
     ]
 
     t = np.linspace(0, 100, 10000)
@@ -37,7 +38,7 @@ def main():
 
     for k, cond in enumerate(labels):
 
-        learners = [m(**kwargs) for (m, kwargs) in learners_models]
+        learners = [lm["model"](n_item=1, n_iter=1000) for lm in learners_models]
         colors = [f'C{i}'for i in range(len(learners))]
 
         p_recall = [[] for _ in learners]
@@ -49,16 +50,20 @@ def main():
                     teach = True
 
             elif cond == "threshold" and ts < 500 and counter < n:
-                p = learners[0].p(item=0, now=ts)
+                p = learners[0].p(item=0, now=ts,
+                                  param=learners_models[0]["kwargs"],
+                                  is_item_specific=False)
                 if p < 0.90:
                     counter += 1
                     teach = True
 
             if teach:
                 for le in learners:
-                    le.update(item=0, now=ts)
+                    le.update(item=0, timestamp=ts)
             for j, l in enumerate(learners):
-                p_r = l.p(item=0, now=ts)
+                p_r = l.p(item=0, now=ts,
+                          param=learners_models[j]["kwargs"],
+                          is_item_specific=False)
                 p_recall[j].append(p_r)
 
         for j, pr in enumerate(p_recall):

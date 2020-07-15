@@ -4,7 +4,10 @@ from . generic import Teacher
 
 class Leitner(Teacher):
 
-    def __init__(self, n_item, delay_factor, delay_min, box, due):
+    def __init__(self, n_item, delay_factor, delay_min):
+
+        box = np.full(n_item, -1)
+        due = np.full(n_item, -1)
 
         self.n_item = n_item
 
@@ -67,10 +70,6 @@ class Leitner(Teacher):
 
     @classmethod
     def create(cls, tk, omniscient):
-        box = np.full(tk.n_item, -1)
-        due = np.full(tk.n_item, -1)
         return cls(n_item=tk.n_item,
                    delay_factor=tk.delay_factor,
-                   delay_min=tk.delay_min,
-                   box=box,
-                   due=due)
+                   delay_min=tk.delay_min)
