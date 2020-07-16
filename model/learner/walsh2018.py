@@ -94,6 +94,7 @@ class Walsh2018(Learner):
         for i, param in enumerate(grid_param):
             p[i] = self.p(item=item, param=param, now=timestamp,
                           is_item_specific=False)
+        p = p if response else 1 - p
         return np.log(p+EPS)
 
     @staticmethod
@@ -138,8 +139,8 @@ class Walsh2018(Learner):
         p = expit(v)
         failure = np.invert(success)
         p[failure] = 1 - p[failure]
-        print("hist", hist, "success", success)
-        print("param", param, "p", p)
+        # print("hist", hist, "success", success)
+        # print("param", param, "p", p)
         log_lik = np.log(p + EPS)
         return log_lik.sum()
 
