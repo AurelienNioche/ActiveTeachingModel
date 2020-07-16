@@ -59,30 +59,37 @@ class Walsh2018(Learner):
     def p_seen(self, param, is_item_specific, now):
 
         self.set_param(param=param)
-        _m_ = np.zeros(self.n_seen)
+        n = np.zeros(self.n_seen)
+        _t_ = np.zeros(self.n_seen)
+        mean_lag = np.zeros(self.n_seen)
+
         for i_it, item in enumerate(self.seen_item):
 
             is_item = self.hist == item
             rep = self.ts[is_item]
-            n = len(rep)
+
+            n_it = len(rep)
+
             delta = (now - rep)
 
-            if np.min(delta) == 0:
-                _m_item = np.inf
-            else:
-                w = delta ** -self.x
-                w /= np.sum(w)
+            w = delta ** -self.x
+            w /= np.sum(w)
 
-                _t_ = np.sum(w * delta)
-                if n > 1:
-                    lag = rep[1:] - rep[:-1]
-                    d = self.b + self.m * np.mean(1 / np.log(lag + math.e))
-                else:
-                    d = self.b
+            _t_it = np.sum(w * delta)
 
-                _m_item = n ** self.c * _t_ ** -d
+            _t_[i_it] = _t_it
+            n[i_it] = n_it
 
-            _m_[i_it] = _m_item
+            if n_it > 1:
+                lag = rep[1:] - rep[:-1]
+                mean_lag[i_it] = np.mean(1 / np.log(lag + math.e))
+
+        one_view = n == 1
+        more_than_one = np.invert(one_view)
+        _m_ = np.zeros(self.n_seen)
+        _m_[one_view] = _t_[one_view] ** - self.b
+        _m_[more_than_one] = n[more_than_one] ** self.c \
+            * _t_[more_than_one] ** - (self.b + self.m * mean_lag[more_than_one])
 
         with np.errstate(divide="ignore", invalid="ignore"):
             v = (-self.tau + _m_) / self.s
