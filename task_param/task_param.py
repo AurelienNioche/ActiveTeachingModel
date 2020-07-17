@@ -4,6 +4,7 @@ import numpy as np
 from model.teacher.leitner import Leitner
 from model.teacher.threshold import Threshold
 from model.teacher.mcts import MCTSTeacher
+from model.teacher.sampling import Sampling
 
 from model.psychologist.psychologist_grid import PsychologistGrid
 from model.psychologist.psychologist_gradient import PsychologistGradient
@@ -21,6 +22,7 @@ TEACHER = {
     'threshold': Threshold,
     'leitner': Leitner,
     'mcts': MCTSTeacher,
+    'sampling': Sampling
 }
 
 LEARNER = {

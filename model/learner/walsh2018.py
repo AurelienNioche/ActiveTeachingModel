@@ -58,15 +58,22 @@ class Walsh2018(Learner):
 
     def p_seen(self, param, is_item_specific, now):
 
+        return self.p_seen_spec_hist(
+            param=param, now=now, hist=self.hist, ts=self.ts,
+            seen=self.seen)
+
+    def p_seen_spec_hist(self, param, now, hist, ts, seen):
+
         self.set_param(param=param)
-        n = np.zeros(self.n_seen)
-        _t_ = np.zeros(self.n_seen)
-        mean_lag = np.zeros(self.n_seen)
+        n_seen = np.sum(seen)
+        n = np.zeros(n_seen)
+        _t_ = np.zeros(n_seen)
+        mean_lag = np.zeros(n_seen)
 
-        for i_it, item in enumerate(self.seen_item):
+        for i_it, item in enumerate(np.flatnonzero(seen)):
 
-            is_item = self.hist == item
-            rep = self.ts[is_item]
+            is_item = hist == item
+            rep = ts[is_item]
 
             n_it = len(rep)
 
@@ -86,7 +93,7 @@ class Walsh2018(Learner):
 
         one_view = n == 1
         more_than_one = np.invert(one_view)
-        _m_ = np.zeros(self.n_seen)
+        _m_ = np.zeros(n_seen)
         _m_[one_view] = _t_[one_view] ** - self.b
         _m_[more_than_one] = n[more_than_one] ** self.c \
             * _t_[more_than_one] ** - (self.b + self.m * mean_lag[more_than_one])
@@ -94,7 +101,7 @@ class Walsh2018(Learner):
         with np.errstate(divide="ignore", invalid="ignore"):
             v = (-self.tau + _m_) / self.s
             p = expit(v)
-        return p, self.seen
+        return p, seen
 
     def log_lik_grid(self, item, grid_param, response, timestamp):
         p = np.zeros(len(grid_param))
