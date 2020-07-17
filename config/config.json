@@ -30,8 +30,8 @@
     "init_guess": null,
     "learner_model": "walsh2018",
     "psychologist_model": "psy_grid",
-    "teachers": ["sampling"],
-    "omniscient": [true],
+    "teachers": ["leitner", "threshold","sampling", "threshold", "sampling"],
+    "omniscient": [false, true, true, false, false],
     "time_per_iter": 2,
     "grid_size": 10,
     "seed": 0
