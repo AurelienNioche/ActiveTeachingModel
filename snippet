@@ -1,0 +1,14 @@
+    bkp_file_path = os.path.join(paths.BKP_DIR, f"{FILENAME}.p"}
+
+    if not os.path.exists(bkp_file_path) or force:
+
+        # Heavy operations happening here
+
+        print("Saving object as pickle file...")
+        pickle.dump(VAR, open(bkp_file_path, "wb"))
+        print("Done!")
+
+    else:
+        print("Loading from pickle file...")
+        VAR = pickle.load(open(bkp_file_path, "rb"))
+        print("Done!")
