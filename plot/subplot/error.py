@@ -35,7 +35,7 @@ def plot_error(
         sharey=True,
         #subplot_kw=dict(alpha=0.9),
         #gridspec_kw=dict(),
-        figsize=(10,10)
+        figsize=(20, 20)
     )
 
     # Text positions
@@ -43,6 +43,8 @@ def plot_error(
     coord_max = 0.5
     coord_top = 0.989
 
+    num_rows = len(learners_teachers_combos_no_leitner)
+    num_columns = len(psychologists)
 
     for i, learner_teacher_combo in enumerate(learners_teachers_combos_no_leitner):
         for j, psychologist in enumerate(psychologists):
@@ -59,8 +61,7 @@ def plot_error(
             axs[i,j].fill_between(range(len(y)), y * 1.3, y * 0.7, alpha=0.3, color=color)
             # Text psychologist name to column
             # Text learner and teacher combo to row
-            num_rows = len(learners_teachers_combos_no_leitner)
-            num_columns = len(psychologists)
+
             if j == 0:
                 i_pos_factor = i * (1 / num_rows) + (1 / num_rows / 2)
                 error.text(coord_min, i_pos_factor, (learner + ", " + teacher), va="center", rotation="vertical")
@@ -75,6 +76,7 @@ def plot_error(
     error.text(coord_max, coord_min, "Time", ha="center")
     # Text left
     error.text(coord_min, coord_max, "Items learnt", va="center", rotation="vertical")
+
     plt.tight_layout()
     #plt.margins(0.9)
     error.savefig(os.path.join(fig_path, "error.pdf"))
