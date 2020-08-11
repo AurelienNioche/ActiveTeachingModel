@@ -27,6 +27,8 @@ LEARNERS = frozenset({"exponential", "walsh2018"})
 PSYCHOLOGISTS = frozenset({"bayesian", "black_box"})
 TEACHERS = frozenset({"leitner", "threshold", "sampling"})
 
+models = (LEARNERS, PSYCHOLOGISTS, TEACHERS)
+
 NUM_AGENTS = 30
 NUM_TEACHERS = len(TEACHERS)
 NUM_LEARNERS = len(LEARNERS)
@@ -38,167 +40,231 @@ NUM_OBSERVATIONS = NUM_CONDITIONS * NUM_AGENTS
 T_TOTAL = 300
 
 # Gen fake data
-def get_trial_conditions():
-    return np.array(tuple(product(LEARNERS, PSYCHOLOGISTS, TEACHERS)))
+def get_trial_conditions(models: Iterable) -> np.ndarray:
+    """Makes combinations of all models. XXX used outside scope"""
 
-product_len = len(get_trial_conditions())
-
-# Reduce. Thanks GVR
-performance = get_trial_conditions()
-for _ in range(NUM_AGENTS - 1):
-    performance = np.vstack((performance, get_trial_conditions()))
-performance = pd.DataFrame.from_records(performance)
-performance.columns= ("Learner", "Psychologist", "Teacher")
+    return np.array(tuple(product(*models)))
 
 
-items_learnt = pd.Series(
-    abs(rng.normal(100, 50, size=product_len * NUM_AGENTS)),
-).astype(int)
+def make_fake_df(models: Iterable, num_agents: int) -> pd.DataFrame:
+    product_len = len(get_trial_conditions(models))
 
-t_computation = pd.Series(
-    abs(rng.normal(1000, 1000, size=product_len * NUM_AGENTS)),
-).astype(int)
+    # Reduce. Thanks GVR
+    to_df = get_trial_conditions(models)
+    for _ in range(NUM_AGENTS - 1):
+        to_df = np.vstack((to_df, get_trial_conditions(models)))
+    df = pd.DataFrame.from_records(to_df)
 
-performance["Items learnt"] = items_learnt
-performance["Computation time"] = t_computation
-performance["Agent ID"] = np.hstack(np.mgrid[:NUM_AGENTS, :product_len][0])
+    df.columns = ("Learner", "Psychologist", "Teacher")
 
+    items_learnt = pd.Series(
+        abs(rng.normal(100, 50, size=product_len * num_agents)),
+    ).astype(int)
 
-# Adding more realistic data
-FAKE_SIM_FACTOR = 1.3
-FACTOR_OF_FACTOR = 1.2
+    t_computation = pd.Series(
+        abs(rng.normal(1000, 1000, size=product_len * num_agents)),
+    ).astype(int)
 
-teacher_factors = pd.Series(
-    {
-        "leitner": 1,
-        "threshold": FAKE_SIM_FACTOR,
-        "sampling": FAKE_SIM_FACTOR * FACTOR_OF_FACTOR,
-    },
-    name="Teacher factor",
-    dtype=float,
-)
+    df["Items learnt"] = items_learnt
+    df["Computation time"] = t_computation
+    df["Agent ID"] = np.hstack(np.mgrid[:NUM_AGENTS, :product_len][0])
 
-learner_factors = pd.Series(
-    {
-        "exponential": 1,
-        "walsh2018": FAKE_SIM_FACTOR,
-    },
-    name="Learner factor",
-    dtype=float,
-)
+    return df
 
-psychologist_factors = pd.Series(
-    {
-        "bayesian": 1,
-        "black_box": FAKE_SIM_FACTOR,
-    },
-    name="Psychologist factor",
-    dtype=float,
-)
+performance = make_fake_df(models, NUM_AGENTS)
 
-fake_factors = (teacher_factors, learner_factors, psychologist_factors)
+def get_multiplying_factors_fake(
+    factor: float,
+    factor_of_factor: float
+    ) -> tuple:
+    """
+    Make factors to multiply fake data and
+    make it more realistic.
+    """
 
+    teacher_factors = pd.Series(
+        {
+            "leitner": 1,
+            "threshold": factor,
+            "sampling": factor * factor_of_factor,
+        },
+        name="Teacher factor",
+        dtype=float,
+    )
 
-# Add model factors as column and multiply by the values
-for fake_factor in fake_factors:
-    #print(fake_factor)
-    assert "factor" not in performance.columns
-    assert " " in fake_factor.name
-    model = next(iter(set(performance.columns).intersection(fake_factor.name.split(" "))))
-    performance = pd.merge(performance, fake_factor, how="left", left_on=model, right_index=True)
-    performance["Items learnt"] = performance["Items learnt"] * performance[fake_factor.name]
-    performance["Computation time"] = performance["Computation time"] * performance[fake_factor.name]
+    learner_factors = pd.Series(
+        {
+            "exponential": 1,
+            "walsh2018": factor,
+        },
+        name="Learner factor",
+        dtype=float,
+    )
 
+    psychologist_factors = pd.Series(
+        {
+            "bayesian": 1,
+            "black_box": factor,
+        },
+        name="Psychologist factor",
+        dtype=float,
+    )
+
+    return teacher_factors, learner_factors, psychologist_factors
+
+factors = get_multiplying_factors_fake(1.3, 1.2)
+
+def df_times_factors(df: pd.DataFrame, fake_factors: tuple) -> pd.DataFrame:
+    """Add model factors as column and multiply by the values"""
+
+    for fake_factor in fake_factors:
+        assert "factor" not in df.columns
+        assert " " in fake_factor.name
+        model = next(iter(set(df.columns).intersection(fake_factor.name.split(" "))))
+        #print(fake_factor.name, model)
+        df = pd.merge(df, fake_factor, how="left", left_on=model, right_index=True)
+        #print(df.columns)
+        df["Items learnt"] = df["Items learnt"] * df[fake_factor.name]
+        df["Computation time"] = df["Computation time"] * df[fake_factor.name]
+    return df
+
+performance = df_times_factors(performance, factors)
+#%%
 
 # # # Chocolate
 
-# Get values to plot from a groupby
-dict_cond_scores = {}
-for index, df in performance.sort_values("Agent ID").groupby(["Teacher", "Learner", "Psychologist"]):
-    dict_cond_scores[frozenset(index)] = df["Items learnt"].values
+def get_plot_values(df, sort_column: str, groupby_columns: Iterable, value_column: str) -> dict:
+    """Get values to plot from a groupby"""
 
+    dict_plot_values = {}
+    for index, sub_df in df.sort_values(sort_column).groupby(groupby_columns):
+        dict_plot_values[frozenset(index)] = sub_df[value_column].values
+    return dict_plot_values
+
+dict_cond_scores = get_plot_values(performance, "Agent ID", ["Teacher", "Learner", "Psychologist"], "Items learnt")
 #%%
 
-# Make the combinations of all teachers
-teachers_combos = tuple(combinations(TEACHERS, 2))
-# Make the combinations of all learners with all psychologists
-learners_psychologists_combos = tuple(product(LEARNERS, PSYCHOLOGISTS))
-# Make the combinations of all learners with all teachers
-learners_teachers_combos_no_leitner = set(product(LEARNERS, TEACHERS.symmetric_difference(frozenset({"leitner"}))))
+#dict_cond_scores = {}
+#for index, df in performance.sort_values("Agent ID").groupby(["Teacher", "Learner", "Psychologist"]):
+#    dict_cond_scores[frozenset(index)] = df["Items learnt"].values
 
-# Start the multiscatter plot
-chocolate, axs = plt.subplots(
-    len(learners_psychologists_combos),
-    len(teachers_combos),
-    sharex=True,
-    sharey=True,
-    #subplot_kw=dict(alpha=0.1),
-    #gridspec_kw=dict(),
-    figsize=(10,10)
-)
+#%%
+def map_teacher_colors() -> dict:
+    """
+    Map each of the teachers to a color
+    Warning: assumes the teachers
+    """
 
-# Colors
+    return {
+        "leitner": "blue",
+        "threshold": "orange",
+        "sampling": "green",
+    }
 
-teacher_colors = {
-    "leitner": "blue",
-    "threshold": "orange",
-    "sampling": "green",
-}
+teacher_colors = map_teacher_colors()
 
-def get_color_sequence(
-    teacher_0: str,
-    sequence_0: Iterable,
-    teacher_1: str,
-    sequence_1: Iterable,
-    color_mapping: Mapping,
-    ) -> tuple:
-    """Get the color of each dot"""
+def plot_chocolate(
+    teachers: Hashable,
+    learners: Hashable,
+    psychologists: Hashable,
+    df: pd.DataFrame,
+    color_mapping: dict,
+    fig_path: str
+    ) -> None:
+    """Prepare and save the chocolate plot"""
 
-    assert len(sequence_0) == len(sequence_1)
-    epsilon = np.finfo(float).eps
-    sequence_0 += epsilon
-    sequence_1 += epsilon
-    sequence = sequence_0 / sequence_1
-    return tuple(map(lambda x: color_mapping[teacher_0] if x > 1 else color_mapping[teacher_1], sequence))
-    #return tuple(map(lambda x: "blue" if x > 1 else "orange", sequence))
+    plt.close("all")
 
-for i, learner_psychologist_combo in enumerate(learners_psychologists_combos):
-    for j, teachers_combo in enumerate(teachers_combos):
-        x = dict_cond_scores[frozenset({teachers_combo[0] , *learner_psychologist_combo})]
-        y = dict_cond_scores[frozenset({teachers_combo[1] , *learner_psychologist_combo})]
-        colors = get_color_sequence(teachers_combo[0], x, teachers_combo[1], y, teacher_colors)
+    # Make the combinations of all teachers
+    teachers_combos = tuple(combinations(teachers, 2))
 
-        #axs[i,j].plot( x, y, "o",)
-        learner = next(iter(LEARNERS.intersection(learner_psychologist_combo)))
-        psychologist = next(iter(PSYCHOLOGISTS.intersection(learner_psychologist_combo)))
-        num_rows = len(learners_psychologists_combos)
-        num_columns = len(teachers_combos)
-        if j == 0:
-            i_pos_factor = i * (1 / num_rows) + (1 / num_rows / 2)
-            chocolate.text(coord_min, i_pos_factor, (learner + ", " + psychologist), va="center", rotation="vertical")
-        if i == 0:
-            j_pos_factor = j * (1 / num_columns) + (1 / num_columns / 2)
-            chocolate.text(j_pos_factor, coord_top , teachers_combo[0] + ", " + teachers_combo[1], ha="center")
-        axs[i,j].scatter( x, y, c=colors, alpha=0.9, zorder=1)
-        axs[i,j].plot([0, 1], [0, 1], "-k", transform=axs[i,j].transAxes, alpha=0.5, zorder=0)
-        axs[i,j].set_xlabel("Items learnt " + teachers_combo[0])
-        axs[i,j].set_ylabel("Items learnt " + teachers_combo[1])
+    # Make the combinations of all learners with all psychologists
+    learners_psychologists_combos = tuple(product(learners, psychologists))
+    if "leitner" in learners_psychologists_combos:
+        # Make the combinations of all learners with all teachers
+        learners_teachers_combos_no_leitner = set(
+            product(learners, teachers.symmetric_difference(frozenset({"leitner"})))
+        )
 
-axs.legend()
-plt.tight_layout()
-chocolate.savefig(os.path.join(paths.FIG_DIR, "chocolate.pdf"))
+    # Start the multiscatter plot
+    chocolate, axs = plt.subplots(
+        len(learners_psychologists_combos),
+        len(teachers_combos),
+        sharex=True,
+        sharey=True,
+        #subplot_kw=dict(alpha=0.1),
+        #gridspec_kw=dict(),
+        figsize=(10,10)
+    )
+
+    # Colors
+    def get_color_sequence(
+        teacher_0: str,
+        sequence_0: Iterable,
+        teacher_1: str,
+        sequence_1: Iterable,
+        color_mapping: Mapping,
+        ) -> tuple:
+        """Get the color of each dot"""
+
+        assert len(sequence_0) == len(sequence_1)
+        epsilon = np.finfo(float).eps
+        sequence_0 += epsilon
+        sequence_1 += epsilon
+        sequence = sequence_0 / sequence_1
+        return tuple(map(lambda x: color_mapping[teacher_0] if x > 1 else color_mapping[teacher_1], sequence))
+        #return tuple(map(lambda x: "blue" if x > 1 else "orange", sequence))
+
+    for i, learner_psychologist_combo in enumerate(learners_psychologists_combos):
+        for j, teachers_combo in enumerate(teachers_combos):
+            x = dict_cond_scores[frozenset({teachers_combo[0] , *learner_psychologist_combo})]
+            y = dict_cond_scores[frozenset({teachers_combo[1] , *learner_psychologist_combo})]
+            colors = get_color_sequence(teachers_combo[0], x, teachers_combo[1], y, color_mapping)
+
+            #axs[i,j].plot( x, y, "o",)
+            learner = next(iter(LEARNERS.intersection(learner_psychologist_combo)))
+            psychologist = next(iter(PSYCHOLOGISTS.intersection(learner_psychologist_combo)))
+            num_rows = len(learners_psychologists_combos)
+            num_columns = len(teachers_combos)
+            if j == 0:
+                i_pos_factor = i * (1 / num_rows) + (1 / num_rows / 2)
+                chocolate.text(coord_min, i_pos_factor, (learner + ", " + psychologist), va="center", rotation="vertical")
+            if i == 0:
+                j_pos_factor = j * (1 / num_columns) + (1 / num_columns / 2)
+                chocolate.text(j_pos_factor, coord_top , teachers_combo[0] + ", " + teachers_combo[1], ha="center")
+            axs[i,j].scatter(x, y, c=colors, alpha=0.9, zorder=1)
+            axs[i,j].plot([0, 1], [0, 1], "-k", transform=axs[i,j].transAxes, alpha=0.5, zorder=0)
+            axs[i,j].set_xlabel("Items learnt " + teachers_combo[0])
+            axs[i,j].set_ylabel("Items learnt " + teachers_combo[1])
+
+    # axs[0,0].legend()
+    plt.tight_layout()
+    chocolate.savefig(os.path.join(fig_path, "chocolate.pdf"))
+
+plot_chocolate(TEACHERS, LEARNERS, PSYCHOLOGISTS, performance, teacher_colors, paths.FIG_DIR)
 
 #%% Box
-box = sns.catplot(x="Teacher", y="Items learnt", kind="swarm", data=performance)
-#for ax in g.axes.flat:
-#    ax.plot((0, 50), (0, .2 * 50), c=".2", ls="--")
-box.savefig(os.path.join(paths.FIG_DIR, "box.pdf"))
+def plot_swarm(df: pd.DataFrame, fig_path: str) -> None:
+    """Swarm plot total items recalled per agent"""
+
+    plt.close("all")
+    box = sns.catplot(x="Teacher", y="Items learnt", kind="swarm", data=df)
+    #for ax in g.axes.flat:
+    #    ax.plot((0, 50), (0, .2 * 50), c=".2", ls="--")
+    box.savefig(os.path.join(fig_path, "box.pdf"))
+
+plot_swarm(performance, paths.FIG_DIR)
 
 #%%
-# Efficiency vs. computational cost
-eff_cost_data = performance.groupby("Teacher").sum()
-eff_cost = sns.relplot(x="Items learnt", y="Computation time", hue=eff_cost_data.index,  data=eff_cost_data)
-eff_cost.savefig(os.path.join(paths.FIG_DIR, "eff_cost.pdf"))
+def plot_efficiency_and_cost(df: pd.DataFrame, fig_path) -> None:
+    """Efficiency vs. computational cost"""
+
+    plt.close("all")
+    eff_cost_data = df.groupby("Teacher").sum()
+    eff_cost = sns.relplot(x="Items learnt", y="Computation time", hue=eff_cost_data.index,  data=eff_cost_data)
+    eff_cost.savefig(os.path.join(fig_path, "eff_cost.pdf"))
+
+plot_efficiency_and_cost(performance, paths.FIG_DIR)
 
 #%%
 # Time evolution fake data
@@ -219,93 +285,121 @@ def make_fake_p_recall_agent(t_total: int) -> np.ndarray:
     return p_recall_error
 
 # Another reduce in ugly loop, thanks GVR
-p_recall_error= make_fake_p_recall_agent(T_TOTAL)
-plt.close("all")
-error, axes = plt.subplots(4, 2, figsize=(10, 10), sharex=True, sharey=True)
-plt.tight_layout()
-for i in range(4):
-    for j in range(2):
-        axes[i,j].set_xlabel("Time")
-        axes[i,j].set_ylabel("Error")
-        #sns.lineplot(data=p_recall_error, ax=axes[i, j])
-        axes[i,j].plot(p_recall_error)
-#axes[0, 0].text(0,0,"dfsaf")#-0.1, 1.1, string.ascii_uppercase[1], transform=axes[0,0].transAxes, size=20)
-error.savefig(os.path.join(paths.FIG_DIR, "error.pdf"))
-#%%
-for _ in range(NUM_AGENTS * product_len - 1):
-    p_recall_error = np.hstack((p_recall_error, make_fake_p_recall_agent(T_TOTAL)))
-p_recall_error_all = pd.Series(p_recall_error, name="p recall error", dtype=float)
-
-
-conditions = get_trial_conditions()
-for _ in range(NUM_AGENTS - 1):
-    conditions = np.vstack((conditions, get_trial_conditions()))
-conditions = pd.DataFrame.from_records(conditions)
-conditions.columns = ("Learner", "Psychologist", "Teacher")
-conditions = conditions.loc[conditions.index.repeat(T_TOTAL)]
-
-assert conditions.shape[0] == p_recall_error_all.shape[0]
-
-#trials = conditions.append(p_recall_error_all)
-conditions["p recall error"] = p_recall_error_all
-conditions["Agent ID"] = np.hstack(np.mgrid[:NUM_AGENTS, :product_len * T_TOTAL][0])
+# plt.close("all")
+# error, axes = plt.subplots(4, 2, figsize=(10, 10), sharex=True, sharey=True)
+# plt.tight_layout()
+# for i in range(4):
+#     for j in range(2):
+#         axes[i,j].set_xlabel("Time")
+#         axes[i,j].set_ylabel("Error")
+#         #sns.lineplot(data=p_recall_error, ax=axes[i, j])
+#         axes[i,j].plot(p_recall_error)
+# #axes[0, 0].text(0,0,"dfsaf")#-0.1, 1.1, string.ascii_uppercase[1], transform=axes[0,0].transAxes, size=20)
+# error.savefig(os.path.join(paths.FIG_DIR, "error.pdf"))
 
 #%%
-dict_cond_scores = {}
-for index, df in conditions.sort_values("Agent ID").groupby(["Teacher", "Learner", "Psychologist"]):
-    #print(df)
-    dict_cond_scores[frozenset(index)] = df["p recall error"].values
+def make_fake_primary_data_df(models: Iterable, num_agents: int, t_total: int) -> pd.DataFrame:
+    """Fake data one entry per iteration"""
+
+    product_len = len(get_trial_conditions(models))
+    p_recall_error = make_fake_p_recall_agent(t_total)
+    for _ in range(num_agents * product_len - 1):
+        p_recall_error = np.hstack((p_recall_error, make_fake_p_recall_agent(t_total)))
+    p_recall_error_all = pd.Series(p_recall_error, name="p recall error", dtype=float)
+
+
+    df = get_trial_conditions(models)
+    for _ in range(NUM_AGENTS - 1):
+        df = np.vstack((df, get_trial_conditions(models)))
+    df = pd.DataFrame.from_records(df)
+    df.columns = ("Learner", "Psychologist", "Teacher")
+    df = df.loc[df.index.repeat(t_total)]
+
+    assert df.shape[0] == p_recall_error_all.shape[0]
+
+    #trials = df.append(p_recall_error_all)
+    df["p recall error"] = p_recall_error_all
+    df["Agent ID"] = np.hstack(np.mgrid[:num_agents, :product_len * t_total][0])
+
+    return df
+
+conditions = make_fake_primary_data_df(models, NUM_AGENTS, T_TOTAL)
 
 #%%
-plt.close("all")
-error, axs = plt.subplots(
-    len(learners_teachers_combos_no_leitner),
-    len(PSYCHOLOGISTS),
-    sharex=True,
-    sharey=True,
-    #subplot_kw=dict(alpha=0.9),
-    #gridspec_kw=dict(),
-    figsize=(10,10)
-)
+# dict_cond_scores = {}
+# for index, df in conditions.sort_values("Agent ID").groupby(["Teacher", "Learner", "Psychologist"]):
+#     #print(df)
+#     dict_cond_scores[frozenset(index)] = df["p recall error"].values
 
-# Text positions
-coord_min = 0.005
-coord_max = 0.5
-coord_top = 0.989
+#%%
+def plot_error(
+    teachers: Hashable,
+    learners: Hashable,
+    psychologists: Hashable,
+    df: pd.DataFrame,
+    color_mapping: dict,
+    fig_path: str
+    ) -> None:
+    """Prepare and save the chocolate plot"""
 
-for i, learner_teacher_combo in enumerate(learners_teachers_combos_no_leitner):
-    for j, psychologist in enumerate(PSYCHOLOGISTS):
-        y = dict_cond_scores[frozenset({psychologist, *learner_teacher_combo})]
-        # colors = get_color_sequence(psychologists_combo[0], x, psychologists_combo[1], y, teacher_colors)
-        learner = next(iter(LEARNERS.intersection(learner_teacher_combo)))
-        teacher = next(iter(TEACHERS.intersection(learner_teacher_combo)))
-        color = teacher_colors[teacher]
-        #print((str(learner_teacher_combo)))
-        #print((str(psychologist)))
-        #axs[i,j].plot( x, y, "o",)
-        #axs[i,j].scatter( x, y, c=colors)
-        # sns.lineplot(x, y=np.arange(len(x)), ax=axes[i, j])
-        axs[i,j].plot(y, color=color)
-        axs[i,j].fill_between(range(len(y)), y * 1.3, y * 0.7, alpha=0.3, color=color)
-        # Text psychologist name to column
-        # Text learner and teacher combo to row
-        num_rows = len(learners_teachers_combos_no_leitner)
-        num_columns = len(PSYCHOLOGISTS)
-        if j == 0:
-            i_pos_factor = i * (1 / num_rows) + (1 / num_rows / 2)
-            error.text(coord_min, i_pos_factor, (learner + ", " + teacher), va="center", rotation="vertical")
-        if i == 0:
-            j_pos_factor = j * (1 / num_columns) + (1 / num_columns / 2)
-            error.text(j_pos_factor, coord_top , psychologist, ha="center")
-        #axs[i,j].plot([0, 1], [0, 1], "--k", transform=axs[i,j].transAxes)
-        #axs[i,j].set_xlabel(psychologist)
-        #axs[i,j].set_ylabel()
-#sns.lineplot(data=p_recall_error)
-# Text bottom
-error.text(coord_max, coord_min, "Time", ha="center")
-# Text left
-error.text(coord_min, coord_max, "Items learnt", va="center", rotation="vertical")
-plt.tight_layout()
-plt.margins(0.9)
-error.savefig(os.path.join(paths.FIG_DIR, "error.pdf"))
+    plt.close("all")
 
+    # Make the combinations of all learners with all teachers
+    learners_teachers_combos_no_leitner = set(
+            product(learners, teachers.symmetric_difference(frozenset({"leitner"})))
+        )
+
+    error, axs = plt.subplots(
+        len(learners_teachers_combos_no_leitner),
+        len(psychologists),
+        sharex=True,
+        sharey=True,
+        #subplot_kw=dict(alpha=0.9),
+        #gridspec_kw=dict(),
+        figsize=(10,10)
+    )
+
+    # Text positions
+    coord_min = 0.005 - 0.01
+    coord_max = 0.5
+    coord_top = 0.989
+
+    dict_cond_scores = get_plot_values(conditions, "Agent ID", ["Teacher", "Learner", "Psychologist"], "p recall error")
+
+
+    for i, learner_teacher_combo in enumerate(learners_teachers_combos_no_leitner):
+        for j, psychologist in enumerate(psychologists):
+            y = dict_cond_scores[frozenset({psychologist, *learner_teacher_combo})]
+            learner = next(iter(learners.intersection(learner_teacher_combo)))
+            teacher = next(iter(teachers.intersection(learner_teacher_combo)))
+            color = teacher_colors[teacher]
+            #print((str(learner_teacher_combo)))
+            #print((str(psychologist)))
+            #axs[i,j].plot( x, y, "o",)
+            #axs[i,j].scatter( x, y, c=colors)
+            # sns.lineplot(x, y=np.arange(len(x)), ax=axes[i, j])
+            axs[i,j].plot(y, color=color)
+            axs[i,j].fill_between(range(len(y)), y * 1.3, y * 0.7, alpha=0.3, color=color)
+            # Text psychologist name to column
+            # Text learner and teacher combo to row
+            num_rows = len(learners_teachers_combos_no_leitner)
+            num_columns = len(psychologists)
+            if j == 0:
+                i_pos_factor = i * (1 / num_rows) + (1 / num_rows / 2)
+                error.text(coord_min, i_pos_factor, (learner + ", " + teacher), va="center", rotation="vertical")
+            if i == 0:
+                j_pos_factor = j * (1 / num_columns) + (1 / num_columns / 2)
+                error.text(j_pos_factor, coord_top , psychologist, ha="center")
+            #axs[i,j].plot([0, 1], [0, 1], "--k", transform=axs[i,j].transAxes)
+            #axs[i,j].set_xlabel(psychologist)
+            #axs[i,j].set_ylabel()
+    #sns.lineplot(data=p_recall_error)
+    # Text bottom
+    error.text(coord_max, coord_min, "Time", ha="center")
+    # Text left
+    error.text(coord_min, coord_max, "Items learnt", va="center", rotation="vertical")
+    plt.tight_layout()
+    #plt.margins(0.9)
+    error.savefig(os.path.join(fig_path, "error.pdf"))
+
+plot_error(TEACHERS, LEARNERS, PSYCHOLOGISTS, conditions, teacher_colors, paths.FIG_DIR)
