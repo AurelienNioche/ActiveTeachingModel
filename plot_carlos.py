@@ -220,13 +220,24 @@ def make_fake_primary_data_df(models: Iterable, num_agents: int, t_total: int) -
     return df
 
 
-if __name__ == "__main__":
+def main():
     models = (LEARNERS, PSYCHOLOGISTS, TEACHERS)
     performance = prepare_data_chocolate(1.3, 1.2, models, NUM_AGENTS)
-    dict_cond_scores = get_plot_values(performance, "Agent ID", ["Teacher", "Learner", "Psychologist"], "Items learnt")
-    chocolate.plot_chocolate(TEACHERS, LEARNERS, PSYCHOLOGISTS, performance, map_teacher_colors(), paths.FIG_DIR, dict_cond_scores)
+    dict_cond_scores = get_plot_values(performance, "Agent ID",
+                                       ["Teacher", "Learner", "Psychologist"],
+                                       "Items learnt")
+    chocolate.plot_chocolate(TEACHERS, LEARNERS, PSYCHOLOGISTS, performance,
+                             map_teacher_colors(), paths.FIG_DIR,
+                             dict_cond_scores)
     swarm.plot_swarm(performance, paths.FIG_DIR)
     efficiency_cost.plot_efficiency_and_cost(performance, paths.FIG_DIR)
     conditions = make_fake_primary_data_df(models, NUM_AGENTS, T_TOTAL)
-    dict_cond_scores = get_plot_values(conditions, "Agent ID", ["Teacher", "Learner", "Psychologist"], "p recall error")
-    error.plot_error(TEACHERS, LEARNERS, PSYCHOLOGISTS, conditions, map_teacher_colors(), paths.FIG_DIR, dict_cond_scores)
+    dict_cond_scores = get_plot_values(conditions, "Agent ID",
+                                       ["Teacher", "Learner", "Psychologist"],
+                                       "p recall error")
+    error.plot_error(TEACHERS, LEARNERS, PSYCHOLOGISTS, conditions,
+                     map_teacher_colors(), paths.FIG_DIR, dict_cond_scores)
+
+
+if __name__ == "__main__":
+    main()
