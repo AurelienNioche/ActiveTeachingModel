@@ -1,0 +1,66 @@
+{
+    "param": [
+        1.1709629034100668,
+        0.04225283343636302,
+        0.033278916751584856,
+        0.19563881002387856,
+        0.1,
+        0.6
+    ],
+    "param_labels": [
+        "tau",
+        "s",
+        "b",
+        "m",
+        "c",
+        "x"
+    ],
+    "is_item_specific": false,
+    "n_item": 500,
+    "ss_n_iter": 50,
+    "ss_n_iter_between": 500,
+    "n_ss": 10,
+    "thr": 0.9,
+    "bounds": [
+        [
+            0.8,
+            1.2
+        ],
+        [
+            0.03,
+            0.05
+        ],
+        [
+            0.005,
+            0.2
+        ],
+        [
+            0.005,
+            0.2
+        ],
+        [
+            0.1,
+            0.1
+        ],
+        [
+            0.6,
+            0.6
+        ]
+    ],
+    "init_guess": null,
+    "learner_model": "exp_decay",
+    "psychologist_model": "psy_grid",
+    "teachers": [
+        "leitner",
+        "threshold",
+        "sampling"
+    ],
+    "omniscient": [
+        false,
+        true,
+        true
+    ],
+    "time_per_iter": 2,
+    "grid_size": 10,
+    "seed": 16
+}

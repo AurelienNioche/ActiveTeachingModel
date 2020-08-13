@@ -57,8 +57,8 @@ def plot(
     chocolate, axes = plt.subplots(
         len(learners_psychologists_combos),
         len(teachers_combos),
-        # sharex=True,  # Uncomment for shared axes
-        # sharey=True,
+        sharex=True,  # Uncommented for shared axes
+        sharey=True,
         figsize=(10,10)
     )
 
@@ -91,7 +91,7 @@ def plot(
             # axes[n_row, n_col].set_ylabel("Items learnt " + teachers_combo[1])
 
             if n_row == 0:
-                axes[n_row, n_col].set_title(f"{teachers_combo[1]}, {teachers_combo[0]}")  # Inverted text indexing, easier interpretation
+                axes[n_row, n_col].set_title(f"{teachers_combo[1]} vs. {teachers_combo[0]}")  # Inverted text indexing, easier interpretation
 
             elif n_row == num_rows:
                 axes[n_row, n_col].set_xlabel("Time")
