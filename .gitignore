@@ -156,6 +156,7 @@ ActiveTeachingModel/credentials.py
 pickle/
 /data.zip
 /user_data.zip
+config/auto/
 
 # Snippet pulls
 snippet
