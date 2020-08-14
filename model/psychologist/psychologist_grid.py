@@ -19,24 +19,29 @@ class PsychologistGrid(Psychologist):
         if not omniscient:
             grid_param = self.cp_grid_param(grid_size=grid_size,
                                             bounds=bounds)
-            n_param_set = grid_param.shape[0]
-            grid_param = grid_param.flatten()
+            n_param_set, n_param = grid_param.shape
+            # grid_param = grid_param.flatten()
 
             lp = np.ones(n_param_set)
             lp -= logsumexp(lp)
             if is_item_specific:
                 log_post = np.zeros((n_item, n_param_set))
                 log_post[:] = lp
-                log_post = log_post.flatten()
+
+                est_param = np.zeros((n_item, n_param))
+                est_param[:] = np.dot(np.exp(lp), grid_param)
+                # log_post = log_post.flatten()
             else:
                 log_post = lp
+                est_param = np.dot(np.exp(lp), grid_param)
 
             self.grid_param = grid_param
             self.log_post = log_post
+            self.est_param = est_param
 
             self.n_param = len(bounds)
-            self.bounds = np.asarray(bounds).flatten()
-            self.inferred_param = self.get_init_guess()
+            self.bounds = np.asarray(bounds)  #.flatten()
+            # self.inferred_param = self.get_init_guess()
 
             self.n_pres = np.zeros(n_item, dtype=int)
             self.n_item = n_item
@@ -80,28 +85,32 @@ class PsychologistGrid(Psychologist):
                 pass
             else:
                 # from datetime import datetime
-                gp = np.reshape(self.grid_param, (-1, self.n_param))
+                # gp = np.reshape(self.grid_param, (-1, self.n_param))
 
                 # t = datetime.now()
                 log_lik = self.learner.log_lik_grid(
                     item=item,
-                    grid_param=gp,
+                    grid_param=self.grid_param,
                     response=response,
                     timestamp=timestamp)
                 # print("log_lik", datetime.now()-t)
                 # Update prior
                 if self.is_item_specific:
-                    log_post = np.reshape(self.log_post, (self.n_item, -1))
-                    lp = log_post[item]
+                    # log_post = np.reshape(self.log_post, (self.n_item, -1))
+                    lp = self.log_post[item]
                     lp += log_lik
                     lp -= logsumexp(lp)
-                    log_post[item] = lp
-                    self.log_post = log_post.flatten()
+                    self.log_post[item] = lp
+
+                    self.est_param[item] = np.dot(np.exp(lp), self.grid_param)
+                    # self.log_post = log_post.flatten()
                 else:
-                    lp = np.asarray(self.log_post)
+                    lp = self.log_post  # np.asarray(self.log_post)
                     lp += log_lik
                     lp -= logsumexp(lp)
                     self.log_post = lp
+
+                    self.est_param = np.dot(np.exp(lp), self.grid_param)
 
             self.n_pres[item] += 1
         self.learner.update(timestamp=timestamp, item=item)
@@ -117,26 +126,26 @@ class PsychologistGrid(Psychologist):
     def inferred_learner_param(self):
 
         if not self.omniscient:
-
-            gp = np.reshape(self.grid_param, (-1, self.n_param))
-            if self.is_item_specific:
-
-                param = np.zeros((self.n_item, self.n_param))
-                param[:] = self.get_init_guess()
-                lp = np.reshape(self.log_post, (self.n_item, -1))
-                rep = self.n_pres > 1
-                param[rep] = gp[lp[rep].argmax(axis=-1)]
-            else:
-                if np.max(self.n_pres) <= 1:
-                    self.inferred_param = self.get_init_guess()
-                else:
-                    self.inferred_param = gp[np.argmax(self.log_post)]
+            return self.est_param
+            # gp = np.reshape(self.grid_param, (-1, self.n_param))
+            # if self.is_item_specific:
+            #     return self.e
+            #     # param = np.zeros((self.n_item, self.n_param))
+            #     # param[:] = self.get_init_guess()
+            #     # lp = np.reshape(self.log_post, (self.n_item, -1))
+            #     # rep = self.n_pres > 1
+            #     # param[rep] = gp[lp[rep].argmax(axis=-1)]
+            # else:
+            #     if np.max(self.n_pres) <= 1:
+            #         self.inferred_param = self.get_init_guess()
+            #     else:
+            #         self.inferred_param = gp[np.argmax(self.log_post)]
 
         return self.inferred_param
 
-    def get_init_guess(self):
-        bounds = np.reshape(self.bounds, (-1, 2))
-        return [np.mean(b) for b in bounds]
+    # def get_init_guess(self):
+    #     bounds = np.reshape(self.bounds, (-1, 2))
+    #     return [np.mean(b) for b in bounds]
 
     def p(self, param, item, now):
         return self.learner.p(

@@ -106,7 +106,8 @@ class Sampling(Teacher):
         p_seen, seen = self.psychologist.learner.p_seen_spec_hist(
             param=param, hist=new_hist,
             ts=new_ts, seen=seen,
-            now=eval_ts
+            now=eval_ts,
+            is_item_specific=self.psychologist.is_item_specific
         )
         return np.sum(p_seen)
 
