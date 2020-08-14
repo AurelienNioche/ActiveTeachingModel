@@ -1,6 +1,6 @@
 import numpy as np
 from scipy.special import logsumexp
-from itertools import product
+# from itertools import product
 
 from model.learner.act_r2008 import ActR2008
 from model.learner.walsh2018 import Walsh2018
@@ -171,13 +171,17 @@ class PsychologistGrid(Psychologist):
 
     @classmethod
     def create(cls, tk, omniscient):
-        if tk.learner_model in (ActR2008, Walsh2018):
+        if tk.learner_model in (ActR2008, ):
             if tk.is_item_specific:
                 raise NotImplementedError
             else:
                 learner = tk.learner_model(n_item=tk.n_item,
                                            n_iter=tk.n_ss*tk.ss_n_iter
                                            + tk.horizon)
+        elif tk.learner_model == Walsh2018:
+            learner = tk.learner_model(n_item=tk.n_item,
+                                       n_iter=tk.n_ss*tk.ss_n_iter
+                                       + tk.horizon)
         else:
             learner = tk.learner_model(tk.n_item)
         # else:
