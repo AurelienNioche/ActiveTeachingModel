@@ -12,12 +12,20 @@ EPS = np.finfo(np.float).eps
 class PsychologistGradient(Psychologist):
 
     def __init__(self, n_item, is_item_specific, learner,
-                 omniscient, param, init_guess, bounds):
+                 omniscient, param, bounds):
 
         self.omniscient = omniscient
         if not omniscient:
-            self.inferred_param = init_guess
             self.bounds = bounds
+
+            ep = np.array([np.mean(b) for b in self.bounds])
+            if is_item_specific:
+                n_param = len(ep)
+                self.inferred_param = np.zeros((n_item, n_param))
+                self.inferred_param[:] = ep
+            else:
+                self.inferred_param = ep
+
             self.n_pres = np.zeros(n_item, dtype=int)
             self.hist = []
             self.success = []
@@ -38,14 +46,31 @@ class PsychologistGradient(Psychologist):
             if self.n_pres[item] == 0:
                 pass
             else:
-                self.inferred_param = self.fit(
-                    self.learner.inv_log_lik,
-                    init_guess=self.inferred_param,
-                    hist=np.asarray(self.hist),
-                    success=np.asarray(self.success),
-                    timestamp=np.asarray(self.timestamp),
-                    bounds=self.bounds
-                )
+                hist = np.asarray(self.hist)
+                ts = np.asarray(self.timestamp)
+                success = np.asarray(self.success)
+
+                if self.is_item_specific:
+                    is_item = hist == item
+                    ep = self.fit(
+                        self.learner.inv_log_lik,
+                        init_guess=self.inferred_param[item],
+                        hist=hist[is_item],
+                        success=success[is_item],
+                        timestamp=ts[is_item],
+                        bounds=self.bounds)
+
+                    self.inferred_param[item] = ep
+                else:
+                    ep = self.fit(
+                        self.learner.inv_log_lik,
+                        init_guess=self.inferred_param,
+                        hist=np.asarray(self.hist),
+                        success=np.asarray(self.success),
+                        timestamp=np.asarray(self.timestamp),
+                        bounds=self.bounds)
+
+                    self.inferred_param = ep
 
             self.n_pres[item] += 1
 
@@ -57,9 +82,7 @@ class PsychologistGradient(Psychologist):
             param=self.inferred_param,
             is_item_specific=self.is_item_specific,
             now=now)
-        # print("hist", self.hist)
-        # print("success", self.success)
-        # print("p_seen", p_seen)
+
         return p_seen, seen
 
     def inferred_learner_param(self):
@@ -101,25 +124,26 @@ class PsychologistGradient(Psychologist):
 
     @classmethod
     def create(cls, tk, omniscient):
-        if tk.is_item_specific:
-            raise NotImplementedError
 
-        if tk.learner_model in (ActR2008, Walsh2018):
+        if tk.learner_model in (ActR2008, ):
             if tk.is_item_specific:
                 raise NotImplementedError
             else:
                 learner = tk.learner_model(n_item=tk.n_item,
                                            n_iter=tk.n_ss*tk.ss_n_iter
                                            + tk.horizon)
+        elif tk.learner_model == Walsh2018:
+            learner = tk.learner_model(n_item=tk.n_item,
+                                       n_iter=tk.n_ss * tk.ss_n_iter
+                                              + tk.horizon)
+
         else:
             learner = tk.learner_model(tk.n_item)
 
         return cls(
-            init_guess=tk.init_guess,
             omniscient=omniscient,
             n_item=tk.n_item,
             bounds=tk.bounds,
             is_item_specific=tk.is_item_specific,
             param=tk.param,
-            learner=learner
-        )
+            learner=learner)

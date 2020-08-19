@@ -5,7 +5,7 @@ from scipy.special import logsumexp
 from model.learner.act_r2008 import ActR2008
 from model.learner.walsh2018 import Walsh2018
 # from model.learner.act_r_2param import ActR2param
-from . generic import Psychologist
+from .generic import Psychologist
 
 EPS = np.finfo(np.float).eps
 
@@ -25,21 +25,18 @@ class PsychologistGrid(Psychologist):
             lp = np.ones(n_param_set)
             lp -= logsumexp(lp)
 
-            ep = np.dot(np.exp(lp), grid_param)
+            ep = np.array([np.mean(b) for b in self.bounds])
 
             if is_item_specific:
-                log_post = np.zeros((n_item, n_param_set))
-                log_post[:] = lp
 
                 est_param = np.zeros((n_item, n_param))
                 est_param[:] = ep
 
             else:
-                log_post = lp
                 est_param = ep
 
             self.grid_param = grid_param
-            self.log_post = log_post
+
             self.est_param = est_param
 
             self.n_param = n_param
@@ -89,20 +86,11 @@ class PsychologistGrid(Psychologist):
                     response=response,
                     timestamp=timestamp)
 
-                if self.is_item_specific:
-                    lp = self.log_post[item]
-                else:
-                    lp = self.log_post
-
-                lp += log_lik
-                lp -= logsumexp(lp)
-                est_param = np.dot(np.exp(lp), self.grid_param)
+                est_param = self.grid_param[np.argmax(log_lik)]
 
                 if self.is_item_specific:
-                    self.log_post[item] = lp
                     self.est_param[item] = est_param
                 else:
-                    self.log_post = lp
                     self.est_param = est_param
 
             self.n_pres[item] += 1
@@ -148,17 +136,17 @@ class PsychologistGrid(Psychologist):
 
     @classmethod
     def create(cls, tk, omniscient):
-        if tk.learner_model in (ActR2008, ):
+        if tk.learner_model in (ActR2008,):
             if tk.is_item_specific:
                 raise NotImplementedError
             else:
                 learner = tk.learner_model(n_item=tk.n_item,
-                                           n_iter=tk.n_ss*tk.ss_n_iter
-                                           + tk.horizon)
+                                           n_iter=tk.n_ss * tk.ss_n_iter
+                                                  + tk.horizon)
         elif tk.learner_model == Walsh2018:
             learner = tk.learner_model(n_item=tk.n_item,
-                                       n_iter=tk.n_ss*tk.ss_n_iter
-                                       + tk.horizon)
+                                       n_iter=tk.n_ss * tk.ss_n_iter
+                                              + tk.horizon)
         else:
             learner = tk.learner_model(tk.n_item)
 
