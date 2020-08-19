@@ -10,7 +10,7 @@ from .generic import Psychologist
 EPS = np.finfo(np.float).eps
 
 
-class PsychologistGrid(Psychologist):
+class PsychologistGridNoBayes(Psychologist):
 
     def __init__(self, n_item, is_item_specific, learner,
                  bounds, grid_size, omniscient, param):
