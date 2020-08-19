@@ -17,7 +17,7 @@ def get_color_sequence(
     teacher_1: str,
     sequence_1: Iterable,
     color_mapping: Mapping,
-    ) -> tuple:
+) -> tuple:
     """Get the color for each dot"""
 
     assert len(sequence_0) == len(sequence_1)
@@ -25,7 +25,12 @@ def get_color_sequence(
     sequence_0 += epsilon
     sequence_1 += epsilon
     sequence = sequence_0 / sequence_1
-    return tuple(map(lambda x: color_mapping[teacher_0] if x > 1 else color_mapping[teacher_1], sequence))
+    return tuple(
+        map(
+            lambda x: color_mapping[teacher_0] if x > 1 else color_mapping[teacher_1],
+            sequence,
+        )
+    )
 
 
 def plot(
@@ -34,7 +39,7 @@ def plot(
     psychologists: Hashable,
     df: pd.DataFrame,
     fig_path: str,
-    ) -> None:
+) -> None:
     """Prepare and save the chocolate plot"""
 
     print("Plotting multiscatter...")
@@ -59,11 +64,13 @@ def plot(
         len(teachers_combos),
         sharex=True,  # Uncommented for shared axes
         sharey=True,
-        figsize=(10,10)
+        figsize=(10, 10),
     )
 
     # Plottable values per condition (models set)
-    dict_cond_scores = utils.get_plot_values(df, "Agent ID", ["Teacher", "Learner", "Psychologist"], "Items learnt")
+    dict_cond_scores = utils.get_plot_values(
+        df, "Agent ID", ["Teacher", "Learner", "Psychologist"], "Items learnt"
+    )
 
     # Text positions
     num_rows = len(learners_psychologists_combos)
@@ -76,22 +83,39 @@ def plot(
         for n_col, teachers_combo in enumerate(teachers_combos):
             # Subplot parameters
             learner = next(iter(learners.intersection(learner_psychologist_combo)))
-            psychologist = next(iter(psychologists.intersection(learner_psychologist_combo)))
+            psychologist = next(
+                iter(psychologists.intersection(learner_psychologist_combo))
+            )
             # Plotting data
-            x = dict_cond_scores[frozenset({teachers_combo[0] , *learner_psychologist_combo})]
-            y = dict_cond_scores[frozenset({teachers_combo[1] , *learner_psychologist_combo})]
+            x = dict_cond_scores[
+                frozenset({teachers_combo[0], *learner_psychologist_combo})
+            ]
+            y = dict_cond_scores[
+                frozenset({teachers_combo[1], *learner_psychologist_combo})
+            ]
             # Color
-            colors = get_color_sequence(teachers_combo[0], x, teachers_combo[1], y, color_mapping)
+            colors = get_color_sequence(
+                teachers_combo[0], x, teachers_combo[1], y, color_mapping
+            )
             # Plot scatter
             axes[n_row, n_col].scatter(x, y, c=colors, alpha=alpha_dot, zorder=1)
             # Plot identity line
-            axes[n_row, n_col].plot([0, 1], [0, 1], "-k", transform=axes[n_row,n_col].transAxes, alpha=alpha_line, zorder=0)
+            axes[n_row, n_col].plot(
+                [0, 1],
+                [0, 1],
+                "-k",
+                transform=axes[n_row, n_col].transAxes,
+                alpha=alpha_line,
+                zorder=0,
+            )
             # Label text
             # axes[n_row, n_col].set_xlabel("Items learnt " + teachers_combo[0])
             # axes[n_row, n_col].set_ylabel("Items learnt " + teachers_combo[1])
 
             if n_row == 0:
-                axes[n_row, n_col].set_title(f"{teachers_combo[1]} vs. {teachers_combo[0]}")  # Inverted text indexing, easier interpretation
+                axes[n_row, n_col].set_title(
+                    f"{teachers_combo[1]} vs. {teachers_combo[0]}"
+                )  # Inverted text indexing, easier interpretation
 
             elif n_row == num_rows:
                 axes[n_row, n_col].set_xlabel("Time")
@@ -100,15 +124,28 @@ def plot(
                 axes[n_row, n_col].set_ylabel(f"{learner}, {psychologist}")
 
     # Text left
-    chocolate.text(coord_min, coord_max, "Items learnt", va="center", rotation="vertical",
-               ha="center", transform=chocolate.transFigure)
+    chocolate.text(
+        coord_min,
+        coord_max,
+        "Items learnt",
+        va="center",
+        rotation="vertical",
+        ha="center",
+        transform=chocolate.transFigure,
+    )
     # Text bottom
-    chocolate.text(coord_max + 0.04, coord_min - 0.02, "Items learnt", va="center", rotation="horizontal",
-               ha="center", transform=chocolate.transFigure)
+    chocolate.text(
+        coord_max + 0.04,
+        coord_min - 0.02,
+        "Items learnt",
+        va="center",
+        rotation="horizontal",
+        ha="center",
+        transform=chocolate.transFigure,
+    )
 
     plt.tight_layout(rect=(padding_0, 0, 1, 1))
 
     print("Saving fig...")
     chocolate.savefig(os.path.join(fig_path, "chocolate.pdf"))
     print("Done!")
-

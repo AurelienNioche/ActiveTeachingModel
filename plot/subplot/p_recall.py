@@ -6,16 +6,17 @@ from utils.brokenaxes import brokenaxes
 
 
 def fig_p_item_seen(
-        fig,
-        gs,
-        xlims,
-        p_recall,
-        label,
-        background,
-        time_per_iter,
-        color,
-        vline=None,
-        hline=None):
+    fig,
+    gs,
+    xlims,
+    p_recall,
+    label,
+    background,
+    time_per_iter,
+    color,
+    vline=None,
+    hline=None,
+):
 
     if xlims is None:
         ax = fig.add_subplot(gs)
@@ -23,11 +24,12 @@ def fig_p_item_seen(
         ax = brokenaxes(fig=fig, subplot_spec=gs, xlims=xlims)
 
     if hline is not None:
-        ax.axhline(hline, color='grey', linestyle='--', lw=0.5,
-                   label='Learnt threshold')
+        ax.axhline(
+            hline, color="grey", linestyle="--", lw=0.5, label="Learnt threshold"
+        )
 
     if vline is not None:
-        ax.axvline(vline, color='red', linestyle=':', lw=4, label='Exam')
+        ax.axvline(vline, color="red", linestyle=":", lw=4, label="Exam")
 
     lines = None
     for coordinates in p_recall:
@@ -48,17 +50,21 @@ def fig_p_item_seen(
     ax.set_ylim(-0.005, 1.005)
     ax.set_yticks([0, 0.5, 1])
 
-    ax.legend(loc='lower left')
+    ax.legend(loc="lower left")
 
     if xlims is None:
         y2, y1 = ax.get_ylim()
     else:
         y2, y1 = ax.get_ylim()[0]
 
-    x = np.arange(0, background.size*time_per_iter, time_per_iter)
-    ax.fill_between(x, y1, y2,
-                    where=background == 1,
-                    facecolor='whitesmoke',
-                    edgecolor='lightgrey',
-                    label='Training')
+    x = np.arange(0, background.size * time_per_iter, time_per_iter)
+    ax.fill_between(
+        x,
+        y1,
+        y2,
+        where=background == 1,
+        facecolor="whitesmoke",
+        edgecolor="lightgrey",
+        label="Training",
+    )
     ax.set_ylim(y2, y1)

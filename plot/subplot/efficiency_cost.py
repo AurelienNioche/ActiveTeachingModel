@@ -50,5 +50,6 @@ def plot(df: pd.DataFrame, fig_path: str) -> None:
     eff_cost.savefig(os.path.join(fig_path, "efficiency_cost.pdf"))
     print("Done!")
 
-#ax = sns.catplot(x="Items learnt", y="Computation time", hue="Psychologist", data=df)
-#eff_cost = sns.relplot(x="Items learnt", y="Computation time", hue=eff_cost_data.index,  data=eff_cost_data)
+
+# ax = sns.catplot(x="Items learnt", y="Computation time", hue="Psychologist", data=df)
+# eff_cost = sns.relplot(x="Items learnt", y="Computation time", hue=eff_cost_data.index,  data=eff_cost_data)

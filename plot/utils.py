@@ -4,7 +4,10 @@ from typing import Iterable
 
 import pandas as pd
 
-def get_plot_values(df, sort_column: str, groupby_columns: Iterable, value_column: str) -> dict:
+
+def get_plot_values(
+    df, sort_column: str, groupby_columns: Iterable, value_column: str
+) -> dict:
     """Get values to plot from a groupby"""
 
     dict_plot_values = {}
@@ -24,4 +27,3 @@ def map_teacher_colors() -> dict:
         "threshold": "orange",
         "sampling": "green",
     }
-

@@ -11,7 +11,7 @@
     "n_item": 500,
     "ss_n_iter": 50,
     "ss_n_iter_between": 500,
-    "n_ss": 10,
+    "n_ss": 2,
     "thr": 0.9,
     "mcts": {
         "iter_limit": 500, "time_limit": null,
@@ -31,7 +31,7 @@
     "learner_model": "walsh2018",
     "psychologist_model": "psy_grid",
     "teachers": ["leitner", "threshold","sampling"],
-    "omniscient": [false, true, true],
+    "omniscient": [false, false, false],
     "time_per_iter": 2,
     "grid_size": 10,
     "seed": 0

@@ -50,30 +50,37 @@ from numpy.random import default_rng
 
 import settings.paths as paths
 
+
 def generate_random_param(
-    parameter_name: str,
-    num_agents: int,
-    bounds: Iterable,
-    rng: object,
-    ) -> pd.Series:
+    parameter_name: str, num_agents: int, bounds: Iterable, rng: object,
+) -> pd.Series:
     """Get randomized parameters for all subjects within bounds"""
 
     assert len(bounds) == 2
     assert bounds[-1] >= bounds[0]
 
-    return pd.Series((bounds[-1] - bounds[0]) * rng.random((num_agents,)) + bounds[0], name=parameter_name)
+    return pd.Series(
+        (bounds[-1] - bounds[0]) * rng.random((num_agents,)) + bounds[0],
+        name=parameter_name,
+    )
 
 
-def get_param_df(num_agents: int , parameter_names: Iterable, bounds: Iterable[Iterable[float]]) -> pd.DataFrame:
+def get_param_df(
+    num_agents: int, parameter_names: Iterable, bounds: Iterable[Iterable[float]]
+) -> pd.DataFrame:
     """Get all parameter dataframe for all agents"""
 
-    return pd.concat(tuple(generate_random_param(parameter_name, num_agents, bounds[idx], rng) for idx, parameter_name in enumerate(parameter_names)), axis=1)
+    return pd.concat(
+        tuple(
+            generate_random_param(parameter_name, num_agents, bounds[idx], rng)
+            for idx, parameter_name in enumerate(parameter_names)
+        ),
+        axis=1,
+    )
 
 
 def make_config_json(
-    num_agents: int,
-    save_path: str,
-    **kwargs,
+    num_agents: int, save_path: str, **kwargs,
 ):
     """Make a JSON config file"""
 
@@ -84,7 +91,10 @@ def make_config_json(
         seed = {"seed": n_agent}
         json_content = {**param, **kwargs, **seed}
 
-        with open(os.path.join(save_path, f"config_{kwargs['learner_model']}_{n_agent}.json"), "w") as file_path:
+        with open(
+            os.path.join(save_path, f"config_{kwargs['learner_model']}_{n_agent}.json"),
+            "w",
+        ) as file_path:
             json.dump(json_content, file_path, sort_keys=False, indent=4)
 
 
@@ -95,20 +105,20 @@ def main() -> None:
 
     param_labels = ["tau", "s", "b", "m", "c", "x"]
     bounds = [
-         [0.8, 1.2],
-         [0.03, 0.05],
-         [0.005, 0.20],
-         [0.005, 0.20],
-         [0.1, 0.1],
-         [0.6, 0.6]
-        ]
+        [0.8, 1.2],
+        [0.03, 0.05],
+        [0.005, 0.20],
+        [0.005, 0.20],
+        [0.1, 0.1],
+        [0.6, 0.6],
+    ]
 
     is_item_specific = False
-    n_item =  500
-    ss_n_iter =  50
-    ss_n_iter_between =  500
-    n_ss =  10
-    thr =  0.9
+    n_item = 500
+    ss_n_iter = 50
+    ss_n_iter_between = 500
+    n_ss = 10
+    thr = 0.9
     init_guess = None
 
     # # # Options
@@ -138,27 +148,26 @@ def main() -> None:
 
     for learner_model in learner_models:
         make_config_json(
-            num_agents         = num_agents,
-            save_path          = paths.AUTO_JSON_DIR,
+            num_agents=num_agents,
+            save_path=paths.AUTO_JSON_DIR,
             # kwargs
-            param_labels       = param_labels,
-            is_item_specific   = is_item_specific,
-            n_item             = n_item,
-            ss_n_iter          = ss_n_iter,
-            ss_n_iter_between  = ss_n_iter_between,
-            n_ss               = n_ss,
-            thr                = thr,
-            bounds             = bounds,
-            init_guess         = init_guess,
-            learner_model      = learner_model,
-            psychologist_model = psychologist_model,
-            teachers           = teachers,
-            omniscient         = omniscient,
-            time_per_iter      = time_per_iter,
-            grid_size          = grid_size,
+            param_labels=param_labels,
+            is_item_specific=is_item_specific,
+            n_item=n_item,
+            ss_n_iter=ss_n_iter,
+            ss_n_iter_between=ss_n_iter_between,
+            n_ss=n_ss,
+            thr=thr,
+            bounds=bounds,
+            init_guess=init_guess,
+            learner_model=learner_model,
+            psychologist_model=psychologist_model,
+            teachers=teachers,
+            omniscient=omniscient,
+            time_per_iter=time_per_iter,
+            grid_size=grid_size,
         )
 
-    pass
 
 if __name__ == "__main__":
     # Change parameters inside `main`
@@ -167,19 +176,19 @@ if __name__ == "__main__":
 
 #%%
 
-    # param_labels: Iterable[str],
-    # is_item_specific: bool,
-    # n_item: int,
-    # ss_n_iter: int,
-    # ss_n_iter_between: int,
-    # n_ss: int,
-    # thr: float,
-    # bounds: Iterable[Iterable[float]],
-    # init_guess: None,
-    # learner_model: str,
-    # psychologist_model: str,
-    # teachers: Iterable[str],
-    # omniscient: Iterable[bool],
-    # time_per_iter: int,
-    # grid_size: int,
-    # seed: int,
+# param_labels: Iterable[str],
+# is_item_specific: bool,
+# n_item: int,
+# ss_n_iter: int,
+# ss_n_iter_between: int,
+# n_ss: int,
+# thr: float,
+# bounds: Iterable[Iterable[float]],
+# init_guess: None,
+# learner_model: str,
+# psychologist_model: str,
+# teachers: Iterable[str],
+# omniscient: Iterable[bool],
+# time_per_iter: int,
+# grid_size: int,
+# seed: int,

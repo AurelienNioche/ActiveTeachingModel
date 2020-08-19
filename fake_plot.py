@@ -19,20 +19,11 @@ def main() -> None:
     # Fake data
     models = (LEARNERS, PSYCHOLOGISTS, TEACHERS)
     cumulative_df = fake_data.prepare_data_chocolate(
-        1.3,
-        1.2,
-        models,
-        NUM_AGENTS,
-        paths.BKP_DIR,
-        force_save=False,
+        1.3, 1.2, models, NUM_AGENTS, paths.BKP_DIR, force_save=False,
     )
 
     primary_df = fake_data.make_primary_df(
-        models,
-        NUM_AGENTS,
-        T_TOTAL,
-        BKP_DIR,
-        force_save=False,
+        models, NUM_AGENTS, T_TOTAL, BKP_DIR, force_save=False,
     )
 
     # Individual plots
