@@ -28,7 +28,7 @@ def make_data(tk: TaskParam, agent_id: int, human: bool) -> dict:
     num_iterations = tk.n_ss * tk.ss_n_iter * len(tk.teachers)
     range_iterations = range(num_iterations)
 
-    item_history = {}
+    session_item_id = {}
     param_recovery = {}
 
     agent_id = pd.Series((agent_id for _ in range_iterations), name=("Agent", "ID"))
@@ -58,36 +58,35 @@ def make_data(tk: TaskParam, agent_id: int, human: bool) -> dict:
     bounds_to_df = {}
     for idx, param_name in enumerate(learner_param_names):
         bounds_to_df[param_name] = tuple(tk.bounds[idx] for _ in range_iterations)
-    bounds = pd.DataFrame(
-        bounds_to_df, columns=learner_param_names,
-    )
+    bounds = pd.DataFrame(bounds_to_df, columns=learner_param_names,)
     bounds.columns = pd.MultiIndex.from_product(({"Bounds"}, learner_param_names))
 
-
-# !! For cell usage !!
-config = os.path.join("config", f"config.json")  # Protyping
-
-task_param = TaskParam.get(config)
-data = make_data(tk=task_param, agent_id=23, human=False)
-print(data)
-#%%
     for teacher_class, omniscient in zip(tk.teachers, tk.omniscient):
 
-        cond_label = teacher_class.__name__
-        tqdm.write(f"Simulating '{cond_label}'...")
+        teacher_name = teacher_class.__name__
+        tqdm.write(f"Simulating '{teacher_name}'...")
         teacher = teacher_class.create(tk=tk, omniscient=omniscient)
         r = run(teacher=teacher, tk=tk, omniscient=omniscient)
+        print(r)  # columns.get_level_values(1))
+        break
 
         if omniscient:
-            cond_label += "-omniscient"
+            teacher_name += "-omniscient"
 
         if isinstance(r, tuple):
-            item_history[cond_label], param_recovery[cond_label] = r
+            session_item_id[teacher_name], param_recovery[teacher_name] = r
         else:
-            item_history[cond_label] = r
+            session_item_id[teacher_name] = r
 
-    # !! this has to return the series
-    return {"kwarg1": tk, "kwarg2": item_history}
+    # return {"kwarg1": tk, "kwarg2": session_item_id}
+    return (
+        agent_id,
+        agent_human,
+        model_learner,
+        model_psychologist,
+        session_seed,
+        bounds,
+    )
 
 
 def run(teacher: Teacher, tk: TaskParam, omniscient: bool):
@@ -96,20 +95,23 @@ def run(teacher: Teacher, tk: TaskParam, omniscient: bool):
     num_iterations = tk.n_ss * tk.ss_n_iter
     range_iterations = range(num_iterations)
 
-    # teacher_name = teacher.__class__.__name__.lower()
     learner_name = tk.learner_model.__name__.lower()
 
     use_teacher_psy = hasattr(teacher, "psychologist") and not omniscient
     learner_param_names = None
+    parameter_values = None
     if use_teacher_psy:
         psychologist = teacher.psychologist
-        # inferred_param = np.zeros((num_iterations, len(tk.param)))
+        # parameter_values = np.zeros((num_iterations, len(tk.param)))
         learner_param_names = model.parameters.make_param_learners_df()[
             learner_name
         ].dropna()
-        inferred_param = pd.DataFrame(
+        parameter_values = pd.DataFrame(
             np.zeros((num_iterations, len(learner_param_names))),
             columns=learner_param_names,
+        )
+        parameter_values.columns = pd.MultiIndex.from_product(
+            ({"Parameter value"}, learner_param_names)
         )
 
     else:
@@ -130,17 +132,24 @@ def run(teacher: Teacher, tk: TaskParam, omniscient: bool):
     #     ),
     #     name="Time delta",
     # )
+    model_teacher = pd.Series(
+        (teacher.__class__.__name__.lower() for _ in range_iterations),
+        name=("Model", "Teacher"),
+    )
+
     session_time_delta = pd.Series(
         (0 for _ in range_iterations), name=("Session", "Time delta")
     )
 
-    session_iteration = pd.Series(tk.ss_n_iter, name=("Session", "Iteration"))
+    session_iteration = pd.Series(
+        range(tk.ss_n_iter), dtype=int, name=("Session", "Iteration")
+    )
 
     session_number = pd.Series(
         (0 for _ in range_iterations), name=("Session", "Number")
     )
-    # item_history = np.zeros(num_iterations, dtype=int)
-    item_history = pd.Series(
+
+    session_item_id = pd.Series(
         (0 for _ in range_iterations), dtype=int, name=("Session", "Item ID"),
     )
 
@@ -175,15 +184,15 @@ def run(teacher: Teacher, tk: TaskParam, omniscient: bool):
                 )
 
                 # Save presented item
-                item_history.iloc[itr] = item_id
+                session_item_id.iloc[itr] = item_id
 
                 timestamp = now
                 p = psychologist.p(item=item_id, param=tk.param, now=timestamp)
 
                 # was_success = np.random.random() < p
                 was_success = rng.random() < p
-                session_success.iloc[itr] = p
-                print(p)
+                session_success.iloc[itr] = was_success
+                # print(p)
 
                 # print("itr", itr, "item", item, "p", p, "success", was_success)
 
@@ -191,12 +200,12 @@ def run(teacher: Teacher, tk: TaskParam, omniscient: bool):
 
                 if use_teacher_psy:
                     # Save inferred parameters
-                    # inferred_param[itr] = teacher.psychologist.inferred_learner_param()
-                    inferred_param.iloc[
+                    # parameter_values[itr] = teacher.psychologist.inferred_learner_param()
+                    parameter_values.iloc[
                         itr
                     ] = teacher.psychologist.inferred_learner_param()
                     # inferred_param_error =
-                    # print(inferred_param.iloc[itr])
+                    # print(parameter_values.iloc[itr])
 
                     # TODO: Compute the error of prediction
                     # (average of sum over all the items)
@@ -210,10 +219,31 @@ def run(teacher: Teacher, tk: TaskParam, omniscient: bool):
                 pbar.update()
 
             now += tk.time_per_iter * tk.ss_n_iter_between
-    if use_teacher_psy:
-        return item_history, inferred_param
+    # if use_teacher_psy:
+    #     return session_item_id, parameter_values
 
-    else:
-        return item_history
+    # else:
+    #     return session_item_id
+
+    return pd.concat(
+        (
+            parameter_values,
+            model_teacher,
+            session_time_delta,
+            session_iteration,
+            session_number,
+            session_item_id,
+            session_p_recall_error,
+            session_success,
+        ),
+        axis=1,
+    )
 
 
+# !! For cell usage !!
+config = os.path.join("config", f"config.json")  # Protyping
+
+task_param = TaskParam.get(config)
+data = make_data(tk=task_param, agent_id=23, human=False)
+# print(data)
+#%%
