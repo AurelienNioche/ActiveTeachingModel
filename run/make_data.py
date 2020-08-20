@@ -42,7 +42,8 @@ def run(teacher, tk, omniscient):
         for _ in range(tk.n_ss):
             for _ in range(tk.ss_n_iter):
 
-                if not use_teacher_psy:
+                if not use_teacher_psy and item is not None \
+                        and timestamp is not None:
                     psychologist.learner.update(item=item, timestamp=timestamp)
 
                 item = teacher.ask(now=now,
