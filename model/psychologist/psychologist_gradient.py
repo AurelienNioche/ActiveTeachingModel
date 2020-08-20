@@ -22,9 +22,9 @@ class PsychologistGradient(Psychologist):
             if is_item_specific:
                 n_param = len(ep)
                 self.inferred_param = np.zeros((n_item, n_param))
-                self.inferred_param[:] = ep
+                self.est_param[:] = ep
             else:
-                self.inferred_param = ep
+                self.est_param = ep
 
             self.n_pres = np.zeros(n_item, dtype=int)
             self.hist = []
@@ -32,7 +32,7 @@ class PsychologistGradient(Psychologist):
             self.timestamp = []
 
         else:
-            self.inferred_param = param
+            self.est_param = param
         self.true_param = param
         self.is_item_specific = is_item_specific
         self.learner = learner
@@ -60,7 +60,7 @@ class PsychologistGradient(Psychologist):
                         timestamp=ts[is_item],
                         bounds=self.bounds)
 
-                    self.inferred_param[item] = ep
+                    self.est_param[item] = ep
                 else:
                     ep = self.fit(
                         self.learner.inv_log_lik,
@@ -70,16 +70,19 @@ class PsychologistGradient(Psychologist):
                         timestamp=np.asarray(self.timestamp),
                         bounds=self.bounds)
 
-                    self.inferred_param = ep
+                    self.est_param = ep
 
             self.n_pres[item] += 1
 
         self.learner.update(timestamp=timestamp, item=item)
 
-    def p_seen(self, now):
+    def p_seen(self, now, param=None):
+
+        if param is None:
+            param = self.est_param
 
         p_seen, seen = self.learner.p_seen(
-            param=self.inferred_param,
+            param=param,
             is_item_specific=self.is_item_specific,
             now=now)
 
@@ -135,7 +138,7 @@ class PsychologistGradient(Psychologist):
         elif tk.learner_model == Walsh2018:
             learner = tk.learner_model(n_item=tk.n_item,
                                        n_iter=tk.n_ss * tk.ss_n_iter
-                                              + tk.horizon)
+                                       + tk.horizon)
 
         else:
             learner = tk.learner_model(tk.n_item)

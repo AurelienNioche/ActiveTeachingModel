@@ -14,16 +14,21 @@ os.makedirs(PICKLE_FOLDER, exist_ok=True)
 def run(teacher, tk, omniscient):
 
     n_iter = tk.n_ss * tk.ss_n_iter
+    n_item = tk.n_item
 
     use_teacher_psy = hasattr(teacher, 'psychologist') and not omniscient
     if use_teacher_psy:
         psychologist = teacher.psychologist
-        inferred_param = np.zeros((n_iter, len(tk.param)))
     else:
         psychologist = tk.psychologist_model.create(tk=tk, omniscient=True)
 
     np.random.seed(tk.seed)
     hist = np.zeros(n_iter, dtype=int)
+
+    inferred_param = np.zeros((n_iter, len(tk.param)))
+
+    inferred_p_recall = np.zeros((n_iter, n_item))
+    real_p_recall = np.zeros((n_iter, n_item))
 
     now = 0
 
@@ -33,9 +38,12 @@ def run(teacher, tk, omniscient):
 
     itr = 0
 
-    with tqdm(total=tk.ss_n_iter*tk.n_ss, file=sys.stdout) as pbar:
+    with tqdm(total=n_iter, file=sys.stdout) as pbar:
         for _ in range(tk.n_ss):
             for _ in range(tk.ss_n_iter):
+
+                if not use_teacher_psy:
+                    psychologist.learner.update(item=item, timestamp=timestamp)
 
                 item = teacher.ask(now=now,
                                    last_was_success=was_success,
@@ -50,21 +58,29 @@ def run(teacher, tk, omniscient):
 
                 was_success = np.random.random() < p
 
-                # print("itr", itr, "item", item, "p", p, "success", was_success)
-
                 hist[itr] = item
 
                 if use_teacher_psy:
-                    inferred_param[itr] = \
-                        teacher.psychologist.inferred_learner_param()
-                else:
-                    psychologist.learner.update(item=item, timestamp=timestamp)
+                    ep = psychologist.inferred_learner_param()
+                    inferred_p_seen, seen = \
+                        psychologist.p_seen(now=now,
+                                            param=ep)
+
+                    inferred_param[itr] = ep
+                    inferred_p_recall[itr, seen] = inferred_p_seen
+
+                real_p_seen, seen = \
+                    teacher.psychologist.p_seen(now,
+                                                param=tk.param)
+
+                real_p_recall[itr, seen] = real_p_seen
 
                 now += tk.time_per_iter
                 itr += 1
                 pbar.update()
 
             now += tk.time_per_iter * tk.ss_n_iter_between
+
     if use_teacher_psy:
         return hist, inferred_param
 

@@ -48,7 +48,7 @@ class PsychologistGrid(Psychologist):
             self.n_item = n_item
 
         else:
-            self.inferred_param = param
+            self.est_param = param
 
         self.is_item_specific = is_item_specific
         self.learner = learner
@@ -109,9 +109,11 @@ class PsychologistGrid(Psychologist):
 
         self.learner.update(timestamp=timestamp, item=item)
 
-    def p_seen(self, now):
+    def p_seen(self, now, param=None):
 
-        param = self.inferred_learner_param()
+        if param is None:
+            param = self.est_param
+
         return self.learner.p_seen(
             param=param,
             is_item_specific=self.is_item_specific,
@@ -119,10 +121,7 @@ class PsychologistGrid(Psychologist):
 
     def inferred_learner_param(self):
 
-        if not self.omniscient:
-            return self.est_param
-
-        return self.inferred_param
+        return self.est_param
 
     def p(self, param, item, now):
         return self.learner.p(

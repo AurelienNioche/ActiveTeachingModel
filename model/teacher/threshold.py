@@ -17,7 +17,6 @@ class Threshold(Teacher):
     def _select_item(self, now):
 
         p, seen = self.psychologist.p_seen(now)
-        # print("p seen",  p)
 
         min_p = np.min(p)
 
