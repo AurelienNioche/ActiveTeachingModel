@@ -63,15 +63,13 @@ def run(teacher, tk, omniscient):
                 if use_teacher_psy:
                     ep = psychologist.inferred_learner_param()
                     inferred_p_seen, seen = \
-                        psychologist.p_seen(now=now,
-                                            param=ep)
+                        psychologist.p_seen(now=now, param=ep)
 
                     inferred_param[itr] = ep
                     inferred_p_recall[itr, seen] = inferred_p_seen
 
                 real_p_seen, seen = \
-                    teacher.psychologist.p_seen(now,
-                                                param=tk.param)
+                    psychologist.p_seen(now, param=tk.param)
 
                 real_p_recall[itr, seen] = real_p_seen
 
