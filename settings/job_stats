@@ -1,0 +1,10 @@
+Job ID: 55133408
+Array Job ID: 55133408_99
+Cluster: triton
+State: COMPLETED (exit code 0)
+Cores: 1
+CPU Utilized: 00:15:00
+CPU Efficiency: 99.23% of 00:15:07 core-walltime
+Job Wall-clock time: 00:15:07
+Memory Utilized: 72.56 MB
+Memory Efficiency: 0.08% of 87.89 GB
