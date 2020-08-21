@@ -10,8 +10,8 @@ Config:
     "task_pr_val"    task param values                                  np.ndarray(n_param_task, dtype=float)
     "teacher_pr_lab" teacher parameters labels                          np.ndarray(n_param_teacher, dtype=string)
     "teacher_pr_val" teacher param values                               np.ndarray(n_param_teacher, dtype=float)
-    "psy_pr_lab" teacher parameters labels                              np.ndarray(n_param_teacher, dtype=string)
-    "psy_pr_val" teacher param values                                   np.ndarray(n_param_teacher, dtype=float)
+    "psy_pr_lab" teacher parameters labels                              np.ndarray(n_param_psy, dtype=string)
+    "psy_pr_val" teacher param values                                   np.ndarray(n_param_psy, dtype=float)
     "pr_lab"         learner parameters labels                          np.ndarray(n_param_learner, dtype=string)
     "pr_val"         true learner parameters                            np.ndarray(n_param_learner, dtype=float)
 
@@ -28,13 +28,13 @@ Results:
     "task_pr_val"    task param values                                  np.ndarray(n_param_task, dtype=float)
     "teacher_pr_lab" teacher parameters labels                          np.ndarray(n_param_teacher, dtype=string)
     "teacher_pr_val" teacher param values                               np.ndarray(n_param_teacher, dtype=float)
-    "psy_pr_lab" teacher parameters labels                              np.ndarray(n_param_teacher, dtype=string)
-    "psy_pr_val" teacher param values                                   np.ndarray(n_param_teacher, dtype=float)
+    "psy_pr_lab"     psy parameters labels                              np.ndarray(n_param_psy, dtype=string)
+    "psy_pr_val"     psy param values                                   np.ndarray(n_param_psy, dtype=float)
     "pr_lab"         learner parameters labels                          np.ndarray(n_param_learner, dtype=string)
     "pr_val"         true learner parameters                            np.ndarray(n_param_learner, dtype=float)
  ----------------------------------------------------------------------------------------------------------
 	
-   "pr_inf"         inferred learner parameters                        np.ndarray(n_param_learner, dtype=float)
+   "pr_inf"         inferred learner parameters                         np.ndarray(n_param_learner, dtype=float)
     "item"           index of the item                                  int
     "iter"           index of the iteration                             int
     "ss_iter"        session relative index of the iteration            int
