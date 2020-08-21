@@ -158,28 +158,42 @@ def main() -> None:
     grid_size = 10
 
     for learner_model in learner_models:
-        make_config_json(
-            num_agents=num_agents,
-            save_path=paths.AUTO_JSON_DIR,
-            # kwargs
-            param_labels=param_labels,
-            is_item_specific=is_item_specific,
-            n_item=n_item,
-            ss_n_iter=ss_n_iter,
-            ss_n_iter_between=ss_n_iter_between,
-            n_ss=n_ss,
-            thr=thr,
-            bounds=bounds,
-            init_guess=init_guess,
-            learner_model=learner_model,
-            psychologist_model=psychologist_model,
-            teachers=teachers,
-            omniscient=omniscient,
-            time_per_iter=time_per_iter,
-            grid_size=grid_size,
-            leitner=leitner,
-            mcts=mcts,
-        )
+
+        for n_agent in range(num_agents):
+            param = {"param": tuple(params_df.iloc[n_agent].values)}
+            seed = {"seed": n_agent}
+            json_content = {**param, **kwargs, **seed}
+
+            with open(
+                    os.path.join(
+                        save_path,
+                        f"{kwargs['learner_model']}-{kwargs['teachers'][0]}-{kwargs['psychologist_model']}-{n_agent}.json",
+                    ),
+                    "w",
+            ) as file_path:
+                json.dump(json_content, file_path, sort_keys=False, indent=4)
+        # make_config_json(
+        #     num_agents=num_agents,
+        #     save_path=paths.AUTO_JSON_DIR,
+        #     # kwargs
+        #     param_labels=param_labels,
+        #     is_item_specific=is_item_specific,
+        #     n_item=n_item,
+        #     ss_n_iter=ss_n_iter,
+        #     ss_n_iter_between=ss_n_iter_between,
+        #     n_ss=n_ss,
+        #     thr=thr,
+        #     bounds=bounds,
+        #     init_guess=init_guess,
+        #     learner_model=learner_model,
+        #     psychologist_model=psychologist_model,
+        #     teachers=teachers,
+        #     omniscient=omniscient,
+        #     time_per_iter=time_per_iter,
+        #     grid_size=grid_size,
+        #     leitner=leitner,
+        #     mcts=mcts,
+        # )
 
 
 if __name__ == "__main__":
