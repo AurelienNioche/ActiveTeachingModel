@@ -49,6 +49,7 @@ from typing import Iterable
 from numpy.random import default_rng
 
 import settings.paths as paths
+import task_param.task_param_carlos as task_param
 
 
 def generate_random_param(
@@ -84,7 +85,7 @@ def make_config_json(
 ):
     """Make a JSON config file"""
 
-    params_df = get_param_df(num_agents, param_labels, bounds)
+    params_df = get_param_df(num_agents, kwargs["param_labels"], kwargs["bounds"])
 
     for n_agent in range(num_agents):
         param = {"param": tuple(params_df.iloc[n_agent].values)}
@@ -92,7 +93,10 @@ def make_config_json(
         json_content = {**param, **kwargs, **seed}
 
         with open(
-            os.path.join(save_path, f"config_{kwargs['learner_model']}_{n_agent}.json"),
+            os.path.join(
+                save_path,
+                f"{kwargs['learner_model']}-{kwargs['teachers'][0]}-{kwargs['psychologist_model']}-{n_agent}.json",
+            ),
             "w",
         ) as file_path:
             json.dump(json_content, file_path, sort_keys=False, indent=4)
@@ -113,10 +117,14 @@ def main() -> None:
         [0.6, 0.6],
     ]
 
+    mcts = {"iter_limit": 500, "time_limit": None, "horizon": 50}
+
+    leitner = {"delay_factor": 2, "delay_min": 2}
+
     is_item_specific = False
-    n_item = 500
-    ss_n_iter = 50
-    ss_n_iter_between = 500
+    n_item = 100
+    ss_n_iter = 100
+    ss_n_iter_between = task_param.N_SEC_PER_DAY - ss_n_iter * task_param.N_SEC_PER_ITER
     n_ss = 10
     thr = 0.9
     init_guess = None
@@ -126,8 +134,8 @@ def main() -> None:
     # 'act_r2005': ActR2005,
     # 'act_r2008': ActR2008,
     # 'walsh2018': Walsh2018
-    # learner_model = "walsh2018"  # Default
-    learner_models = "exp_decay", "walsh2018"
+    # learner_model = ["walsh2018"]  # Default
+    learner_models = ["walsh2018"]
 
     # # # Options
     # 'psy_grid': PsychologistGrid,
@@ -140,9 +148,12 @@ def main() -> None:
     # 'mcts': MCTSTeacher,
     # 'sampling': Sampling
     # ! Must be the list of three
-    teachers = ["leitner", "threshold", "sampling"]  # Default
+    # teachers = ["leitner", "threshold", "sampling"]  # Default
+    teachers = ["sampling"]
 
-    omniscient = [False, True, True]
+    # # # Options
+    # omniscient = [False, True, True]  # Default
+    omniscient = [False]
     time_per_iter = 2
     grid_size = 10
 
@@ -166,6 +177,8 @@ def main() -> None:
             omniscient=omniscient,
             time_per_iter=time_per_iter,
             grid_size=grid_size,
+            leitner=leitner,
+            mcts=mcts,
         )
 
 
