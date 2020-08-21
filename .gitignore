@@ -157,6 +157,7 @@ pickle/
 /data.zip
 /user_data.zip
 config/auto/
+results/
 
 # Snippet pulls
 snippet
