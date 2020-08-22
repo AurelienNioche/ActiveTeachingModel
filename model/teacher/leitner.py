@@ -52,8 +52,7 @@ class Leitner(Teacher):
     def _pickup_new(self):
         return np.argmin(self.box)
 
-    def ask(self, now, last_was_success=None, last_time_reply=None,
-            idx_last_q=None):
+    def ask(self, now, last_was_success, last_time_reply, idx_last_q):
 
         if idx_last_q is None:
             item_idx = self._pickup_new()
@@ -69,7 +68,7 @@ class Leitner(Teacher):
         return item_idx
 
     @classmethod
-    def create(cls, tk, omniscient):
-        return cls(n_item=tk.n_item,
-                   delay_factor=tk.delay_factor,
-                   delay_min=tk.delay_min)
+    def create(cls, n_item, delay_factor, delay_min, *args, **kwargs):
+        return cls(n_item=n_item,
+                   delay_factor=delay_factor,
+                   delay_min=delay_min)

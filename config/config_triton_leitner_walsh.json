@@ -1,0 +1,30 @@
+{
+  "seed": 0,
+  "agent": 0,
+  "bounds": [
+        [0.8, 1.2],
+        [0.03, 0.05],
+        [0.005, 0.20],
+        [0.005, 0.20],
+        [0.1, 0.1],
+        [0.6, 0.6]],
+  "md_learner": "walsh2018",
+  "md_psy": "psy_grid",
+  "md_teacher": "leitner",
+  "omni": true,
+  "n_item": 100,
+  "task_pr_lab": ["learnt_threshold", "is_item_specific","time_per_iter","n_ss","ss_n_iter", "time_between_ss"],
+  "task_pr_val": [0.90, false, 2, 2, 100, 1000],
+  "teacher_pr_lab": ["delay_factor", "delay_min"],
+  "teacher_pr_val": [2, 2],
+  "psy_pr_lab": ["grid_size"],
+  "psy_pr_val": [10],
+  "pr_lab": ["tau", "s", "b", "m", "c", "x"],
+  "pr_val": [
+        0.9,
+        0.04,
+        0.01,
+        0.08,
+        0.1,
+        0.6]
+}

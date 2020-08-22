@@ -12,10 +12,10 @@ EPS = np.finfo(np.float).eps
 class PsychologistGradient(Psychologist):
 
     def __init__(self, n_item, is_item_specific, learner,
-                 omniscient, param, bounds):
+                 bounds, true_param=None):
 
-        self.omniscient = omniscient
-        if not omniscient:
+        self.omniscient = true_param is not None
+        if not self.omniscient:
             self.bounds = bounds
 
             ep = np.array([np.mean(b) for b in self.bounds])
@@ -32,8 +32,8 @@ class PsychologistGradient(Psychologist):
             self.timestamp = []
 
         else:
-            self.est_param = param
-        self.true_param = param
+            self.est_param = true_param
+
         self.is_item_specific = is_item_specific
         self.learner = learner
 
@@ -126,27 +126,13 @@ class PsychologistGradient(Psychologist):
         return p
 
     @classmethod
-    def create(cls, tk, omniscient):
-
-        if tk.learner_model in (ActR2008, ):
-            if tk.is_item_specific:
-                raise NotImplementedError
-            else:
-                learner = tk.learner_model(n_item=tk.n_item,
-                                           n_iter=tk.n_ss*tk.ss_n_iter
-                                           + tk.horizon)
-        elif tk.learner_model == Walsh2018:
-            learner = tk.learner_model(n_item=tk.n_item,
-                                       n_iter=tk.n_ss * tk.ss_n_iter
-                                       + tk.horizon)
-
-        else:
-            learner = tk.learner_model(tk.n_item)
+    def create(cls, learner, n_item, bounds,
+               is_item_specific,
+               true_param=None):
 
         return cls(
-            omniscient=omniscient,
-            n_item=tk.n_item,
-            bounds=tk.bounds,
-            is_item_specific=tk.is_item_specific,
-            param=tk.param,
+            true_param=true_param,
+            n_item=n_item,
+            bounds=bounds,
+            is_item_specific=is_item_specific,
             learner=learner)

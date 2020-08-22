@@ -4,11 +4,10 @@ from abc import abstractmethod
 class Teacher:
 
     @abstractmethod
-    def ask(self, now, last_was_success=None, last_time_reply=None,
-            idx_last_q=None):
+    def ask(self, *args, **kwargs):
         raise NotImplementedError
 
     @classmethod
     @abstractmethod
-    def create(cls, tk, omniscient):
+    def create(cls, *args, **kwargs):
         raise NotImplementedError

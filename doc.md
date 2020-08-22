@@ -1,5 +1,6 @@
 Config:
-    "config"         name of the config file                            str
+    "seed"           seed random number generator                       seed
+    "config_file"    name of the config file                            str
     "bounds"         bounds used by the psychologist                    np.ndarray((n_param, 2)) dtype=float)
     "md_learner"     class of the learner                               str
     "md_psy"         class of the psychologist                          str
@@ -17,7 +18,8 @@ Config:
 
 
 Results:
-	"config"         name of the config file                            str
+    "seed"           seed random number generator                       seed
+	"config_file"    name of the config file                            str
     "bounds"         bounds used by the psychologist                    np.ndarray((n_param, 2)) dtype=float)
     "md_learner"     class of the learner                               str
     "md_psy"         class of the psychologist                          str

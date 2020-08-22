@@ -6,16 +6,25 @@ EPS = np.finfo(np.float).eps
 
 class ExponentialNDelta(Learner):
 
-    def __init__(self, n_item):
+    def __init__(self, n_item, n_iter):
+
+        self.n_item = n_item
+
+        self.seen = np.zeros(n_item, dtype=bool)
+        self.ts = np.full(n_iter, -1, dtype=float)
+        self.hist = np.full(n_iter, -1, dtype=int)
+        self.seen_item = None
+        self.n_seen = 0
+        self.i = 0
 
         self.n_pres = np.zeros(n_item, dtype=int)
-        self.last_pres = np.zeros(n_item, dtype=int)
+        self.last_pres = np.zeros(n_item, dtype=float)
 
     def p_seen(self, param, is_item_specific, now):
 
         seen = self.n_pres >= 1
         if np.sum(seen) == 0:
-            return None, []
+            return np.array([]), seen
 
         if is_item_specific:
             init_forget = param[seen, 0]
@@ -29,6 +38,35 @@ class ExponentialNDelta(Learner):
         delta = now - last_pres
         # else:
         #     delta = delta[seen]
+        p = np.exp(-fr * delta)
+        return p, seen
+
+    def p_seen_spec_hist(self, param, now, hist, ts, seen, is_item_specific):
+
+        # seen = np.zeros(self.n_item, dtype=bool)
+        # seen[np.unique(hist)] = True
+
+        param = np.asarray(param)
+        hist = np.asarray(hist)
+        ts = np.asarray(ts)
+
+        if is_item_specific: # len(param.shape) > 1:  # Is item specific
+            init_forget = param[seen, 0]
+            rep_effect = param[seen, 1]
+        else:
+            init_forget, rep_effect = param
+
+        seen_item = sorted(np.flatnonzero(seen))
+        n_pres = np.zeros(self.n_item)
+        last_pres = np.zeros(self.n_item)
+        for i, item in enumerate(seen_item):
+            is_item = hist == item
+            n_pres[i] = np.sum(is_item)
+            last_pres[i] = np.max(ts[is_item])
+
+        fr = init_forget * (1-rep_effect) ** (n_pres[seen] - 1)
+
+        delta = now - last_pres[seen]
         p = np.exp(-fr * delta)
         return p, seen
 
@@ -91,3 +129,13 @@ class ExponentialNDelta(Learner):
 
         self.last_pres[item] = timestamp
         self.n_pres[item] += 1
+
+        self.hist[self.i] = item
+        self.ts[self.i] = timestamp
+
+        self.seen[item] = True
+
+        self.seen_item = np.flatnonzero(self.seen)
+        self.n_seen = np.sum(self.seen)
+
+        self.i += 1
