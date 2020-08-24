@@ -1,3 +1,4 @@
+#%%
 import datetime
 import os
 import json
@@ -5,6 +6,9 @@ import json
 import numpy as np
 
 from numpy.random import default_rng
+from tqdm import tqdm
+
+import settings.paths as paths
 
 from model.teacher.sampling import Sampling
 from model.teacher.threshold import Threshold
@@ -15,12 +19,13 @@ from model.psychologist.psychologist_grid import PsychologistGrid
 
 from settings.config_triton import TEACHER, PSYCHOLOGIST, LEARNER
 
+
 N_SEC_PER_DAY = 86400
 N_SEC_PER_ITER = 2
 
-FOLDER = os.path.join("config", "triton")
+# FOLDER = os.path.join("config", "triton")
 
-os.makedirs(FOLDER, exist_ok=True)
+# os.makedirs(FOLDER, exist_ok=True)
 
 TEACHER_INV = {v: k for k, v in TEACHER.items()}
 PSY_INV = {v: k for k, v in PSYCHOLOGIST.items()}
@@ -47,6 +52,7 @@ def generate_param(bounds, is_item_specific, n_item):
     param = param.tolist()
     return param
 
+
 def dic_to_lab_val(dic):
     lab = list(dic.keys())
     val = [dic[k] for k in dic]
@@ -64,7 +70,8 @@ def main() -> None:
 
     task_param = {
         "is_item_specific": True,
-        "ss_n_iter": 100,
+        "ss_n_iter": 1,
+        # "ss_n_iter": 100, # ! TESTING !!!!!!!!!!!!!!!!!!!!!
         "time_between_ss": 86200,
         "n_ss": 15,
         "learnt_threshold": 0.9,
@@ -98,11 +105,12 @@ def main() -> None:
         "grid_size": 20,
     }
 
-    learner_models = (Walsh2018, )
+    learner_models = (Walsh2018,)
     teacher_models = (Leitner, Sampling, Threshold)
-    psy_models = (PsychologistGrid, )
+    psy_models = (PsychologistGrid,)
 
-    f_name_root = f"at-{datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S-%f')}"
+    # f_name_root = f"at-{datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S-%f')}"
+    f_name_root = f"at-{datetime.datetime.now().strftime('%Y_%m_%d_%H_%M_%S_%f')}"
 
     for learner_md in learner_models:
 
@@ -117,7 +125,8 @@ def main() -> None:
         grid_size = cst["grid_size"]
         pr_lab = cst["param_labels"]
 
-        for agent in range(n_agent):
+        print("Generating cluster config files...")
+        for agent in tqdm(range(n_agent)):
 
             for teacher_md in teacher_models:
 
@@ -143,7 +152,7 @@ def main() -> None:
                     pr_val = generate_param(
                         bounds=bounds,
                         is_item_specific=task_param["is_item_specific"],
-                        n_item=n_item
+                        n_item=n_item,
                     )
 
                     json_content = {
@@ -162,13 +171,17 @@ def main() -> None:
                         "psy_pr_lab": psy_pr_lab,
                         "psy_pr_val": psy_pr_val,
                         "pr_lab": pr_lab,
-                        "pr_val": pr_val
+                        "pr_val": pr_val,
                     }
 
+                    # f_name = os.path.join(FOLDER, f"{f_name_root}-{agent}.json")
                     f_name = os.path.join(
-                        FOLDER, f"{f_name_root}-{agent}.json")
+                        paths.CONFIG_CLUSTER_DIR,
+                        f"{f_name_root}-{json_content['md_learner']}-{json_content['md_psy']}-{json_content['md_teacher']}-{agent}.json",
+                    )
                     with open(f_name, "w") as f:
                         json.dump(json_content, f, sort_keys=False, indent=4)
+    print("Done!")
 
 
 if __name__ == "__main__":

@@ -22,7 +22,7 @@ from model.teacher.generic import Teacher
 # os.makedirs(PICKLE_FOLDER, exist_ok=True)
 
 
-def make_data(tk: TaskParam, agent_id: int, human: bool) -> dict:
+def make_data(tk: TaskParam, agent_id: int, human: bool) -> pd.DataFrame:
     """Runs task for every teacher"""
 
     num_iterations = tk.n_ss * tk.ss_n_iter * len(tk.teachers)
@@ -67,11 +67,11 @@ def make_data(tk: TaskParam, agent_id: int, human: bool) -> dict:
         tqdm.write(f"Simulating '{teacher_name}'...")
         teacher = teacher_class.create(tk=tk, omniscient=omniscient)
         r = run(teacher=teacher, tk=tk, omniscient=omniscient)
-        print(r)  # columns.get_level_values(1))
-        break
+        # print(r)  # .drop("Parameter value", axis=1))  # columns.get_level_values(1))
+        # break
 
-        if omniscient:
-            teacher_name += "-omniscient"
+        # if omniscient:
+        #     teacher_name += "-omniscient"
 
         if isinstance(r, tuple):
             session_item_id[teacher_name], param_recovery[teacher_name] = r
@@ -79,17 +79,29 @@ def make_data(tk: TaskParam, agent_id: int, human: bool) -> dict:
             session_item_id[teacher_name] = r
 
     # return {"kwarg1": tk, "kwarg2": session_item_id}
-    return (
-        agent_id,
-        agent_human,
-        model_learner,
-        model_psychologist,
-        session_seed,
-        bounds,
-    )
+    # print(r)
+
+    results_df = pd.concat(
+        (
+            agent_id,
+            agent_human,
+            session_seed,
+            bounds,
+            model_learner,
+            model_psychologist,
+            r,
+        ),
+        axis=1,
+    ).sort_index(axis=1, level=0)
+
+    # Final indices name clean-up
+    results_df.index.rename(tk.extension, inplace=True)
+    results_df.columns.rename((None, None), inplace=True)
+
+    return results_df
 
 
-def run(teacher: Teacher, tk: TaskParam, omniscient: bool):
+def run(teacher: Teacher, tk: TaskParam, omniscient: bool) -> pd.DataFrame:
     """Run for every teacher by make_data"""
 
     num_iterations = tk.n_ss * tk.ss_n_iter
@@ -99,42 +111,43 @@ def run(teacher: Teacher, tk: TaskParam, omniscient: bool):
 
     use_teacher_psy = hasattr(teacher, "psychologist") and not omniscient
     learner_param_names = None
-    parameter_values = None
+    parameter_inferred = None
     if use_teacher_psy:
         psychologist = teacher.psychologist
-        # parameter_values = np.zeros((num_iterations, len(tk.param)))
         learner_param_names = model.parameters.make_param_learners_df()[
             learner_name
         ].dropna()
-        parameter_values = pd.DataFrame(
+        parameter_inferred = pd.DataFrame(
             np.zeros((num_iterations, len(learner_param_names))),
             columns=learner_param_names,
         )
-        parameter_values.columns = pd.MultiIndex.from_product(
-            ({"Parameter value"}, learner_param_names)
+        parameter_inferred.columns = pd.MultiIndex.from_product(
+            ({"Parameter inferred"}, learner_param_names)
         )
 
     else:
         # Psychologist needed to output a probability of recall
         psychologist = tk.psychologist_model.create(tk=tk, omniscient=True)
 
-    learner_true_parameters = pd.Series(
-        tk.param, index=learner_param_names, name="Parameter value",
-    )
-
-    # np.random.seed(tk.seed)
     rng = default_rng(tk.seed)
-    # time_stamps = np.zeros(num_iterations, dtype=int)  # Unit is second
-    # time_delta = pd.Series(
-    #     (
-    #         pd.Timedelta(n_iter * tk.time_per_iter, unit="s")
-    #         for n_iter in range_iterations
-    #     ),
-    #     name="Time delta",
-    # )
+
+    if teacher.__class__.__name__ != "Leitner":
+        parameter_real = pd.DataFrame(
+            (tk.param for _ in range_iterations), columns=learner_param_names
+        )
+        parameter_real.columns = pd.MultiIndex.from_product(
+            ({"Parameter real"}, learner_param_names)
+        )
+    else:
+        parameter_real = pd.DataFrame()
+
     model_teacher = pd.Series(
         (teacher.__class__.__name__.lower() for _ in range_iterations),
         name=("Model", "Teacher"),
+    )
+
+    session_omniscient = pd.Series(
+        (omniscient for _ in range_iterations), name=("Session", "Omniscient"),
     )
 
     session_time_delta = pd.Series(
@@ -172,8 +185,18 @@ def run(teacher: Teacher, tk: TaskParam, omniscient: bool):
     with tqdm(total=tk.ss_n_iter * tk.n_ss, file=sys.stdout) as pbar:
         for n_session in range(tk.n_ss):
             for n_iter in range(tk.ss_n_iter):
-                # print(n_session)
-                # print(n_iter)
+
+                # Record session iteration parameters
+                session_number[itr] = n_session
+                session_iteration[itr] = n_iter
+                session_time_delta.iloc[itr] = pd.Timedelta(now, unit="s")
+
+                if (
+                    not use_teacher_psy
+                    and item_id is not None
+                    and timestamp is not None
+                ):
+                    psychologist.learner.update(item=item_id, timestamp=timestamp)
 
                 # Decide item to present
                 item_id = teacher.ask(
@@ -186,64 +209,62 @@ def run(teacher: Teacher, tk: TaskParam, omniscient: bool):
                 # Save presented item
                 session_item_id.iloc[itr] = item_id
 
+                # Infer P recall and determine if success
                 timestamp = now
                 p = psychologist.p(item=item_id, param=tk.param, now=timestamp)
-
-                # was_success = np.random.random() < p
                 was_success = rng.random() < p
                 session_success.iloc[itr] = was_success
-                # print(p)
 
-                # print("itr", itr, "item", item, "p", p, "success", was_success)
-
-                # history[itr] = item
-
+                # Save inferred parameters
                 if use_teacher_psy:
-                    # Save inferred parameters
-                    # parameter_values[itr] = teacher.psychologist.inferred_learner_param()
-                    parameter_values.iloc[
-                        itr
-                    ] = teacher.psychologist.inferred_learner_param()
-                    # inferred_param_error =
-                    # print(parameter_values.iloc[itr])
+                    parameters_inferred = teacher.psychologist.inferred_learner_param()
+                    inferred_p_seen, _ = psychologist.p_seen(
+                        now=now, param=parameters_inferred
+                    )
+                    parameter_inferred.iloc[itr] = parameters_inferred
 
-                    # TODO: Compute the error of prediction
-                    # (average of sum over all the items)
+                    real_p_seen, _ = psychologist.p_seen(now, param=tk.param)
+
+                    # P recall length as many seen items
+                    # Error must be computed taking absolute value of difference
+                    session_p_recall_error[itr] = np.mean(
+                        np.abs(real_p_seen, inferred_p_seen)
+                    )
                 else:
                     psychologist.learner.update(item=item_id, timestamp=timestamp)
-                    # You don't need to do it here
 
-                session_time_delta.iloc[itr] = pd.Timedelta(now, unit="s")
                 now += tk.time_per_iter
                 itr += 1
                 pbar.update()
 
             now += tk.time_per_iter * tk.ss_n_iter_between
     # if use_teacher_psy:
-    #     return session_item_id, parameter_values
+    #     return session_item_id, parameter_inferred
 
     # else:
     #     return session_item_id
 
     return pd.concat(
         (
-            parameter_values,
             model_teacher,
+            parameter_inferred,
+            parameter_real,
             session_time_delta,
             session_iteration,
             session_number,
             session_item_id,
             session_p_recall_error,
             session_success,
+            session_omniscient,
         ),
         axis=1,
     )
 
 
-# !! For cell usage !!
-config = os.path.join("config", f"config.json")  # Protyping
-
-task_param = TaskParam.get(config)
-data = make_data(tk=task_param, agent_id=23, human=False)
+# # !! For cell usage !!
+# config = os.path.join("config", f"config.json")  # Protyping
+#
+# task_param = TaskParam.get(config)
+# data = make_data(tk=task_param, agent_id=23, human=False)
 # print(data)
-#%%
+# data.to_csv("sample_results.csv")

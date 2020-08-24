@@ -156,8 +156,13 @@ ActiveTeachingModel/credentials.py
 pickle/
 /data.zip
 /user_data.zip
+
+# Cluster
 config/auto/
+config/triton/
 results/
+out/*
+.last.pid
 
 # Snippet pulls
 snippet
