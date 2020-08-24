@@ -1,5 +1,5 @@
 import numpy as np
-from . generic import Learner
+from .generic import Learner
 from scipy.special import expit
 import math
 
@@ -7,7 +7,6 @@ EPS = np.finfo(np.float).eps
 
 
 class Walsh2018(Learner):
-
     def __init__(self, n_item, n_iter):
 
         self.seen = np.zeros(n_item, dtype=bool)
@@ -36,7 +35,7 @@ class Walsh2018(Learner):
         relevant = self.hist == item
         rep = self.ts[relevant]
         n = len(rep)
-        delta = (now - rep)
+        delta = now - rep
 
         if n == 0:
             return 0
@@ -50,7 +49,7 @@ class Walsh2018(Learner):
             _t_ = np.sum(w * delta)
             if n > 1:
                 lag = rep[1:] - rep[:-1]
-                d = b + m * np.mean(1/np.log(lag + math.e))
+                d = b + m * np.mean(1 / np.log(lag + math.e))
             else:
                 d = b
 
@@ -63,12 +62,16 @@ class Walsh2018(Learner):
     def p_seen(self, param, is_item_specific, now):
 
         return self.p_seen_spec_hist(
-            param=param, now=now, hist=self.hist, ts=self.ts,
-            seen=self.seen, is_item_specific=is_item_specific)
+            param=param,
+            now=now,
+            hist=self.hist,
+            ts=self.ts,
+            seen=self.seen,
+            is_item_specific=is_item_specific,
+        )
 
     @staticmethod
-    def p_seen_spec_hist(param, now, hist, ts, seen,
-                         is_item_specific):
+    def p_seen_spec_hist(param, now, hist, ts, seen, is_item_specific):
 
         # seen = np.zeros(self.n_item, dtype=bool)
         # seen[np.unique(hist)] = True
@@ -132,11 +135,10 @@ class Walsh2018(Learner):
             b_one_view = b_more_than_one = b
 
         _m_ = np.zeros(n_seen)
-        _m_[one_view] = _t_[one_view] ** - b_one_view
-        _m_[more_than_one] = n[more_than_one] ** c \
-                             * _t_[more_than_one] ** - (b_more_than_one +
-                                                        m * mean_lag[
-                                                            more_than_one])
+        _m_[one_view] = _t_[one_view] ** -b_one_view
+        _m_[more_than_one] = n[more_than_one] ** c * _t_[more_than_one] ** -(
+            b_more_than_one + m * mean_lag[more_than_one]
+        )
 
         with np.errstate(divide="ignore", invalid="ignore"):
             v = (-tau + _m_) / s
@@ -147,10 +149,9 @@ class Walsh2018(Learner):
     def log_lik_grid(self, item, grid_param, response, timestamp):
         p = np.zeros(len(grid_param))
         for i, param in enumerate(grid_param):
-            p[i] = self.p(item=item, param=param, now=timestamp,
-                          is_item_specific=False)
+            p[i] = self.p(item=item, param=param, now=timestamp, is_item_specific=False)
         p = p if response else 1 - p
-        return np.log(p+EPS)
+        return np.log(p + EPS)
 
     @staticmethod
     def log_lik(param, hist, success, timestamp):
@@ -172,9 +173,9 @@ class Walsh2018(Learner):
 
             _m_item = np.zeros(n)
 
-            _m_item[0] = - np.inf  # To adapt for xp
+            _m_item[0] = -np.inf  # To adapt for xp
             if n > 1:
-                _m_item[1] = (rep[1]-rep[0])**-b
+                _m_item[1] = (rep[1] - rep[0]) ** -b
             for i in range(2, n):
                 delta = rep[i] - rep[:i]
 
@@ -183,7 +184,7 @@ class Walsh2018(Learner):
 
                 _t_ = np.sum(w * delta)
 
-                lag = rep[1:i+1] - rep[:i]
+                lag = rep[1 : i + 1] - rep[:i]
                 d = b + m * np.mean(1 / np.log(lag + math.e))
                 _m_item[i] = i ** c * _t_ ** -d
 
