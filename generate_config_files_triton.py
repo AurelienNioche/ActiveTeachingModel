@@ -135,8 +135,8 @@ def main() -> None:
                 for psy_md in psy_models:
 
                     if psy_md == PsychologistGrid:
-                        psy_pr_lab = "grid_size"
-                        psy_pr_val = grid_size
+                        psy_pr_lab = ["grid_size", ]
+                        psy_pr_val = [grid_size, ]
                     else:
                         raise ValueError
 
