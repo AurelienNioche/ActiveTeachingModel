@@ -5,12 +5,7 @@ Run simulations and save results
 
 import os
 
-from itertools import product
-from typing import Iterable, Hashable
 
-import pandas as pd
-
-import model.parameters
 import settings.paths as paths
 import utils.file_loader as file_loader
 from task_param.task_param_carlos import TaskParam
@@ -52,7 +47,11 @@ if __name__ == "__main__":
 # data.to_csv("sample_results.csv")
 #######
 
+# from itertools import product
+# from typing import Iterable, Hashable
+# import model.parameters
 # def make_saving_df(learner_model: str) -> pd.MultiIndex:
+# import pandas as pd
 #
 #     # Get the parameter names for the learner
 #     learner_parameters = model.parameters.make_param_learners_df()[

@@ -11,10 +11,10 @@ BKP_DIR = os.path.join(BASE_DIR, "bkp")
 #
 JSON_DIR = os.path.join(BASE_DIR, "config")
 # #
-AUTO_JSON_DIR = os.path.join(JSON_DIR, "auto")
+CONFIG_CLUSTER_DIR = os.path.join(JSON_DIR, "triton")
 
 #
-RESULTS_DIR = os.path.join(BASE_DIR, "results")
+DATA_DIR = os.path.join(BASE_DIR, "data")
 
-for directory in FIG_DIR, BKP_DIR, JSON_DIR, AUTO_JSON_DIR, RESULTS_DIR:
+for directory in FIG_DIR, BKP_DIR, JSON_DIR, CONFIG_CLUSTER_DIR, DATA_DIR:
     os.makedirs(directory, exist_ok=True)
