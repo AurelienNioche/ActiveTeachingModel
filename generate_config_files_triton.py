@@ -102,7 +102,7 @@ def main() -> None:
     teacher_models = (Leitner, Sampling, Threshold)
     psy_models = (PsychologistGrid, )
 
-    f_name_root = f"AT-{datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S-%f')}"
+    f_name_root = f"at-{datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S-%f')}"
 
     for learner_md in learner_models:
 
