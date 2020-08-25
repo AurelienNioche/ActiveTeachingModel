@@ -18,7 +18,9 @@ def main():
     else:
 
         config_file = os.path.join("config",
-                                   "config_triton_trial.json")
+                                   "triton",
+                                   "at-2020_08_25_20_29_25_914475-exp_decay-psy_grid-sampling-29.json")
+                                   # "config_triton_trial.json")
     config = Config.get(config_file)
     df = run(config=config)
     f_name = f"{os.path.splitext(os.path.basename(config_file))[0]}.csv"
