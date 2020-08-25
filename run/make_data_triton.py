@@ -5,6 +5,7 @@ import datetime
 import pandas as pd
 
 from model.teacher.leitner import Leitner
+from model.teacher.sampling import Sampling
 
 from model.learner.act_r2008 import ActR2008
 from model.learner.walsh2018 import Walsh2018
@@ -41,7 +42,8 @@ def run(config):
 
     teacher = teacher_cls.create(task_pr=task_pr,
                                  n_item=n_item, **teacher_pr)
-    teacher_use_psy = teacher_cls != Leitner
+    is_leitner = teacher_cls == Leitner
+    is_sampling = teacher_cls == Sampling
 
     if "horizon" in teacher_pr:
         horizon = teacher_pr["horizon"]
@@ -62,7 +64,7 @@ def run(config):
     else:
         raise ValueError
 
-    if omniscient or not teacher_use_psy:
+    if omniscient or is_leitner:
         psy = psy_cls.create(
             n_item=n_item,
             is_item_specific=is_item_specific,
@@ -97,14 +99,16 @@ def run(config):
                     psy.update(item=item, response=was_success,
                                timestamp=timestamp)
 
-                    if teacher_use_psy:
-                        item = teacher.ask(now=now,
-                                           psy=psy)
-                    else:
+                    if is_leitner:
                         item = teacher.ask(now=now,
                                            last_was_success=was_success,
                                            last_time_reply=timestamp,
                                            idx_last_q=item)
+
+                    elif is_sampling:
+                        item = teacher.ask(now=now,
+                                           psy=psy,
+                                           ss_iter=j)
                     p = psy.p(
                         item=item,
                         param=pr,
@@ -121,7 +125,7 @@ def run(config):
 
                 n_learnt = np.sum(real_p_seen > learnt_threshold)
 
-                if teacher_use_psy:
+                if is_leitner:
                     pr_inf = psy.inferred_learner_param()
                     inferred_p_seen, seen = \
                         psy.p_seen(now=now, param=pr_inf)

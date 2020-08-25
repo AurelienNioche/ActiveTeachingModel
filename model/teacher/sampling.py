@@ -6,50 +6,53 @@ from . generic import Teacher
 class Sampling(Teacher):
 
     def __init__(self, n_item, learnt_threshold,
-                 n_sample, horizon,
+                 n_sample, # horizon,
                  time_per_iter, ss_n_iter, time_between_ss):
-
-        self.n_item = n_item
-
-        self.learnt_threshold = learnt_threshold
 
         self.n_sample = n_sample
 
+        self.n_item = n_item
+        self.learnt_threshold = learnt_threshold
         self.time_per_iter = time_per_iter
-        self.horizon = horizon
-
         self.ss_n_iter = ss_n_iter
-
         self.time_between_ss = time_between_ss
 
-        self.iter = -1
-        self.ss_it = -1
+        #         #self.horizon = horizon
+        # self.iter = -1
+        # self.ss_it = -1
 
-    def _revise_goal(self, now):
+    # def _revise_goal(self, now):
+    #
+    #     self.ss_it += 1
+    #     if self.ss_it == self.ss_n_iter - 1:
+    #         self.ss_it = 0
+    #
+    #     remain = self.ss_n_iter - self.ss_it
+    #
+    #     self.iter += 1
+    #     if self.iter == self.horizon:
+    #         self.iter = 0
+    #         h = self.horizon
+    #     else:
+    #         h = self.horizon - self.iter
+    #
+    #     # delta in timestep (number of iteration)
+    #     delta_ts = np.arange(h + 1, dtype=float)
+    #
+    #     if remain < h + 1:
+    #         delta_ts[remain:] += (self.time_between_ss/self.time_per_iter)
+    #         assert h - remain <= self.ss_n_iter, "case not handled!"
+    #
+    #     timestamps = now + delta_ts * self.time_per_iter
+    #
+    #     return h, timestamps
 
-        self.ss_it += 1
-        if self.ss_it == self.ss_n_iter - 1:
-            self.ss_it = 0
+    def _revise_goal(self, now, ss_iter):
 
-        remain = self.ss_n_iter - self.ss_it
-
-        self.iter += 1
-        if self.iter == self.horizon:
-            self.iter = 0
-            h = self.horizon
-        else:
-            h = self.horizon - self.iter
-
-        # delta in timestep (number of iteration)
-        delta_ts = np.arange(h + 1, dtype=float)
-
-        if remain < h + 1:
-            delta_ts[remain:] += (self.time_between_ss/self.time_per_iter)
-            assert h - remain <= self.ss_n_iter, "case not handled!"
-
-        timestamps = now + delta_ts * self.time_per_iter
-
-        return h, timestamps
+        h = self.ss_n_iter - ss_iter
+        ts = now + np.arange(h) * self.time_per_iter
+        eval_ts = ts[-1] + self.time_between_ss
+        return h, ts, eval_ts
 
     def _value_future(self, psy, future, param, new_ts, eval_ts):
         hist = psy.learner.hist
@@ -68,16 +71,17 @@ class Sampling(Teacher):
         )
         return np.sum(p_seen)
 
-    def ask(self, now, psy):
+    def ask(self, now, psy, ss_iter):
 
-        horizon, timestamps = self._revise_goal(now)
+        horizon, timestamps, eval_ts = self._revise_goal(now=now,
+                                                         ss_iter=ss_iter)
 
         param = psy.inferred_learner_param()
         ts = psy.learner.ts
         ts = ts[ts != -1]
         new_ts = \
-            np.hstack((ts, timestamps[:-1]))
-        eval_ts = timestamps[-1]
+            np.hstack((ts, timestamps))
+        # eval_ts = timestamps[-1]
 
         if psy.learner.n_seen < self.n_item:
             items = np.hstack((psy.learner.seen_item,
@@ -113,13 +117,13 @@ class Sampling(Teacher):
         return item_idx
 
     @classmethod
-    def create(cls, n_item, task_pr, n_sample, horizon):
+    def create(cls, n_item, task_pr, n_sample): #, horizon):
 
         return cls(
             n_item=n_item,
             learnt_threshold=task_pr.learnt_threshold,
             n_sample=n_sample,
-            horizon=horizon,
+            # horizon=horizon,
             time_per_iter=task_pr.time_per_iter,
             ss_n_iter=task_pr.ss_n_iter,
             time_between_ss=task_pr.time_between_ss)

@@ -79,7 +79,7 @@ def main() -> None:
 
     task_pr_lab, task_pr_val = dic_to_lab_val(task_param)
 
-    sampling_cst = {"horizon": 100, "n_sample": 500}
+    sampling_cst = {"n_sample": 500}
 
     leitner_cst = {"delay_factor": 2, "delay_min": 2}
 
