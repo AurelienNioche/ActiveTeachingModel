@@ -1,3 +1,4 @@
+import os
 import settings.paths as paths
 
 from plot import fake_data
@@ -27,8 +28,10 @@ def main() -> None:
     )
 
     # Individual plots
-    chocolate.plot(TEACHERS, LEARNERS, PSYCHOLOGISTS, cumulative_df, paths.FIG_DIR)
-    box.plot(cumulative_df, paths.FIG_DIR)
+    chocolate.plot(TEACHERS, LEARNERS, PSYCHOLOGISTS, cumulative_df,
+                   os.path.join(paths.FIG_DIR, "chocolate_fake.pdf"))
+    box.plot(cumulative_df,
+             os.path.join(paths.FIG_DIR, "box_fake.pdf"))
     efficiency_cost.plot(cumulative_df, paths.FIG_DIR)
     p_recall_error.plot(TEACHERS, LEARNERS, PSYCHOLOGISTS, primary_df, paths.FIG_DIR)
 

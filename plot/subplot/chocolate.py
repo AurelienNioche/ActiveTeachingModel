@@ -21,10 +21,12 @@ def get_color_sequence(
     """Get the color for each dot"""
 
     assert len(sequence_0) == len(sequence_1)
-    epsilon = np.finfo(float).eps
-    sequence_0 += epsilon
-    sequence_1 += epsilon
+    # epsilon = np.finfo(float).eps
+    # sequence_0 += epsilon
+    # sequence_1 += epsilon
+    # if sequence_1 > 0:
     sequence = sequence_0 / sequence_1
+
     return tuple(
         map(
             lambda x: color_mapping[teacher_0] if x > 1 else color_mapping[teacher_1],
@@ -40,7 +42,16 @@ def plot(
     df: pd.DataFrame,
     fig_path: str,
 ) -> None:
-    """Prepare and save the chocolate plot"""
+    """Prepare and save the chocolate plot
+    dataframe needs following columns:
+    "Agent ID", "Teacher", "Learner", Psychologist", "Items learnt"
+    """
+    if not isinstance(teachers, set):
+        teachers = set(teachers)
+    if not isinstance(learners, set):
+        learners = set(learners)
+    if not isinstance(psychologists, set):
+        psychologists = set(psychologists)
 
     print("Plotting multiscatter...")
     # Plot parameters
@@ -73,14 +84,14 @@ def plot(
     )
 
     # Text positions
-    num_rows = len(learners_psychologists_combos)
-    num_columns = len(teachers_combos)
+    n_row = len(learners_psychologists_combos)
+    n_col = len(teachers_combos)
 
     # Colors
     color_mapping = utils.map_teacher_colors()
 
-    for n_row, learner_psychologist_combo in enumerate(learners_psychologists_combos):
-        for n_col, teachers_combo in enumerate(teachers_combos):
+    for i_row, learner_psychologist_combo in enumerate(learners_psychologists_combos):
+        for i_col, teachers_combo in enumerate(teachers_combos):
             # Subplot parameters
             learner = next(iter(learners.intersection(learner_psychologist_combo)))
             psychologist = next(
@@ -98,13 +109,20 @@ def plot(
                 teachers_combo[0], x, teachers_combo[1], y, color_mapping
             )
             # Plot scatter
-            axes[n_row, n_col].scatter(x, y, c=colors, alpha=alpha_dot, zorder=1)
+            if n_row > 1 and n_col >1:
+                ax = axes[i_row, i_col]
+            elif n_row > 1:
+                ax = axes[i_row]
+            else:
+                ax = axes[i_col]
+
+            ax.scatter(x, y, c=colors, alpha=alpha_dot, zorder=1)
             # Plot identity line
-            axes[n_row, n_col].plot(
+            ax.plot(
                 [0, 1],
                 [0, 1],
                 "-k",
-                transform=axes[n_row, n_col].transAxes,
+                transform=ax.transAxes,
                 alpha=alpha_line,
                 zorder=0,
             )
@@ -112,16 +130,16 @@ def plot(
             # axes[n_row, n_col].set_xlabel("Items learnt " + teachers_combo[0])
             # axes[n_row, n_col].set_ylabel("Items learnt " + teachers_combo[1])
 
-            if n_row == 0:
-                axes[n_row, n_col].set_title(
+            if i_row == 0:
+                ax.set_title(
                     f"{teachers_combo[1]} vs. {teachers_combo[0]}"
                 )  # Inverted text indexing, easier interpretation
 
-            elif n_row == num_rows:
-                axes[n_row, n_col].set_xlabel("Time")
+            elif i_row == n_row:
+                ax.set_xlabel("Time")
 
-            if n_col == 0:
-                axes[n_row, n_col].set_ylabel(f"{learner}, {psychologist}")
+            if i_col == 0:
+                ax.set_ylabel(f"{learner}, {psychologist}")
 
     # Text left
     chocolate.text(
@@ -147,5 +165,5 @@ def plot(
     plt.tight_layout(rect=(padding_0, 0, 1, 1))
 
     print("Saving fig...")
-    chocolate.savefig(os.path.join(fig_path, "chocolate.pdf"))
+    chocolate.savefig(fig_path)
     print("Done!")
