@@ -25,8 +25,34 @@ Using brew on mac:
 Create the config files
 
     generate_config_files_triton.py
+    
+Edit the number of array job in `simulation.job`
  
 Launch the job with:
  
     ./run.sh simulation.job
+    
+See job status:
+    
+    sacct -u <user>
+    
+Count number of results files:
+    
+    ls data | wc -l
+    
+Check the last 10 lines of the log file:
 
+    tail -f triton_out/out
+    
+or for seeing the complete file:
+    
+    cat triton_out/out
+    
+cancel the job:
+    
+    scancel <job_id>
+    
+ 
+check the resources used by the job:
+
+    seff <job_id>

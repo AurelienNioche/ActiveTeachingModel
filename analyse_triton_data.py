@@ -31,7 +31,7 @@ def preprocess_data():
         # last_iter = df[df["iter"] == max_iter]
         # n_learnt = last_iter["n_learnt"].iloc[0]
 
-        last_ss_idx = max(df["ss_idx"])
+        # last_ss_idx = max(df["ss_idx"])
 
         n_learnt = df.query("ss_idx==@last_ss_idx & ss_iter==0")["n_learnt"].iloc[0]
 
