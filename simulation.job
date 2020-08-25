@@ -5,7 +5,7 @@
 #SBATCH -c 1
 #SBATCH --mem=9000MB
 #SBATCH --ntasks=1
-#SBATCH --array=0-99
+#SBATCH --array=0-299
 #SBATCH -o triton_out/out.out
 ############## Here starts the actual UNIX commands and payload:
 
