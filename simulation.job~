@@ -3,14 +3,14 @@
 #SBATCH --job-name=active-t
 #SBATCH --time 15:00:00
 #SBATCH -c 1
-#SBATCH --mem=9000MB
+#SBATCH --mem=90000MB
 #SBATCH --ntasks=1
 #SBATCH --array=0-99
 #SBATCH -o out/test.out
 ############## Here starts the actual UNIX commands and payload:
 
 module purge
-module load anaconda
+module load Python/3.6.6-foss-2018b anaconda
 
-srun python main_triton.py $SLURM_ARRAY_TASK_ID
+srun python main_carlos.py $SLURM_ARRAY_TASK_ID
 

@@ -33,6 +33,9 @@ def main() -> None:
     p_recall_error.plot(TEACHERS, LEARNERS, PSYCHOLOGISTS, primary_df, paths.FIG_DIR)
 
 
+main()
+
+#%%
 if __name__ == "__main__":
     main()
 

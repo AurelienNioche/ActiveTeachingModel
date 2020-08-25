@@ -70,8 +70,7 @@ def main() -> None:
 
     task_param = {
         "is_item_specific": True,
-        "ss_n_iter": 1,
-        # "ss_n_iter": 100, # ! TESTING !!!!!!!!!!!!!!!!!!!!!
+        "ss_n_iter": 100,
         "time_between_ss": 86200,
         "n_ss": 15,
         "learnt_threshold": 0.9,
@@ -144,8 +143,12 @@ def main() -> None:
                 for psy_md in psy_models:
 
                     if psy_md == PsychologistGrid:
-                        psy_pr_lab = ["grid_size", ]
-                        psy_pr_val = [grid_size, ]
+                        psy_pr_lab = [
+                            "grid_size",
+                        ]
+                        psy_pr_val = [
+                            grid_size,
+                        ]
                     else:
                         raise ValueError
 

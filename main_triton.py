@@ -15,20 +15,19 @@ from run.make_data_triton import run
 
 def main(job_id: int) -> None:
 
-    # Read
-    file_paths = file_loader.get_file_paths(paths.CONFIG_CLUSTER_DIR, ".json")
-    file_paths = tuple(file_loader.get_file_paths_not_empty(file_paths))
-    f_path = file_paths[job_id]
-    f_name = os.path.basename(f_path)
-    save_file_name = f"{f_name.split('.')[0]}.pickle"
-
-    # config_file = os.path.join("config", "config_triton_sampling_grid_walsh.json")
+    f_names = sorted(
+        file_name
+        for file_name in os.listdir(paths.CONFIG_CLUSTER_DIR)
+        if ".json" in file_name
+    )
+    f_paths = sorted(
+        os.path.join(paths.CONFIG_CLUSTER_DIR, f_name) for f_name in f_names
+    )
+    f_path = f_paths[job_id]
     config = Config.get(f_path)
-    print(config.config_file)
-
-    # df = run(config=config)
-    # f_name = f"{os.path.splitext(os.path.basename(config_file))[0]}.csv"
-    # df.to_csv(os.path.join(paths.DATA_DIR, f_name))
+    df = run(config=config)
+    f_name = f"{config.config_file.split('.')[0]}.csv"
+    df.to_csv(os.path.join(paths.DATA_DIR, f_name))
 
 
 if __name__ == "__main__":
