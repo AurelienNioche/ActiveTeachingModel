@@ -21,7 +21,12 @@ Using brew on mac:
         pip3 install -r requirements.txt
 
 
- ## Notes
+ ## Triton
+Create the config files
 
- 43050
+    generate_config_files_triton.py
+ 
+Launch the job with:
+ 
+    ./run.sh simulation.job
 
