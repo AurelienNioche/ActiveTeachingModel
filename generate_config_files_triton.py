@@ -66,10 +66,10 @@ def main() -> None:
 
     n_agent = 100
     n_item = 100
-    omni = True
+    omni = False
 
     task_param = {
-        "is_item_specific": True,
+        "is_item_specific": False,
         "ss_n_iter": 100,
         "time_between_ss": 86200,
         "n_ss": 15,
@@ -93,18 +93,16 @@ def main() -> None:
             [0.1, 0.1],
             [0.6, 0.6],
         ],
-        "learner_model": "walsh2018",
         "grid_size": 10,
     }
 
     exp_decay_cst = {
         "param_labels": ["alpha", "beta"],
         "bounds": [[0.001, 0.2], [0.00, 0.5]],
-        "learner_model": "exp_decay",
         "grid_size": 20,
     }
 
-    learner_models = (Walsh2018,)
+    learner_models = (ExponentialNDelta,)
     teacher_models = (Leitner, Sampling, Threshold)
     psy_models = (PsychologistGrid,)
 
