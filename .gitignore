@@ -160,7 +160,7 @@ pickle/
 # Cluster
 config/auto/
 config/triton/
-config/done-triton/
+config/triton-done/
 results/
 out/*
 .last.pid
