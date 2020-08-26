@@ -117,13 +117,13 @@ class Sampling(Teacher):
         return item_idx
 
     @classmethod
-    def create(cls, n_item, task_pr, n_sample): #, horizon):
+    def create(cls, n_item, learnt_threshold, n_sample,
+               time_per_iter, ss_n_iter, time_between_ss):
 
         return cls(
             n_item=n_item,
-            learnt_threshold=task_pr.learnt_threshold,
+            learnt_threshold=learnt_threshold,
             n_sample=n_sample,
-            # horizon=horizon,
-            time_per_iter=task_pr.time_per_iter,
-            ss_n_iter=task_pr.ss_n_iter,
-            time_between_ss=task_pr.time_between_ss)
+            time_per_iter=time_per_iter,
+            ss_n_iter=ss_n_iter,
+            time_between_ss=time_between_ss)

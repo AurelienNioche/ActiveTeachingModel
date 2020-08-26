@@ -4,6 +4,7 @@ import os
 import json
 
 import numpy as np
+import shutil
 
 from numpy.random import default_rng
 from tqdm import tqdm
@@ -59,8 +60,32 @@ def dic_to_lab_val(dic):
     return lab, val
 
 
+def cleanup():
+    if os.path.exists(paths.CONFIG_CLUSTER_DIR):
+        erase = input("Do you want to erase the config folder first? "
+                      "('y' or 'yes')")
+        if erase in ('y', 'yes'):
+            shutil.rmtree(paths.CONFIG_CLUSTER_DIR)
+            os.makedirs(paths.CONFIG_CLUSTER_DIR)
+            print("Done!")
+        else:
+            print("I keep everything as it is")
+
+    if os.path.exists(paths.DATA_CLUSTER_DIR):
+        erase = input("Do you want to erase the data folder first? "
+                      "('y' or 'yes')")
+        if erase in ('y', 'yes'):
+            shutil.rmtree(paths.DATA_CLUSTER_DIR)
+            os.makedirs(paths.DATA_CLUSTER_DIR)
+            print("Done!")
+        else:
+            print("I keep everything as it is")
+
+
 def main() -> None:
     """Set the parameters and generate the JSON config files"""
+
+    cleanup()
 
     np.random.seed(1234)
 
@@ -77,7 +102,7 @@ def main() -> None:
         "time_per_iter": 2,
     }
 
-    task_pr_lab, task_pr_val = dic_to_lab_val(task_param)
+    # task_pr_lab, task_pr_val = dic_to_lab_val(task_param)
 
     sampling_cst = {"n_sample": 500}
 
@@ -94,20 +119,22 @@ def main() -> None:
             [0.6, 0.6],
         ],
         "grid_size": 10,
+        "cst_time": (1/60**2)/24
     }
 
     exp_decay_cst = {
         "param_labels": ["alpha", "beta"],
         "bounds": [[0.001, 0.2], [0.00, 0.5]],
         "grid_size": 20,
+        "cst_time": (1/60**2)/24
     }
 
     learner_models = (ExponentialNDelta,)
     teacher_models = (Leitner, Sampling, Threshold)
     psy_models = (PsychologistGrid,)
 
-    # f_name_root = f"at-{datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S-%f')}"
-    f_name_root = f"at-{datetime.datetime.now().strftime('%Y_%m_%d_%H_%M_%S_%f')}"
+    f_name_root = \
+        f"at-{datetime.datetime.now().strftime('%Y_%m_%d_%H_%M_%S_%f')}"
 
     for learner_md in learner_models:
 
@@ -121,6 +148,7 @@ def main() -> None:
         bounds = cst["bounds"]
         grid_size = cst["grid_size"]
         pr_lab = cst["param_labels"]
+        cst_time = cst["cst_time"]
 
         print("Generating cluster config files...")
         for agent in tqdm(range(n_agent)):
@@ -165,20 +193,24 @@ def main() -> None:
                         "md_teacher": TEACHER_INV[teacher_md],
                         "omni": omni,
                         "n_item": n_item,
-                        "task_pr_lab": task_pr_lab,
-                        "task_pr_val": task_pr_val,
                         "teacher_pr_lab": teacher_pr_lab,
                         "teacher_pr_val": teacher_pr_val,
                         "psy_pr_lab": psy_pr_lab,
                         "psy_pr_val": psy_pr_val,
                         "pr_lab": pr_lab,
                         "pr_val": pr_val,
+                        "cst_time": cst_time,
                     }
 
-                    # f_name = os.path.join(FOLDER, f"{f_name_root}-{agent}.json")
+                    json_content.update(**task_param)
+
                     f_name = os.path.join(
                         paths.CONFIG_CLUSTER_DIR,
-                        f"{f_name_root}-{json_content['md_learner']}-{json_content['md_psy']}-{json_content['md_teacher']}-{agent}.json",
+                        f"{f_name_root}-"
+                        f"{json_content['md_learner']}-"
+                        f"{json_content['md_psy']}-"
+                        f"{json_content['md_teacher']}-"
+                        f"{agent}.json",
                     )
                     with open(f_name, "w") as f:
                         json.dump(json_content, f, sort_keys=False, indent=4)

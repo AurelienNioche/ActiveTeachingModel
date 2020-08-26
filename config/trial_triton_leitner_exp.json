@@ -1,0 +1,23 @@
+{
+  "seed": 0,
+  "agent": 0,
+  "bounds": [[0.001, 0.2], [0.00, 0.5]],
+  "md_learner": "exp_decay",
+  "md_psy": "psy_grid",
+  "md_teacher": "leitner",
+  "omni": true,
+  "n_item": 100,
+  "learnt_threshold": 0.90,
+  "is_item_specific":  false,
+  "time_per_iter": 2,
+  "n_ss": 7,
+  "ss_n_iter":  100,
+  "time_between_ss": 86200,
+  "cst_time": 1.1574074074074073e-05,
+  "teacher_pr_lab": ["delay_factor", "delay_min"],
+  "teacher_pr_val": [2, 2],
+  "psy_pr_lab": ["grid_size"],
+  "psy_pr_val": [20],
+  "pr_lab": ["alpha", "beta"],
+  "pr_val": [0.01, 0.44]
+}

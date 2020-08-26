@@ -7,7 +7,7 @@ EPS = np.finfo(np.float).eps
 
 
 class Walsh2018(Learner):
-    def __init__(self, n_item, n_iter):
+    def __init__(self, n_item, n_iter, cst_time):
 
         self.seen = np.zeros(n_item, dtype=bool)
         self.ts = np.full(n_iter, -1, dtype=float)
@@ -24,6 +24,8 @@ class Walsh2018(Learner):
         self.c = None
         self.x = None
 
+        self.cst_time = cst_time
+
     def p(self, item, param, now, is_item_specific):
 
         if len(param.shape) > 1:
@@ -34,6 +36,10 @@ class Walsh2018(Learner):
 
         relevant = self.hist == item
         rep = self.ts[relevant]
+
+        rep *= self.cst_time
+        now *= self.cst_time
+
         n = len(rep)
         delta = now - rep
 
@@ -70,8 +76,8 @@ class Walsh2018(Learner):
             is_item_specific=is_item_specific,
         )
 
-    @staticmethod
-    def p_seen_spec_hist(param, now, hist, ts, seen, is_item_specific):
+    def p_seen_spec_hist(self,
+                         param, now, hist, ts, seen, is_item_specific):
 
         # seen = np.zeros(self.n_item, dtype=bool)
         # seen[np.unique(hist)] = True
@@ -89,8 +95,12 @@ class Walsh2018(Learner):
         else:
             tau, s, b, m, c, x = param
 
-        ts = np.asarray(ts)
-        hist = np.asarray(hist)
+        # ts = np.asarray(ts)
+        # hist = np.asarray(hist)
+
+        _ts = ts.copy()
+        _ts *= self.cst_time
+        now *= self.cst_time
 
         n_seen = np.sum(seen)
         n = np.zeros(n_seen)
@@ -105,7 +115,7 @@ class Walsh2018(Learner):
                 _x = x
 
             is_item = hist == item
-            rep = ts[is_item]
+            rep = _ts[is_item]
 
             n_it = len(rep)
 
@@ -153,22 +163,19 @@ class Walsh2018(Learner):
         p = p if response else 1 - p
         return np.log(p + EPS)
 
-    @staticmethod
-    def log_lik(param, hist, success, timestamp):
+    def log_lik(self, param, hist, success, timestamp):
 
-        # if isinstance(param, dict):
-        #     tau, s, b, m, c, x = \
-        #         param["tau"], param["s"], param["b"], \
-        #         param["m"], param["c"], param["x"]
-        # else:
         tau, s, b, m, c, x = param
+
+        _ts = timestamp.copy()
+        _ts *= self.cst_time
 
         _m_ = np.zeros(len(hist))
 
         for item in np.unique(hist):
 
             is_item = hist == item
-            rep = timestamp[is_item]
+            rep = _ts[is_item]
             n = len(rep)
 
             _m_item = np.zeros(n)
@@ -184,7 +191,7 @@ class Walsh2018(Learner):
 
                 _t_ = np.sum(w * delta)
 
-                lag = rep[1 : i + 1] - rep[:i]
+                lag = rep[1: i + 1] - rep[:i]
                 d = b + m * np.mean(1 / np.log(lag + math.e))
                 _m_item[i] = i ** c * _t_ ** -d
 

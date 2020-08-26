@@ -5,6 +5,7 @@ import datetime
 import pandas as pd
 
 from model.teacher.leitner import Leitner
+from model.teacher.threshold import Threshold
 from model.teacher.sampling import Sampling
 
 from model.learner.act_r2008 import ActR2008
@@ -19,18 +20,17 @@ def run(config):
     config_file = config.config_file
     config_dic = config.config_dic
     seed = config.seed
+    n_ss = config.n_ss
+    ss_n_iter = config.ss_n_iter
+    time_between_ss = config.time_between_ss
+    time_per_iter = config.time_per_iter
+    is_item_specific = config.is_item_specific
+    learnt_threshold = config.learnt_threshold
+    cst_time = config.cst_time
 
     pr = config.param
     teacher_pr = config.teacher_pr
-    task_pr = config.task_pr
     psy_pr = config.psy_pr
-
-    n_ss = task_pr.n_ss
-    ss_n_iter = task_pr.ss_n_iter
-    time_between_ss = task_pr.time_between_ss
-    time_per_iter = task_pr.time_per_iter
-    is_item_specific = task_pr.is_item_specific
-    learnt_threshold = task_pr.learnt_threshold
 
     n_iter = n_ss * ss_n_iter
 
@@ -40,27 +40,39 @@ def run(config):
 
     bounds = config.bounds
 
-    teacher = teacher_cls.create(task_pr=task_pr,
-                                 n_item=n_item, **teacher_pr)
+    if teacher_cls == Leitner:
+        teacher = teacher_cls.create(n_item=n_item, **teacher_pr)
+    elif teacher_cls == Threshold:
+        teacher = teacher_cls.create(n_item=n_item,
+                                     learnt_threshold=learnt_threshold)
+    elif teacher_cls == Sampling:
+        teacher = teacher_cls.create(
+            n_item=n_item, learnt_threshold=learnt_threshold,
+            time_per_iter=time_per_iter,
+            ss_n_iter=ss_n_iter, time_between_ss=time_between_ss,
+            **teacher_pr)
+    else:
+        raise ValueError
+
     is_leitner = teacher_cls == Leitner
     is_sampling = teacher_cls == Sampling
 
-    if "horizon" in teacher_pr:
-        horizon = teacher_pr["horizon"]
-    else:
-        horizon = 0
+    # if "horizon" in teacher_pr:
+    #     horizon = teacher_pr["horizon"]
+    # else:
+    #     horizon = 0
 
-    if learner_cls in (ActR2008,):
-        if task_pr.is_item_specific:
-            raise NotImplementedError
-        else:
-            learner = learner_cls(n_item=n_item,
-                                  n_iter=n_ss * ss_n_iter
-                                         + horizon)
-    elif learner_cls in (Walsh2018, ExponentialNDelta):
+    # if learner_cls in (ActR2008,):
+    #     if is_item_specific:
+    #         raise NotImplementedError
+    #     else:
+    #         learner = learner_cls(n_item=n_item,
+    #                               n_iter=n_ss * ss_n_iter
+    #                                      + horizon)
+    if learner_cls in (Walsh2018, ExponentialNDelta):
         learner = learner_cls(n_item=n_item,
-                              n_iter=n_ss * ss_n_iter
-                                     + horizon)
+                              n_iter=n_ss * ss_n_iter,
+                              cst_time=cst_time)
     else:
         raise ValueError
 
@@ -86,7 +98,7 @@ def run(config):
     now = 0
 
     item = None
-    timestamp = None
+    ts = None
     was_success = None
 
     itr = 0
@@ -95,14 +107,14 @@ def run(config):
         for i in range(n_ss):
             for j in range(ss_n_iter):
 
-                if item is not None and timestamp is not None:
+                if item is not None and ts is not None:
                     psy.update(item=item, response=was_success,
-                               timestamp=timestamp)
+                               timestamp=ts)
 
                     if is_leitner:
                         item = teacher.ask(now=now,
                                            last_was_success=was_success,
-                                           last_time_reply=timestamp,
+                                           last_time_reply=ts,
                                            idx_last_q=item)
 
                     elif is_sampling:
@@ -112,26 +124,28 @@ def run(config):
                     p = psy.p(
                         item=item,
                         param=pr,
-                        now=timestamp)
+                        now=ts)
                 else:
                     item = 0
                     p = 0
 
-                timestamp = now
+                ts = now
                 was_success = np.random.random() < p
 
-                real_p_seen, seen = \
-                    psy.p_seen(now=now, param=pr)
+                p_seen_real, seen = psy.p_seen(now=now, param=pr)
 
-                n_learnt = np.sum(real_p_seen > learnt_threshold)
+                n_learnt = np.sum(p_seen_real > learnt_threshold)
+                if j == 0:
+                    print("********n_learnt", n_learnt)
+                # else:
+                #     print("n_learnt", n_learnt)
 
                 if is_leitner:
                     pr_inf = psy.inferred_learner_param()
-                    inferred_p_seen, seen = \
-                        psy.p_seen(now=now, param=pr_inf)
+                    p_seen_inf, seen = psy.p_seen(now=now, param=pr_inf)
 
-                    if len(inferred_p_seen):
-                        p_err = np.abs(real_p_seen-inferred_p_seen)
+                    if len(p_seen_inf):
+                        p_err = np.abs(p_seen_real-p_seen_inf)
                         p_err_mean, p_err_std = np.mean(p_err), np.std(p_err)
                     else:
                         p_err_mean, p_err_std = None, None

@@ -17,10 +17,13 @@ def main():
             raise ValueError
     else:
 
+        # config_file = os.path.join("config",
+        #                            "trial_triton_leitner_walsh.json")
+
         config_file = os.path.join("config",
                                    "triton",
-                                   "at-2020_08_25_20_29_25_914475-exp_decay-psy_grid-sampling-29.json")
-                                   # "config_triton_trial.json")
+                                   "at-2020_08_26_13_20_03_075705-exp_decay-psy_grid-sampling-49.json")
+
     config = Config.get(config_file)
     df = run(config=config)
     f_name = f"{os.path.splitext(os.path.basename(config_file))[0]}.csv"

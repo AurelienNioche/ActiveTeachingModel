@@ -29,26 +29,9 @@ LEARNER = {
     "walsh2018": Walsh2018,
 }
 
-PSYCHOLOGIST = {"psy_grid": PsychologistGrid, "psy_gradient": PsychologistGradient}
-
-
-class TaskParam:
-    def __init__(
-        self,
-        is_item_specific,
-        time_between_ss,
-        time_per_iter,
-        n_ss,
-        ss_n_iter,
-        learnt_threshold,
-    ):
-
-        self.is_item_specific = is_item_specific
-        self.time_between_ss = time_between_ss
-        self.time_per_iter = time_per_iter
-        self.n_ss = n_ss
-        self.ss_n_iter = ss_n_iter
-        self.learnt_threshold = learnt_threshold
+PSYCHOLOGIST = {
+    "psy_grid": PsychologistGrid,
+    "psy_gradient": PsychologistGradient}
 
 
 class Config:
@@ -64,14 +47,19 @@ class Config:
         md_teacher,
         omni,
         n_item,
-        task_pr_lab,
-        task_pr_val,
+        is_item_specific,
+        ss_n_iter,
+        time_between_ss,
+        n_ss,
+        learnt_threshold,
+        time_per_iter,
+        cst_time,
         teacher_pr_lab,
         teacher_pr_val,
         psy_pr_lab,
         psy_pr_val,
         pr_lab,
-        pr_val,
+        pr_val
     ):
 
         self.seed = seed
@@ -89,12 +77,21 @@ class Config:
         self.n_item = n_item
         self.omniscient = omni
 
-        self.task_pr = TaskParam(**{k: v for k, v in zip(task_pr_lab, task_pr_val)})
+        self.is_item_specific = is_item_specific
+        self.time_between_ss = time_between_ss
+        self.time_per_iter = time_per_iter
+        self.n_ss = n_ss
+        self.ss_n_iter = ss_n_iter
+        self.learnt_threshold = learnt_threshold
+        self.cst_time = cst_time
+
         if len(psy_pr_lab):
-            self.psy_pr = {k: v for k, v in zip(psy_pr_lab, psy_pr_val)}
+            self.psy_pr = {k: v
+                           for k, v in zip(psy_pr_lab, psy_pr_val)}
         else:
             self.psy_pr = None
-        self.teacher_pr = {k: v for k, v in zip(teacher_pr_lab, teacher_pr_val)}
+        self.teacher_pr = {k: v
+                           for k, v in zip(teacher_pr_lab, teacher_pr_val)}
 
         self.config_file = config_file
         self.config_dic = config_dic
