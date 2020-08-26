@@ -2,13 +2,20 @@
 Run simulations and save results
 """
 import os
+
 # import sys
 
 from settings.config_triton import Config
 import settings.paths as paths
+
 # import utils.file_loader as file_loader
 
 from run.make_data_triton import run
+
+
+EXT = "_incr_samples"
+DIR_NAME = f"triton + {EXT}"
+PATH = os.path.join(paths.DATA_CLUSTER_DIR, DIR_NAME)
 
 
 def main(job_id: int) -> None:
@@ -25,7 +32,7 @@ def main(job_id: int) -> None:
     config = Config.get(f_path)
     df = run(config=config)
     f_name = f"{config.config_file.split('.')[0]}.csv"
-    df.to_csv(os.path.join(paths.DATA_CLUSTER_DIR, f_name))
+    df.to_csv(os.path.join(PATH, f_name))
 
 
 if __name__ == "__main__":

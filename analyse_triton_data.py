@@ -8,11 +8,12 @@ from plot.subplot import chocolate, box, efficiency_cost, p_recall_error
 
 # EXT = '_exp'
 # EXT = "_exp_omni_spec"
-EXT = "_new_samp"
+EXT = "_walsh"
 
 RAW_DATA_FOLDER = os.path.join("data", "triton", f"data{EXT}")
-PREPROCESSED_DATA_FILE = os.path.join("data", "preprocessed",
-                                      f"chocolate_triton{EXT}.csv")
+PREPROCESSED_DATA_FILE = os.path.join(
+    "data", "preprocessed", f"chocolate_triton{EXT}.csv"
+)
 FIG_CHOCOLATE_PATH = os.path.join("fig", f"chocolate_triton{EXT}.pdf")
 FIG_BOXPLOT_PATH = os.path.join("fig", f"boxplot_triton{EXT}.pdf")
 
@@ -39,7 +40,7 @@ def preprocess_data():
 
         last_ss_idx = max(df["ss_idx"])
 
-        n_learnt = df.query("ss_idx==@last_ss_idx & ss_iter==0")["n_learnt"].iloc[0]
+        n_learnt = df.query("ss_idx == @last_ss_idx & ss_iter == 0")["n_learnt"].iloc[0]
 
         row = {
             "Agent ID": i,
@@ -73,13 +74,10 @@ def main(force=False):
         teachers=teachers,
         learners=learners,
         psychologists=psy,
-        fig_path=FIG_CHOCOLATE_PATH
+        fig_path=FIG_CHOCOLATE_PATH,
     )
 
-    box.plot(
-        df=df,
-        fig_path=FIG_BOXPLOT_PATH
-    )
+    box.plot(df=df, fig_path=FIG_BOXPLOT_PATH)
 
 
 if __name__ == "__main__":

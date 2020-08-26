@@ -176,7 +176,7 @@ def run(config):
             now += time_per_iter
             itr += 1
 
-            pbar.update()
+            # pbar.update()
 
         now += time_between_ss
 

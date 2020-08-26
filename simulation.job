@@ -1,12 +1,12 @@
 #!/bin/bash
 ############## This section states the requirements the job requires:
-#SBATCH --job-name=active-t
-#SBATCH --time 5:00:00
+#SBATCH --job-name=act-teach
+#SBATCH --time 50:00
 #SBATCH -c 1
-#SBATCH --mem=9000MB
+#SBATCH --mem=15000MB
 #SBATCH --ntasks=1
-#SBATCH --array=0-599
-#SBATCH -o triton_out/out.out
+#SBATCH --array=0-599 
+#SBATCH -o triton_out/debug.out
 ############## Here starts the actual UNIX commands and payload:
 
 module purge

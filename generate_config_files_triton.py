@@ -2,6 +2,7 @@
 import datetime
 import os
 import json
+import subprocess
 
 import numpy as np
 import shutil
@@ -62,9 +63,8 @@ def dic_to_lab_val(dic):
 
 def cleanup():
     if os.path.exists(paths.CONFIG_CLUSTER_DIR):
-        erase = input("Do you want to erase the config folder first? "
-                      "('y' or 'yes')")
-        if erase in ('y', 'yes'):
+        erase = input("Do you want to erase the config folder first? " "('y' or 'yes')")
+        if erase in ("y", "yes"):
             shutil.rmtree(paths.CONFIG_CLUSTER_DIR)
             os.makedirs(paths.CONFIG_CLUSTER_DIR)
             print("Done!")
@@ -72,9 +72,8 @@ def cleanup():
             print("I keep everything as it is")
 
     if os.path.exists(paths.DATA_CLUSTER_DIR):
-        erase = input("Do you want to erase the data folder first? "
-                      "('y' or 'yes')")
-        if erase in ('y', 'yes'):
+        erase = input("Do you want to erase the data folder first? " "('y' or 'yes')")
+        if erase in ("y", "yes"):
             shutil.rmtree(paths.DATA_CLUSTER_DIR)
             os.makedirs(paths.DATA_CLUSTER_DIR)
             print("Done!")
@@ -104,7 +103,7 @@ def main() -> None:
 
     # task_pr_lab, task_pr_val = dic_to_lab_val(task_param)
 
-    sampling_cst = {"n_sample": 500}
+    sampling_cst = {"n_sample": 1500}
 
     leitner_cst = {"delay_factor": 2, "delay_min": 2}
 
@@ -112,29 +111,31 @@ def main() -> None:
         "param_labels": ["tau", "s", "b", "m", "c", "x"],
         "bounds": [
             [0.5, 1.5],
-            [0.005, 0.10],
-            [0.005, 0.2],
-            [0.005, 0.2],
+            [0.001, 0.10],
+            [0.001, 0.2],
+            [0.001, 0.2],
             [0.1, 0.1],
             [0.6, 0.6],
         ],
         "grid_size": 10,
-        "cst_time": (1/60**2)/24
+        "cst_time": (1 / 60 ** 2) / 24,
     }
 
     exp_decay_cst = {
         "param_labels": ["alpha", "beta"],
         "bounds": [[0.001, 0.2], [0.00, 0.5]],
         "grid_size": 20,
-        "cst_time": (1/60**2)/24
+        "cst_time": (1 / 60 ** 2) / 24,
     }
 
-    learner_models = (ExponentialNDelta, Walsh2018,)
+    learner_models = (
+        ExponentialNDelta,
+        Walsh2018,
+    )
     teacher_models = (Leitner, Sampling, Threshold)
     psy_models = (PsychologistGrid,)
 
-    f_name_root = \
-        f"at-{datetime.datetime.now().strftime('%Y_%m_%d_%H_%M_%S_%f')}"
+    f_name_root = f"at-{datetime.datetime.now().strftime('%Y_%m_%d_%H_%M_%S_%f')}"
 
     for learner_md in learner_models:
 
@@ -217,5 +218,14 @@ def main() -> None:
     print("Done!")
 
 
+def mod_job_file(template_path: str, config_path: str, saving_path: str) -> None:
+    os.system(f"sh mod_job.sh {template_path} {config_path} {saving_path}")
+
+
 if __name__ == "__main__":
     main()
+    mod_job_file(
+        os.path.join(paths.JSON_DIR, "template.job"),
+        paths.CONFIG_CLUSTER_DIR,
+        os.path.join(paths.BASE_DIR, "simulation.job"),
+    )
