@@ -10,22 +10,27 @@ from plot.subplot import chocolate, box, efficiency_cost, p_recall_error
 # EXT = "_exp_omni_spec"
 EXT = "_new_samp"
 
-DATA_FOLDER = os.path.join("data", f"data{EXT}")
-DATA_FILE = os.path.join("data", f"chocolate_triton{EXT}.csv")
+RAW_DATA_FOLDER = os.path.join("data", "triton", f"data{EXT}")
+PREPROCESSED_DATA_FILE = os.path.join("data", "preprocessed",
+                                      f"chocolate_triton{EXT}.csv")
 FIG_CHOCOLATE_PATH = os.path.join("fig", f"chocolate_triton{EXT}.pdf")
 FIG_BOXPLOT_PATH = os.path.join("fig", f"boxplot_triton{EXT}.pdf")
 
-os.makedirs("data", exist_ok=True)
+os.makedirs(os.path.join("data", "preprocessed"), exist_ok=True)
 
 
 def preprocess_data():
 
-    path, dirs, files = next(os.walk(DATA_FOLDER))
+    assert os.path.exists(RAW_DATA_FOLDER)
+
+    path, dirs, files = next(os.walk(RAW_DATA_FOLDER))
     file_count = len(files)
+
+    assert file_count > 0
 
     row_list = []
 
-    for i, p in tqdm(enumerate(os.scandir(DATA_FOLDER)), total=file_count):
+    for i, p in tqdm(enumerate(os.scandir(RAW_DATA_FOLDER)), total=file_count):
         df = pd.read_csv(p.path, index_col=[0])
 
         # max_iter = max(df["iter"])
@@ -46,16 +51,16 @@ def preprocess_data():
         row_list.append(row)
 
     df = pd.DataFrame(row_list)
-    df.to_csv(DATA_FILE)
+    df.to_csv(PREPROCESSED_DATA_FILE)
     return df
 
 
 def main(force=False):
 
-    if not os.path.exists(DATA_FILE) or force:
+    if not os.path.exists(PREPROCESSED_DATA_FILE) or force:
         df = preprocess_data()
     else:
-        df = pd.read_csv(DATA_FILE, index_col=[0])
+        df = pd.read_csv(PREPROCESSED_DATA_FILE, index_col=[0])
 
     print(type(df["Items learnt"][0]))
 
