@@ -90,7 +90,7 @@ def main() -> None:
     np.random.seed(1234)
 
     n_agent = 100
-    n_item = 100
+    n_item = 150
     omni = True
 
     task_param = {
@@ -129,7 +129,7 @@ def main() -> None:
         "cst_time": (1/60**2)/24
     }
 
-    learner_models = (ExponentialNDelta,)
+    learner_models = (ExponentialNDelta, Walsh2018,)
     teacher_models = (Leitner, Sampling, Threshold)
     psy_models = (PsychologistGrid,)
 

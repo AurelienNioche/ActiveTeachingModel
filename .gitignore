@@ -146,8 +146,10 @@ dmypy.json
 */migrations
 !*/*/__init__.py
 
-# Docker
+# SImulations
 /data
+/data/triton
+/data/triton/triton-done
 
 ActiveTeachingModel/credentials.py
 /user_data/bkp/
