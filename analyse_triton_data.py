@@ -7,7 +7,8 @@ from plot.subplot import chocolate, box, efficiency_cost, p_recall_error
 
 
 # EXT = '_exp'
-EXT = "_exp_omni_spec"
+# EXT = "_exp_omni_spec"
+EXT = "_new_samp"
 
 DATA_FOLDER = os.path.join("data", f"data{EXT}")
 DATA_FILE = os.path.join("data", f"chocolate_triton{EXT}.csv")
@@ -31,7 +32,7 @@ def preprocess_data():
         # last_iter = df[df["iter"] == max_iter]
         # n_learnt = last_iter["n_learnt"].iloc[0]
 
-        # last_ss_idx = max(df["ss_idx"])
+        last_ss_idx = max(df["ss_idx"])
 
         n_learnt = df.query("ss_idx==@last_ss_idx & ss_iter==0")["n_learnt"].iloc[0]
 
@@ -49,7 +50,7 @@ def preprocess_data():
     return df
 
 
-def main(force=True):
+def main(force=False):
 
     if not os.path.exists(DATA_FILE) or force:
         df = preprocess_data()

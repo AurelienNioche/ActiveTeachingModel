@@ -69,6 +69,8 @@ def plot(
     # Make the combinations of all learners with all psychologists
     learners_psychologists_combos = tuple(product(learners, psychologists))
 
+    min_x, max_x = min(df["Items learnt"]), max(df["Items learnt"])
+
     # Start the multiscatter plot
     chocolate, axes = plt.subplots(
         len(learners_psychologists_combos),
@@ -109,7 +111,7 @@ def plot(
                 teachers_combo[0], x, teachers_combo[1], y, color_mapping
             )
             # Plot scatter
-            if n_row > 1 and n_col >1:
+            if n_row > 1 and n_col > 1:
                 ax = axes[i_row, i_col]
             elif n_row > 1:
                 ax = axes[i_row]
@@ -140,6 +142,10 @@ def plot(
 
             if i_col == 0:
                 ax.set_ylabel(f"{learner}, {psychologist}")
+
+            ax.set_aspect(1)
+            ax.set_xlim(min_x, max_x)
+            ax.set_ylim(min_x, max_x)
 
     # Text left
     chocolate.text(
