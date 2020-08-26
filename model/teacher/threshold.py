@@ -22,8 +22,8 @@ class Threshold(Teacher):
         return item_idx
 
     @classmethod
-    def create(cls, n_item, task_pr):
+    def create(cls, n_item, learnt_threshold):
 
         return cls(
             n_item=n_item,
-            learnt_threshold=task_pr.learnt_threshold)
+            learnt_threshold=learnt_threshold)
