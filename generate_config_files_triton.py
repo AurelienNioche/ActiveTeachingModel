@@ -223,6 +223,9 @@ def main() -> None:
                         json.dump(json_content, f, sort_keys=False, indent=4)
     print("Config files created!")
 
+    os.makedirs(paths.DATA_CLUSTER_DIR, exist_ok=True)
+    os.makedirs(paths.LOG_CLUSTER_DIR, exist_ok=True)
+
     mod_job_file(
         os.path.join(paths.JSON_DIR, "template.job"),
         paths.CONFIG_CLUSTER_DIR,

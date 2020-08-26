@@ -10,6 +10,8 @@ JSON_DIR = os.path.join(BASE_DIR, "config")
 
 CONFIG_CLUSTER_DIR = os.path.join(JSON_DIR, "triton")
 
+LOG_CLUSTER_DIR = "triton_out"
+
 DATA_DIR = os.path.join(BASE_DIR, "data")
 
 DATA_CLUSTER_DIR = os.path.join(DATA_DIR, "triton")
