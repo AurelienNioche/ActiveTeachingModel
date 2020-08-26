@@ -66,7 +66,7 @@ def main() -> None:
 
     n_agent = 100
     n_item = 100
-    omni = False
+    omni = True
 
     task_param = {
         "is_item_specific": False,
