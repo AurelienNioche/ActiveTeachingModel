@@ -81,6 +81,14 @@ def cleanup():
             print("I keep everything as it is")
 
 
+def run_simulation():
+    simulate = input("Run simulation?" "('y' or 'yes')")
+    if simulate in ("y", "yes"):
+        os.system(f"sh run.sh simulation.job")
+    else:
+        print("Nothing run.")
+
+
 def main() -> None:
     """Set the parameters and generate the JSON config files"""
 
@@ -103,7 +111,7 @@ def main() -> None:
 
     # task_pr_lab, task_pr_val = dic_to_lab_val(task_param)
 
-    sampling_cst = {"n_sample": 1500}
+    sampling_cst = {"n_sample": 500}
 
     leitner_cst = {"delay_factor": 2, "delay_min": 2}
 
@@ -130,7 +138,6 @@ def main() -> None:
 
     learner_models = (
         ExponentialNDelta,
-        Walsh2018,
     )
     teacher_models = (Leitner, Sampling, Threshold)
     psy_models = (PsychologistGrid,)
