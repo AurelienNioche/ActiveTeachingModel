@@ -39,8 +39,15 @@ def preprocess_data():
         # n_learnt = last_iter["n_learnt"].iloc[0]
 
         last_ss_idx = max(df["ss_idx"])
+        is_last_ss = df["ss_idx"] == last_ss_idx
+        is_first_iter_ss = df["ss_iter"] == 0
 
-        n_learnt = df.query("ss_idx == @last_ss_idx & ss_iter == 0")["n_learnt"].iloc[0]
+        n_learnt = df[is_last_ss & is_first_iter_ss]["n_learnt"].iloc[0]
+
+        is_before_last_ss = df["ss_idx"] == last_ss_idx - 1
+        is_last_iter_ss = df["ss_iter"] == df["ss_n_iter"][0] - 1
+
+        n_learnt_end_ss = df[is_before_last_ss & is_last_iter_ss]["n_learnt"].iloc[0]
 
         row = {
             "Agent ID": i,
@@ -48,6 +55,7 @@ def preprocess_data():
             "Psychologist": df["md_psy"][0],
             "Teacher": df["md_teacher"][0],
             "Items learnt": n_learnt,
+            "Items learnt end prev ss": n_learnt_end_ss
         }
         row_list.append(row)
 
