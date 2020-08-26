@@ -1,8 +1,6 @@
-#%%
 import datetime
 import os
 import json
-import subprocess
 
 import numpy as np
 import shutil
@@ -24,10 +22,6 @@ from settings.config_triton import TEACHER, PSYCHOLOGIST, LEARNER
 
 N_SEC_PER_DAY = 86400
 N_SEC_PER_ITER = 2
-
-# FOLDER = os.path.join("config", "triton")
-
-# os.makedirs(FOLDER, exist_ok=True)
 
 TEACHER_INV = {v: k for k, v in TEACHER.items()}
 PSY_INV = {v: k for k, v in PSYCHOLOGIST.items()}
@@ -63,7 +57,8 @@ def dic_to_lab_val(dic):
 
 def cleanup():
     if os.path.exists(paths.CONFIG_CLUSTER_DIR):
-        erase = input("Do you want to erase the config folder first? " "('y' or 'yes')")
+        erase = input("Do you want to erase the config folder first? "
+                      "('y' or 'yes')")
         if erase in ("y", "yes"):
             shutil.rmtree(paths.CONFIG_CLUSTER_DIR)
             os.makedirs(paths.CONFIG_CLUSTER_DIR)
@@ -72,7 +67,8 @@ def cleanup():
             print("I keep everything as it is")
 
     if os.path.exists(paths.DATA_CLUSTER_DIR):
-        erase = input("Do you want to erase the data folder first? " "('y' or 'yes')")
+        erase = input("Do you want to erase the data folder first? "
+                      "('y' or 'yes')")
         if erase in ("y", "yes"):
             shutil.rmtree(paths.DATA_CLUSTER_DIR)
             os.makedirs(paths.DATA_CLUSTER_DIR)
@@ -82,11 +78,16 @@ def cleanup():
 
 
 def run_simulation():
-    simulate = input("Run simulation?" "('y' or 'yes')")
+    simulate = input("Run simulation? "
+                     "('y' or 'yes')")
     if simulate in ("y", "yes"):
         os.system(f"sh run.sh simulation.job")
     else:
         print("Nothing run.")
+
+
+def mod_job_file(template_path: str, config_path: str, saving_path: str) -> None:
+    os.system(f"sh mod_job.sh {template_path} {config_path} {saving_path}")
 
 
 def main() -> None:
@@ -108,8 +109,6 @@ def main() -> None:
         "learnt_threshold": 0.9,
         "time_per_iter": 2,
     }
-
-    # task_pr_lab, task_pr_val = dic_to_lab_val(task_param)
 
     sampling_cst = {"n_sample": 500}
 
@@ -222,17 +221,15 @@ def main() -> None:
                     )
                     with open(f_name, "w") as f:
                         json.dump(json_content, f, sort_keys=False, indent=4)
-    print("Done!")
+    print("Config files created!")
 
+    mod_job_file(
+        os.path.join(paths.JSON_DIR, "template.job"),
+        paths.CONFIG_CLUSTER_DIR,
+        os.path.join(paths.BASE_DIR, "simulation.job"))
 
-def mod_job_file(template_path: str, config_path: str, saving_path: str) -> None:
-    os.system(f"sh mod_job.sh {template_path} {config_path} {saving_path}")
+    run_simulation()
 
 
 if __name__ == "__main__":
     main()
-    mod_job_file(
-        os.path.join(paths.JSON_DIR, "template.job"),
-        paths.CONFIG_CLUSTER_DIR,
-        os.path.join(paths.BASE_DIR, "simulation.job"),
-    )

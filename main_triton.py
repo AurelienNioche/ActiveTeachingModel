@@ -3,19 +3,13 @@ Run simulations and save results
 """
 import os
 
-# import sys
-
 from settings.config_triton import Config
 import settings.paths as paths
-
-# import utils.file_loader as file_loader
 
 from run.make_data_triton import run
 
 
-EXT = "_incr_samples"
-DIR_NAME = f"triton + {EXT}"
-PATH = os.path.join(paths.DATA_CLUSTER_DIR, DIR_NAME)
+PATH = os.path.join(paths.DATA_CLUSTER_DIR)
 
 
 def main(job_id: int) -> None:
