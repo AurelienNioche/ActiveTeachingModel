@@ -42,6 +42,7 @@ def run(config):
 
     if teacher_cls == Leitner:
         teacher = teacher_cls.create(n_item=n_item, **teacher_pr)
+
     elif teacher_cls == Threshold:
         teacher = teacher_cls.create(n_item=n_item,
                                      learnt_threshold=learnt_threshold)
@@ -121,6 +122,11 @@ def run(config):
                     item = teacher.ask(now=now,
                                        psy=psy,
                                        ss_iter=j)
+
+                else:
+                    item = teacher.ask(now=now,
+                                       psy=psy)
+
                 p = psy.p(
                     item=item,
                     param=pr,

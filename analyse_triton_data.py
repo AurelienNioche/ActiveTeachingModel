@@ -8,7 +8,7 @@ from plot.subplot import chocolate, box, efficiency_cost, p_recall_error
 
 # EXT = '_exp'
 # EXT = "_exp_omni_spec"
-EXT = "_walsh"
+EXT = "_triton"
 
 RAW_DATA_FOLDER = os.path.join("data", "triton", f"data{EXT}")
 PREPROCESSED_DATA_FILE = os.path.join(
@@ -71,11 +71,11 @@ def main(force=False):
     else:
         df = pd.read_csv(PREPROCESSED_DATA_FILE, index_col=[0])
 
-    print(type(df["Items learnt"][0]))
-
     teachers = sorted(np.unique(df["Teacher"]))
     learners = sorted(np.unique(df["Learner"]))
     psy = sorted(np.unique(df["Psychologist"]))
+
+    learnt_label = "Items learnt end prev ss" # "Items learnt"
 
     chocolate.plot(
         df=df,
@@ -83,9 +83,10 @@ def main(force=False):
         learners=learners,
         psychologists=psy,
         fig_path=FIG_CHOCOLATE_PATH,
+        learnt_label=learnt_label
     )
 
-    box.plot(df=df, fig_path=FIG_BOXPLOT_PATH)
+    box.plot(df=df, fig_path=FIG_BOXPLOT_PATH, learnt_label=learnt_label)
 
 
 if __name__ == "__main__":

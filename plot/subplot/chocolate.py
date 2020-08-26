@@ -36,6 +36,7 @@ def get_color_sequence(
 
 
 def plot(
+    learnt_label: str,
     teachers: Hashable,
     learners: Hashable,
     psychologists: Hashable,
@@ -69,7 +70,7 @@ def plot(
     # Make the combinations of all learners with all psychologists
     learners_psychologists_combos = tuple(product(learners, psychologists))
 
-    min_x, max_x = min(df["Items learnt"]), max(df["Items learnt"])
+    min_x, max_x = min(df[learnt_label]), max(df[learnt_label])
 
     # Start the multiscatter plot
     chocolate, axes = plt.subplots(
@@ -82,7 +83,7 @@ def plot(
 
     # Plottable values per condition (models set)
     dict_cond_scores = utils.get_plot_values(
-        df, "Agent ID", ["Teacher", "Learner", "Psychologist"], "Items learnt"
+        df, "Agent ID", ["Teacher", "Learner", "Psychologist"], learnt_label
     )
 
     # Text positions
