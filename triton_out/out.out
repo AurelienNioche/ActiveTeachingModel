@@ -1,0 +1,3648 @@
+srun: error: csl10: task 0: Exited with exit code 1
+srun: Terminating job step 55164279.0
+srun: error: csl10: task 0: Exited with exit code 1
+srun: Terminating job step 55164269.0
+srun: error: csl10: task 0: Exited with exit code 1
+srun: Terminating job step 55164268.0
+srun: error: csl10: task 0: Exited with exit code 1
+srun: Terminating job step 55164276.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+srun: error: csl10: task 0: Exited with exit code 1
+srun: Terminating job step 55164280.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+srun: error: csl10: task 0: Exited with exit code 1
+srun: Terminating job step 55164277.0
+srun: error: csl10: task 0: Exited with exit code 1
+srun: Terminating job step 55164283.0
+srun: error: csl10: task 0: Exited with exit code 1
+srun: Terminating job step 55164275.0
+srun: error: csl10: task 0: Exited with exit code 1
+srun: Terminating job step 55164266.0
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+    main(job_id)
+    main(job_id)
+    main(job_id)
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+    df = run(config=config)
+    df = run(config=config)
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+    pbar.update()
+    pbar.update()
+    pbar.update()
+NameError: name 'pbar' is not defined
+NameError: name 'pbar' is not defined
+NameError: name 'pbar' is not defined
+NameError: name 'pbar' is not defined
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+    main(job_id)
+    main(job_id)
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+    df = run(config=config)
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+    learnt_threshold=learnt_threshold)
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+srun: error: pe9: task 0: Exited with exit code 1
+srun: Terminating job step 55164375.0
+srun: error: pe43: task 0: Exited with exit code 1
+srun: Terminating job step 55164364.0
+srun: error: pe43: task 0: Exited with exit code 1
+srun: error: pe43: task 0: Exited with exit code 1
+srun: Terminating job step 55164363.0
+srun: Terminating job step 55164362.0
+srun: error: pe9: task 0: Exited with exit code 1
+srun: error: pe9: task 0: Exited with exit code 1
+srun: Terminating job step 55164376.0
+srun: Terminating job step 55164374.0
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+Traceback (most recent call last):
+    main(job_id)
+    main(job_id)
+    main(job_id)
+    main(job_id)
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+Traceback (most recent call last):
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+    main(job_id)
+    df = run(config=config)
+    df = run(config=config)
+  File "main_triton.py", line 38, in <module>
+    df = run(config=config)
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+  File "main_triton.py", line 26, in main
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    main(job_id)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    learnt_threshold=learnt_threshold)
+    df = run(config=config)
+    learnt_threshold=learnt_threshold)
+    learnt_threshold=learnt_threshold)
+  File "main_triton.py", line 26, in main
+    pbar.update()
+    pbar.update()
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+    df = run(config=config)
+NameError: name 'pbar' is not defined
+NameError: name 'pbar' is not defined
+    learnt_threshold=learnt_threshold)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+    pbar.update()
+NameError: name 'pbar' is not defined
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+srun: error: pe9: task 0: Exited with exit code 1
+srun: Terminating job step 55164373.0
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+    main(job_id)
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+    df = run(config=config)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+    learnt_threshold=learnt_threshold)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+srun: error: pe43: task 0: Exited with exit code 1
+Traceback (most recent call last):
+srun: Terminating job step 55164361.0
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+    main(job_id)
+    main(job_id)
+  File "main_triton.py", line 26, in main
+Traceback (most recent call last):
+  File "main_triton.py", line 26, in main
+Traceback (most recent call last):
+  File "main_triton.py", line 26, in main
+Traceback (most recent call last):
+    df = run(config=config)
+  File "main_triton.py", line 38, in <module>
+    df = run(config=config)
+  File "main_triton.py", line 38, in <module>
+    df = run(config=config)
+  File "main_triton.py", line 38, in <module>
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    main(job_id)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    main(job_id)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    main(job_id)
+    pbar.update()
+  File "main_triton.py", line 26, in main
+    pbar.update()
+  File "main_triton.py", line 26, in main
+    pbar.update()
+  File "main_triton.py", line 26, in main
+NameError: name 'pbar' is not defined
+    df = run(config=config)
+NameError: name 'pbar' is not defined
+    df = run(config=config)
+NameError: name 'pbar' is not defined
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+    pbar.update()
+    pbar.update()
+NameError: name 'pbar' is not defined
+NameError: name 'pbar' is not defined
+NameError: name 'pbar' is not defined
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+Traceback (most recent call last):
+    main(job_id)
+    main(job_id)
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+    main(job_id)
+    df = run(config=config)
+    df = run(config=config)
+  File "main_triton.py", line 26, in main
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    df = run(config=config)
+    learnt_threshold=learnt_threshold)
+    learnt_threshold=learnt_threshold)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+    main(job_id)
+  File "main_triton.py", line 26, in main
+Traceback (most recent call last):
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "main_triton.py", line 38, in <module>
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    main(job_id)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+  File "main_triton.py", line 26, in main
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+    df = run(config=config)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+srun: error: pe34: task 0: Exited with exit code 1
+srun: Terminating job step 55164365.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+srun: error: pe34: task 0: Exited with exit code 1
+srun: error: pe34: task 0: Exited with exit code 1
+srun: Terminating job step 55164367.0
+srun: Terminating job step 55164366.0
+srun: error: pe34: task 0: Exited with exit code 1
+srun: Terminating job step 55164369.0
+srun: error: csl2: task 0: Exited with exit code 1
+srun: Terminating job step 55164330.0
+srun: error: csl2: task 0: Exited with exit code 1
+srun: Terminating job step 55164329.0
+srun: error: pe34: task 0: Exited with exit code 1
+srun: error: pe34: task 0: Exited with exit code 1
+srun: error: pe34: task 0: Exited with exit code 1
+srun: error: pe34: task 0: Exited with exit code 1
+srun: Terminating job step 55164372.0
+srun: Terminating job step 55164371.0
+srun: Terminating job step 55164368.0
+srun: Terminating job step 55164370.0
+srun: error: csl2: task 0: Exited with exit code 1
+srun: error: csl2: task 0: Exited with exit code 1
+srun: Terminating job step 55164326.0
+srun: Terminating job step 55164333.0
+srun: error: pe51: task 0: Exited with exit code 1
+srun: Terminating job step 55164380.0
+srun: error: csl2: task 0: Exited with exit code 1
+srun: Terminating job step 55164328.0
+srun: error: pe52: task 0: Exited with exit code 1
+srun: error: pe51: task 0: Exited with exit code 1
+srun: error: pe52: task 0: Exited with exit code 1
+srun: Terminating job step 55164381.0
+srun: Terminating job step 55164378.0
+srun: Terminating job step 55164377.0
+srun: error: pe51: task 0: Exited with exit code 1
+srun: Terminating job step 55164382.0
+srun: error: csl2: task 0: Exited with exit code 1
+srun: Terminating job step 55164331.0
+srun: error: csl2: task 0: Exited with exit code 1
+srun: Terminating job step 55164327.0
+srun: error: csl2: task 0: Exited with exit code 1
+srun: Terminating job step 55164332.0
+srun: error: pe75: task 0: Exited with exit code 1
+srun: Terminating job step 55164359.0
+srun: error: pe52: task 0: Exited with exit code 1
+Traceback (most recent call last):
+srun: error: pe75: task 0: Exited with exit code 1
+srun: Terminating job step 55164379.0
+Traceback (most recent call last):
+srun: error: pe75: task 0: Exited with exit code 1
+Traceback (most recent call last):
+srun: Terminating job step 55164357.0
+  File "main_triton.py", line 38, in <module>
+srun: Terminating job step 55164360.0
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+    main(job_id)
+    main(job_id)
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+    df = run(config=config)
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    learnt_threshold=learnt_threshold)
+    pbar.update()
+    pbar.update()
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+NameError: name 'pbar' is not defined
+NameError: name 'pbar' is not defined
+srun: error: pe75: task 0: Exited with exit code 1
+srun: Terminating job step 55164358.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+srun: error: pe75: task 0: Exited with exit code 1
+srun: Terminating job step 55164354.0
+srun: error: pe75: task 0: Exited with exit code 1
+srun: Terminating job step 55164353.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+Traceback (most recent call last):
+    main(job_id)
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 26, in main
+    main(job_id)
+    df = run(config=config)
+  File "main_triton.py", line 26, in main
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    df = run(config=config)
+    learnt_threshold=learnt_threshold)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+srun: error: pe75: task 0: Exited with exit code 1
+srun: Terminating job step 55164356.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+srun: error: skl8: task 0: Exited with exit code 1
+srun: Terminating job step 55164646.0
+srun: error: skl33: task 0: Exited with exit code 1
+srun: Terminating job step 55164506.0
+srun: error: skl8: task 0: Exited with exit code 1
+srun: Terminating job step 55164645.0
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+    main(job_id)
+Traceback (most recent call last):
+    main(job_id)
+    main(job_id)
+    main(job_id)
+    main(job_id)
+    main(job_id)
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+    df = run(config=config)
+    main(job_id)
+    df = run(config=config)
+    df = run(config=config)
+    df = run(config=config)
+    df = run(config=config)
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+  File "main_triton.py", line 26, in main
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+    pbar.update()
+    df = run(config=config)
+    pbar.update()
+    pbar.update()
+    pbar.update()
+    pbar.update()
+    pbar.update()
+NameError: name 'pbar' is not defined
+NameError: name 'pbar' is not defined
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+NameError: name 'pbar' is not defined
+NameError: name 'pbar' is not defined
+NameError: name 'pbar' is not defined
+NameError: name 'pbar' is not defined
+NameError: name 'pbar' is not defined
+    pbar.update()
+NameError: name 'pbar' is not defined
+srun: error: skl27: task 0: Exited with exit code 1
+srun: Terminating job step 55164570.0
+srun: error: skl27: task 0: Exited with exit code 1
+srun: error: skl27: task 0: Exited with exit code 1
+srun: Terminating job step 55164567.0
+srun: error: skl27: task 0: Exited with exit code 1
+srun: Terminating job step 55164568.0
+srun: Terminating job step 55164565.0
+srun: error: skl27: task 0: Exited with exit code 1
+srun: Terminating job step 55164564.0
+Traceback (most recent call last):
+srun: error: skl27: task 0: Exited with exit code 1
+  File "main_triton.py", line 38, in <module>
+srun: Terminating job step 55164566.0
+Traceback (most recent call last):
+    main(job_id)
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 26, in main
+    main(job_id)
+    df = run(config=config)
+  File "main_triton.py", line 26, in main
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    df = run(config=config)
+    pbar.update()
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+NameError: name 'pbar' is not defined
+    pbar.update()
+NameError: name 'pbar' is not defined
+srun: error: skl27: task 0: Exited with exit code 1
+srun: Terminating job step 55164569.0
+srun: error: skl45: task 0: Exited with exit code 1
+srun: Terminating job step 55164404.0
+srun: error: skl45: task 0: Exited with exit code 1
+srun: Terminating job step 55164398.0
+srun: error: skl45: task 0: Exited with exit code 1
+srun: Terminating job step 55164405.0
+srun: error: skl45: task 0: Exited with exit code 1
+srun: Terminating job step 55164399.0
+srun: error: skl48: task 0: Exited with exit code 1
+srun: Terminating job step 55164386.0
+srun: error: skl45: task 0: Exited with exit code 1
+srun: error: skl45: task 0: Exited with exit code 1
+srun: Terminating job step 55164400.0
+srun: Terminating job step 55164402.0
+Traceback (most recent call last):
+srun: error: skl45: task 0: Exited with exit code 1
+Traceback (most recent call last):
+Traceback (most recent call last):
+srun: Terminating job step 55164401.0
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+srun: error: skl45: task 0: Exited with exit code 1
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+srun: Terminating job step 55164403.0
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+srun: error: skl48: task 0: Exited with exit code 1
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+srun: Terminating job step 55164387.0
+Traceback (most recent call last):
+    main(job_id)
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+    main(job_id)
+    main(job_id)
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+    main(job_id)
+    main(job_id)
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    main(job_id)
+    main(job_id)
+    main(job_id)
+    main(job_id)
+    main(job_id)
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    main(job_id)
+    main(job_id)
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+    main(job_id)
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+    main(job_id)
+    main(job_id)
+    main(job_id)
+    main(job_id)
+    main(job_id)
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "main_triton.py", line 26, in main
+    main(job_id)
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    df = run(config=config)
+    df = run(config=config)
+    df = run(config=config)
+    df = run(config=config)
+    main(job_id)
+    df = run(config=config)
+    main(job_id)
+    df = run(config=config)
+    main(job_id)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+    main(job_id)
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+    main(job_id)
+    df = run(config=config)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+    main(job_id)
+    df = run(config=config)
+    main(job_id)
+    df = run(config=config)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+    main(job_id)
+    df = run(config=config)
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+  File "main_triton.py", line 26, in main
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+  File "main_triton.py", line 26, in main
+    learnt_threshold=learnt_threshold)
+  File "main_triton.py", line 26, in main
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+  File "main_triton.py", line 26, in main
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    main(job_id)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+  File "main_triton.py", line 26, in main
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    main(job_id)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+  File "main_triton.py", line 26, in main
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+  File "main_triton.py", line 26, in main
+    learnt_threshold=learnt_threshold)
+  File "main_triton.py", line 26, in main
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    df = run(config=config)
+    df = run(config=config)
+  File "main_triton.py", line 26, in main
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+  File "main_triton.py", line 26, in main
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+  File "main_triton.py", line 26, in main
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+  File "main_triton.py", line 26, in main
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+  File "main_triton.py", line 26, in main
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    df = run(config=config)
+    df = run(config=config)
+    df = run(config=config)
+    df = run(config=config)
+  File "main_triton.py", line 26, in main
+    learnt_threshold=learnt_threshold)
+    df = run(config=config)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+    df = run(config=config)
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+    df = run(config=config)
+    learnt_threshold=learnt_threshold)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+    df = run(config=config)
+    learnt_threshold=learnt_threshold)
+    df = run(config=config)
+Traceback (most recent call last):
+    learnt_threshold=learnt_threshold)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+  File "main_triton.py", line 38, in <module>
+    learnt_threshold=learnt_threshold)
+    df = run(config=config)
+    main(job_id)
+    learnt_threshold=learnt_threshold)
+    learnt_threshold=learnt_threshold)
+  File "main_triton.py", line 26, in main
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    df = run(config=config)
+    learnt_threshold=learnt_threshold)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    pbar.update()
+    learnt_threshold=learnt_threshold)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+NameError: name 'pbar' is not defined
+    learnt_threshold=learnt_threshold)
+    df = run(config=config)
+    learnt_threshold=learnt_threshold)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+    df = run(config=config)
+    learnt_threshold=learnt_threshold)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+Traceback (most recent call last):
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+Traceback (most recent call last):
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+Traceback (most recent call last):
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+Traceback (most recent call last):
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+Traceback (most recent call last):
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+Traceback (most recent call last):
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+Traceback (most recent call last):
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+  File "main_triton.py", line 38, in <module>
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+  File "main_triton.py", line 38, in <module>
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+  File "main_triton.py", line 38, in <module>
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+  File "main_triton.py", line 38, in <module>
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+  File "main_triton.py", line 38, in <module>
+    learnt_threshold=learnt_threshold)
+srun: error: csl1: task 0: Exited with exit code 1
+  File "main_triton.py", line 38, in <module>
+    learnt_threshold=learnt_threshold)
+srun: Terminating job step 55164351.0
+  File "main_triton.py", line 38, in <module>
+    learnt_threshold=learnt_threshold)
+    main(job_id)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+Traceback (most recent call last):
+    learnt_threshold=learnt_threshold)
+    main(job_id)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+    main(job_id)
+    learnt_threshold=learnt_threshold)
+    main(job_id)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+    main(job_id)
+    learnt_threshold=learnt_threshold)
+    main(job_id)
+    learnt_threshold=learnt_threshold)
+    main(job_id)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+  File "main_triton.py", line 26, in main
+    learnt_threshold=learnt_threshold)
+  File "main_triton.py", line 38, in <module>
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+  File "main_triton.py", line 26, in main
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+    main(job_id)
+    df = run(config=config)
+    df = run(config=config)
+    df = run(config=config)
+    df = run(config=config)
+    df = run(config=config)
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+  File "main_triton.py", line 26, in main
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    learnt_threshold=learnt_threshold)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    learnt_threshold=learnt_threshold)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+    pbar.update()
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+    df = run(config=config)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+    pbar.update()
+srun: error: csl5: task 0: Exited with exit code 1
+    pbar.update()
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+    pbar.update()
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+    pbar.update()
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+    pbar.update()
+srun: error: csl5: task 0: Exited with exit code 1
+    pbar.update()
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+NameError: name 'pbar' is not defined
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+srun: error: csl5: task 0: Exited with exit code 1
+NameError: name 'pbar' is not defined
+srun: Terminating job step 55164312.0
+NameError: name 'pbar' is not defined
+srun: Terminating job step 55164319.0
+NameError: name 'pbar' is not defined
+srun: error: csl1: task 0: Exited with exit code 1
+srun: Terminating job step 55164325.0
+NameError: name 'pbar' is not defined
+srun: Terminating job step 55164342.0
+srun: error: csl5: task 0: Exited with exit code 1
+NameError: name 'pbar' is not defined
+srun: Terminating job step 55164324.0
+NameError: name 'pbar' is not defined
+    pbar.update()
+NameError: name 'pbar' is not defined
+srun: error: csl5: task 0: Exited with exit code 1
+srun: Terminating job step 55164308.0
+srun: error: csl1: task 0: Exited with exit code 1
+srun: Terminating job step 55164341.0
+srun: error: csl5: task 0: Exited with exit code 1
+srun: error: csl5: task 0: Exited with exit code 1
+srun: Terminating job step 55164309.0
+srun: Terminating job step 55164317.0
+srun: error: skl46: task 0: Exited with exit code 1
+srun: Terminating job step 55164397.0
+srun: error: csl5: task 0: Exited with exit code 1
+srun: Terminating job step 55164306.0
+srun: error: csl1: task 0: Exited with exit code 1
+srun: error: csl1: task 0: Exited with exit code 1
+srun: Terminating job step 55164349.0
+srun: Terminating job step 55164344.0
+srun: error: csl1: task 0: Exited with exit code 1
+srun: Terminating job step 55164352.0
+srun: error: csl1: task 0: Exited with exit code 1
+srun: Terminating job step 55164334.0
+srun: error: csl5: task 0: Exited with exit code 1
+srun: Terminating job step 55164307.0
+srun: error: csl1: task 0: Exited with exit code 1
+srun: Terminating job step 55164335.0
+srun: error: csl1: task 0: Exited with exit code 1
+srun: Terminating job step 55164350.0
+srun: error: skl47: task 0: Exited with exit code 1
+srun: Terminating job step 55164392.0
+srun: error: csl5: task 0: Exited with exit code 1
+srun: Terminating job step 55164305.0
+srun: error: csl1: task 0: Exited with exit code 1
+srun: Terminating job step 55164343.0
+srun: error: csl1: task 0: Exited with exit code 1
+srun: Terminating job step 55164347.0
+srun: error: csl1: task 0: Exited with exit code 1
+srun: Terminating job step 55164348.0
+srun: error: skl47: task 0: Exited with exit code 1
+srun: Terminating job step 55164390.0
+srun: error: csl1: task 0: Exited with exit code 1
+srun: Terminating job step 55164336.0
+srun: error: csl5: task 0: Exited with exit code 1
+srun: error: csl5: task 0: Exited with exit code 1
+srun: Terminating job step 55164313.0
+srun: Terminating job step 55164310.0
+srun: error: skl47: task 0: Exited with exit code 1
+srun: Terminating job step 55164394.0
+srun: error: skl47: task 0: Exited with exit code 1
+srun: Terminating job step 55164393.0
+srun: error: csl1: task 0: Exited with exit code 1
+srun: Terminating job step 55164338.0
+srun: error: skl47: task 0: Exited with exit code 1
+srun: Terminating job step 55164389.0
+srun: error: skl47: task 0: Exited with exit code 1
+srun: Terminating job step 55164395.0
+srun: error: skl47: task 0: Exited with exit code 1
+srun: Terminating job step 55164388.0
+srun: error: csl5: task 0: Exited with exit code 1
+srun: Terminating job step 55164311.0
+srun: error: skl47: task 0: Exited with exit code 1
+srun: Terminating job step 55164391.0
+srun: error: csl1: task 0: Exited with exit code 1
+srun: Terminating job step 55164337.0
+srun: error: csl5: task 0: Exited with exit code 1
+srun: Terminating job step 55164314.0
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+    main(job_id)
+    main(job_id)
+    main(job_id)
+    main(job_id)
+    main(job_id)
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+    df = run(config=config)
+    df = run(config=config)
+    df = run(config=config)
+    df = run(config=config)
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+    pbar.update()
+    pbar.update()
+    pbar.update()
+    pbar.update()
+    pbar.update()
+NameError: name 'pbar' is not defined
+NameError: name 'pbar' is not defined
+NameError: name 'pbar' is not defined
+NameError: name 'pbar' is not defined
+NameError: name 'pbar' is not defined
+NameError: name 'pbar' is not defined
+srun: error: csl1: task 0: Exited with exit code 1
+srun: Terminating job step 55164339.0
+srun: error: csl1: task 0: Exited with exit code 1
+srun: Terminating job step 55164345.0
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+    main(job_id)
+    main(job_id)
+    main(job_id)
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+    df = run(config=config)
+    df = run(config=config)
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+Traceback (most recent call last):
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+    pbar.update()
+    pbar.update()
+  File "main_triton.py", line 38, in <module>
+    pbar.update()
+Traceback (most recent call last):
+NameError: name 'pbar' is not defined
+NameError: name 'pbar' is not defined
+NameError: name 'pbar' is not defined
+    main(job_id)
+NameError: name 'pbar' is not defined
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 26, in main
+    main(job_id)
+    df = run(config=config)
+  File "main_triton.py", line 26, in main
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    df = run(config=config)
+    pbar.update()
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+NameError: name 'pbar' is not defined
+    pbar.update()
+NameError: name 'pbar' is not defined
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+    main(job_id)
+    main(job_id)
+    main(job_id)
+    main(job_id)
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+    df = run(config=config)
+    df = run(config=config)
+    df = run(config=config)
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+Traceback (most recent call last):
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+  File "main_triton.py", line 38, in <module>
+    pbar.update()
+    pbar.update()
+    pbar.update()
+    pbar.update()
+NameError: name 'pbar' is not defined
+    main(job_id)
+NameError: name 'pbar' is not defined
+NameError: name 'pbar' is not defined
+NameError: name 'pbar' is not defined
+NameError: name 'pbar' is not defined
+  File "main_triton.py", line 26, in main
+Traceback (most recent call last):
+    df = run(config=config)
+  File "main_triton.py", line 38, in <module>
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    main(job_id)
+    pbar.update()
+  File "main_triton.py", line 26, in main
+NameError: name 'pbar' is not defined
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+srun: error: skl41: task 0: Exited with exit code 1
+srun: Terminating job step 55164452.0
+srun: error: skl41: task 0: Exited with exit code 1
+srun: Terminating job step 55164449.0
+srun: error: skl41: task 0: Exited with exit code 1
+srun: Terminating job step 55164446.0
+srun: error: skl41: task 0: Exited with exit code 1
+srun: error: skl41: task 0: Exited with exit code 1
+srun: Terminating job step 55164451.0
+srun: Terminating job step 55164447.0
+srun: error: skl41: task 0: Exited with exit code 1
+srun: Terminating job step 55164450.0
+srun: error: csl5: task 0: Exited with exit code 1
+srun: Terminating job step 55164315.0
+srun: error: skl43: task 0: Exited with exit code 1
+srun: Terminating job step 55164422.0
+srun: error: csl1: task 0: Exited with exit code 1
+srun: Terminating job step 55164346.0
+srun: error: skl43: task 0: Exited with exit code 1
+srun: Terminating job step 55164414.0
+srun: error: skl43: task 0: Exited with exit code 1
+srun: Terminating job step 55164424.0
+srun: error: skl43: task 0: Exited with exit code 1
+srun: Terminating job step 55164419.0
+srun: error: skl40: task 0: Exited with exit code 1
+srun: error: skl43: task 0: Exited with exit code 1
+srun: Terminating job step 55164461.0
+srun: Terminating job step 55164423.0
+srun: error: skl43: task 0: Exited with exit code 1
+srun: Terminating job step 55164415.0
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+    main(job_id)
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+    pbar.update()
+NameError: name 'pbar' is not defined
+NameError: name 'pbar' is not defined
+srun: error: skl43: task 0: Exited with exit code 1
+srun: error: skl40: task 0: Exited with exit code 1
+srun: Terminating job step 55164421.0
+srun: error: skl40: task 0: Exited with exit code 1
+srun: Terminating job step 55164454.0
+srun: Terminating job step 55164455.0
+srun: error: csl5: task 0: Exited with exit code 1
+srun: error: csl5: task 0: Exited with exit code 1
+srun: Terminating job step 55164323.0
+srun: Terminating job step 55164320.0
+srun: error: skl43: task 0: Exited with exit code 1
+srun: error: skl40: task 0: Exited with exit code 1
+srun: Terminating job step 55164420.0
+srun: Terminating job step 55164459.0
+srun: error: csl1: task 0: Exited with exit code 1
+srun: Terminating job step 55164340.0
+srun: error: skl43: task 0: Exited with exit code 1
+srun: Terminating job step 55164425.0
+srun: error: csl5: task 0: Exited with exit code 1
+srun: Terminating job step 55164321.0
+srun: error: csl5: task 0: Exited with exit code 1
+srun: Terminating job step 55164322.0
+srun: error: csl5: task 0: Exited with exit code 1
+srun: Terminating job step 55164318.0
+srun: error: skl40: task 0: Exited with exit code 1
+srun: error: skl40: task 0: Exited with exit code 1
+srun: error: skl40: task 0: Exited with exit code 1
+srun: Terminating job step 55164457.0
+srun: Terminating job step 55164458.0
+srun: Terminating job step 55164456.0
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+    main(job_id)
+    main(job_id)
+    main(job_id)
+    main(job_id)
+    main(job_id)
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+    df = run(config=config)
+    df = run(config=config)
+    df = run(config=config)
+    df = run(config=config)
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+    pbar.update()
+    pbar.update()
+    pbar.update()
+    pbar.update()
+    pbar.update()
+NameError: name 'pbar' is not defined
+NameError: name 'pbar' is not defined
+NameError: name 'pbar' is not defined
+NameError: name 'pbar' is not defined
+NameError: name 'pbar' is not defined
+NameError: name 'pbar' is not defined
+srun: error: skl43: task 0: Exited with exit code 1
+srun: Terminating job step 55164418.0
+srun: error: skl40: task 0: Exited with exit code 1
+srun: Terminating job step 55164460.0
+srun: error: skl32: task 0: Exited with exit code 1
+srun: Terminating job step 55164509.0
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+    main(job_id)
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+    pbar.update()
+NameError: name 'pbar' is not defined
+NameError: name 'pbar' is not defined
+srun: error: skl43: task 0: Exited with exit code 1
+Traceback (most recent call last):
+srun: Terminating job step 55164416.0
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+srun: error: skl32: task 0: Exited with exit code 1
+    main(job_id)
+  File "main_triton.py", line 38, in <module>
+srun: Terminating job step 55164508.0
+    main(job_id)
+    main(job_id)
+    main(job_id)
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    main(job_id)
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+srun: error: skl43: task 0: Exited with exit code 1
+    df = run(config=config)
+  File "main_triton.py", line 26, in main
+srun: Terminating job step 55164417.0
+    df = run(config=config)
+Traceback (most recent call last):
+    df = run(config=config)
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+  File "main_triton.py", line 38, in <module>
+    learnt_threshold=learnt_threshold)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+    main(job_id)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+    learnt_threshold=learnt_threshold)
+    learnt_threshold=learnt_threshold)
+  File "main_triton.py", line 26, in main
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+    main(job_id)
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+    pbar.update()
+NameError: name 'pbar' is not defined
+NameError: name 'pbar' is not defined
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+Traceback (most recent call last):
+    main(job_id)
+Traceback (most recent call last):
+    main(job_id)
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+    main(job_id)
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 26, in main
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 26, in main
+    main(job_id)
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+    main(job_id)
+    df = run(config=config)
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+    df = run(config=config)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+    df = run(config=config)
+  File "main_triton.py", line 26, in main
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    main(job_id)
+  File "main_triton.py", line 26, in main
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    df = run(config=config)
+    learnt_threshold=learnt_threshold)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+    learnt_threshold=learnt_threshold)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+    learnt_threshold=learnt_threshold)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+    learnt_threshold=learnt_threshold)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+srun: error: skl44: task 0: Exited with exit code 1
+srun: Terminating job step 55164413.0
+srun: error: skl44: task 0: Exited with exit code 1
+srun: Terminating job step 55164410.0
+srun: error: skl13: task 0: Exited with exit code 1
+srun: Terminating job step 55164606.0
+srun: error: skl25: task 0: Exited with exit code 1
+srun: Terminating job step 55164581.0
+srun: error: skl25: task 0: Exited with exit code 1
+srun: Terminating job step 55164580.0
+srun: error: skl25: task 0: Exited with exit code 1
+srun: Terminating job step 55164583.0
+srun: error: pe49: task 0: Exited with exit code 1
+srun: error: skl44: task 0: Exited with exit code 1
+srun: error: pe49: task 0: Exited with exit code 1
+srun: error: skl44: task 0: Exited with exit code 1
+srun: Terminating job step 55164383.0
+srun: error: skl44: task 0: Exited with exit code 1
+srun: Terminating job step 55164385.0
+srun: Terminating job step 55164406.0
+srun: Terminating job step 55164407.0
+srun: Terminating job step 55164409.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+srun: error: skl13: task 0: Exited with exit code 1
+srun: error: skl44: task 0: Exited with exit code 1
+srun: Terminating job step 55164605.0
+Traceback (most recent call last):
+srun: Terminating job step 55164408.0
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+    main(job_id)
+    main(job_id)
+    main(job_id)
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+    df = run(config=config)
+    df = run(config=config)
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+    learnt_threshold=learnt_threshold)
+    learnt_threshold=learnt_threshold)
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+srun: error: skl13: task 0: Exited with exit code 1
+srun: Terminating job step 55164602.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+srun: error: skl13: task 0: Exited with exit code 1
+srun: Terminating job step 55164603.0
+srun: error: skl29: task 0: Exited with exit code 1
+srun: Terminating job step 55164542.0
+srun: error: skl16: task 0: Exited with exit code 1
+srun: Terminating job step 55164586.0
+srun: error: skl16: task 0: Exited with exit code 1
+srun: Terminating job step 55164584.0
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+    main(job_id)
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+    main(job_id)
+    main(job_id)
+    main(job_id)
+    main(job_id)
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+    main(job_id)
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+    df = run(config=config)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+    df = run(config=config)
+    df = run(config=config)
+    df = run(config=config)
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+Traceback (most recent call last):
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+    pbar.update()
+  File "main_triton.py", line 38, in <module>
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+    pbar.update()
+    pbar.update()
+    pbar.update()
+    pbar.update()
+NameError: name 'pbar' is not defined
+NameError: name 'pbar' is not defined
+    main(job_id)
+    pbar.update()
+NameError: name 'pbar' is not defined
+NameError: name 'pbar' is not defined
+NameError: name 'pbar' is not defined
+NameError: name 'pbar' is not defined
+NameError: name 'pbar' is not defined
+  File "main_triton.py", line 26, in main
+NameError: name 'pbar' is not defined
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+srun: error: skl16: task 0: Exited with exit code 1
+srun: Terminating job step 55164585.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+srun: error: skl16: task 0: Exited with exit code 1
+srun: Terminating job step 55164591.0
+srun: error: skl29: task 0: Exited with exit code 1
+srun: Terminating job step 55164543.0
+srun: error: skl16: task 0: Exited with exit code 1
+srun: Terminating job step 55164587.0
+srun: error: skl11: task 0: Exited with exit code 1
+srun: Terminating job step 55164621.0
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+    main(job_id)
+    main(job_id)
+    main(job_id)
+    main(job_id)
+    main(job_id)
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+    df = run(config=config)
+    df = run(config=config)
+    df = run(config=config)
+    df = run(config=config)
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+    pbar.update()
+    pbar.update()
+    pbar.update()
+    pbar.update()
+    pbar.update()
+NameError: name 'pbar' is not defined
+NameError: name 'pbar' is not defined
+NameError: name 'pbar' is not defined
+NameError: name 'pbar' is not defined
+NameError: name 'pbar' is not defined
+NameError: name 'pbar' is not defined
+srun: error: skl16: task 0: Exited with exit code 1
+srun: Terminating job step 55164588.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+srun: error: skl15: task 0: Exited with exit code 1
+srun: Terminating job step 55164596.0
+srun: error: skl16: task 0: Exited with exit code 1
+srun: error: skl16: task 0: Exited with exit code 1
+srun: Terminating job step 55164590.0
+srun: Terminating job step 55164589.0
+srun: error: skl15: task 0: Exited with exit code 1
+srun: Terminating job step 55164592.0
+srun: error: skl15: task 0: Exited with exit code 1
+srun: Terminating job step 55164593.0
+srun: error: skl15: task 0: Exited with exit code 1
+srun: Terminating job step 55164595.0
+srun: error: skl15: task 0: Exited with exit code 1
+srun: Terminating job step 55164594.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+srun: error: skl39: task 0: Exited with exit code 1
+srun: Terminating job step 55164463.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+srun: error: skl39: task 0: Exited with exit code 1
+srun: Terminating job step 55164465.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+    main(job_id)
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+srun: error: skl39: task 0: Exited with exit code 1
+srun: Terminating job step 55164462.0
+srun: error: skl39: task 0: Exited with exit code 1
+srun: Terminating job step 55164473.0
+srun: error: skl39: task 0: Exited with exit code 1
+srun: Terminating job step 55164472.0
+srun: error: skl36: task 0: Exited with exit code 1
+srun: error: skl36: task 0: Exited with exit code 1
+srun: Terminating job step 55164484.0
+srun: Terminating job step 55164482.0
+srun: error: skl39: task 0: Exited with exit code 1
+srun: error: skl39: task 0: Exited with exit code 1
+srun: Terminating job step 55164468.0
+srun: Terminating job step 55164466.0
+srun: error: skl39: task 0: Exited with exit code 1
+srun: Terminating job step 55164467.0
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+    main(job_id)
+    main(job_id)
+    main(job_id)
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+    df = run(config=config)
+    df = run(config=config)
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+    pbar.update()
+    pbar.update()
+    pbar.update()
+NameError: name 'pbar' is not defined
+NameError: name 'pbar' is not defined
+NameError: name 'pbar' is not defined
+NameError: name 'pbar' is not defined
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+srun: error: skl39: task 0: Exited with exit code 1
+srun: error: skl36: task 0: Exited with exit code 1
+srun: Terminating job step 55164469.0
+srun: Terminating job step 55164479.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+srun: error: skl36: task 0: Exited with exit code 1
+srun: Terminating job step 55164480.0
+srun: error: skl39: task 0: Exited with exit code 1
+srun: Terminating job step 55164470.0
+srun: error: skl39: task 0: Exited with exit code 1
+srun: Terminating job step 55164471.0
+srun: error: skl7: task 0: Exited with exit code 1
+srun: error: skl7: task 0: Exited with exit code 1
+srun: Terminating job step 55164648.0
+srun: Terminating job step 55164647.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+srun: error: skl36: task 0: Exited with exit code 1
+srun: error: skl36: task 0: Exited with exit code 1
+srun: error: skl36: task 0: Exited with exit code 1
+srun: error: skl36: task 0: Exited with exit code 1
+srun: Terminating job step 55164475.0
+srun: Terminating job step 55164477.0
+srun: Terminating job step 55164483.0
+srun: Terminating job step 55164478.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+srun: error: skl36: task 0: Exited with exit code 1
+srun: error: skl36: task 0: Exited with exit code 1
+srun: Terminating job step 55164474.0
+srun: Terminating job step 55164481.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+    main(job_id)
+    main(job_id)
+    main(job_id)
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+    df = run(config=config)
+    df = run(config=config)
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+    learnt_threshold=learnt_threshold)
+    learnt_threshold=learnt_threshold)
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+    main(job_id)
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+    main(job_id)
+    main(job_id)
+    main(job_id)
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+    df = run(config=config)
+    df = run(config=config)
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+    learnt_threshold=learnt_threshold)
+    learnt_threshold=learnt_threshold)
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+srun: error: skl30: task 0: Exited with exit code 1
+srun: Terminating job step 55164530.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+    main(job_id)
+    main(job_id)
+    main(job_id)
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+    df = run(config=config)
+    df = run(config=config)
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+    learnt_threshold=learnt_threshold)
+    learnt_threshold=learnt_threshold)
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+srun: error: skl30: task 0: Exited with exit code 1
+srun: Terminating job step 55164538.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+srun: error: skl30: task 0: Exited with exit code 1
+srun: Terminating job step 55164533.0
+srun: error: skl30: task 0: Exited with exit code 1
+srun: error: skl30: task 0: Exited with exit code 1
+srun: Terminating job step 55164540.0
+srun: Terminating job step 55164535.0
+srun: error: skl14: task 0: Exited with exit code 1
+srun: Terminating job step 55164601.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+    main(job_id)
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    main(job_id)
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+    df = run(config=config)
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+    learnt_threshold=learnt_threshold)
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+Traceback (most recent call last):
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+srun: error: skl14: task 0: Exited with exit code 1
+srun: error: skl14: task 0: Exited with exit code 1
+srun: error: skl14: task 0: Exited with exit code 1
+srun: Terminating job step 55164598.0
+srun: Terminating job step 55164599.0
+srun: Terminating job step 55164600.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+Traceback (most recent call last):
+    main(job_id)
+    main(job_id)
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 38, in <module>
+Traceback (most recent call last):
+srun: error: skl6: task 0: Exited with exit code 1
+Traceback (most recent call last):
+    df = run(config=config)
+    main(job_id)
+Traceback (most recent call last):
+srun: Terminating job step 55164655.0
+    df = run(config=config)
+Traceback (most recent call last):
+  File "main_triton.py", line 26, in main
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    df = run(config=config)
+  File "main_triton.py", line 38, in <module>
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+Traceback (most recent call last):
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+  File "main_triton.py", line 38, in <module>
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    learnt_threshold=learnt_threshold)
+srun: error: skl6: task 0: Exited with exit code 1
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+Traceback (most recent call last):
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+srun: error: skl6: task 0: Exited with exit code 1
+  File "main_triton.py", line 38, in <module>
+srun: error: skl30: task 0: Exited with exit code 1
+    learnt_threshold=learnt_threshold)
+    learnt_threshold=learnt_threshold)
+srun: Terminating job step 55164650.0
+  File "main_triton.py", line 38, in <module>
+srun: Terminating job step 55164536.0
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+srun: Terminating job step 55164659.0
+Traceback (most recent call last):
+  File "main_triton.py", line 26, in main
+    main(job_id)
+  File "main_triton.py", line 38, in <module>
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+Traceback (most recent call last):
+    main(job_id)
+    df = run(config=config)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+srun: error: skl30: task 0: Exited with exit code 1
+    main(job_id)
+  File "main_triton.py", line 26, in main
+srun: error: skl6: task 0: Exited with exit code 1
+    main(job_id)
+srun: error: skl30: task 0: Exited with exit code 1
+    main(job_id)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+srun: Terminating job step 55164651.0
+  File "main_triton.py", line 26, in main
+srun: Terminating job step 55164539.0
+    main(job_id)
+    df = run(config=config)
+srun: error: skl12: task 0: Exited with exit code 1
+srun: Terminating job step 55164532.0
+    main(job_id)
+    learnt_threshold=learnt_threshold)
+    main(job_id)
+  File "main_triton.py", line 38, in <module>
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+  File "main_triton.py", line 26, in main
+    main(job_id)
+    learnt_threshold=learnt_threshold)
+srun: error: skl12: task 0: Exited with exit code 1
+  File "main_triton.py", line 26, in main
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+srun: error: skl30: task 0: Exited with exit code 1
+    df = run(config=config)
+  File "main_triton.py", line 26, in main
+srun: error: skl30: task 0: Exited with exit code 1
+srun: Terminating job step 55164616.0
+  File "main_triton.py", line 26, in main
+srun: error: skl30: task 0: Exited with exit code 1
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+srun: Terminating job step 55164537.0
+    main(job_id)
+  File "main_triton.py", line 26, in main
+srun: Terminating job step 55164541.0
+    df = run(config=config)
+    main(job_id)
+srun: Terminating job step 55164531.0
+srun: Terminating job step 55164619.0
+  File "main_triton.py", line 26, in main
+srun: error: skl12: task 0: Exited with exit code 1
+srun: error: skl10: task 0: Exited with exit code 1
+  File "main_triton.py", line 26, in main
+srun: error: skl12: task 0: Exited with exit code 1
+srun: Terminating job step 55164632.0
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    df = run(config=config)
+    df = run(config=config)
+    df = run(config=config)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    df = run(config=config)
+srun: Terminating job step 55164618.0
+  File "main_triton.py", line 26, in main
+srun: Terminating job step 55164613.0
+    df = run(config=config)
+    learnt_threshold=learnt_threshold)
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    df = run(config=config)
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+    learnt_threshold=learnt_threshold)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+srun: error: skl12: task 0: Exited with exit code 1
+srun: Terminating job step 55164620.0
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+    learnt_threshold=learnt_threshold)
+    learnt_threshold=learnt_threshold)
+    learnt_threshold=learnt_threshold)
+    learnt_threshold=learnt_threshold)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+srun: error: skl12: task 0: Exited with exit code 1
+srun: error: skl12: task 0: Exited with exit code 1
+srun: Terminating job step 55164615.0
+srun: Terminating job step 55164614.0
+srun: error: skl10: task 0: Exited with exit code 1
+srun: error: skl10: task 0: Exited with exit code 1
+srun: Terminating job step 55164627.0
+srun: Terminating job step 55164626.0
+srun: error: skl6: task 0: Exited with exit code 1
+srun: error: skl6: task 0: Exited with exit code 1
+srun: error: skl6: task 0: Exited with exit code 1
+srun: Terminating job step 55164654.0
+srun: Terminating job step 55164652.0
+srun: Terminating job step 55164656.0
+srun: error: skl12: task 0: Exited with exit code 1
+srun: Terminating job step 55164607.0
+srun: error: skl10: task 0: Exited with exit code 1
+srun: error: skl10: task 0: Exited with exit code 1
+srun: Terminating job step 55164624.0
+srun: Terminating job step 55164625.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+srun: error: skl5: task 0: Exited with exit code 1
+srun: Terminating job step 55164068.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+srun: error: skl5: task 0: Exited with exit code 1
+srun: error: skl5: task 0: Exited with exit code 1
+srun: Terminating job step 55164666.0
+srun: Terminating job step 55164661.0
+srun: error: skl10: task 0: Exited with exit code 1
+srun: error: skl10: task 0: Exited with exit code 1
+srun: Terminating job step 55164630.0
+srun: Terminating job step 55164629.0
+srun: error: skl26: task 0: Exited with exit code 1
+srun: Terminating job step 55164578.0
+srun: error: skl12: task 0: Exited with exit code 1
+srun: Terminating job step 55164612.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+srun: error: skl10: task 0: Exited with exit code 1
+srun: Terminating job step 55164633.0
+srun: error: skl5: task 0: Exited with exit code 1
+srun: Terminating job step 55164662.0
+srun: error: skl26: task 0: Exited with exit code 1
+srun: Terminating job step 55164579.0
+srun: error: skl5: task 0: Exited with exit code 1
+srun: error: skl12: task 0: Exited with exit code 1
+srun: Terminating job step 55164663.0
+srun: error: skl12: task 0: Exited with exit code 1
+srun: Terminating job step 55164608.0
+srun: Terminating job step 55164617.0
+srun: error: skl5: task 0: Exited with exit code 1
+srun: error: skl5: task 0: Exited with exit code 1
+srun: Terminating job step 55164660.0
+srun: Terminating job step 55164667.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+srun: error: skl10: task 0: Exited with exit code 1
+srun: Terminating job step 55164628.0
+srun: error: skl26: task 0: Exited with exit code 1
+srun: error: skl26: task 0: Exited with exit code 1
+srun: error: skl26: task 0: Exited with exit code 1
+srun: Terminating job step 55164573.0
+srun: Terminating job step 55164576.0
+srun: Terminating job step 55164572.0
+srun: error: skl12: task 0: Exited with exit code 1
+srun: Terminating job step 55164609.0
+srun: error: skl5: task 0: Exited with exit code 1
+srun: Terminating job step 55164665.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+srun: error: skl5: task 0: Exited with exit code 1
+srun: Terminating job step 55164664.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+srun: error: skl26: task 0: Exited with exit code 1
+srun: error: skl26: task 0: Exited with exit code 1
+srun: error: skl26: task 0: Exited with exit code 1
+srun: Terminating job step 55164577.0
+srun: Terminating job step 55164575.0
+srun: Terminating job step 55164574.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+srun: error: skl10: task 0: Exited with exit code 1
+srun: Terminating job step 55164631.0
+srun: error: skl12: task 0: Exited with exit code 1
+srun: Terminating job step 55164610.0
+srun: error: skl9: task 0: Exited with exit code 1
+srun: error: skl9: task 0: Exited with exit code 1
+srun: Terminating job step 55164638.0
+srun: Terminating job step 55164636.0
+srun: error: skl9: task 0: Exited with exit code 1
+srun: Terminating job step 55164644.0
+srun: error: skl10: task 0: Exited with exit code 1
+srun: Terminating job step 55164623.0
+srun: error: skl9: task 0: Exited with exit code 1
+srun: Terminating job step 55164637.0
+srun: error: skl9: task 0: Exited with exit code 1
+srun: Terminating job step 55164634.0
+srun: error: skl9: task 0: Exited with exit code 1
+srun: Terminating job step 55164641.0
+srun: error: skl9: task 0: Exited with exit code 1
+srun: Terminating job step 55164643.0
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+    main(job_id)
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+    pbar.update()
+NameError: name 'pbar' is not defined
+NameError: name 'pbar' is not defined
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+    main(job_id)
+    main(job_id)
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+    df = run(config=config)
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+    pbar.update()
+    pbar.update()
+NameError: name 'pbar' is not defined
+NameError: name 'pbar' is not defined
+NameError: name 'pbar' is not defined
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+    main(job_id)
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    main(job_id)
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+    df = run(config=config)
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+    pbar.update()
+    pbar.update()
+NameError: name 'pbar' is not defined
+    pbar.update()
+NameError: name 'pbar' is not defined
+NameError: name 'pbar' is not defined
+NameError: name 'pbar' is not defined
+NameError: name 'pbar' is not defined
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+srun: error: skl9: task 0: Exited with exit code 1
+srun: Terminating job step 55164642.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+srun: error: skl9: task 0: Exited with exit code 1
+srun: Terminating job step 55164639.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+srun: error: skl35: task 0: Exited with exit code 1
+srun: error: skl35: task 0: Exited with exit code 1
+srun: Terminating job step 55164505.0
+srun: Terminating job step 55164503.0
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+    main(job_id)
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+    pbar.update()
+NameError: name 'pbar' is not defined
+NameError: name 'pbar' is not defined
+srun: error: skl31: task 0: Exited with exit code 1
+srun: Terminating job step 55164516.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+srun: error: skl42: task 0: Exited with exit code 1
+srun: Terminating job step 55164445.0
+srun: error: skl35: task 0: Exited with exit code 1
+Traceback (most recent call last):
+srun: Terminating job step 55164489.0
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+srun: error: skl42: task 0: Exited with exit code 1
+srun: Terminating job step 55164433.0
+srun: error: skl42: task 0: Exited with exit code 1
+srun: Terminating job step 55164432.0
+srun: error: skl42: task 0: Exited with exit code 1
+srun: Terminating job step 55164430.0
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+    main(job_id)
+    main(job_id)
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+    df = run(config=config)
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+    pbar.update()
+    pbar.update()
+NameError: name 'pbar' is not defined
+NameError: name 'pbar' is not defined
+NameError: name 'pbar' is not defined
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+srun: error: skl31: task 0: Exited with exit code 1
+Traceback (most recent call last):
+srun: Terminating job step 55164514.0
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+    main(job_id)
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+    pbar.update()
+NameError: name 'pbar' is not defined
+NameError: name 'pbar' is not defined
+srun: error: skl31: task 0: Exited with exit code 1
+srun: Terminating job step 55164515.0
+srun: error: skl42: task 0: Exited with exit code 1
+srun: Terminating job step 55164428.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+srun: error: skl35: task 0: Exited with exit code 1
+srun: Terminating job step 55164490.0
+srun: error: skl42: task 0: Exited with exit code 1
+srun: Terminating job step 55164434.0
+srun: error: skl42: task 0: Exited with exit code 1
+srun: Terminating job step 55164429.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+srun: error: skl31: task 0: Exited with exit code 1
+srun: Terminating job step 55164512.0
+srun: error: skl31: task 0: Exited with exit code 1
+srun: Terminating job step 55164513.0
+srun: error: skl31: task 0: Exited with exit code 1
+srun: Terminating job step 55164511.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+srun: error: skl42: task 0: Exited with exit code 1
+srun: Terminating job step 55164436.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+srun: error: skl31: task 0: Exited with exit code 1
+srun: Terminating job step 55164520.0
+srun: error: skl35: task 0: Exited with exit code 1
+srun: Terminating job step 55164494.0
+srun: error: skl42: task 0: Exited with exit code 1
+srun: Terminating job step 55164444.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+srun: error: skl31: task 0: Exited with exit code 1
+srun: Terminating job step 55164510.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    main(job_id)
+  File "main_triton.py", line 26, in main
+srun: error: skl28: task 0: Exited with exit code 1
+Traceback (most recent call last):
+    df = run(config=config)
+    df = run(config=config)
+  File "main_triton.py", line 26, in main
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+srun: Terminating job step 55164561.0
+  File "main_triton.py", line 38, in <module>
+    pbar.update()
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    df = run(config=config)
+Traceback (most recent call last):
+NameError: name 'pbar' is not defined
+    pbar.update()
+    main(job_id)
+srun: error: skl35: task 0: Exited with exit code 1
+NameError: name 'pbar' is not defined
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+  File "main_triton.py", line 38, in <module>
+srun: error: skl31: task 0: Exited with exit code 1
+srun: Terminating job step 55164495.0
+Traceback (most recent call last):
+  File "main_triton.py", line 26, in main
+    main(job_id)
+  File "main_triton.py", line 38, in <module>
+    pbar.update()
+  File "main_triton.py", line 26, in main
+    main(job_id)
+srun: Terminating job step 55164528.0
+srun: error: skl28: task 0: Exited with exit code 1
+    df = run(config=config)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+srun: Terminating job step 55164551.0
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    df = run(config=config)
+NameError: name 'pbar' is not defined
+    pbar.update()
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+NameError: name 'pbar' is not defined
+    pbar.update()
+    pbar.update()
+NameError: name 'pbar' is not defined
+NameError: name 'pbar' is not defined
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+    main(job_id)
+  File "main_triton.py", line 26, in main
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+    pbar.update()
+NameError: name 'pbar' is not defined
+NameError: name 'pbar' is not defined
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+srun: error: skl28: task 0: Exited with exit code 1
+  File "main_triton.py", line 26, in main
+    main(job_id)
+  File "main_triton.py", line 26, in main
+srun: error: skl28: task 0: Exited with exit code 1
+    df = run(config=config)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+srun: error: skl28: task 0: Exited with exit code 1
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+srun: Terminating job step 55164547.0
+    pbar.update()
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+srun: error: skl35: task 0: Exited with exit code 1
+srun: Terminating job step 55164545.0
+srun: error: skl31: task 0: Exited with exit code 1
+    pbar.update()
+    pbar.update()
+srun: Terminating job step 55164563.0
+NameError: name 'pbar' is not defined
+NameError: name 'pbar' is not defined
+srun: Terminating job step 55164497.0
+srun: Terminating job step 55164527.0
+Traceback (most recent call last):
+NameError: name 'pbar' is not defined
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+srun: error: skl42: task 0: Exited with exit code 1
+srun: Terminating job step 55164426.0
+srun: error: skl28: task 0: Exited with exit code 1
+srun: Terminating job step 55164550.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+srun: error: skl31: task 0: Exited with exit code 1
+srun: Terminating job step 55164519.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+srun: error: skl42: task 0: Exited with exit code 1
+srun: Terminating job step 55164427.0
+srun: error: skl42: task 0: Exited with exit code 1
+srun: Terminating job step 55164431.0
+Traceback (most recent call last):
+srun: error: skl28: task 0: Exited with exit code 1
+  File "main_triton.py", line 38, in <module>
+srun: Terminating job step 55164554.0
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+srun: error: skl35: task 0: Exited with exit code 1
+srun: Terminating job step 55164500.0
+srun: error: skl42: task 0: Exited with exit code 1
+Traceback (most recent call last):
+srun: Terminating job step 55164441.0
+  File "main_triton.py", line 38, in <module>
+srun: error: skl31: task 0: Exited with exit code 1
+    main(job_id)
+srun: Terminating job step 55164525.0
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+srun: error: skl35: task 0: Exited with exit code 1
+srun: Terminating job step 55164487.0
+srun: error: skl42: task 0: Exited with exit code 1
+srun: Terminating job step 55164440.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+srun: error: skl31: task 0: Exited with exit code 1
+srun: Terminating job step 55164524.0
+srun: error: skl28: task 0: Exited with exit code 1
+srun: Terminating job step 55164562.0
+srun: error: skl35: task 0: Exited with exit code 1
+srun: Terminating job step 55164498.0
+srun: error: skl35: task 0: Exited with exit code 1
+srun: Terminating job step 55164486.0
+Traceback (most recent call last):
+srun: error: skl31: task 0: Exited with exit code 1
+  File "main_triton.py", line 38, in <module>
+srun: Terminating job step 55164522.0
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+srun: error: skl42: task 0: Exited with exit code 1
+srun: error: skl42: task 0: Exited with exit code 1
+srun: Terminating job step 55164438.0
+srun: Terminating job step 55164435.0
+srun: error: skl31: task 0: Exited with exit code 1
+srun: Terminating job step 55164523.0
+srun: error: skl35: task 0: Exited with exit code 1
+Traceback (most recent call last):
+srun: Terminating job step 55164499.0
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+srun: error: skl42: task 0: Exited with exit code 1
+srun: error: skl42: task 0: Exited with exit code 1
+srun: error: skl42: task 0: Exited with exit code 1
+srun: Terminating job step 55164442.0
+srun: Terminating job step 55164437.0
+srun: Terminating job step 55164439.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+srun: error: skl28: task 0: Exited with exit code 1
+srun: Terminating job step 55164557.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+srun: error: skl31: task 0: Exited with exit code 1
+srun: Terminating job step 55164518.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+srun: error: skl35: task 0: Exited with exit code 1
+srun: Terminating job step 55164501.0
+srun: error: skl31: task 0: Exited with exit code 1
+srun: Terminating job step 55164521.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+srun: error: skl28: task 0: Exited with exit code 1
+srun: Terminating job step 55164549.0
+srun: error: skl31: task 0: Exited with exit code 1
+srun: Terminating job step 55164526.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+srun: error: skl35: task 0: Exited with exit code 1
+srun: Terminating job step 55164488.0
+srun: error: skl31: task 0: Exited with exit code 1
+srun: Terminating job step 55164529.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+srun: error: skl35: task 0: Exited with exit code 1
+srun: Terminating job step 55164492.0
+srun: error: skl28: task 0: Exited with exit code 1
+srun: error: skl35: task 0: Exited with exit code 1
+srun: Terminating job step 55164555.0
+srun: Terminating job step 55164493.0
+srun: error: skl42: task 0: Exited with exit code 1
+srun: Terminating job step 55164443.0
+srun: error: skl28: task 0: Exited with exit code 1
+srun: Terminating job step 55164553.0
+srun: error: skl28: task 0: Exited with exit code 1
+srun: Terminating job step 55164552.0
+srun: error: skl28: task 0: Exited with exit code 1
+srun: Terminating job step 55164544.0
+srun: error: skl28: task 0: Exited with exit code 1
+srun: Terminating job step 55164556.0
+srun: error: skl28: task 0: Exited with exit code 1
+srun: Terminating job step 55164548.0
+srun: error: skl28: task 0: Exited with exit code 1
+srun: Terminating job step 55164558.0
+srun: error: skl28: task 0: Exited with exit code 1
+srun: Terminating job step 55164546.0
+srun: error: skl35: task 0: Exited with exit code 1
+srun: Terminating job step 55164496.0
+srun: error: skl35: task 0: Exited with exit code 1
+srun: Terminating job step 55164491.0
+srun: error: skl28: task 0: Exited with exit code 1
+srun: error: skl28: task 0: Exited with exit code 1
+srun: Terminating job step 55164560.0
+srun: Terminating job step 55164559.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+srun: error: pe75: task 0: Exited with exit code 1
+srun: Terminating job step 55164355.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+srun: error: skl33: task 0: Exited with exit code 1
+srun: Terminating job step 55164507.0
+srun: error: skl27: task 0: Exited with exit code 1
+srun: Terminating job step 55164571.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+srun: error: skl41: task 0: Exited with exit code 1
+srun: Terminating job step 55164453.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+srun: error: csl5: task 0: Exited with exit code 1
+srun: Terminating job step 55164316.0
+srun: error: skl46: task 0: Exited with exit code 1
+srun: Terminating job step 55164396.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+srun: error: skl44: task 0: Exited with exit code 1
+srun: Terminating job step 55164412.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+srun: error: skl13: task 0: Exited with exit code 1
+srun: Terminating job step 55164604.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+srun: error: skl25: task 0: Exited with exit code 1
+srun: Terminating job step 55164582.0
+srun: error: pe49: task 0: Exited with exit code 1
+srun: Terminating job step 55164384.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+srun: error: skl11: task 0: Exited with exit code 1
+srun: Terminating job step 55164622.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+srun: error: skl36: task 0: Exited with exit code 1
+srun: Terminating job step 55164476.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+srun: error: skl39: task 0: Exited with exit code 1
+srun: Terminating job step 55164464.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+srun: error: skl30: task 0: Exited with exit code 1
+srun: Terminating job step 55164534.0
+srun: error: skl14: task 0: Exited with exit code 1
+srun: Terminating job step 55164597.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+srun: error: skl6: task 0: Exited with exit code 1
+srun: Terminating job step 55164658.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+srun: error: skl12: task 0: Exited with exit code 1
+srun: Terminating job step 55164611.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 47, in run
+    learnt_threshold=learnt_threshold)
+TypeError: create() got an unexpected keyword argument 'learnt_threshold'
+srun: error: skl9: task 0: Exited with exit code 1
+srun: Terminating job step 55164640.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+srun: error: skl31: task 0: Exited with exit code 1
+srun: Terminating job step 55164517.0
+srun: error: skl35: task 0: Exited with exit code 1
+srun: Terminating job step 55164502.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+srun: error: skl41: task 0: Exited with exit code 1
+srun: Terminating job step 55164448.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+srun: error: skl44: task 0: Exited with exit code 1
+srun: Terminating job step 55164411.0
+Traceback (most recent call last):
+  File "main_triton.py", line 38, in <module>
+    main(job_id)
+  File "main_triton.py", line 26, in main
+    df = run(config=config)
+  File "/scratch/work/delac1/active-teaching/run/make_data_triton.py", line 179, in run
+    pbar.update()
+NameError: name 'pbar' is not defined
+srun: error: skl36: task 0: Exited with exit code 1
+srun: Terminating job step 55164485.0

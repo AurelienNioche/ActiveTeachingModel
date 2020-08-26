@@ -98,7 +98,7 @@ class Config:
 
     @classmethod
     def get(cls, file):
-        print(f"I will use the file '{file}'")
+        # print(f"I will use the file '{file}'")
         with open(file) as f:
             cf_from_file = json.load(f)
             cf = cls(

@@ -97,7 +97,7 @@ def main() -> None:
         "is_item_specific": False,
         "ss_n_iter": 100,
         "time_between_ss": 86200,
-        "n_ss": 15,
+        "n_ss": 7,
         "learnt_threshold": 0.9,
         "time_per_iter": 2,
     }

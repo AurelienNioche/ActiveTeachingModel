@@ -1,4 +1,3 @@
-#%%
 """
 Run simulations and save results
 """

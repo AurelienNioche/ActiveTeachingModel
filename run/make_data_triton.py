@@ -103,81 +103,81 @@ def run(config):
 
     itr = 0
 
-    with tqdm(total=n_iter, file=sys.stdout) as pbar:
-        for i in range(n_ss):
-            for j in range(ss_n_iter):
+    # with tqdm(total=n_iter, file=sys.stdout) as pbar:
+    for i in range(n_ss):
+        for j in range(ss_n_iter):
 
-                if item is not None and ts is not None:
-                    psy.update(item=item, response=was_success,
-                               timestamp=ts)
-
-                    if is_leitner:
-                        item = teacher.ask(now=now,
-                                           last_was_success=was_success,
-                                           last_time_reply=ts,
-                                           idx_last_q=item)
-
-                    elif is_sampling:
-                        item = teacher.ask(now=now,
-                                           psy=psy,
-                                           ss_iter=j)
-                    p = psy.p(
-                        item=item,
-                        param=pr,
-                        now=ts)
-                else:
-                    item = 0
-                    p = 0
-
-                ts = now
-                was_success = np.random.random() < p
-
-                p_seen_real, seen = psy.p_seen(now=now, param=pr)
-
-                n_learnt = np.sum(p_seen_real > learnt_threshold)
-                if j == 0:
-                    print("********n_learnt", n_learnt)
-                # else:
-                #     print("n_learnt", n_learnt)
+            if item is not None and ts is not None:
+                psy.update(item=item, response=was_success,
+                           timestamp=ts)
 
                 if is_leitner:
-                    pr_inf = psy.inferred_learner_param()
-                    p_seen_inf, seen = psy.p_seen(now=now, param=pr_inf)
+                    item = teacher.ask(now=now,
+                                       last_was_success=was_success,
+                                       last_time_reply=ts,
+                                       idx_last_q=item)
 
-                    if len(p_seen_inf):
-                        p_err = np.abs(p_seen_real-p_seen_inf)
-                        p_err_mean, p_err_std = np.mean(p_err), np.std(p_err)
-                    else:
-                        p_err_mean, p_err_std = None, None
+                elif is_sampling:
+                    item = teacher.ask(now=now,
+                                       psy=psy,
+                                       ss_iter=j)
+                p = psy.p(
+                    item=item,
+                    param=pr,
+                    now=ts)
+            else:
+                item = 0
+                p = 0
 
+            ts = now
+            was_success = np.random.random() < p
+
+            p_seen_real, seen = psy.p_seen(now=now, param=pr)
+
+            n_learnt = np.sum(p_seen_real > learnt_threshold)
+            # if j == 0:
+            #     print("********n_learnt", n_learnt)
+            # else:
+            #     print("n_learnt", n_learnt)
+
+            if is_leitner:
+                pr_inf = psy.inferred_learner_param()
+                p_seen_inf, seen = psy.p_seen(now=now, param=pr_inf)
+
+                if len(p_seen_inf):
+                    p_err = np.abs(p_seen_real-p_seen_inf)
+                    p_err_mean, p_err_std = np.mean(p_err), np.std(p_err)
                 else:
-                    pr_inf, p_err_mean, p_err_std = None, None, None
+                    p_err_mean, p_err_std = None, None
 
-                now_real = datetime.datetime.now().timestamp()
+            else:
+                pr_inf, p_err_mean, p_err_std = None, None, None
 
-                row = {
-                    "iter": itr,
-                    "item": item,
-                    "success": was_success,
-                    "ss_idx": i,
-                    "ss_iter": j,
-                    "pr_inf": pr_inf,
-                    "p_err_mean": p_err_mean,
-                    "p_err_std": p_err_std,
-                    "n_learnt": n_learnt,
-                    "timestamp": now,
-                    "timestamp_cpt": now_real,
-                    "config_file": config_file,
-                    "is_human": False
-                }
-                row.update(config_dic)
-                row_list.append(row)
+            now_real = datetime.datetime.now().timestamp()
 
-                now += time_per_iter
-                itr += 1
+            row = {
+                "iter": itr,
+                "item": item,
+                "success": was_success,
+                "ss_idx": i,
+                "ss_iter": j,
+                "pr_inf": pr_inf,
+                "p_err_mean": p_err_mean,
+                "p_err_std": p_err_std,
+                "n_learnt": n_learnt,
+                "timestamp": now,
+                "timestamp_cpt": now_real,
+                "config_file": config_file,
+                "is_human": False
+            }
+            row.update(config_dic)
+            row_list.append(row)
 
-                pbar.update()
+            now += time_per_iter
+            itr += 1
 
-            now += time_between_ss
+            pbar.update()
+
+        now += time_between_ss
 
     return pd.DataFrame(row_list)
