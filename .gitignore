@@ -169,3 +169,5 @@ out/*
 
 # Snippet pulls
 snippet
+
+triton_out/
