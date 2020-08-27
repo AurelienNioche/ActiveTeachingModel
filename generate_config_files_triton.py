@@ -110,7 +110,7 @@ def main() -> None:
         "time_per_iter": 2,
     }
 
-    sampling_cst = {"n_sample": 500}
+    sampling_cst = {"n_sample": 1000}
 
     leitner_cst = {"delay_factor": 2, "delay_min": 2}
 
@@ -130,9 +130,9 @@ def main() -> None:
 
     exp_decay_cst = {
         "param_labels": ["alpha", "beta"],
-        "bounds": [[0.0001, 0.5], [0.00, 0.5]],
+        "bounds": [[0.001, 0.5], [0.00, 0.5]],
         "grid_size": 20,
-        "cst_time": 1 / (24 * 60**2),
+        "cst_time": 1 / 60**2,
     }
 
     learner_models = (
@@ -235,6 +235,7 @@ def main() -> None:
 
     # SBATCH --mail-type=END
     # SBATCH --mail-user=nioche.aurelien@gmail.com
+
 
 if __name__ == "__main__":
     main()

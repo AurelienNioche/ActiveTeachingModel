@@ -8,7 +8,7 @@ from plot.subplot import chocolate, box, efficiency_cost, p_recall_error
 
 # EXT = '_exp'
 # EXT = "_exp_omni_spec"
-EXT = "_triton_new"
+EXT = "_new"
 
 RAW_DATA_FOLDER = os.path.join("data", "triton", f"data{EXT}")
 PREPROCESSED_DATA_FILE = os.path.join(
