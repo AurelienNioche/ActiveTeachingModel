@@ -8,21 +8,21 @@ from plot.subplot import chocolate, box, efficiency_cost, p_recall_error, hist
 
 # EXT = '_exp'
 # EXT = "_exp_omni_spec"
-EXT = "walsh_cst"
+DATA_NAME = "exp_Nomni_spec"
 
 FORCE = False
 
-RAW_DATA_FOLDER = os.path.join("data", "triton", f"data_triton_walsh_cst")
+RAW_DATA_FOLDER = os.path.join("data", "triton", DATA_NAME)
 PREPROCESSED_DATA_FILE = os.path.join(
-    "data", "preprocessed", f"chocolate_triton{EXT}.csv"
+    "data", "preprocessed", f"chocolate_triton{DATA_NAME}.csv"
 )
-FIG_CHOCOLATE_PATH = os.path.join("fig", f"{EXT}_chocolate.pdf")
-FIG_BOXPLOT_PATH = os.path.join("fig", f"{EXT}_boxplot.pdf")
+FIG_CHOCOLATE_PATH = os.path.join("fig", f"{DATA_NAME}_chocolate.pdf")
+FIG_BOXPLOT_PATH = os.path.join("fig", f"{DATA_NAME}_boxplot.pdf")
 
-FIG_CHOCOLATE_PATH_END_PR_SS = os.path.join("fig", f"{EXT}_chocolate_end_pr_ss.pdf")
-FIG_BOXPLOT_PATH_END_PR_SS = os.path.join("fig", f"{EXT}_boxplot_end_pr_ss.pdf")
+FIG_CHOCOLATE_PATH_END_PR_SS = os.path.join("fig", f"{DATA_NAME}_chocolate_end_pr_ss.pdf")
+FIG_BOXPLOT_PATH_END_PR_SS = os.path.join("fig", f"{DATA_NAME}_boxplot_end_pr_ss.pdf")
 
-FIG_HIST_PATH = os.path.join("fig", f"{EXT}_hist.pdf")
+FIG_HIST_PATH = os.path.join("fig", f"{DATA_NAME}_hist.pdf")
 
 os.makedirs(os.path.join("data", "preprocessed"), exist_ok=True)
 
@@ -62,7 +62,7 @@ def preprocess_data():
             "Psychologist": df["md_psy"][0],
             "Teacher": df["md_teacher"][0],
             "Items learnt": n_learnt,
-            "Items learnt end prev ss": n_learnt_end_ss
+            "Items learnt end prev ss": n_learnt_end_ss,
         }
         row_list.append(row)
 

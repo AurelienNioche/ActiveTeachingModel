@@ -1,13 +1,9 @@
-import os
-
 from itertools import product
 from typing import Hashable
 
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
-
-import settings.paths as paths
 
 from plot import utils
 
@@ -19,7 +15,13 @@ def plot(
     df: pd.DataFrame,
     fig_path: str,
 ) -> None:
-    """Prepare and save the chocolate plot"""
+
+    if not isinstance(teachers, set):
+        teachers = set(teachers)
+    if not isinstance(learners, set):
+        learners = set(learners)
+    if not isinstance(psychologists, set):
+        psychologists = set(psychologists)
 
     print("Plotting p recall error...")
 
@@ -33,7 +35,8 @@ def plot(
 
     # Make the combinations of learners with teachers without Leitner
     learners_teachers_combos_no_leitner = set(
-        product(learners, teachers.symmetric_difference(frozenset({"leitner"})))
+        product(learners,
+                teachers.symmetric_difference(frozenset({"leitner"})))
     )
 
     p_recall_error, axes = plt.subplots(
@@ -44,51 +47,61 @@ def plot(
         figsize=(10, 10),
     )
 
-    # Plottable values per condition (models set)
-    dict_cond_scores = utils.get_plot_values(
-        df, "Agent ID", ["Teacher", "Learner", "Psychologist"], "p recall error"
-    )
-
     # Text positions
-    num_rows = len(learners_teachers_combos_no_leitner)
-    # num_columns = len(psychologists)
+    n_row = len(learners_teachers_combos_no_leitner)
+    n_col = len(psychologists)
 
     # Colors
     color_mapping = utils.map_teacher_colors()
 
-    for n_row, learner_teacher_combo in enumerate(learners_teachers_combos_no_leitner):
-        for n_col, psychologist in enumerate(psychologists):
+    for i_row, lt_combo in enumerate(learners_teachers_combos_no_leitner):
+        for i_col, psychologist in enumerate(psychologists):
 
             # Text psychologist name to column
             # Text learner and teacher combo to row
 
-            y = dict_cond_scores[frozenset({psychologist, *learner_teacher_combo})]
-            y = np.random.random(300)
-            y.sort()
-            y = y[::-1]
-            learner = next(iter(learners.intersection(learner_teacher_combo)))
-            teacher = next(iter(teachers.intersection(learner_teacher_combo)))
+            learner = next(iter(learners.intersection(lt_combo)))
+            teacher = next(iter(teachers.intersection(lt_combo)))
+
+            is_psy = df["Psychologist"] == psychologist
+            is_t = df["Teacher"] == teacher
+            is_learner = df["Learner"] == learner
+
+            stacked_y = df[is_psy & is_t & is_learner]
+            y = [df0["p recall error"]
+                 for _, df0 in stacked_y.groupby("Agent ID")]
+            y = np.asarray(y)
+
+            mean_y = np.mean(y, axis=0)
+            std_y = np.std(y, axis=0)
+
             color = color_mapping[teacher]
 
-            axes[n_row, n_col].plot(y, color=color)
-            # mean_y = np.mean(y, axis=0)
-            # std_y = np.std(y, axis=0)
-            axes[n_row, n_col].fill_between(
-                np.arange(len(y)),
-                y * 1.3,
-                y * 0.7,
+            if n_row > 1 and n_col > 1:
+                ax = axes[i_row, i_col]
+            elif n_row > 1:
+                ax = axes[i_row]
+            else:
+                ax = axes[i_col]
+
+            ax.plot(mean_y, color=color)
+
+            ax.fill_between(
+                np.arange(len(mean_y)),
+                mean_y+std_y,
+                mean_y-std_y,
                 alpha=alpha_fill_between,
                 color=color,
             )
 
-            if n_row == 0:
-                axes[n_row, n_col].set_title(psychologist)
+            if i_row == 0:
+                ax.set_title(psychologist)
 
-            elif n_row == num_rows:
-                axes[n_row, n_col].set_xlabel("Time")
+            elif i_row == n_row:
+                ax.set_xlabel("Time")
 
-            if n_col == 0:
-                axes[n_row, n_col].set_ylabel(f"{learner}, {teacher}")
+            if i_col == 0:
+                ax.set_ylabel(f"{learner}, {teacher}")
 
     # Text left
     p_recall_error.text(
@@ -108,11 +121,10 @@ def plot(
         va="center",
         rotation="horizontal",
         ha="center",
-        transform=p_recall_error.transFigure,
-    )
+        transform=p_recall_error.transFigure)
 
     plt.tight_layout(rect=(padding_0, 0, 1, 1))
 
     print("Saving fig...")
-    plt.savefig(os.path.join(fig_path, "p_recall_error.pdf"))
+    plt.savefig(fig_path)
     print("Done!")
