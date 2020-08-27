@@ -109,11 +109,7 @@ def main() -> None:
         "time_per_iter": 2,
     }
 
-<<<<<<< HEAD
-    sampling_cst = {"n_sample": 2000}
-=======
-    sampling_cst = {"n_sample": 1000}
->>>>>>> 1ba4015d5f43ee30c0056584cef157134e2769e4
+    sampling_cst = {"n_sample": 500}
 
     leitner_cst = {"delay_factor": 2, "delay_min": 2}
 
@@ -135,19 +131,10 @@ def main() -> None:
         "param_labels": ["alpha", "beta"],
         "bounds": [[0.001, 0.5], [0.00, 0.5]],
         "grid_size": 20,
-<<<<<<< HEAD
         "cst_time": 1 / (60 ** 2),  # 1 / (24 * 60**2),
     }
 
     learner_models = (ExponentialNDelta,)
-=======
-        "cst_time": 1 / 60**2,
-    }
-
-    learner_models = (
-        Walsh2018,
-    )
->>>>>>> 1ba4015d5f43ee30c0056584cef157134e2769e4
     teacher_models = (Leitner, Sampling, Threshold)
     psy_models = (PsychologistGrid,)
 
