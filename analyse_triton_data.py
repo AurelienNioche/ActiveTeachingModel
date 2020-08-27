@@ -3,24 +3,33 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
-from plot.subplot import chocolate, box, efficiency_cost, p_recall_error
+from plot.subplot import chocolate, box, efficiency_cost, p_recall_error, hist
 
 
 # EXT = '_exp'
 # EXT = "_exp_omni_spec"
-EXT = "_triton_new"
+DATA_NAME = "exp_Nomni_spec"
 
-RAW_DATA_FOLDER = os.path.join("data", "triton", f"data{EXT}")
+FORCE = False
+
+RAW_DATA_FOLDER = os.path.join("data", "triton", DATA_NAME)
 PREPROCESSED_DATA_FILE = os.path.join(
-    "data", "preprocessed", f"chocolate_triton{EXT}.csv"
+    "data", "preprocessed", f"chocolate_triton{DATA_NAME}.csv"
 )
-FIG_CHOCOLATE_PATH = os.path.join("fig", f"chocolate_triton{EXT}.pdf")
-FIG_BOXPLOT_PATH = os.path.join("fig", f"boxplot_triton{EXT}.pdf")
+FIG_CHOCOLATE_PATH = os.path.join("fig", f"{DATA_NAME}_chocolate.pdf")
+FIG_BOXPLOT_PATH = os.path.join("fig", f"{DATA_NAME}_boxplot.pdf")
 
+FIG_CHOCOLATE_PATH_END_PR_SS = os.path.join("fig", f"{DATA_NAME}_chocolate_end_pr_ss.pdf")
+FIG_BOXPLOT_PATH_END_PR_SS = os.path.join("fig", f"{DATA_NAME}_boxplot_end_pr_ss.pdf")
+
+<<<<<<< HEAD
 FIG_CHOCOLATE_PATH_END_PR_SS = os.path.join(
     "fig", f"chocolate_triton{EXT}_end_pr_ss.pdf"
 )
 FIG_BOXPLOT_PATH_END_PR_SS = os.path.join("fig", f"boxplot_triton{EXT}_end_pr_ss.pdf")
+=======
+FIG_HIST_PATH = os.path.join("fig", f"{DATA_NAME}_hist.pdf")
+>>>>>>> 1ba4015d5f43ee30c0056584cef157134e2769e4
 
 os.makedirs(os.path.join("data", "preprocessed"), exist_ok=True)
 
@@ -69,9 +78,9 @@ def preprocess_data():
     return df
 
 
-def main(force=False):
+def main():
 
-    if not os.path.exists(PREPROCESSED_DATA_FILE) or force:
+    if not os.path.exists(PREPROCESSED_DATA_FILE) or FORCE:
         df = preprocess_data()
     else:
         df = pd.read_csv(PREPROCESSED_DATA_FILE, index_col=[0])
@@ -83,6 +92,7 @@ def main(force=False):
     items_learnt = "Items learnt"
     items_learnt_last_session = "Items learnt end prev ss"
 
+<<<<<<< HEAD
     chocolate.plot(
         df=df,
         teachers=teachers,
@@ -108,6 +118,33 @@ def main(force=False):
         fig_path=FIG_BOXPLOT_PATH_END_PR_SS,
         learnt_label=items_learnt_last_session,
     )
+=======
+    hist.plot(learnt_label=items_learnt, df=df,
+              fig_path=FIG_HIST_PATH)
+
+    # chocolate.plot(
+    #     df=df,
+    #     teachers=teachers,
+    #     learners=learners,
+    #     psychologists=psy,
+    #     fig_path=FIG_CHOCOLATE_PATH,
+    #     learnt_label=items_learnt
+    # )
+    #
+    # box.plot(df=df, fig_path=FIG_BOXPLOT_PATH, learnt_label=items_learnt)
+    #
+    # chocolate.plot(
+    #     df=df,
+    #     teachers=teachers,
+    #     learners=learners,
+    #     psychologists=psy,
+    #     fig_path=FIG_CHOCOLATE_PATH_END_PR_SS,
+    #     learnt_label=items_learnt_last_session
+    # )
+    #
+    # box.plot(df=df, fig_path=FIG_BOXPLOT_PATH_END_PR_SS,
+    #          learnt_label=items_learnt_last_session)
+>>>>>>> 1ba4015d5f43ee30c0056584cef157134e2769e4
 
 
 if __name__ == "__main__":
