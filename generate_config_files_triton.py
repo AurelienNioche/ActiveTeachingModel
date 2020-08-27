@@ -123,7 +123,7 @@ def main() -> None:
             [0.6, 0.6],
         ],
         "grid_size": 10,
-        "cst_time": 1 / (24 * 60 ** 2),
+        "cst_time": 1 / (10 * 24 * 60 ** 2),
     }
 
     exp_decay_cst = {
@@ -133,7 +133,7 @@ def main() -> None:
         "cst_time": 1 / (60 ** 2),  # 1 / (24 * 60**2),
     }
 
-    learner_models = (ExponentialNDelta,)
+    learner_models = (Walsh2018,)
     teacher_models = (Leitner, Sampling, Threshold)
     psy_models = (PsychologistGrid,)
 
