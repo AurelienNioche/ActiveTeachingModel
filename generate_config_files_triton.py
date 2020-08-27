@@ -95,7 +95,8 @@ def main() -> None:
 
     cleanup()
 
-    np.random.seed(1234)
+    seed = 123
+    np.random.seed(seed)
 
     n_agent = 100
     n_item = 150
@@ -192,7 +193,7 @@ def main() -> None:
                     )
 
                     json_content = {
-                        "seed": agent,
+                        "seed": seed+agent,
                         "agent": agent,
                         "bounds": bounds,
                         "md_learner": LEARNER_INV[learner_md],
