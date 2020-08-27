@@ -91,7 +91,6 @@ def main() -> None:
     """Set the parameters and generate the JSON config files"""
 
     cleanup()
-    run_simulation()
 
     seed = 123
     np.random.seed(seed)
