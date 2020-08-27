@@ -169,5 +169,6 @@ def plot(
     plt.tight_layout(rect=(padding_0, 0, 1, 1))
 
     print("Saving fig...")
+    plt.show()
     chocolate.savefig(fig_path)
     print("Done!")
