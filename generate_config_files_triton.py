@@ -136,7 +136,7 @@ def main() -> None:
     }
 
     learner_models = (
-        ExponentialNDelta,
+        Walsh2018,
     )
     teacher_models = (Leitner, Sampling, Threshold)
     psy_models = (PsychologistGrid,)
