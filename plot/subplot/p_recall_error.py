@@ -42,10 +42,9 @@ def plot(
     p_recall_error, axes = plt.subplots(
         len(learners_teachers_combos_no_leitner),
         len(psychologists),
-        sharex=True,
-        sharey=True,
-        figsize=(10, 10),
-    )
+        sharex='all',
+        sharey='all',
+        figsize=(10, 10))
 
     # Text positions
     n_row = len(learners_teachers_combos_no_leitner)

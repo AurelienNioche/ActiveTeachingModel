@@ -34,10 +34,7 @@ def get_color_sequence(
 
 def plot(
     learnt_label: str,
-    # teachers: Hashable,
-    teacher_0: str,
-    teacher_1: str,
-    teacher_2: str,
+    teachers: Hashable,
     learners: Hashable,
     psychologists: Hashable,
     df: pd.DataFrame,
@@ -65,11 +62,8 @@ def plot(
     coord_min = padding_0
     coord_max = 0.5
 
-    ## FIXES FORMAT
-    teachers = teacher_0, teacher_1, teacher_2
-
     # Make the combinations of all teachers
-    teachers_combos = sorted(tuple(combinations(teachers, 2)))
+    teachers_combos = tuple(combinations(teachers, 2))
 
     # Make the combinations of all learners with all psychologists
     learners_psychologists_combos = tuple(product(learners, psychologists))

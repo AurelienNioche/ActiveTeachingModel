@@ -3,33 +3,15 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
-from plot.subplot import chocolate, box, efficiency_cost, p_recall_error, hist
+from plot.subplot import chocolate, box, hist
 
-
-# EXT = '_exp'
-# EXT = "_exp_omni_spec"
-DATA_NAME = "exp_Nomni_spec"
+DATA_NAME = "walsh_cst"
 
 FORCE = False
 
 RAW_DATA_FOLDER = os.path.join("data", "triton", DATA_NAME)
 PREPROCESSED_DATA_FILE = os.path.join(
-    "data", "preprocessed", f"chocolate_triton{DATA_NAME}.csv"
-)
-FIG_CHOCOLATE_PATH = os.path.join("fig", f"{DATA_NAME}_chocolate.pdf")
-FIG_BOXPLOT_PATH = os.path.join("fig", f"{DATA_NAME}_boxplot.pdf")
-
-FIG_CHOCOLATE_PATH_END_PR_SS = os.path.join("fig", f"{DATA_NAME}_chocolate_end_pr_ss.pdf")
-FIG_BOXPLOT_PATH_END_PR_SS = os.path.join("fig", f"{DATA_NAME}_boxplot_end_pr_ss.pdf")
-
-<<<<<<< HEAD
-FIG_CHOCOLATE_PATH_END_PR_SS = os.path.join(
-    "fig", f"chocolate_triton{EXT}_end_pr_ss.pdf"
-)
-FIG_BOXPLOT_PATH_END_PR_SS = os.path.join("fig", f"boxplot_triton{EXT}_end_pr_ss.pdf")
-=======
-FIG_HIST_PATH = os.path.join("fig", f"{DATA_NAME}_hist.pdf")
->>>>>>> 1ba4015d5f43ee30c0056584cef157134e2769e4
+    "data", "preprocessed", f"chocolate_triton{DATA_NAME}.csv")
 
 os.makedirs(os.path.join("data", "preprocessed"), exist_ok=True)
 
@@ -68,8 +50,8 @@ def preprocess_data():
             "Learner": df["md_learner"][0],
             "Psychologist": df["md_psy"][0],
             "Teacher": df["md_teacher"][0],
-            "Items learnt": n_learnt,
-            "Items learnt end prev ss": n_learnt_end_ss,
+            "Items learnt one day later": n_learnt,
+            "Items learnt end last session": n_learnt_end_ss,
         }
         row_list.append(row)
 
@@ -89,62 +71,39 @@ def main():
     learners = sorted(np.unique(df["Learner"]))
     psy = sorted(np.unique(df["Psychologist"]))
 
-    items_learnt = "Items learnt"
-    items_learnt_last_session = "Items learnt end prev ss"
+    items_learnt = \
+        {
+            "one_day_later": "Items learnt one day later",
+            "end_last_ss": "Items learnt end last session"
+        }
 
-<<<<<<< HEAD
-    chocolate.plot(
-        df=df,
-        teachers=teachers,
-        learners=learners,
-        psychologists=psy,
-        fig_path=FIG_CHOCOLATE_PATH,
-        learnt_label=items_learnt,
-    )
+    for k, v in items_learnt.items():
 
-    box.plot(df=df, fig_path=FIG_BOXPLOT_PATH, learnt_label=items_learnt)
+        fig_path = os.path.join("fig",
+                                f"{DATA_NAME}_chocolate_{k}.pdf")
+        chocolate.plot(
+            df=df,
+            teachers=teachers,
+            learners=learners,
+            psychologists=psy,
+            fig_path=fig_path,
+            learnt_label=v,
+        )
 
-    chocolate.plot(
-        df=df,
-        teachers=teachers,
-        learners=learners,
-        psychologists=psy,
-        fig_path=FIG_CHOCOLATE_PATH_END_PR_SS,
-        learnt_label=items_learnt_last_session,
-    )
+        fig_path = os.path.join("fig",
+                                f"{DATA_NAME}_box_{k}.pdf")
 
-    box.plot(
-        df=df,
-        fig_path=FIG_BOXPLOT_PATH_END_PR_SS,
-        learnt_label=items_learnt_last_session,
-    )
-=======
-    hist.plot(learnt_label=items_learnt, df=df,
-              fig_path=FIG_HIST_PATH)
+        box.plot(
+            df=df,
+            fig_path=fig_path,
+            learnt_label=v,
+        )
 
-    # chocolate.plot(
-    #     df=df,
-    #     teachers=teachers,
-    #     learners=learners,
-    #     psychologists=psy,
-    #     fig_path=FIG_CHOCOLATE_PATH,
-    #     learnt_label=items_learnt
-    # )
-    #
-    # box.plot(df=df, fig_path=FIG_BOXPLOT_PATH, learnt_label=items_learnt)
-    #
-    # chocolate.plot(
-    #     df=df,
-    #     teachers=teachers,
-    #     learners=learners,
-    #     psychologists=psy,
-    #     fig_path=FIG_CHOCOLATE_PATH_END_PR_SS,
-    #     learnt_label=items_learnt_last_session
-    # )
-    #
-    # box.plot(df=df, fig_path=FIG_BOXPLOT_PATH_END_PR_SS,
-    #          learnt_label=items_learnt_last_session)
->>>>>>> 1ba4015d5f43ee30c0056584cef157134e2769e4
+        fig_path = os.path.join("fig",
+                                f"{DATA_NAME}_hist_{k}.pdf")
+
+        hist.plot(learnt_label=v, df=df,
+                  fig_path=fig_path)
 
 
 if __name__ == "__main__":
