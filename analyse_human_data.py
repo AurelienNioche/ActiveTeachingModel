@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 
 """
-To import data: 
+To import data:
 scp <user>@<server>:/var/www/html/ActiveTeachingServer/results.csv ~/Desktop
 """
 

@@ -57,8 +57,7 @@ def dic_to_lab_val(dic):
 
 def cleanup():
     if os.path.exists(paths.CONFIG_CLUSTER_DIR):
-        erase = input("Do you want to erase the config folder first? "
-                      "('y' or 'yes')")
+        erase = input("Do you want to erase the config folder first? " "('y' or 'yes')")
         if erase in ("y", "yes"):
             shutil.rmtree(paths.CONFIG_CLUSTER_DIR)
             os.makedirs(paths.CONFIG_CLUSTER_DIR)
@@ -67,8 +66,7 @@ def cleanup():
             print("I keep everything as it is")
 
     if os.path.exists(paths.DATA_CLUSTER_DIR):
-        erase = input("Do you want to erase the data folder first? "
-                      "('y' or 'yes')")
+        erase = input("Do you want to erase the data folder first? " "('y' or 'yes')")
         if erase in ("y", "yes"):
             shutil.rmtree(paths.DATA_CLUSTER_DIR)
             os.makedirs(paths.DATA_CLUSTER_DIR)
@@ -78,8 +76,7 @@ def cleanup():
 
 
 def run_simulation():
-    simulate = input("Run simulation? "
-                     "('y' or 'yes')")
+    simulate = input("Run simulation? " "('y' or 'yes')")
     if simulate in ("y", "yes"):
         os.system(f"sh run.sh simulation.job")
     else:
@@ -111,7 +108,7 @@ def main() -> None:
         "time_per_iter": 2,
     }
 
-    sampling_cst = {"n_sample": 500}
+    sampling_cst = {"n_sample": 2000}
 
     leitner_cst = {"delay_factor": 2, "delay_min": 2}
 
@@ -126,14 +123,14 @@ def main() -> None:
             [0.6, 0.6],
         ],
         "grid_size": 10,
-        "cst_time": 1 / (24 * 60**2),
+        "cst_time": 1 / (24 * 60 ** 2),
     }
 
     exp_decay_cst = {
         "param_labels": ["alpha", "beta"],
-        "bounds": [[0.0001, 0.5], [0.00, 0.5]],
+        "bounds": [[0.001, 0.5], [0.00, 0.5]],
         "grid_size": 20,
-        "cst_time": 1 / (24 * 60**2),
+        "cst_time": 1 / (60 ** 2),  # 1 / (24 * 60**2),
     }
 
     learner_models = (ExponentialNDelta,)
@@ -228,12 +225,14 @@ def main() -> None:
     mod_job_file(
         os.path.join(paths.JSON_DIR, "template.job"),
         paths.CONFIG_CLUSTER_DIR,
-        os.path.join(paths.BASE_DIR, "simulation.job"))
+        os.path.join(paths.BASE_DIR, "simulation.job"),
+    )
 
     run_simulation()
 
     # SBATCH --mail-type=END
     # SBATCH --mail-user=nioche.aurelien@gmail.com
+
 
 if __name__ == "__main__":
     main()

@@ -3,9 +3,9 @@
 #SBATCH --job-name=act-teach
 #SBATCH --time 50:00
 #SBATCH -c 1
-#SBATCH --mem=15000MB
+#SBATCH --mem=1000MB
 #SBATCH --ntasks=1
-#SBATCH --array=0-599 
+#SBATCH --array=0-299 
 #SBATCH -o triton_out/debug.out
 ############## Here starts the actual UNIX commands and payload:
 

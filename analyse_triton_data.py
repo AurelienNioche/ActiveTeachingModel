@@ -17,7 +17,9 @@ PREPROCESSED_DATA_FILE = os.path.join(
 FIG_CHOCOLATE_PATH = os.path.join("fig", f"chocolate_triton{EXT}.pdf")
 FIG_BOXPLOT_PATH = os.path.join("fig", f"boxplot_triton{EXT}.pdf")
 
-FIG_CHOCOLATE_PATH_END_PR_SS = os.path.join("fig", f"chocolate_triton{EXT}_end_pr_ss.pdf")
+FIG_CHOCOLATE_PATH_END_PR_SS = os.path.join(
+    "fig", f"chocolate_triton{EXT}_end_pr_ss.pdf"
+)
 FIG_BOXPLOT_PATH_END_PR_SS = os.path.join("fig", f"boxplot_triton{EXT}_end_pr_ss.pdf")
 
 os.makedirs(os.path.join("data", "preprocessed"), exist_ok=True)
@@ -58,7 +60,7 @@ def preprocess_data():
             "Psychologist": df["md_psy"][0],
             "Teacher": df["md_teacher"][0],
             "Items learnt": n_learnt,
-            "Items learnt end prev ss": n_learnt_end_ss
+            "Items learnt end prev ss": n_learnt_end_ss,
         }
         row_list.append(row)
 
@@ -87,7 +89,7 @@ def main(force=False):
         learners=learners,
         psychologists=psy,
         fig_path=FIG_CHOCOLATE_PATH,
-        learnt_label=items_learnt
+        learnt_label=items_learnt,
     )
 
     box.plot(df=df, fig_path=FIG_BOXPLOT_PATH, learnt_label=items_learnt)
@@ -98,11 +100,14 @@ def main(force=False):
         learners=learners,
         psychologists=psy,
         fig_path=FIG_CHOCOLATE_PATH_END_PR_SS,
-        learnt_label=items_learnt_last_session
+        learnt_label=items_learnt_last_session,
     )
 
-    box.plot(df=df, fig_path=FIG_BOXPLOT_PATH_END_PR_SS,
-             learnt_label=items_learnt_last_session)
+    box.plot(
+        df=df,
+        fig_path=FIG_BOXPLOT_PATH_END_PR_SS,
+        learnt_label=items_learnt_last_session,
+    )
 
 
 if __name__ == "__main__":

@@ -4,6 +4,7 @@ from typing import Hashable, Iterable, Mapping
 
 import matplotlib.pyplot as plt
 import pandas as pd
+
 # import numpy as np
 
 # import settings.paths as paths
@@ -20,10 +21,7 @@ def get_color_sequence(
     """Get the color for each dot"""
 
     assert len(sequence_0) == len(sequence_1)
-    # epsilon = np.finfo(float).eps
-    # sequence_0 += epsilon
-    # sequence_1 += epsilon
-    # if sequence_1 > 0:
+
     sequence = sequence_0 / sequence_1
 
     return tuple(
@@ -36,7 +34,10 @@ def get_color_sequence(
 
 def plot(
     learnt_label: str,
-    teachers: Hashable,
+    # teachers: Hashable,
+    teacher_0: str,
+    teacher_1: str,
+    teacher_2: str,
     learners: Hashable,
     psychologists: Hashable,
     df: pd.DataFrame,
@@ -46,6 +47,7 @@ def plot(
     dataframe needs following columns:
     "Agent ID", "Teacher", "Learner", Psychologist", "Items learnt"
     """
+
     if not isinstance(teachers, set):
         teachers = set(teachers)
     if not isinstance(learners, set):
@@ -63,8 +65,11 @@ def plot(
     coord_min = padding_0
     coord_max = 0.5
 
+    ## FIXES FORMAT
+    teachers = teacher_0, teacher_1, teacher_2
+
     # Make the combinations of all teachers
-    teachers_combos = tuple(combinations(teachers, 2))
+    teachers_combos = sorted(tuple(combinations(teachers, 2)))
 
     # Make the combinations of all learners with all psychologists
     learners_psychologists_combos = tuple(product(learners, psychologists))
@@ -128,26 +133,25 @@ def plot(
                 alpha=alpha_line,
                 zorder=0,
             )
-            # Label text
-            # axes[n_row, n_col].set_xlabel("Items learnt " + teachers_combo[0])
-            # axes[n_row, n_col].set_ylabel("Items learnt " + teachers_combo[1])
 
+            # Label text
             if i_row == 0:
                 ax.set_title(
                     f"{teachers_combo[1]} vs. {teachers_combo[0]}"
                 )  # Inverted text indexing, easier interpretation
 
             elif i_row == n_row:
-                ax.set_xlabel("Time")
+                ax.set_xlabel("{teachers_combos[0]} \n Time")
 
             if i_col == 0:
-                ax.set_ylabel(f"{learner}, {psychologist}")
+                ax.set_ylabel(f"{learner}, {psychologist} \n {teachers_combo[1]}")
 
             ax.set_aspect(1)
             ax.set_xlim(min_x, max_x)
             ax.set_ylim(min_x, max_x)
 
     # Text left
+    # DO NOT REMOVE, FOR FINAL PLOT
     chocolate.text(
         coord_min,
         coord_max,
