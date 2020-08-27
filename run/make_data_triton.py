@@ -1,6 +1,4 @@
-from tqdm import tqdm
 import numpy as np
-import sys
 import datetime
 import pandas as pd
 
@@ -8,9 +6,9 @@ from model.teacher.leitner import Leitner
 from model.teacher.threshold import Threshold
 from model.teacher.sampling import Sampling
 
-from model.learner.act_r2008 import ActR2008
 from model.learner.walsh2018 import Walsh2018
 from model.learner.exponential_n_delta import ExponentialNDelta
+# from model.learner.act_r2008 import ActR2008
 
 
 def run(config):
@@ -32,7 +30,7 @@ def run(config):
     teacher_pr = config.teacher_pr
     psy_pr = config.psy_pr
 
-    n_iter = n_ss * ss_n_iter
+    # n_iter = n_ss * ss_n_iter
 
     teacher_cls = config.teacher_cls
     psy_cls = config.psy_cls
@@ -146,7 +144,7 @@ def run(config):
             # else:
             #     print("n_learnt", n_learnt)
 
-            if is_leitner:
+            if not is_leitner or not omniscient:
                 pr_inf = psy.inferred_learner_param()
                 p_seen_inf, seen = psy.p_seen(now=now, param=pr_inf)
 

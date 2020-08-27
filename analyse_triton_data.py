@@ -17,6 +17,9 @@ PREPROCESSED_DATA_FILE = os.path.join(
 FIG_CHOCOLATE_PATH = os.path.join("fig", f"chocolate_triton{EXT}.pdf")
 FIG_BOXPLOT_PATH = os.path.join("fig", f"boxplot_triton{EXT}.pdf")
 
+FIG_CHOCOLATE_PATH_END_PR_SS = os.path.join("fig", f"chocolate_triton{EXT}_end_pr_ss.pdf")
+FIG_BOXPLOT_PATH_END_PR_SS = os.path.join("fig", f"boxplot_triton{EXT}_end_pr_ss.pdf")
+
 os.makedirs(os.path.join("data", "preprocessed"), exist_ok=True)
 
 
@@ -75,7 +78,8 @@ def main(force=False):
     learners = sorted(np.unique(df["Learner"]))
     psy = sorted(np.unique(df["Psychologist"]))
 
-    learnt_label = "Items learnt end prev ss" # "Items learnt"
+    items_learnt = "Items learnt"
+    items_learnt_last_session = "Items learnt end prev ss"
 
     chocolate.plot(
         df=df,
@@ -83,10 +87,22 @@ def main(force=False):
         learners=learners,
         psychologists=psy,
         fig_path=FIG_CHOCOLATE_PATH,
-        learnt_label=learnt_label
+        learnt_label=items_learnt
     )
 
-    box.plot(df=df, fig_path=FIG_BOXPLOT_PATH, learnt_label=learnt_label)
+    box.plot(df=df, fig_path=FIG_BOXPLOT_PATH, learnt_label=items_learnt)
+
+    chocolate.plot(
+        df=df,
+        teachers=teachers,
+        learners=learners,
+        psychologists=psy,
+        fig_path=FIG_CHOCOLATE_PATH_END_PR_SS,
+        learnt_label=items_learnt_last_session
+    )
+
+    box.plot(df=df, fig_path=FIG_BOXPLOT_PATH_END_PR_SS,
+             learnt_label=items_learnt_last_session)
 
 
 if __name__ == "__main__":

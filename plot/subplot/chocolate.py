@@ -1,14 +1,13 @@
-import os
-
+# import os
 from itertools import combinations, product
 from typing import Hashable, Iterable, Mapping
 
 import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
+# import numpy as np
 
-import settings.paths as paths
-from plot import fake_data, utils
+# import settings.paths as paths
+from plot import utils  # fake_data,
 
 
 def get_color_sequence(

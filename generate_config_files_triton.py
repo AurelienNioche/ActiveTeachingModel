@@ -125,14 +125,14 @@ def main() -> None:
             [0.6, 0.6],
         ],
         "grid_size": 10,
-        "cst_time": (1 / 60 ** 2) / 24,
+        "cst_time": 1 / (24 * 60**2),
     }
 
     exp_decay_cst = {
         "param_labels": ["alpha", "beta"],
-        "bounds": [[0.001, 0.5], [0.00, 0.5]],
+        "bounds": [[0.0001, 0.5], [0.00, 0.5]],
         "grid_size": 20,
-        "cst_time": 1 / 60 ** 2,
+        "cst_time": 1 / (24 * 60**2),
     }
 
     learner_models = (
@@ -233,6 +233,8 @@ def main() -> None:
 
     run_simulation()
 
+    # SBATCH --mail-type=END
+    # SBATCH --mail-user=nioche.aurelien@gmail.com
 
 if __name__ == "__main__":
     main()
