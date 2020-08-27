@@ -123,7 +123,7 @@ def main() -> None:
             [0.6, 0.6],
         ],
         "grid_size": 10,
-        "cst_time": 1 / (24 * 60 ** 2),
+        "cst_time": 1 / (4 * 24 * 60 ** 2),
     }
 
     exp_decay_cst = {

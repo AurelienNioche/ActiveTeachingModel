@@ -9,7 +9,8 @@ DATA_NAME = ""
 
 FORCE = False
 
-RAW_DATA_FOLDER = os.path.join("data", "triton")
+RAW_DATA_FOLDER = "/Volumes/niochea1/ActiveTeachingModel/data/triton"
+#os.path.join("data", "triton")
 PREPROCESSED_DATA_FILE = os.path.join(
     "data", "preprocessed", f"chocolate_triton{DATA_NAME}.csv")
 
