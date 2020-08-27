@@ -5,7 +5,7 @@ from tqdm import tqdm
 
 from plot.subplot import chocolate, box, hist
 
-DATA_NAME = "walsh_cst"
+DATA_NAME = "walsh_new"
 
 FORCE = False
 
@@ -29,10 +29,6 @@ def preprocess_data():
 
     for i, p in tqdm(enumerate(os.scandir(RAW_DATA_FOLDER)), total=file_count):
         df = pd.read_csv(p.path, index_col=[0])
-
-        # max_iter = max(df["iter"])
-        # last_iter = df[df["iter"] == max_iter]
-        # n_learnt = last_iter["n_learnt"].iloc[0]
 
         last_ss_idx = max(df["ss_idx"])
         is_last_ss = df["ss_idx"] == last_ss_idx
