@@ -130,9 +130,9 @@ def main() -> None:
 
     exp_decay_cst = {
         "param_labels": ["alpha", "beta"],
-        "bounds": [[0.001, 0.2], [0.00, 0.5]],
+        "bounds": [[0.001, 0.5], [0.00, 0.5]],
         "grid_size": 20,
-        "cst_time": (1 / 60 ** 2) / 24,
+        "cst_time": 1 / 60 ** 2,
     }
 
     learner_models = (
