@@ -94,6 +94,7 @@ def main() -> None:
     """Set the parameters and generate the JSON config files"""
 
     cleanup()
+    run_simulation()
 
     np.random.seed(1234)
 
@@ -135,9 +136,7 @@ def main() -> None:
         "cst_time": 1 / (24 * 60**2),
     }
 
-    learner_models = (
-        ExponentialNDelta,
-    )
+    learner_models = (ExponentialNDelta,)
     teacher_models = (Leitner, Sampling, Threshold)
     psy_models = (PsychologistGrid,)
 

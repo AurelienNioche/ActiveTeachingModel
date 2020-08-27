@@ -4380,3 +4380,877 @@ Traceback (most recent call last):
 FileNotFoundError: [Errno 2] No such file or directory: '/scratch/work/delac1/active-teaching/data/triton/triton + _incr_samples/at-2020_08_26_17_27_54_550246-exp_decay-psy_grid-sampling-68.csv'
 srun: error: csl38: task 0: Exited with exit code 1
 srun: Terminating job step 55170358.0
+Traceback (most recent call last):
+  File "main_triton.py", line 45, in <module>
+    main(job_id)
+  File "main_triton.py", line 35, in main
+    df.to_csv(os.path.join(PATH, f_name))
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/core/generic.py", line 3204, in to_csv
+    formatter.save()
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/formats/csvs.py", line 188, in save
+    compression=dict(self.compression_args, method=self.compression),
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/common.py", line 428, in get_handle
+    f = open(path_or_buf, mode, encoding=encoding, newline="")
+FileNotFoundError: [Errno 2] No such file or directory: '/scratch/work/delac1/active-teaching/data/triton/triton + _incr_samples/at-2020_08_26_17_27_54_550246-walsh2018-psy_grid-sampling-63.csv'
+srun: error: ivb8: task 0: Exited with exit code 1
+srun: Terminating job step 55170654.0
+Traceback (most recent call last):
+  File "main_triton.py", line 45, in <module>
+    main(job_id)
+  File "main_triton.py", line 35, in main
+    df.to_csv(os.path.join(PATH, f_name))
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/core/generic.py", line 3204, in to_csv
+    formatter.save()
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/formats/csvs.py", line 188, in save
+    compression=dict(self.compression_args, method=self.compression),
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/common.py", line 428, in get_handle
+    f = open(path_or_buf, mode, encoding=encoding, newline="")
+FileNotFoundError: [Errno 2] No such file or directory: '/scratch/work/delac1/active-teaching/data/triton/triton + _incr_samples/at-2020_08_26_17_27_54_550246-walsh2018-psy_grid-sampling-58.csv'
+srun: error: ivb9: task 0: Exited with exit code 1
+srun: Terminating job step 55170648.0
+Traceback (most recent call last):
+  File "main_triton.py", line 45, in <module>
+    main(job_id)
+  File "main_triton.py", line 35, in main
+    df.to_csv(os.path.join(PATH, f_name))
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/core/generic.py", line 3204, in to_csv
+    formatter.save()
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/formats/csvs.py", line 188, in save
+    compression=dict(self.compression_args, method=self.compression),
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/common.py", line 428, in get_handle
+    f = open(path_or_buf, mode, encoding=encoding, newline="")
+FileNotFoundError: [Errno 2] No such file or directory: '/scratch/work/delac1/active-teaching/data/triton/triton + _incr_samples/at-2020_08_26_17_27_54_550246-walsh2018-psy_grid-sampling-52.csv'
+srun: error: ivb9: task 0: Exited with exit code 1
+srun: Terminating job step 55170642.0
+Traceback (most recent call last):
+  File "main_triton.py", line 45, in <module>
+    main(job_id)
+  File "main_triton.py", line 35, in main
+    df.to_csv(os.path.join(PATH, f_name))
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/core/generic.py", line 3204, in to_csv
+    formatter.save()
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/formats/csvs.py", line 188, in save
+    compression=dict(self.compression_args, method=self.compression),
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/common.py", line 428, in get_handle
+    f = open(path_or_buf, mode, encoding=encoding, newline="")
+FileNotFoundError: [Errno 2] No such file or directory: '/scratch/work/delac1/active-teaching/data/triton/triton + _incr_samples/at-2020_08_26_17_27_54_550246-walsh2018-psy_grid-sampling-91.csv'
+srun: error: ivb6: task 0: Exited with exit code 1
+srun: Terminating job step 55170685.0
+Traceback (most recent call last):
+  File "main_triton.py", line 45, in <module>
+    main(job_id)
+  File "main_triton.py", line 35, in main
+    df.to_csv(os.path.join(PATH, f_name))
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/core/generic.py", line 3204, in to_csv
+    formatter.save()
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/formats/csvs.py", line 188, in save
+    compression=dict(self.compression_args, method=self.compression),
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/common.py", line 428, in get_handle
+    f = open(path_or_buf, mode, encoding=encoding, newline="")
+FileNotFoundError: [Errno 2] No such file or directory: '/scratch/work/delac1/active-teaching/data/triton/triton + _incr_samples/at-2020_08_26_17_27_54_550246-walsh2018-psy_grid-sampling-98.csv'
+srun: error: ivb6: task 0: Exited with exit code 1
+srun: Terminating job step 55170692.0
+Traceback (most recent call last):
+  File "main_triton.py", line 45, in <module>
+    main(job_id)
+  File "main_triton.py", line 35, in main
+    df.to_csv(os.path.join(PATH, f_name))
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/core/generic.py", line 3204, in to_csv
+    formatter.save()
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/formats/csvs.py", line 188, in save
+    compression=dict(self.compression_args, method=self.compression),
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/common.py", line 428, in get_handle
+    f = open(path_or_buf, mode, encoding=encoding, newline="")
+FileNotFoundError: [Errno 2] No such file or directory: '/scratch/work/delac1/active-teaching/data/triton/triton + _incr_samples/at-2020_08_26_17_27_54_550246-walsh2018-psy_grid-sampling-62.csv'
+srun: error: ivb8: task 0: Exited with exit code 1
+srun: Terminating job step 55170653.0
+Traceback (most recent call last):
+  File "main_triton.py", line 45, in <module>
+    main(job_id)
+  File "main_triton.py", line 35, in main
+    df.to_csv(os.path.join(PATH, f_name))
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/core/generic.py", line 3204, in to_csv
+    formatter.save()
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/formats/csvs.py", line 188, in save
+    compression=dict(self.compression_args, method=self.compression),
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/common.py", line 428, in get_handle
+    f = open(path_or_buf, mode, encoding=encoding, newline="")
+FileNotFoundError: [Errno 2] No such file or directory: '/scratch/work/delac1/active-teaching/data/triton/triton + _incr_samples/at-2020_08_26_17_27_54_550246-walsh2018-psy_grid-sampling-69.csv'
+srun: error: ivb8: task 0: Exited with exit code 1
+srun: Terminating job step 55170660.0
+Traceback (most recent call last):
+  File "main_triton.py", line 45, in <module>
+    main(job_id)
+  File "main_triton.py", line 35, in main
+    df.to_csv(os.path.join(PATH, f_name))
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/core/generic.py", line 3204, in to_csv
+    formatter.save()
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/formats/csvs.py", line 188, in save
+    compression=dict(self.compression_args, method=self.compression),
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/common.py", line 428, in get_handle
+    f = open(path_or_buf, mode, encoding=encoding, newline="")
+FileNotFoundError: [Errno 2] No such file or directory: '/scratch/work/delac1/active-teaching/data/triton/triton + _incr_samples/at-2020_08_26_17_27_54_550246-walsh2018-psy_grid-sampling-59.csv'
+srun: error: ivb8: task 0: Exited with exit code 1
+srun: Terminating job step 55170649.0
+Traceback (most recent call last):
+  File "main_triton.py", line 45, in <module>
+    main(job_id)
+  File "main_triton.py", line 35, in main
+    df.to_csv(os.path.join(PATH, f_name))
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/core/generic.py", line 3204, in to_csv
+    formatter.save()
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/formats/csvs.py", line 188, in save
+    compression=dict(self.compression_args, method=self.compression),
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/common.py", line 428, in get_handle
+    f = open(path_or_buf, mode, encoding=encoding, newline="")
+FileNotFoundError: [Errno 2] No such file or directory: '/scratch/work/delac1/active-teaching/data/triton/triton + _incr_samples/at-2020_08_26_17_27_54_550246-walsh2018-psy_grid-sampling-36.csv'
+srun: error: ivb10: task 0: Exited with exit code 1
+srun: Terminating job step 55170624.0
+Traceback (most recent call last):
+  File "main_triton.py", line 45, in <module>
+    main(job_id)
+  File "main_triton.py", line 35, in main
+    df.to_csv(os.path.join(PATH, f_name))
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/core/generic.py", line 3204, in to_csv
+    formatter.save()
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/formats/csvs.py", line 188, in save
+    compression=dict(self.compression_args, method=self.compression),
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/common.py", line 428, in get_handle
+    f = open(path_or_buf, mode, encoding=encoding, newline="")
+FileNotFoundError: [Errno 2] No such file or directory: '/scratch/work/delac1/active-teaching/data/triton/triton + _incr_samples/at-2020_08_26_17_27_54_550246-walsh2018-psy_grid-sampling-14.csv'
+Traceback (most recent call last):
+  File "main_triton.py", line 45, in <module>
+    main(job_id)
+  File "main_triton.py", line 35, in main
+    df.to_csv(os.path.join(PATH, f_name))
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/core/generic.py", line 3204, in to_csv
+    formatter.save()
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/formats/csvs.py", line 188, in save
+    compression=dict(self.compression_args, method=self.compression),
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/common.py", line 428, in get_handle
+    f = open(path_or_buf, mode, encoding=encoding, newline="")
+srun: error: ivb11: task 0: Exited with exit code 1
+srun: Terminating job step 55170600.0
+FileNotFoundError: [Errno 2] No such file or directory: '/scratch/work/delac1/active-teaching/data/triton/triton + _incr_samples/at-2020_08_26_17_27_54_550246-walsh2018-psy_grid-sampling-78.csv'
+srun: error: ivb7: task 0: Exited with exit code 1
+srun: Terminating job step 55170670.0
+Traceback (most recent call last):
+  File "main_triton.py", line 45, in <module>
+    main(job_id)
+  File "main_triton.py", line 35, in main
+    df.to_csv(os.path.join(PATH, f_name))
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/core/generic.py", line 3204, in to_csv
+    formatter.save()
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/formats/csvs.py", line 188, in save
+    compression=dict(self.compression_args, method=self.compression),
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/common.py", line 428, in get_handle
+    f = open(path_or_buf, mode, encoding=encoding, newline="")
+FileNotFoundError: [Errno 2] No such file or directory: '/scratch/work/delac1/active-teaching/data/triton/triton + _incr_samples/at-2020_08_26_17_27_54_550246-walsh2018-psy_grid-sampling-75.csv'
+srun: error: ivb7: task 0: Exited with exit code 1
+srun: Terminating job step 55170667.0
+Traceback (most recent call last):
+  File "main_triton.py", line 45, in <module>
+    main(job_id)
+  File "main_triton.py", line 35, in main
+    df.to_csv(os.path.join(PATH, f_name))
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/core/generic.py", line 3204, in to_csv
+    formatter.save()
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/formats/csvs.py", line 188, in save
+    compression=dict(self.compression_args, method=self.compression),
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/common.py", line 428, in get_handle
+    f = open(path_or_buf, mode, encoding=encoding, newline="")
+FileNotFoundError: [Errno 2] No such file or directory: '/scratch/work/delac1/active-teaching/data/triton/triton + _incr_samples/at-2020_08_26_17_27_54_550246-walsh2018-psy_grid-sampling-16.csv'
+srun: error: ivb11: task 0: Exited with exit code 1
+srun: Terminating job step 55170602.0
+Traceback (most recent call last):
+  File "main_triton.py", line 45, in <module>
+    main(job_id)
+  File "main_triton.py", line 35, in main
+    df.to_csv(os.path.join(PATH, f_name))
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/core/generic.py", line 3204, in to_csv
+    formatter.save()
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/formats/csvs.py", line 188, in save
+    compression=dict(self.compression_args, method=self.compression),
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/common.py", line 428, in get_handle
+    f = open(path_or_buf, mode, encoding=encoding, newline="")
+FileNotFoundError: [Errno 2] No such file or directory: '/scratch/work/delac1/active-teaching/data/triton/triton + _incr_samples/at-2020_08_26_17_27_54_550246-walsh2018-psy_grid-sampling-49.csv'
+srun: error: ivb9: task 0: Exited with exit code 1
+srun: Terminating job step 55170638.0
+Traceback (most recent call last):
+  File "main_triton.py", line 45, in <module>
+    main(job_id)
+  File "main_triton.py", line 35, in main
+    df.to_csv(os.path.join(PATH, f_name))
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/core/generic.py", line 3204, in to_csv
+    formatter.save()
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/formats/csvs.py", line 188, in save
+    compression=dict(self.compression_args, method=self.compression),
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/common.py", line 428, in get_handle
+    f = open(path_or_buf, mode, encoding=encoding, newline="")
+FileNotFoundError: [Errno 2] No such file or directory: '/scratch/work/delac1/active-teaching/data/triton/triton + _incr_samples/at-2020_08_26_17_27_54_550246-walsh2018-psy_grid-sampling-93.csv'
+srun: error: ivb6: task 0: Exited with exit code 1
+srun: Terminating job step 55170687.0
+Traceback (most recent call last):
+  File "main_triton.py", line 45, in <module>
+    main(job_id)
+  File "main_triton.py", line 35, in main
+    df.to_csv(os.path.join(PATH, f_name))
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/core/generic.py", line 3204, in to_csv
+    formatter.save()
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/formats/csvs.py", line 188, in save
+    compression=dict(self.compression_args, method=self.compression),
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/common.py", line 428, in get_handle
+    f = open(path_or_buf, mode, encoding=encoding, newline="")
+FileNotFoundError: [Errno 2] No such file or directory: '/scratch/work/delac1/active-teaching/data/triton/triton + _incr_samples/at-2020_08_26_17_27_54_550246-walsh2018-psy_grid-sampling-92.csv'
+srun: error: ivb6: task 0: Exited with exit code 1
+srun: Terminating job step 55170686.0
+Traceback (most recent call last):
+  File "main_triton.py", line 45, in <module>
+    main(job_id)
+  File "main_triton.py", line 35, in main
+    df.to_csv(os.path.join(PATH, f_name))
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/core/generic.py", line 3204, in to_csv
+    formatter.save()
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/formats/csvs.py", line 188, in save
+    compression=dict(self.compression_args, method=self.compression),
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/common.py", line 428, in get_handle
+    f = open(path_or_buf, mode, encoding=encoding, newline="")
+FileNotFoundError: [Errno 2] No such file or directory: '/scratch/work/delac1/active-teaching/data/triton/triton + _incr_samples/at-2020_08_26_17_27_54_550246-walsh2018-psy_grid-sampling-86.csv'
+srun: error: ivb7: task 0: Exited with exit code 1
+srun: Terminating job step 55170679.0
+Traceback (most recent call last):
+  File "main_triton.py", line 45, in <module>
+    main(job_id)
+  File "main_triton.py", line 35, in main
+    df.to_csv(os.path.join(PATH, f_name))
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/core/generic.py", line 3204, in to_csv
+    formatter.save()
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/formats/csvs.py", line 188, in save
+    compression=dict(self.compression_args, method=self.compression),
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/common.py", line 428, in get_handle
+    f = open(path_or_buf, mode, encoding=encoding, newline="")
+FileNotFoundError: [Errno 2] No such file or directory: '/scratch/work/delac1/active-teaching/data/triton/triton + _incr_samples/at-2020_08_26_17_27_54_550246-walsh2018-psy_grid-sampling-10.csv'
+srun: error: ivb12: task 0: Exited with exit code 1
+srun: Terminating job step 55170596.0
+Traceback (most recent call last):
+  File "main_triton.py", line 45, in <module>
+    main(job_id)
+  File "main_triton.py", line 35, in main
+    df.to_csv(os.path.join(PATH, f_name))
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/core/generic.py", line 3204, in to_csv
+    formatter.save()
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/formats/csvs.py", line 188, in save
+    compression=dict(self.compression_args, method=self.compression),
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/common.py", line 428, in get_handle
+    f = open(path_or_buf, mode, encoding=encoding, newline="")
+FileNotFoundError: [Errno 2] No such file or directory: '/scratch/work/delac1/active-teaching/data/triton/triton + _incr_samples/at-2020_08_26_17_27_54_550246-walsh2018-psy_grid-sampling-1.csv'
+srun: error: ivb12: task 0: Exited with exit code 1
+srun: Terminating job step 55170595.0
+Traceback (most recent call last):
+  File "main_triton.py", line 45, in <module>
+    main(job_id)
+  File "main_triton.py", line 35, in main
+    df.to_csv(os.path.join(PATH, f_name))
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/core/generic.py", line 3204, in to_csv
+    formatter.save()
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/formats/csvs.py", line 188, in save
+    compression=dict(self.compression_args, method=self.compression),
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/common.py", line 428, in get_handle
+    f = open(path_or_buf, mode, encoding=encoding, newline="")
+FileNotFoundError: [Errno 2] No such file or directory: '/scratch/work/delac1/active-teaching/data/triton/triton + _incr_samples/at-2020_08_26_17_27_54_550246-walsh2018-psy_grid-sampling-8.csv'
+srun: error: ivb7: task 0: Exited with exit code 1
+srun: Terminating job step 55170672.0
+Traceback (most recent call last):
+  File "main_triton.py", line 45, in <module>
+    main(job_id)
+  File "main_triton.py", line 35, in main
+    df.to_csv(os.path.join(PATH, f_name))
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/core/generic.py", line 3204, in to_csv
+    formatter.save()
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/formats/csvs.py", line 188, in save
+    compression=dict(self.compression_args, method=self.compression),
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/common.py", line 428, in get_handle
+    f = open(path_or_buf, mode, encoding=encoding, newline="")
+FileNotFoundError: [Errno 2] No such file or directory: '/scratch/work/delac1/active-teaching/data/triton/triton + _incr_samples/at-2020_08_26_17_27_54_550246-walsh2018-psy_grid-sampling-81.csv'
+srun: error: ivb7: task 0: Exited with exit code 1
+srun: Terminating job step 55170674.0
+Traceback (most recent call last):
+  File "main_triton.py", line 45, in <module>
+    main(job_id)
+  File "main_triton.py", line 35, in main
+    df.to_csv(os.path.join(PATH, f_name))
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/core/generic.py", line 3204, in to_csv
+    formatter.save()
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/formats/csvs.py", line 188, in save
+    compression=dict(self.compression_args, method=self.compression),
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/common.py", line 428, in get_handle
+    f = open(path_or_buf, mode, encoding=encoding, newline="")
+FileNotFoundError: [Errno 2] No such file or directory: '/scratch/work/delac1/active-teaching/data/triton/triton + _incr_samples/at-2020_08_26_17_27_54_550246-walsh2018-psy_grid-sampling-3.csv'
+srun: error: ivb10: task 0: Exited with exit code 1
+srun: Terminating job step 55170617.0
+Traceback (most recent call last):
+  File "main_triton.py", line 45, in <module>
+    main(job_id)
+  File "main_triton.py", line 35, in main
+    df.to_csv(os.path.join(PATH, f_name))
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/core/generic.py", line 3204, in to_csv
+    formatter.save()
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/formats/csvs.py", line 188, in save
+    compression=dict(self.compression_args, method=self.compression),
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/common.py", line 428, in get_handle
+    f = open(path_or_buf, mode, encoding=encoding, newline="")
+FileNotFoundError: [Errno 2] No such file or directory: '/scratch/work/delac1/active-teaching/data/triton/triton + _incr_samples/at-2020_08_26_17_27_54_550246-walsh2018-psy_grid-sampling-42.csv'
+srun: error: ivb10: task 0: Exited with exit code 1
+srun: Terminating job step 55170631.0
+Traceback (most recent call last):
+  File "main_triton.py", line 45, in <module>
+    main(job_id)
+  File "main_triton.py", line 35, in main
+    df.to_csv(os.path.join(PATH, f_name))
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/core/generic.py", line 3204, in to_csv
+    formatter.save()
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/formats/csvs.py", line 188, in save
+    compression=dict(self.compression_args, method=self.compression),
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/common.py", line 428, in get_handle
+    f = open(path_or_buf, mode, encoding=encoding, newline="")
+FileNotFoundError: [Errno 2] No such file or directory: '/scratch/work/delac1/active-teaching/data/triton/triton + _incr_samples/at-2020_08_26_17_27_54_550246-walsh2018-psy_grid-sampling-32.csv'
+srun: error: ivb10: task 0: Exited with exit code 1
+srun: Terminating job step 55170620.0
+Traceback (most recent call last):
+  File "main_triton.py", line 45, in <module>
+    main(job_id)
+  File "main_triton.py", line 35, in main
+    df.to_csv(os.path.join(PATH, f_name))
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/core/generic.py", line 3204, in to_csv
+    formatter.save()
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/formats/csvs.py", line 188, in save
+    compression=dict(self.compression_args, method=self.compression),
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/common.py", line 428, in get_handle
+    f = open(path_or_buf, mode, encoding=encoding, newline="")
+FileNotFoundError: [Errno 2] No such file or directory: '/scratch/work/delac1/active-teaching/data/triton/triton + _incr_samples/at-2020_08_26_17_27_54_550246-walsh2018-psy_grid-sampling-97.csv'
+srun: error: ivb6: task 0: Exited with exit code 1
+srun: Terminating job step 55170691.0
+Traceback (most recent call last):
+  File "main_triton.py", line 45, in <module>
+    main(job_id)
+  File "main_triton.py", line 35, in main
+    df.to_csv(os.path.join(PATH, f_name))
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/core/generic.py", line 3204, in to_csv
+    formatter.save()
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/formats/csvs.py", line 188, in save
+    compression=dict(self.compression_args, method=self.compression),
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/common.py", line 428, in get_handle
+    f = open(path_or_buf, mode, encoding=encoding, newline="")
+FileNotFoundError: [Errno 2] No such file or directory: '/scratch/work/delac1/active-teaching/data/triton/triton + _incr_samples/at-2020_08_26_17_27_54_550246-walsh2018-psy_grid-sampling-76.csv'
+srun: error: ivb7: task 0: Exited with exit code 1
+srun: Terminating job step 55170668.0
+Traceback (most recent call last):
+  File "main_triton.py", line 45, in <module>
+    main(job_id)
+  File "main_triton.py", line 35, in main
+    df.to_csv(os.path.join(PATH, f_name))
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/core/generic.py", line 3204, in to_csv
+    formatter.save()
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/formats/csvs.py", line 188, in save
+    compression=dict(self.compression_args, method=self.compression),
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/common.py", line 428, in get_handle
+    f = open(path_or_buf, mode, encoding=encoding, newline="")
+FileNotFoundError: [Errno 2] No such file or directory: '/scratch/work/delac1/active-teaching/data/triton/triton + _incr_samples/at-2020_08_26_17_27_54_550246-walsh2018-psy_grid-sampling-2.csv'
+srun: error: ivb11: task 0: Exited with exit code 1
+srun: Terminating job step 55170606.0
+Traceback (most recent call last):
+  File "main_triton.py", line 45, in <module>
+    main(job_id)
+  File "main_triton.py", line 35, in main
+    df.to_csv(os.path.join(PATH, f_name))
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/core/generic.py", line 3204, in to_csv
+    formatter.save()
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/formats/csvs.py", line 188, in save
+    compression=dict(self.compression_args, method=self.compression),
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/common.py", line 428, in get_handle
+    f = open(path_or_buf, mode, encoding=encoding, newline="")
+FileNotFoundError: [Errno 2] No such file or directory: '/scratch/work/delac1/active-teaching/data/triton/triton + _incr_samples/at-2020_08_26_17_27_54_550246-walsh2018-psy_grid-sampling-77.csv'
+srun: error: ivb7: task 0: Exited with exit code 1
+srun: Terminating job step 55170669.0
+Traceback (most recent call last):
+  File "main_triton.py", line 45, in <module>
+    main(job_id)
+  File "main_triton.py", line 35, in main
+    df.to_csv(os.path.join(PATH, f_name))
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/core/generic.py", line 3204, in to_csv
+    formatter.save()
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/formats/csvs.py", line 188, in save
+    compression=dict(self.compression_args, method=self.compression),
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/common.py", line 428, in get_handle
+    f = open(path_or_buf, mode, encoding=encoding, newline="")
+FileNotFoundError: [Errno 2] No such file or directory: '/scratch/work/delac1/active-teaching/data/triton/triton + _incr_samples/at-2020_08_26_17_27_54_550246-walsh2018-psy_grid-sampling-40.csv'
+srun: error: ivb10: task 0: Exited with exit code 1
+srun: Terminating job step 55170629.0
+Traceback (most recent call last):
+  File "main_triton.py", line 45, in <module>
+    main(job_id)
+  File "main_triton.py", line 35, in main
+    df.to_csv(os.path.join(PATH, f_name))
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/core/generic.py", line 3204, in to_csv
+    formatter.save()
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/formats/csvs.py", line 188, in save
+    compression=dict(self.compression_args, method=self.compression),
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/common.py", line 428, in get_handle
+    f = open(path_or_buf, mode, encoding=encoding, newline="")
+FileNotFoundError: [Errno 2] No such file or directory: '/scratch/work/delac1/active-teaching/data/triton/triton + _incr_samples/at-2020_08_26_17_27_54_550246-walsh2018-psy_grid-sampling-70.csv'
+srun: error: ivb8: task 0: Exited with exit code 1
+srun: Terminating job step 55170662.0
+Traceback (most recent call last):
+  File "main_triton.py", line 45, in <module>
+    main(job_id)
+  File "main_triton.py", line 35, in main
+    df.to_csv(os.path.join(PATH, f_name))
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/core/generic.py", line 3204, in to_csv
+    formatter.save()
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/formats/csvs.py", line 188, in save
+    compression=dict(self.compression_args, method=self.compression),
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/common.py", line 428, in get_handle
+    f = open(path_or_buf, mode, encoding=encoding, newline="")
+FileNotFoundError: [Errno 2] No such file or directory: '/scratch/work/delac1/active-teaching/data/triton/triton + _incr_samples/at-2020_08_26_17_27_54_550246-walsh2018-psy_grid-sampling-61.csv'
+srun: error: ivb8: task 0: Exited with exit code 1
+srun: Terminating job step 55170652.0
+Traceback (most recent call last):
+  File "main_triton.py", line 45, in <module>
+    main(job_id)
+  File "main_triton.py", line 35, in main
+    df.to_csv(os.path.join(PATH, f_name))
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/core/generic.py", line 3204, in to_csv
+    formatter.save()
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/formats/csvs.py", line 188, in save
+    compression=dict(self.compression_args, method=self.compression),
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/common.py", line 428, in get_handle
+    f = open(path_or_buf, mode, encoding=encoding, newline="")
+FileNotFoundError: [Errno 2] No such file or directory: '/scratch/work/delac1/active-teaching/data/triton/triton + _incr_samples/at-2020_08_26_17_27_54_550246-walsh2018-psy_grid-sampling-72.csv'
+srun: error: ivb8: task 0: Exited with exit code 1
+srun: Terminating job step 55170664.0
+Traceback (most recent call last):
+  File "main_triton.py", line 45, in <module>
+    main(job_id)
+  File "main_triton.py", line 35, in main
+    df.to_csv(os.path.join(PATH, f_name))
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/core/generic.py", line 3204, in to_csv
+    formatter.save()
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/formats/csvs.py", line 188, in save
+    compression=dict(self.compression_args, method=self.compression),
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/common.py", line 428, in get_handle
+    f = open(path_or_buf, mode, encoding=encoding, newline="")
+FileNotFoundError: [Errno 2] No such file or directory: '/scratch/work/delac1/active-teaching/data/triton/triton + _incr_samples/at-2020_08_26_17_27_54_550246-walsh2018-psy_grid-sampling-95.csv'
+srun: error: ivb6: task 0: Exited with exit code 1
+srun: Terminating job step 55170689.0
+Traceback (most recent call last):
+  File "main_triton.py", line 45, in <module>
+    main(job_id)
+  File "main_triton.py", line 35, in main
+    df.to_csv(os.path.join(PATH, f_name))
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/core/generic.py", line 3204, in to_csv
+    formatter.save()
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/formats/csvs.py", line 188, in save
+    compression=dict(self.compression_args, method=self.compression),
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/common.py", line 428, in get_handle
+    f = open(path_or_buf, mode, encoding=encoding, newline="")
+FileNotFoundError: [Errno 2] No such file or directory: '/scratch/work/delac1/active-teaching/data/triton/triton + _incr_samples/at-2020_08_26_17_27_54_550246-walsh2018-psy_grid-sampling-68.csv'
+srun: error: ivb8: task 0: Exited with exit code 1
+srun: Terminating job step 55170659.0
+Traceback (most recent call last):
+  File "main_triton.py", line 45, in <module>
+    main(job_id)
+  File "main_triton.py", line 35, in main
+    df.to_csv(os.path.join(PATH, f_name))
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/core/generic.py", line 3204, in to_csv
+    formatter.save()
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/formats/csvs.py", line 188, in save
+    compression=dict(self.compression_args, method=self.compression),
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/common.py", line 428, in get_handle
+    f = open(path_or_buf, mode, encoding=encoding, newline="")
+FileNotFoundError: [Errno 2] No such file or directory: '/scratch/work/delac1/active-teaching/data/triton/triton + _incr_samples/at-2020_08_26_17_27_54_550246-walsh2018-psy_grid-sampling-50.csv'
+srun: error: ivb9: task 0: Exited with exit code 1
+srun: Terminating job step 55170640.0
+Traceback (most recent call last):
+  File "main_triton.py", line 45, in <module>
+    main(job_id)
+  File "main_triton.py", line 35, in main
+    df.to_csv(os.path.join(PATH, f_name))
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/core/generic.py", line 3204, in to_csv
+    formatter.save()
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/formats/csvs.py", line 188, in save
+    compression=dict(self.compression_args, method=self.compression),
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/common.py", line 428, in get_handle
+    f = open(path_or_buf, mode, encoding=encoding, newline="")
+FileNotFoundError: [Errno 2] No such file or directory: '/scratch/work/delac1/active-teaching/data/triton/triton + _incr_samples/at-2020_08_26_17_27_54_550246-walsh2018-psy_grid-sampling-88.csv'
+srun: error: ivb7: task 0: Exited with exit code 1
+srun: Terminating job step 55170681.0
+Traceback (most recent call last):
+  File "main_triton.py", line 45, in <module>
+    main(job_id)
+  File "main_triton.py", line 35, in main
+    df.to_csv(os.path.join(PATH, f_name))
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/core/generic.py", line 3204, in to_csv
+    formatter.save()
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/formats/csvs.py", line 188, in save
+    compression=dict(self.compression_args, method=self.compression),
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/common.py", line 428, in get_handle
+    f = open(path_or_buf, mode, encoding=encoding, newline="")
+FileNotFoundError: [Errno 2] No such file or directory: '/scratch/work/delac1/active-teaching/data/triton/triton + _incr_samples/at-2020_08_26_17_27_54_550246-walsh2018-psy_grid-sampling-27.csv'
+srun: error: ivb11: task 0: Exited with exit code 1
+srun: Terminating job step 55170614.0
+Traceback (most recent call last):
+  File "main_triton.py", line 45, in <module>
+    main(job_id)
+  File "main_triton.py", line 35, in main
+    df.to_csv(os.path.join(PATH, f_name))
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/core/generic.py", line 3204, in to_csv
+    formatter.save()
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/formats/csvs.py", line 188, in save
+    compression=dict(self.compression_args, method=self.compression),
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/common.py", line 428, in get_handle
+    f = open(path_or_buf, mode, encoding=encoding, newline="")
+FileNotFoundError: [Errno 2] No such file or directory: '/scratch/work/delac1/active-teaching/data/triton/triton + _incr_samples/at-2020_08_26_17_27_54_550246-walsh2018-psy_grid-sampling-82.csv'
+srun: error: ivb7: task 0: Exited with exit code 1
+srun: Terminating job step 55170675.0
+Traceback (most recent call last):
+  File "main_triton.py", line 45, in <module>
+    main(job_id)
+  File "main_triton.py", line 35, in main
+    df.to_csv(os.path.join(PATH, f_name))
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/core/generic.py", line 3204, in to_csv
+    formatter.save()
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/formats/csvs.py", line 188, in save
+    compression=dict(self.compression_args, method=self.compression),
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/common.py", line 428, in get_handle
+    f = open(path_or_buf, mode, encoding=encoding, newline="")
+FileNotFoundError: [Errno 2] No such file or directory: '/scratch/work/delac1/active-teaching/data/triton/triton + _incr_samples/at-2020_08_26_17_27_54_550246-walsh2018-psy_grid-sampling-38.csv'
+srun: error: ivb10: task 0: Exited with exit code 1
+srun: Terminating job step 55170626.0
+Traceback (most recent call last):
+  File "main_triton.py", line 45, in <module>
+    main(job_id)
+  File "main_triton.py", line 35, in main
+    df.to_csv(os.path.join(PATH, f_name))
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/core/generic.py", line 3204, in to_csv
+    formatter.save()
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/formats/csvs.py", line 188, in save
+    compression=dict(self.compression_args, method=self.compression),
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/common.py", line 428, in get_handle
+    f = open(path_or_buf, mode, encoding=encoding, newline="")
+FileNotFoundError: [Errno 2] No such file or directory: '/scratch/work/delac1/active-teaching/data/triton/triton + _incr_samples/at-2020_08_26_17_27_54_550246-walsh2018-psy_grid-sampling-48.csv'
+srun: error: ivb9: task 0: Exited with exit code 1
+srun: Terminating job step 55170637.0
+Traceback (most recent call last):
+  File "main_triton.py", line 45, in <module>
+    main(job_id)
+  File "main_triton.py", line 35, in main
+    df.to_csv(os.path.join(PATH, f_name))
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/core/generic.py", line 3204, in to_csv
+    formatter.save()
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/formats/csvs.py", line 188, in save
+    compression=dict(self.compression_args, method=self.compression),
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/common.py", line 428, in get_handle
+    f = open(path_or_buf, mode, encoding=encoding, newline="")
+FileNotFoundError: [Errno 2] No such file or directory: '/scratch/work/delac1/active-teaching/data/triton/triton + _incr_samples/at-2020_08_26_17_27_54_550246-walsh2018-psy_grid-sampling-41.csv'
+srun: error: ivb10: task 0: Exited with exit code 1
+srun: Terminating job step 55170630.0
+Traceback (most recent call last):
+  File "main_triton.py", line 45, in <module>
+    main(job_id)
+  File "main_triton.py", line 35, in main
+    df.to_csv(os.path.join(PATH, f_name))
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/core/generic.py", line 3204, in to_csv
+    formatter.save()
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/formats/csvs.py", line 188, in save
+    compression=dict(self.compression_args, method=self.compression),
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/common.py", line 428, in get_handle
+    f = open(path_or_buf, mode, encoding=encoding, newline="")
+FileNotFoundError: [Errno 2] No such file or directory: '/scratch/work/delac1/active-teaching/data/triton/triton + _incr_samples/at-2020_08_26_17_27_54_550246-walsh2018-psy_grid-sampling-96.csv'
+srun: error: ivb6: task 0: Exited with exit code 1
+srun: Terminating job step 55170690.0
+Traceback (most recent call last):
+  File "main_triton.py", line 45, in <module>
+    main(job_id)
+  File "main_triton.py", line 35, in main
+    df.to_csv(os.path.join(PATH, f_name))
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/core/generic.py", line 3204, in to_csv
+    formatter.save()
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/formats/csvs.py", line 188, in save
+    compression=dict(self.compression_args, method=self.compression),
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/common.py", line 428, in get_handle
+    f = open(path_or_buf, mode, encoding=encoding, newline="")
+FileNotFoundError: [Errno 2] No such file or directory: '/scratch/work/delac1/active-teaching/data/triton/triton + _incr_samples/at-2020_08_26_17_27_54_550246-walsh2018-psy_grid-sampling-34.csv'
+srun: error: ivb10: task 0: Exited with exit code 1
+srun: Terminating job step 55170622.0
+Traceback (most recent call last):
+  File "main_triton.py", line 45, in <module>
+    main(job_id)
+  File "main_triton.py", line 35, in main
+    df.to_csv(os.path.join(PATH, f_name))
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/core/generic.py", line 3204, in to_csv
+    formatter.save()
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/formats/csvs.py", line 188, in save
+    compression=dict(self.compression_args, method=self.compression),
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/common.py", line 428, in get_handle
+    f = open(path_or_buf, mode, encoding=encoding, newline="")
+FileNotFoundError: [Errno 2] No such file or directory: '/scratch/work/delac1/active-teaching/data/triton/triton + _incr_samples/at-2020_08_26_17_27_54_550246-walsh2018-psy_grid-sampling-19.csv'
+srun: error: ivb11: task 0: Exited with exit code 1
+srun: Terminating job step 55170605.0
+Traceback (most recent call last):
+  File "main_triton.py", line 45, in <module>
+    main(job_id)
+  File "main_triton.py", line 35, in main
+    df.to_csv(os.path.join(PATH, f_name))
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/core/generic.py", line 3204, in to_csv
+    formatter.save()
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/formats/csvs.py", line 188, in save
+    compression=dict(self.compression_args, method=self.compression),
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/common.py", line 428, in get_handle
+    f = open(path_or_buf, mode, encoding=encoding, newline="")
+FileNotFoundError: [Errno 2] No such file or directory: '/scratch/work/delac1/active-teaching/data/triton/triton + _incr_samples/at-2020_08_26_17_27_54_550246-walsh2018-psy_grid-sampling-83.csv'
+srun: error: ivb7: task 0: Exited with exit code 1
+srun: Terminating job step 55170676.0
+Traceback (most recent call last):
+  File "main_triton.py", line 45, in <module>
+    main(job_id)
+  File "main_triton.py", line 35, in main
+    df.to_csv(os.path.join(PATH, f_name))
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/core/generic.py", line 3204, in to_csv
+    formatter.save()
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/formats/csvs.py", line 188, in save
+    compression=dict(self.compression_args, method=self.compression),
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/common.py", line 428, in get_handle
+    f = open(path_or_buf, mode, encoding=encoding, newline="")
+FileNotFoundError: [Errno 2] No such file or directory: '/scratch/work/delac1/active-teaching/data/triton/triton + _incr_samples/at-2020_08_26_17_27_54_550246-walsh2018-psy_grid-sampling-6.csv'
+srun: error: ivb8: task 0: Exited with exit code 1
+srun: Terminating job step 55170650.0
+Traceback (most recent call last):
+  File "main_triton.py", line 45, in <module>
+    main(job_id)
+  File "main_triton.py", line 35, in main
+    df.to_csv(os.path.join(PATH, f_name))
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/core/generic.py", line 3204, in to_csv
+    formatter.save()
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/formats/csvs.py", line 188, in save
+    compression=dict(self.compression_args, method=self.compression),
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/common.py", line 428, in get_handle
+    f = open(path_or_buf, mode, encoding=encoding, newline="")
+FileNotFoundError: [Errno 2] No such file or directory: '/scratch/work/delac1/active-teaching/data/triton/triton + _incr_samples/at-2020_08_26_17_27_54_550246-walsh2018-psy_grid-sampling-5.csv'
+srun: error: ivb9: task 0: Exited with exit code 1
+srun: Terminating job step 55170639.0
+Traceback (most recent call last):
+  File "main_triton.py", line 45, in <module>
+    main(job_id)
+  File "main_triton.py", line 35, in main
+    df.to_csv(os.path.join(PATH, f_name))
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/core/generic.py", line 3204, in to_csv
+    formatter.save()
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/formats/csvs.py", line 188, in save
+    compression=dict(self.compression_args, method=self.compression),
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/common.py", line 428, in get_handle
+    f = open(path_or_buf, mode, encoding=encoding, newline="")
+FileNotFoundError: [Errno 2] No such file or directory: '/scratch/work/delac1/active-teaching/data/triton/triton + _incr_samples/at-2020_08_26_17_27_54_550246-walsh2018-psy_grid-sampling-47.csv'
+srun: error: ivb9: task 0: Exited with exit code 1
+srun: Terminating job step 55170636.0
+Traceback (most recent call last):
+  File "main_triton.py", line 45, in <module>
+    main(job_id)
+  File "main_triton.py", line 35, in main
+    df.to_csv(os.path.join(PATH, f_name))
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/core/generic.py", line 3204, in to_csv
+    formatter.save()
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/formats/csvs.py", line 188, in save
+    compression=dict(self.compression_args, method=self.compression),
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/common.py", line 428, in get_handle
+    f = open(path_or_buf, mode, encoding=encoding, newline="")
+FileNotFoundError: [Errno 2] No such file or directory: '/scratch/work/delac1/active-teaching/data/triton/triton + _incr_samples/at-2020_08_26_17_27_54_550246-walsh2018-psy_grid-sampling-87.csv'
+srun: error: ivb7: task 0: Exited with exit code 1
+srun: Terminating job step 55170680.0
+Traceback (most recent call last):
+  File "main_triton.py", line 45, in <module>
+    main(job_id)
+  File "main_triton.py", line 35, in main
+    df.to_csv(os.path.join(PATH, f_name))
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/core/generic.py", line 3204, in to_csv
+    formatter.save()
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/formats/csvs.py", line 188, in save
+    compression=dict(self.compression_args, method=self.compression),
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/common.py", line 428, in get_handle
+    f = open(path_or_buf, mode, encoding=encoding, newline="")
+FileNotFoundError: [Errno 2] No such file or directory: '/scratch/work/delac1/active-teaching/data/triton/triton + _incr_samples/at-2020_08_26_17_27_54_550246-walsh2018-psy_grid-sampling-24.csv'
+srun: error: ivb11: task 0: Exited with exit code 1
+srun: Terminating job step 55170611.0
+Traceback (most recent call last):
+  File "main_triton.py", line 45, in <module>
+    main(job_id)
+  File "main_triton.py", line 35, in main
+    df.to_csv(os.path.join(PATH, f_name))
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/core/generic.py", line 3204, in to_csv
+    formatter.save()
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/formats/csvs.py", line 188, in save
+    compression=dict(self.compression_args, method=self.compression),
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/common.py", line 428, in get_handle
+    f = open(path_or_buf, mode, encoding=encoding, newline="")
+FileNotFoundError: [Errno 2] No such file or directory: '/scratch/work/delac1/active-teaching/data/triton/triton + _incr_samples/at-2020_08_26_17_27_54_550246-walsh2018-psy_grid-sampling-64.csv'
+srun: error: ivb8: task 0: Exited with exit code 1
+srun: Terminating job step 55170655.0
+Traceback (most recent call last):
+  File "main_triton.py", line 45, in <module>
+    main(job_id)
+  File "main_triton.py", line 35, in main
+    df.to_csv(os.path.join(PATH, f_name))
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/core/generic.py", line 3204, in to_csv
+    formatter.save()
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/formats/csvs.py", line 188, in save
+    compression=dict(self.compression_args, method=self.compression),
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/common.py", line 428, in get_handle
+    f = open(path_or_buf, mode, encoding=encoding, newline="")
+FileNotFoundError: [Errno 2] No such file or directory: '/scratch/work/delac1/active-teaching/data/triton/triton + _incr_samples/at-2020_08_26_17_27_54_550246-walsh2018-psy_grid-sampling-57.csv'
+srun: error: ivb9: task 0: Exited with exit code 1
+srun: Terminating job step 55170647.0
+Traceback (most recent call last):
+  File "main_triton.py", line 45, in <module>
+    main(job_id)
+  File "main_triton.py", line 35, in main
+    df.to_csv(os.path.join(PATH, f_name))
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/core/generic.py", line 3204, in to_csv
+    formatter.save()
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/formats/csvs.py", line 188, in save
+    compression=dict(self.compression_args, method=self.compression),
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/common.py", line 428, in get_handle
+    f = open(path_or_buf, mode, encoding=encoding, newline="")
+FileNotFoundError: [Errno 2] No such file or directory: '/scratch/work/delac1/active-teaching/data/triton/triton + _incr_samples/at-2020_08_26_17_27_54_550246-walsh2018-psy_grid-sampling-43.csv'
+srun: error: ivb9: task 0: Exited with exit code 1
+srun: Terminating job step 55170632.0
+Traceback (most recent call last):
+  File "main_triton.py", line 45, in <module>
+    main(job_id)
+  File "main_triton.py", line 35, in main
+    df.to_csv(os.path.join(PATH, f_name))
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/core/generic.py", line 3204, in to_csv
+    formatter.save()
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/formats/csvs.py", line 188, in save
+    compression=dict(self.compression_args, method=self.compression),
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/common.py", line 428, in get_handle
+    f = open(path_or_buf, mode, encoding=encoding, newline="")
+FileNotFoundError: [Errno 2] No such file or directory: '/scratch/work/delac1/active-teaching/data/triton/triton + _incr_samples/at-2020_08_26_17_27_54_550246-walsh2018-psy_grid-sampling-71.csv'
+srun: error: ivb8: task 0: Exited with exit code 1
+srun: Terminating job step 55170663.0
+Traceback (most recent call last):
+  File "main_triton.py", line 45, in <module>
+    main(job_id)
+  File "main_triton.py", line 35, in main
+    df.to_csv(os.path.join(PATH, f_name))
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/core/generic.py", line 3204, in to_csv
+    formatter.save()
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/formats/csvs.py", line 188, in save
+    compression=dict(self.compression_args, method=self.compression),
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/common.py", line 428, in get_handle
+    f = open(path_or_buf, mode, encoding=encoding, newline="")
+FileNotFoundError: [Errno 2] No such file or directory: '/scratch/work/delac1/active-teaching/data/triton/triton + _incr_samples/at-2020_08_26_17_27_54_550246-walsh2018-psy_grid-sampling-33.csv'
+srun: error: ivb10: task 0: Exited with exit code 1
+srun: Terminating job step 55170621.0
+Traceback (most recent call last):
+  File "main_triton.py", line 45, in <module>
+    main(job_id)
+  File "main_triton.py", line 35, in main
+    df.to_csv(os.path.join(PATH, f_name))
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/core/generic.py", line 3204, in to_csv
+    formatter.save()
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/formats/csvs.py", line 188, in save
+    compression=dict(self.compression_args, method=self.compression),
+  File "/share/apps/anaconda-ci/fgci-centos7-generic/software/anaconda/2020-04-tf2/3088534c/lib/python3.7/site-packages/pandas/io/common.py", line 428, in get_handle
+    f = open(path_or_buf, mode, encoding=encoding, newline="")
+FileNotFoundError: [Errno 2] No such file or directory: '/scratch/work/delac1/active-teaching/data/triton/triton + _incr_samples/at-2020_08_26_17_27_54_550246-walsh2018-psy_grid-sampling-53.csv'
+srun: error: ivb9: task 0: Exited with exit code 1
+srun: Terminating job step 55170643.0
+slurmstepd: error: *** STEP 55170594.0 ON ivb12 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** STEP 55170598.0 ON ivb11 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** JOB 55170597 ON ivb12 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** JOB 55170598 ON ivb11 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** JOB 55170594 ON ivb12 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** JOB 55170604 ON ivb11 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** STEP 55170597.0 ON ivb12 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** STEP 55170599.0 ON ivb11 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** STEP 55170601.0 ON ivb11 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** JOB 55170608 ON ivb11 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** STEP 55170609.0 ON ivb11 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** JOB 55170603 ON ivb11 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** STEP 55170604.0 ON ivb11 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** JOB 55170599 ON ivb11 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** STEP 55170610.0 ON ivb11 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** JOB 55170601 ON ivb11 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** JOB 55170607 ON ivb11 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** JOB 55170609 ON ivb11 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** STEP 55170603.0 ON ivb11 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** STEP 55170608.0 ON ivb11 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** JOB 55170615 ON ivb10 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** STEP 55170607.0 ON ivb11 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** JOB 55170612 ON ivb11 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** JOB 55170613 ON ivb11 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** JOB 55170619 ON ivb10 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** JOB 55170610 ON ivb11 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** STEP 55170612.0 ON ivb11 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** STEP 55170623.0 ON ivb10 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** JOB 55170618 ON ivb10 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** JOB 55170625 ON ivb10 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** STEP 55170615.0 ON ivb10 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** STEP 55170619.0 ON ivb10 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** JOB 55170616 ON ivb10 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** STEP 55170613.0 ON ivb11 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** JOB 55170623 ON ivb10 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** STEP 55170618.0 ON ivb10 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** STEP 55170633.0 ON ivb9 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** STEP 55170616.0 ON ivb10 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** JOB 55170627 ON ivb10 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** STEP 55170634.0 ON ivb9 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** STEP 55170628.0 ON ivb10 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** STEP 55170625.0 ON ivb10 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** STEP 55170635.0 ON ivb9 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** STEP 55170641.0 ON ivb9 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** STEP 55170627.0 ON ivb10 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** JOB 55170644 ON ivb9 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** JOB 55170628 ON ivb10 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** JOB 55170635 ON ivb9 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** JOB 55170634 ON ivb9 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** JOB 55170633 ON ivb9 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** STEP 55170646.0 ON ivb9 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** JOB 55170645 ON ivb9 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** JOB 55170651 ON ivb8 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** STEP 55170644.0 ON ivb9 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** STEP 55170645.0 ON ivb9 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** JOB 55170657 ON ivb8 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** JOB 55170641 ON ivb9 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** STEP 55170658.0 ON ivb8 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** STEP 55170656.0 ON ivb8 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** JOB 55170661 ON ivb8 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** JOB 55170646 ON ivb9 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** STEP 55170657.0 ON ivb8 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** JOB 55170665 ON ivb8 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** STEP 55170651.0 ON ivb8 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** JOB 55170656 ON ivb8 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** STEP 55170666.0 ON ivb7 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** STEP 55170661.0 ON ivb8 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** STEP 55170673.0 ON ivb7 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** JOB 55170658 ON ivb8 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** JOB 55170666 ON ivb7 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** JOB 55170677 ON ivb7 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** STEP 55170671.0 ON ivb7 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** STEP 55170665.0 ON ivb8 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** JOB 55170673 ON ivb7 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** JOB 55170682 ON ivb7 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** STEP 55170677.0 ON ivb7 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** JOB 55170671 ON ivb7 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** STEP 55170683.0 ON ivb6 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** STEP 55170678.0 ON ivb7 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+srun: Job step aborted: Waiting up to 32 seconds for job step to finish.
+slurmstepd: error: *** STEP 55170684.0 ON ivb6 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** STEP 55170682.0 ON ivb7 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+srun: error: ivb11: task 0: Terminated
+slurmstepd: error: *** JOB 55170678 ON ivb7 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** STEP 55170693.0 ON ivb6 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** JOB 55170688 ON ivb6 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** JOB 55170683 ON ivb6 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** JOB 55170684 ON ivb6 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** JOB 55170693 ON ivb6 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
+slurmstepd: error: *** STEP 55170688.0 ON ivb6 CANCELLED AT 2020-08-26T18:30:48 DUE TO TIME LIMIT ***
