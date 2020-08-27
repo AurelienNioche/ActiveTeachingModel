@@ -188,7 +188,7 @@ def main() -> None:
                     )
 
                     json_content = {
-                        "seed": seed + agent,
+                        "seed": seed+agent,
                         "agent": agent,
                         "bounds": bounds,
                         "md_learner": LEARNER_INV[learner_md],

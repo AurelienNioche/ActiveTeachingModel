@@ -5,13 +5,14 @@ from tqdm import tqdm
 
 from plot.subplot import chocolate, box, hist
 
-DATA_NAME = "walsh_new"
+DATA_NAME = "exp_stup"
 
 FORCE = False
 
 RAW_DATA_FOLDER = os.path.join("data", "triton", DATA_NAME)
 PREPROCESSED_DATA_FILE = os.path.join(
-    "data", "preprocessed", f"chocolate_triton{DATA_NAME}.csv")
+    "data", "preprocessed", f"chocolate_triton{DATA_NAME}.csv"
+)
 
 os.makedirs(os.path.join("data", "preprocessed"), exist_ok=True)
 
@@ -67,16 +68,14 @@ def main():
     learners = sorted(np.unique(df["Learner"]))
     psy = sorted(np.unique(df["Psychologist"]))
 
-    items_learnt = \
-        {
-            "one_day_later": "Items learnt one day later",
-            "end_last_ss": "Items learnt end last session"
-        }
+    items_learnt = {
+        "one_day_later": "Items learnt one day later",
+        "end_last_ss": "Items learnt end last session",
+    }
 
     for k, v in items_learnt.items():
 
-        fig_path = os.path.join("fig",
-                                f"{DATA_NAME}_chocolate_{k}.pdf")
+        fig_path = os.path.join("fig", f"{DATA_NAME}_chocolate_{k}.pdf")
         chocolate.plot(
             df=df,
             teachers=teachers,
@@ -86,20 +85,15 @@ def main():
             learnt_label=v,
         )
 
-        fig_path = os.path.join("fig",
-                                f"{DATA_NAME}_box_{k}.pdf")
+        fig_path = os.path.join("fig", f"{DATA_NAME}_box_{k}.pdf")
 
         box.plot(
-            df=df,
-            fig_path=fig_path,
-            learnt_label=v,
+            df=df, fig_path=fig_path, learnt_label=v,
         )
 
-        fig_path = os.path.join("fig",
-                                f"{DATA_NAME}_hist_{k}.pdf")
+        fig_path = os.path.join("fig", f"{DATA_NAME}_hist_{k}.pdf")
 
-        hist.plot(learnt_label=v, df=df,
-                  fig_path=fig_path)
+        hist.plot(learnt_label=v, df=df, fig_path=fig_path)
 
 
 if __name__ == "__main__":
