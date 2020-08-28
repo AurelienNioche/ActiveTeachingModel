@@ -56,6 +56,8 @@ def select_data_name():
 
     # func UNIX side effects
     trial_name = input("Trial name: ")
+    saving_path = os.path.join(paths.DATA_CLUSTER_DIR, trial_name)
+    os.makedirs(saving_path, exist_ok=True)
     os.system(f"echo {trial_name} > .last_run_name")
     return trial_name
 
@@ -67,7 +69,7 @@ def delete_config():
         erase = input("Do you want to erase the config folder first? " "('y' or 'yes')")
         if erase in ("y", "yes"):
             shutil.rmtree(paths.CONFIG_CLUSTER_DIR)
-            os.makedirs(paths.CONFIG_CLUSTER_DIR)
+            os.makedirs(paths.CONFIG_CLUSTER_DIR, exist_ok=True)
             print("Done!")
         else:
             print("I keep everything as it is")
@@ -80,7 +82,7 @@ def delete_data():
         erase = input("Do you want to erase the data folder first? " "('y' or 'yes')")
         if erase in ("y", "yes"):
             shutil.rmtree(paths.DATA_CLUSTER_DIR)
-            os.makedirs(paths.DATA_CLUSTER_DIR)
+            os.makedirs(paths.DATA_CLUSTER_DIR, exist_ok=True)
             print("Done!")
         else:
             print("I keep everything as it is")

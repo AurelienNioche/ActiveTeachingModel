@@ -51,7 +51,20 @@ def dic_to_lab_val(dic):
     return lab, val
 
 
-def cleanup():
+def select_data_name():
+    """Name file, keep last (this) name"""
+
+    # func UNIX side effects
+    trial_name = input("Trial name: ")
+    saving_path = os.path.join(paths.DATA_CLUSTER_DIR, trial_name)
+    os.makedirs(saving_path, exist_ok=True)
+    os.system(f"echo {trial_name} > .last_run_name")
+    return trial_name
+
+
+def delete_config():
+    """Delete cluster config files if user confirms"""
+
     if os.path.exists(paths.CONFIG_CLUSTER_DIR):
         erase = input("Do you want to erase the config folder first? " "('y' or 'yes')")
         if erase in ("y", "yes"):
@@ -61,6 +74,10 @@ def cleanup():
         else:
             print("I keep everything as it is")
 
+
+def delete_data():
+    """Delete cluster data files if user confirms"""
+
     if os.path.exists(paths.DATA_CLUSTER_DIR):
         erase = input("Do you want to erase the data folder first? " "('y' or 'yes')")
         if erase in ("y", "yes"):
@@ -69,6 +86,11 @@ def cleanup():
             print("Done!")
         else:
             print("I keep everything as it is")
+
+
+def cleanup():
+    delete_config()
+    # delete_data()
 
 
 def run_simulation():
@@ -124,17 +146,17 @@ def main() -> None:
 
     exp_decay_cst = {
         "param_labels": ["alpha", "beta"],
-        # "bounds": [[0.001, 0.5], [0.00, 0.5]],
         "bounds": [[0.069, 0.069], [0.00, 0.0]],
         "grid_size": 20,
         "cst_time": 1 / (60 ** 2),  # 1 / (24 * 60**2),
     }
-
     learner_models = (ExponentialNDelta,)
     teacher_models = (Leitner, Sampling, Threshold)
     psy_models = (PsychologistGrid,)
 
     f_name_root = f"at-{datetime.datetime.now().strftime('%Y_%m_%d_%H_%M_%S_%f')}"
+
+    select_data_name()
 
     for learner_md in learner_models:
 
