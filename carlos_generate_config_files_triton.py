@@ -1,24 +1,20 @@
 import datetime
-import os
 import json
-
-import numpy as np
+import os
 import shutil
 
+import numpy as np
 from numpy.random import default_rng
 from tqdm import tqdm
 
 import settings.paths as paths
-
-from model.teacher.sampling import Sampling
-from model.teacher.threshold import Threshold
-from model.teacher.leitner import Leitner
 from model.learner.exponential_n_delta import ExponentialNDelta
 from model.learner.walsh2018 import Walsh2018
 from model.psychologist.psychologist_grid import PsychologistGrid
-
-from settings.config_triton import TEACHER, PSYCHOLOGIST, LEARNER
-
+from model.teacher.leitner import Leitner
+from model.teacher.sampling import Sampling
+from model.teacher.threshold import Threshold
+from settings.config_triton import LEARNER, PSYCHOLOGIST, TEACHER
 
 N_SEC_PER_DAY = 86400
 N_SEC_PER_ITER = 2
@@ -78,7 +74,7 @@ def cleanup():
 def run_simulation():
     simulate = input("Run simulation? " "('y' or 'yes')")
     if simulate in ("y", "yes"):
-        os.system(f"sh run.sh simulation.job")
+        os.system("sh run.sh simulation.job")
     else:
         print("Nothing run.")
 
@@ -123,12 +119,13 @@ def main() -> None:
             [0.6, 0.6],
         ],
         "grid_size": 10,
-        "cst_time": 1 / (24 * 60 ** 2),
+        "cst_time": 1 / (4 * 24 * 60 ** 2),
     }
 
     exp_decay_cst = {
         "param_labels": ["alpha", "beta"],
-        "bounds": [[0.001, 0.5], [0.00, 0.5]],
+        # "bounds": [[0.001, 0.5], [0.00, 0.5]],
+        "bounds": [[0.069, 0.069], [0.00, 0.0]],
         "grid_size": 20,
         "cst_time": 1 / (60 ** 2),  # 1 / (24 * 60**2),
     }
@@ -188,7 +185,7 @@ def main() -> None:
                     )
 
                     json_content = {
-                        "seed": seed+agent,
+                        "seed": seed + agent,
                         "agent": agent,
                         "bounds": bounds,
                         "md_learner": LEARNER_INV[learner_md],

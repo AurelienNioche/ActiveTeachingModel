@@ -1,24 +1,20 @@
 import datetime
-import os
 import json
-
-import numpy as np
+import os
 import shutil
 
+import numpy as np
 from numpy.random import default_rng
 from tqdm import tqdm
 
 import settings.paths as paths
-
-from model.teacher.sampling import Sampling
-from model.teacher.threshold import Threshold
-from model.teacher.leitner import Leitner
 from model.learner.exponential_n_delta import ExponentialNDelta
 from model.learner.walsh2018 import Walsh2018
 from model.psychologist.psychologist_grid import PsychologistGrid
-
-from settings.config_triton import TEACHER, PSYCHOLOGIST, LEARNER
-
+from model.teacher.leitner import Leitner
+from model.teacher.sampling import Sampling
+from model.teacher.threshold import Threshold
+from settings.config_triton import LEARNER, PSYCHOLOGIST, TEACHER
 
 N_SEC_PER_DAY = 86400
 N_SEC_PER_ITER = 2
@@ -55,7 +51,9 @@ def dic_to_lab_val(dic):
     return lab, val
 
 
-def cleanup():
+def delete_config():
+    """Delete cluster config files if user confirms"""
+
     if os.path.exists(paths.CONFIG_CLUSTER_DIR):
         erase = input("Do you want to erase the config folder first? " "('y' or 'yes')")
         if erase in ("y", "yes"):
@@ -64,6 +62,19 @@ def cleanup():
             print("Done!")
         else:
             print("I keep everything as it is")
+
+
+def select_data_name():
+    """Name file, keep last (this) name"""
+
+    # func UNIX side effects
+    trial_name = input("Trial name: ")
+    os.system(f"echo {trial_name} > .last_run_name")
+    return trial_name
+
+
+def delete_data():
+    """Delete cluster data files if user confirms"""
 
     if os.path.exists(paths.DATA_CLUSTER_DIR):
         erase = input("Do you want to erase the data folder first? " "('y' or 'yes')")
@@ -75,10 +86,15 @@ def cleanup():
             print("I keep everything as it is")
 
 
+def cleanup():
+    delete_config()
+    delete_data()
+
+
 def run_simulation():
     simulate = input("Run simulation? " "('y' or 'yes')")
     if simulate in ("y", "yes"):
-        os.system(f"sh run.sh simulation.job")
+        os.system("sh run.sh simulation.job")
     else:
         print("Nothing run.")
 
@@ -138,6 +154,8 @@ def main() -> None:
     psy_models = (PsychologistGrid,)
 
     f_name_root = f"at-{datetime.datetime.now().strftime('%Y_%m_%d_%H_%M_%S_%f')}"
+
+    select_data_name()
 
     for learner_md in learner_models:
 

@@ -1,15 +1,17 @@
 """
 Run simulations and save results
 """
+
 import os
 
-from settings.config_triton import Config
 import settings.paths as paths
-
 from run.make_data_triton import run
+from settings.config_triton import Config
 
+with open("./.last_run_name") as f:
+    last_config = f.read()
 
-PATH = os.path.join(paths.DATA_CLUSTER_DIR)
+PATH = os.path.join(paths.DATA_CLUSTER_DIR, last_config)
 
 
 def main(job_id: int) -> None:
@@ -30,10 +32,10 @@ def main(job_id: int) -> None:
 
 
 if __name__ == "__main__":
-    try:
-        # Changes cluster simulation
+
+    try:  # Changes cluster simulation
         job_id = int(os.getenv("SLURM_ARRAY_TASK_ID"))
-    except:
-        # Default for non-cluster use
+    except ValueError:  # Default for non-cluster use
         job_id = 0
+
     main(job_id)

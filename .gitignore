@@ -166,6 +166,7 @@ config/triton-done/
 results/
 out/*
 .last.pid
+.last_run_name
 
 # Snippet pulls
 snippet
