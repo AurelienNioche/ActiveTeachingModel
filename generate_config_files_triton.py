@@ -51,6 +51,15 @@ def dic_to_lab_val(dic):
     return lab, val
 
 
+def select_data_name():
+    """Name file, keep last (this) name"""
+
+    # func UNIX side effects
+    trial_name = input("Trial name: ")
+    os.system(f"echo {trial_name} > .last_run_name")
+    return trial_name
+
+
 def delete_config():
     """Delete cluster config files if user confirms"""
 
@@ -62,15 +71,6 @@ def delete_config():
             print("Done!")
         else:
             print("I keep everything as it is")
-
-
-def select_data_name():
-    """Name file, keep last (this) name"""
-
-    # func UNIX side effects
-    trial_name = input("Trial name: ")
-    os.system(f"echo {trial_name} > .last_run_name")
-    return trial_name
 
 
 def delete_data():
@@ -88,7 +88,7 @@ def delete_data():
 
 def cleanup():
     delete_config()
-    delete_data()
+    # delete_data()
 
 
 def run_simulation():
