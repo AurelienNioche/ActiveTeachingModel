@@ -51,15 +51,14 @@ def dic_to_lab_val(dic):
     return lab, val
 
 
-def select_data_name():
+def select_data_folder():
     """Name file, keep last (this) name"""
 
     # func UNIX side effects
     trial_name = input("Trial name: ")
     saving_path = os.path.join(paths.DATA_CLUSTER_DIR, trial_name)
-    os.makedirs(saving_path, exist_ok=True)
-    os.system(f"echo {trial_name} > .last_run_name")
-    return trial_name
+    print("Data will be save at:", saving_path)
+    return saving_path
 
 
 def delete_config():
@@ -69,28 +68,29 @@ def delete_config():
         erase = input("Do you want to erase the config folder first? " "('y' or 'yes')")
         if erase in ("y", "yes"):
             shutil.rmtree(paths.CONFIG_CLUSTER_DIR)
-            os.makedirs(paths.CONFIG_CLUSTER_DIR, exist_ok=True)
             print("Done!")
         else:
             print("I keep everything as it is")
 
 
-def delete_data():
+def delete_data(data_name):
     """Delete cluster data files if user confirms"""
 
-    if os.path.exists(paths.DATA_CLUSTER_DIR):
+    if os.path.exists(data_name):
         erase = input("Do you want to erase the data folder first? " "('y' or 'yes')")
         if erase in ("y", "yes"):
-            shutil.rmtree(paths.DATA_CLUSTER_DIR)
-            os.makedirs(paths.DATA_CLUSTER_DIR, exist_ok=True)
+            shutil.rmtree(data_name)
             print("Done!")
         else:
             print("I keep everything as it is")
 
 
-def cleanup():
+def cleanup(data_name):
     delete_config()
-    # delete_data()
+    delete_data(data_name)
+
+    os.makedirs(data_name, exist_ok=True)
+    os.makedirs(paths.CONFIG_CLUSTER_DIR, exist_ok=True)
 
 
 def run_simulation():
@@ -108,7 +108,10 @@ def mod_job_file(template_path: str, config_path: str, saving_path: str) -> None
 def main() -> None:
     """Set the parameters and generate the JSON config files"""
 
-    cleanup()
+    f_name_root = f"at-{datetime.datetime.now().strftime('%Y_%m_%d_%H_%M_%S_%f')}"
+
+    data_folder = select_data_folder()
+    cleanup(data_folder)
 
     seed = 123
     np.random.seed(seed)
@@ -154,10 +157,6 @@ def main() -> None:
     learner_models = (Walsh2018,)
     teacher_models = (Leitner, Sampling, Threshold)
     psy_models = (PsychologistGrid,)
-
-    f_name_root = f"at-{datetime.datetime.now().strftime('%Y_%m_%d_%H_%M_%S_%f')}"
-
-    select_data_name()
 
     for learner_md in learner_models:
 
@@ -223,6 +222,7 @@ def main() -> None:
                         "pr_lab": pr_lab,
                         "pr_val": pr_val,
                         "cst_time": cst_time,
+                        "data_folder": data_folder,
                     }
 
                     json_content.update(**task_param)

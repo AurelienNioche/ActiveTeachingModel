@@ -37,6 +37,7 @@ PSYCHOLOGIST = {
 class Config:
     def __init__(
         self,
+        data_folder,
         config_file,
         config_dic,
         seed,
@@ -95,6 +96,7 @@ class Config:
 
         self.config_file = config_file
         self.config_dic = config_dic
+        self.data_folder = data_folder
 
     @classmethod
     def get(cls, file):

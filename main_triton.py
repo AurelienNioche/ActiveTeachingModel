@@ -8,11 +8,6 @@ import settings.paths as paths
 from run.make_data_triton import run
 from settings.config_triton import Config
 
-with open("./.last_run_name") as f:
-    last_config = f.read()
-
-PATH = os.path.join(paths.DATA_CLUSTER_DIR, last_config)
-
 
 def main(job_id: int) -> None:
 
@@ -28,7 +23,7 @@ def main(job_id: int) -> None:
     config = Config.get(f_path)
     df = run(config=config)
     f_name = f"{config.config_file.split('.')[0]}.csv"
-    df.to_csv(os.path.join(PATH, f_name))
+    df.to_csv(os.path.join(config.data_folder, f_name))
 
 
 if __name__ == "__main__":
