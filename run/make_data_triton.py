@@ -94,7 +94,7 @@ def run(config):
 
     row_list = []
 
-    now = 0
+    now = 0.0
 
     item = None
     ts = None
@@ -106,9 +106,16 @@ def run(config):
     for i in range(n_ss):
         for j in range(ss_n_iter):
 
-            if item is not None and ts is not None:
-                psy.update(item=item, response=was_success,
-                           timestamp=ts)
+            if item is None and ts is None:
+                item = 0
+                p = 0
+                n_learnt_before = 0
+                n_seen_before = 0
+            else:
+
+                p_seen_real_before, seen_before = psy.p_seen(now=now, param=pr)
+                n_learnt_before = np.sum(p_seen_real_before > learnt_threshold)
+                n_seen_before = np.sum(seen_before)
 
                 if is_leitner:
                     item = teacher.ask(now=now,
@@ -129,16 +136,17 @@ def run(config):
                     item=item,
                     param=pr,
                     now=ts)
-            else:
-                item = 0
-                p = 0
 
             ts = now
             was_success = np.random.random() < p
 
+            psy.update(item=item, response=was_success,
+                       timestamp=ts)
+
             p_seen_real, seen = psy.p_seen(now=now, param=pr)
 
             n_learnt = np.sum(p_seen_real > learnt_threshold)
+            n_seen = np.sum(seen)
             # if j == 0:
             #     print("********n_learnt", n_learnt)
             # else:
@@ -168,13 +176,16 @@ def run(config):
                 "pr_inf": pr_inf,
                 "p_err_mean": p_err_mean,
                 "p_err_std": p_err_std,
+                "n_learnt_before": n_learnt_before,
                 "n_learnt": n_learnt,
+                "n_seen_before": n_seen_before,
+                "n_seen": n_seen,
                 "timestamp": now,
                 "timestamp_cpt": now_real,
                 "config_file": config_file,
-                "is_human": False
+                "is_human": False,
+                **config_dic
             }
-            row.update(config_dic)
             row_list.append(row)
 
             now += time_per_iter
@@ -183,5 +194,31 @@ def run(config):
             # pbar.update()
 
         now += time_between_ss
+
+    p_seen_real, seen = psy.p_seen(now=now, param=pr)
+
+    n_learnt = np.sum(p_seen_real > learnt_threshold)
+    n_seen = np.sum(seen)
+
+    row = {
+        "iter": itr,
+        "item": item,
+        "success": was_success,
+        "ss_idx": n_ss,
+        "ss_iter": ss_n_iter,
+        "pr_inf": None,
+        "p_err_mean": None,
+        "p_err_std": None,
+        "n_learnt_before": None,
+        "n_learnt": n_learnt,
+        "n_seen_before": None,
+        "n_seen": n_seen,
+        "timestamp": now,
+        "timestamp_cpt": datetime.datetime.now().timestamp(),
+        "config_file": config_file,
+        "is_human": False,
+        **config_dic
+    }
+    row_list.append(row)
 
     return pd.DataFrame(row_list)
