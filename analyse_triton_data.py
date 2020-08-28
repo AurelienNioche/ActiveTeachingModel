@@ -24,7 +24,7 @@ def preprocess_data(preprocess_data_file, raw_data_folder):
         df = pd.read_csv(p.path, index_col=[0])
 
         last_iter = max(df["iter"])
-        is_last_iter = df["iter" == last_iter]
+        is_last_iter = df["iter"] == last_iter
 
         n_learnt = df[is_last_iter]["n_learnt"].iloc[0]
 
