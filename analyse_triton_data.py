@@ -4,31 +4,23 @@ import pandas as pd
 from tqdm import tqdm
 
 from plot.subplot import chocolate, box, hist
-
-DATA_NAME = ""
+from settings import paths
 
 FORCE = False
 
-RAW_DATA_FOLDER = "/Volumes/niochea1/ActiveTeachingModel/data/triton"
-#os.path.join("data", "triton")
-PREPROCESSED_DATA_FILE = os.path.join(
-    "data", "preprocessed", f"chocolate_triton{DATA_NAME}.csv")
 
-os.makedirs(os.path.join("data", "preprocessed"), exist_ok=True)
+def preprocess_data(preprocess_data_file, raw_data_folder):
 
+    assert os.path.exists(raw_data_folder)
 
-def preprocess_data():
-
-    assert os.path.exists(RAW_DATA_FOLDER)
-
-    path, dirs, files = next(os.walk(RAW_DATA_FOLDER))
+    path, dirs, files = next(os.walk(raw_data_folder))
     file_count = len(files)
 
     assert file_count > 0
 
     row_list = []
 
-    for i, p in tqdm(enumerate(os.scandir(RAW_DATA_FOLDER)), total=file_count):
+    for i, p in tqdm(enumerate(os.scandir(raw_data_folder)), total=file_count):
         df = pd.read_csv(p.path, index_col=[0])
 
         last_iter = max(df["iter"])
@@ -52,16 +44,28 @@ def preprocess_data():
         row_list.append(row)
 
     df = pd.DataFrame(row_list)
-    df.to_csv(PREPROCESSED_DATA_FILE)
+    df.to_csv(preprocess_data_file)
     return df
 
 
 def main():
 
-    if not os.path.exists(PREPROCESSED_DATA_FILE) or FORCE:
-        df = preprocess_data()
+    trial_name = input("Trial name: ")
+    raw_data_folder = os.path.join(paths.DATA_CLUSTER_DIR, trial_name)
+
+    # RAW_DATA_FOLDER = "/Volumes/niochea1/ActiveTeachingModel/data/triton"
+    # #os.path.join("data", "triton")
+    preprocess_data_file = os.path.join(
+        "data", "preprocessed", f"chocolate_triton{trial_name}.csv")
+
+    os.makedirs(os.path.join("data", "preprocessed"), exist_ok=True)
+
+    if not os.path.exists(preprocess_data_file) or FORCE:
+        df = preprocess_data(
+            raw_data_folder=raw_data_folder,
+            preprocess_data_file=preprocess_data_file)
     else:
-        df = pd.read_csv(PREPROCESSED_DATA_FILE, index_col=[0])
+        df = pd.read_csv(preprocess_data_file, index_col=[0])
 
     teachers = sorted(np.unique(df["Teacher"]))
     learners = sorted(np.unique(df["Learner"]))
@@ -76,7 +80,7 @@ def main():
     for k, v in items_learnt.items():
 
         fig_path = os.path.join("fig",
-                                f"{DATA_NAME}_chocolate_{k}.pdf")
+                                f"{trial_name}_chocolate_{k}.pdf")
         chocolate.plot(
             df=df,
             teachers=teachers,
@@ -87,7 +91,7 @@ def main():
         )
 
         fig_path = os.path.join("fig",
-                                f"{DATA_NAME}_box_{k}.pdf")
+                                f"{trial_name}_box_{k}.pdf")
 
         box.plot(
             df=df,
@@ -96,7 +100,7 @@ def main():
         )
 
         fig_path = os.path.join("fig",
-                                f"{DATA_NAME}_hist_{k}.pdf")
+                                f"{trial_name}_hist_{k}.pdf")
 
         hist.plot(learnt_label=v, df=df,
                   fig_path=fig_path)
