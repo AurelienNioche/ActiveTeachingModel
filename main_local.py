@@ -21,13 +21,13 @@ def main():
         #                            "trial_triton_leitner_walsh.json")
 
         config_file = os.path.join("config",
-                                   "triton",
-                                   "at-2020_08_26_13_20_03_075705-exp_decay-psy_grid-sampling-49.json")
+                                   "trial_samp_exp.json")
 
     config = Config.get(config_file)
     df = run(config=config)
     f_name = f"{os.path.splitext(os.path.basename(config_file))[0]}.csv"
     df.to_csv(os.path.join("data", f_name))
+    df.to_csv(os.path.join(config.data_folder, f_name))
 
 
 if __name__ == "__main__":

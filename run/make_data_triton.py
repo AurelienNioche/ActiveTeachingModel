@@ -1,6 +1,7 @@
 import numpy as np
 import datetime
 import pandas as pd
+from tqdm import tqdm
 
 from model.teacher.leitner import Leitner
 from model.teacher.threshold import Threshold
@@ -11,7 +12,7 @@ from model.learner.exponential_n_delta import ExponentialNDelta
 # from model.learner.act_r2008 import ActR2008
 
 
-def run(config):
+def run(config, with_tqdm=False):
 
     n_item = config.n_item
     omniscient = config.omniscient
@@ -29,8 +30,6 @@ def run(config):
     pr = config.param
     teacher_pr = config.teacher_pr
     psy_pr = config.psy_pr
-
-    # n_iter = n_ss * ss_n_iter
 
     teacher_cls = config.teacher_cls
     psy_cls = config.psy_cls
@@ -56,18 +55,6 @@ def run(config):
     is_leitner = teacher_cls == Leitner
     is_sampling = teacher_cls == Sampling
 
-    # if "horizon" in teacher_pr:
-    #     horizon = teacher_pr["horizon"]
-    # else:
-    #     horizon = 0
-
-    # if learner_cls in (ActR2008,):
-    #     if is_item_specific:
-    #         raise NotImplementedError
-    #     else:
-    #         learner = learner_cls(n_item=n_item,
-    #                               n_iter=n_ss * ss_n_iter
-    #                                      + horizon)
     if learner_cls in (Walsh2018, ExponentialNDelta):
         learner = learner_cls(n_item=n_item,
                               n_iter=n_ss * ss_n_iter,
@@ -102,7 +89,11 @@ def run(config):
 
     itr = 0
 
-    # with tqdm(total=n_iter, file=sys.stdout) as pbar:
+    if with_tqdm:
+        import sys
+        n_iter = n_ss * ss_n_iter
+        pbar = tqdm(total=n_iter, file=sys.stdout)
+
     for i in range(n_ss):
         for j in range(ss_n_iter):
 
@@ -152,18 +143,18 @@ def run(config):
             # else:
             #     print("n_learnt", n_learnt)
 
-            if not is_leitner or not omniscient:
+            if is_leitner or omniscient:
+                pr_inf, p_err_mean, p_err_std = None, None, None
+
+            else:
                 pr_inf = psy.inferred_learner_param()
                 p_seen_inf, seen = psy.p_seen(now=now, param=pr_inf)
 
-                if len(p_seen_inf):
-                    p_err = np.abs(p_seen_real-p_seen_inf)
+                if np.sum(seen):
+                    p_err = np.abs(p_seen_real - p_seen_inf)
                     p_err_mean, p_err_std = np.mean(p_err), np.std(p_err)
                 else:
                     p_err_mean, p_err_std = None, None
-
-            else:
-                pr_inf, p_err_mean, p_err_std = None, None, None
 
             now_real = datetime.datetime.now().timestamp()
 
@@ -191,7 +182,8 @@ def run(config):
             now += time_per_iter
             itr += 1
 
-            # pbar.update()
+            if with_tqdm:
+                pbar.update()
 
         now += time_between_ss
 
@@ -220,5 +212,8 @@ def run(config):
         **config_dic
     }
     row_list.append(row)
+
+    if with_tqdm:
+        pbar.close()
 
     return pd.DataFrame(row_list)

@@ -83,13 +83,9 @@ class Sampling(Teacher):
                     future=future, param=param,
                     new_ts=new_ts, eval_ts=eval_ts, psy=psy)
 
-        if np.all(r1 == r1[0]):
-            r = r1
-        else:
-            r = r2
-
-        item_idx = first[np.argmax(r)]
-
+        max_r1 = np.max(r1)
+        is_max = r1 == max_r1
+        item_idx = first[is_max][np.argmax(r2[is_max])]
         return item_idx
 
     @classmethod
