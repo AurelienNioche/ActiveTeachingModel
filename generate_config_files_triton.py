@@ -154,7 +154,7 @@ def main() -> None:
         "cst_time": 1 / (60 ** 2),  # 1 / (24 * 60**2),
     }
 
-    learner_models = (Walsh2018,)
+    learner_models = (ExponentialNDelta,)
     teacher_models = (Leitner, Sampling, Threshold)
     psy_models = (PsychologistGrid,)
 
