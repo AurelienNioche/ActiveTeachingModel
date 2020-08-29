@@ -243,7 +243,7 @@ def main() -> None:
     os.makedirs(paths.LOG_CLUSTER_DIR, exist_ok=True)
 
     mod_job_file(
-        os.path.join(paths.JSON_DIR, "template.job"),
+        os.path.join(paths.TEMPLATE_DIR, "template.job"),
         paths.CONFIG_CLUSTER_DIR,
         os.path.join(paths.BASE_DIR, "simulation.job"),
     )

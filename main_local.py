@@ -21,7 +21,7 @@ def main():
         #                            "trial_triton_leitner_walsh.json")
 
         config_file = os.path.join("config",
-                                   "trial_threshold_exp.json")
+                                   "threshold_walsh.json")
 
     config = Config.get(config_file)
     df = run(config=config, with_tqdm=True)

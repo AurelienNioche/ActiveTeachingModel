@@ -13,12 +13,18 @@
   "n_ss": 7,
   "ss_n_iter":  100,
   "time_between_ss": 86200,
-  "cst_time": 0.0002777777777777778,
   "teacher_pr_lab": ["n_sample"],
   "teacher_pr_val": [500],
   "psy_pr_lab": ["grid_size"],
   "psy_pr_val": [20],
   "pr_lab": ["alpha", "beta"],
-  "pr_val": [0.02, 0.44],
+  "pr_val": [
+        0.9,
+        0.04,
+        0.01,
+        0.08,
+        0.1,
+        0.6],
+  "cst_time": 0.0002777777777777778,
   "data_folder": "data/local"
 }
