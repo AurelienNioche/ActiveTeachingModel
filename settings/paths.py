@@ -1,3 +1,5 @@
+"""Project paths settings"""
+
 import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -16,7 +18,10 @@ DATA_DIR = os.path.join(BASE_DIR, "data")
 
 DATA_CLUSTER_DIR = os.path.join(DATA_DIR, "triton")
 
+<<<<<<< HEAD
+=======
 TEMPLATE_DIR = os.path.join(BASE_DIR, "templates")
+>>>>>>> ccfdac406b03f88e5be84aef8612ddcf7620949c
 
 for directory in FIG_DIR, BKP_DIR, JSON_DIR, CONFIG_CLUSTER_DIR, DATA_DIR:
     os.makedirs(directory, exist_ok=True)

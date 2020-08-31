@@ -10,6 +10,7 @@ from settings.config_triton import Config
 
 
 def main(job_id: int) -> None:
+    """Launch job and save the files"""
 
     f_names = sorted(
         file_name
@@ -22,16 +23,16 @@ def main(job_id: int) -> None:
     )
     f_path = f_paths[job_id]
     config = Config.get(f_path)
-    df = run(config=config)
+    saving_df = run(config=config)
     f_name = f"{config.config_file.split('.')[0]}.csv"
-    df.to_csv(os.path.join(config.data_folder, f_name))
+    saving_df.to_csv(os.path.join(config.data_folder, f_name))
 
 
 if __name__ == "__main__":
 
     try:  # Changes cluster simulation
-        job_id = int(os.getenv("SLURM_ARRAY_TASK_ID"))
+        JOB_ID = int(os.getenv("SLURM_ARRAY_TASK_ID"))
     except ValueError:  # Default for non-cluster use
-        job_id = 0
+        JOB_ID = 0
 
-    main(job_id)
+    main(JOB_ID)

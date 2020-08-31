@@ -1,3 +1,5 @@
+#!/bin/python3
+
 import datetime
 import json
 import os
@@ -54,7 +56,6 @@ def dic_to_lab_val(dic):
 def select_data_folder():
     """Name file, keep last (this) name"""
 
-    # func UNIX side effects
     trial_name = input("Trial name: ")
     saving_path = os.path.join(paths.DATA_CLUSTER_DIR, trial_name)
     print("Data will be save at:", saving_path)
@@ -96,13 +97,15 @@ def cleanup(data_name):
 def run_simulation():
     simulate = input("Run simulation? " "('y' or 'yes')")
     if simulate in ("y", "yes"):
-        os.system("sh run.sh simulation.job")
+        os.system("/bin/sh run.sh simulation.job")
     else:
         print("Nothing run.")
 
 
 def mod_job_file(template_path: str, config_path: str, saving_path: str) -> None:
-    os.system(f"sh mod_job.sh {template_path} {config_path} {saving_path}")
+    """Call the shell script that modifies the number of parallel branches"""
+
+    os.system(f"/bin/sh mod_job.sh {template_path} {config_path} {saving_path}")
 
 
 def main() -> None:
