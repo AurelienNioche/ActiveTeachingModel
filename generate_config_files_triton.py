@@ -129,7 +129,7 @@ def main() -> None:
         "time_per_iter": 2,
     }
 
-    sampling_cst = {"n_sample": 500}
+    sampling_cst = {"n_sample": 10000}
 
     leitner_cst = {"delay_factor": 2, "delay_min": 2}
 

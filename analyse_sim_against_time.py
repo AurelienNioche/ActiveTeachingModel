@@ -5,6 +5,8 @@ import numpy as np
 from tqdm import tqdm
 import pandas as pd
 import matplotlib.pyplot as plt
+from matplotlib.patches import Patch
+from matplotlib.lines import Line2D
 
 FORCE = True
 
@@ -16,26 +18,37 @@ os.makedirs(FIG_FOLDER, exist_ok=True)
 
 def main():
 
-    raw_data_folder = os.path.join("data", "local_walsh")
+    raw_data_folder = os.path.join("data", "exp_decay_1330")
     path, dirs, files = next(os.walk(raw_data_folder))
 
-    labels = []
+    teachers = []
     dfs = []
     for f in files:
         df = pd.read_csv(os.path.join(raw_data_folder, f), index_col=[0])
         dfs.append(df)
-        label = os.path.splitext(f)[0]
-        labels.append(label)
+        fn = os.path.splitext(f)[0]
+        _, date, learner, psy, teacher, agent_id = fn.split("-")
+        teachers.append(teacher)
+
+    colors = {t: f'C{i}' for (i,t) in enumerate(np.unique(teachers))}
 
     fig, ax = plt.subplots()
-    for df, label in zip(dfs, labels):
-        ax.plot(df['timestamp'], df['n_learnt'], label=label)
+    for df, teacher in zip(dfs, teachers):
+        ax.plot(df['timestamp'], df['n_learnt'], label=teacher,
+                color=colors[teacher], alpha=0.1, lw=0.5)
     ax.set_xlabel("time")
     ax.set_ylabel("n learnt")
-    plt.legend()
+
+    legend_elements = [Line2D([0], [0], color=v, lw=1, label=k)
+                       for (k, v) in colors.items()]
+                       # Line2D([0], [0], marker='o', color='w', label='Scatter',
+                       #        markerfacecolor='g', markersize=15),
+                       # Patch(facecolor='orange', edgecolor='r',
+                       #       label='Color Patch')
+
+    ax.legend(handles=legend_elements)
+
     plt.show()
-
-
 
 
 if __name__ == "__main__":
