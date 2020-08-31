@@ -1,11 +1,12 @@
-import os
-import pandas as pd
-import numpy as np
-
 """
 To import data:
 scp <user>@<server>:/var/www/html/ActiveTeachingServer/results.csv ~/Desktop
 """
+
+import os
+
+import numpy as np
+import pandas as pd
 
 
 def main():
