@@ -132,7 +132,7 @@ def main() -> None:
         "time_per_iter": 2,
     }
 
-    sampling_cst = {"n_sample": 500}
+    sampling_cst = {"n_sample": 10000}
 
     leitner_cst = {"delay_factor": 2, "delay_min": 2}
 
@@ -246,7 +246,7 @@ def main() -> None:
     os.makedirs(paths.LOG_CLUSTER_DIR, exist_ok=True)
 
     mod_job_file(
-        os.path.join(paths.JSON_DIR, "template.job"),
+        os.path.join(paths.TEMPLATE_DIR, "template.job"),
         paths.CONFIG_CLUSTER_DIR,
         os.path.join(paths.BASE_DIR, "simulation.job"),
     )

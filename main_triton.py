@@ -18,7 +18,8 @@ def main(job_id: int) -> None:
         if ".json" in file_name
     )
     f_paths = sorted(
-        os.path.join(paths.CONFIG_CLUSTER_DIR, f_name) for f_name in f_names
+        os.path.join(paths.CONFIG_CLUSTER_DIR, f_name)
+        for f_name in f_names
     )
     f_path = f_paths[job_id]
     config = Config.get(f_path)
