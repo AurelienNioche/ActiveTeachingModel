@@ -112,7 +112,7 @@ def mod_job_file(template_path: str, config_path: str, saving_path: str) -> None
 def main() -> None:
     """Set the parameters and generate the JSON config files"""
 
-    f_name_root = f"at-{datetime.datetime.now().strftime('%Y_%m_%d_%H_%M_%S_%f')}"
+    ts = datetime.datetime.now().strftime('%Y_%m_%d_%H_%M_%S_%f')
 
     learner_models = (ExponentialNDelta,)
     teacher_models = (Leitner, Threshold, Recursive)
@@ -161,6 +161,8 @@ def main() -> None:
         "grid_size": 20,
         "cst_time": 1 / (60 ** 2),  # 1 / (24 * 60**2),
     }
+
+    job_number = 0
 
     for learner_md in learner_models:
 
@@ -233,14 +235,16 @@ def main() -> None:
 
                     f_name = os.path.join(
                         paths.CONFIG_CLUSTER_DIR,
-                        f"{f_name_root}-"
+                        f"{job_number}-{ts}-"
                         f"{json_content['md_learner']}-"
                         f"{json_content['md_psy']}-"
                         f"{json_content['md_teacher']}-"
                         f"{agent}.json",
                     )
+
                     with open(f_name, "w") as f:
                         json.dump(json_content, f, sort_keys=False, indent=4)
+                    job_number += 1
     print("Config files created!")
 
     os.makedirs(paths.DATA_CLUSTER_DIR, exist_ok=True)
