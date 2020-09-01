@@ -1,4 +1,7 @@
 #%%
+"""
+Param recovery
+"""
 
 import os
 from typing import Iterable
@@ -7,6 +10,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
+from tqdm import tqdm
 
 import settings.paths as paths
 
@@ -19,25 +23,16 @@ def cartesian_product(*arrays):
         arr[..., i] = a
     return arr.reshape(-1, la)
 
+
 def cp_grid_param_loglin(grid_size, bounds, methods):
+    """Get grid parameters, with log scale for alpha"""
+
     diff = bounds[:, 1] - bounds[:, 0] > 0
     not_diff = np.invert(diff)
 
-    values = np.atleast_2d([m(*b, num=grid_size) for (b, m) in zip(bounds[diff], methods[diff])])
-    var = cartesian_product(*values)
-    grid = np.zeros((max(1, len(var)), len(bounds)))
-    if np.sum(diff):
-        grid[:, diff] = var
-    if np.sum(not_diff):
-        grid[:, not_diff] = bounds[not_diff, 0]
-
-    return grid
-
-def cp_grid_param(grid_size, bounds):
-    diff = bounds[:, 1] - bounds[:, 0] > 0
-    not_diff = np.invert(diff)
-
-    values = np.atleast_2d([np.linspace(*b, num=grid_size) for b in bounds[diff]])
+    values = np.atleast_2d(
+        [m(*b, num=grid_size) for (b, m) in zip(bounds[diff], methods[diff])]
+    )
     var = cartesian_product(*values)
     grid = np.zeros((max(1, len(var)), len(bounds)))
     if np.sum(diff):
@@ -53,10 +48,10 @@ def log_lik(
     hist: Iterable,
     success: Iterable,
     timestamp: Iterable,
-    cst_time: int,
+    cst_time: float,
     eps: float,
 ):
-    """Compute log-likelihood"""
+    """Compute log-likelihood for one bounds param pair"""
 
     a, b = param
 
@@ -93,13 +88,14 @@ def get_all_log_lik(user_df: pd.DataFrame, grid_df: pd.DataFrame, eps: float) ->
     sums_ll = []
     beginning_history = pd.Timestamp("1970-01-01", tz="UTC")
     one_s = pd.Timedelta("1s")
-    for _, param_pair in grid_df.iterrows():
+    for _, param_pair in tqdm(grid_df.iterrows()):
         sums_ll.append(
             log_lik(
                 param_pair,
                 user_df["item"],
                 user_df["success"],
-                (user_df["ts_reply"] - beginning_history) // one_s,  # To seconds as in pandas docs
+                (user_df["ts_reply"] - beginning_history)
+                // one_s,  # To seconds as in pandas docs
                 1 / (10000 * 60 ** 2),
                 eps,
             )
@@ -108,84 +104,69 @@ def get_all_log_lik(user_df: pd.DataFrame, grid_df: pd.DataFrame, eps: float) ->
     return sums_ll
 
 
-def main(f_results: str) -> None:
+def plot_param_space(user_name: str, grid: pd.DataFrame, log_liks: np.ndarray) -> None:
+    """Heatmap of the alpha-beta parameter space"""
+
+    plt.close()
+    log_liks = pd.Series(log_liks[f"{user_name}@test.com"], name="log_lik")
+    data = pd.concat((grid, log_liks), axis=1)
+    data = data.round(2)
+    data = data.pivot("alpha", "beta", "log_lik")
+    ax = sns.heatmap(data=data, cmap="viridis")
+    ax.invert_yaxis()
+    plt.savefig(os.path.join("fig", f"param_grid_{user_name}.pdf"))
+
+
+def main(f_results: str) -> (pd.DataFrame, pd.DataFrame):
     """Get grid values, log-lik, and plot"""
 
     eps = np.finfo(np.float).eps
 
-    # bounds = np.array([[0.001, 0.5], [0.00, 0.5]])
+    # Grid
+    # original bounds := np.array([[0.001, 0.5], [0.00, 0.5]])
     bounds = np.array([[0.00001, 4.0], [0.00, 0.5]])
     grid_size = 20
-    methods = np.array([np.logspace, np.linspace])
+    methods = np.array([np.logspace, np.linspace])  # Use log scale for alpha
     grid = cp_grid_param_loglin(grid_size, bounds, methods)
     grid = pd.DataFrame(grid, columns=("alpha", "beta"))
 
-    sns.heatmap(grid, square=True)
-    plt.savefig(os.path.join("fig", "param_grid.pdf"))
-    plt.close("all")
-
+    # Log-likelihood
     results_df = pd.read_csv(os.path.join(paths.DATA_DIR, f_results), index_col=[0])
     results_df["ts_display"] = pd.to_datetime(
         results_df["ts_display"]
     )  # str to datetime
     results_df["ts_reply"] = pd.to_datetime(results_df["ts_reply"])  # str to datetime
-    return (
-        {
-            user: get_all_log_lik(user_df, grid, eps)
-            for user, user_df in results_df.groupby("user")
-        },
-        grid,
-    )
+    likelihoods = {
+        user: get_all_log_lik(user_df, grid, eps)
+        for user, user_df in results_df.groupby("user")
+        if "carlos2" not in user
+    }
+    users = list(likelihoods.keys())
+    map(plot_param_space, users)
 
-
-# results_df = pd.read_csv(os.path.join(paths.DATA_DIR, "results.csv"), index_col=[0])
+    return likelihoods, grid
 
 
 if __name__ == "__main__":
-    loglikes, grid = main("results.csv")
+    loglikes, grid_ = main("results.csv")
 
-#%%
 
-#%%
-values = loglikes.values
-spam = np.meshgrid(values)
-
-#%%
-eggs = loglikes.values
-#%%
-plt.imshow(spam)
-plt.savefig(os.path.join("fig", "param_grid.pdf"))
-plt.close("all")
-#%%
-
-mean, cov = [0, 1], [(1, 0.5), (0.5, 1)]
-data = np.random.multivariate_normal(mean, cov, 200)
-df = pd.DataFrame(data, columns=["x", "y"])
-sns.jointplot(x="x", y="y", data=df)
-
-plt.savefig(os.path.join("fig", "param_grid.pdf"))
-#%%
-df
-#%%
-tips = sns.load_dataset("tips")
-sns.jointplot(x="total_bill", y="tip", data=tips, kind="reg")
-plt.savefig(os.path.join("fig", "param_grid.pdf"))
-#%%
-flights_long = sns.load_dataset("flights")
-flights = flights_long.pivot("month", "year", "passengers")
-
-#%%
-plt.close()
-user_name = "aini"
-logs = pd.Series(loglikes[f"{user_name}@test.com"], name="log_lik")
-data = pd.concat((grid, logs), axis=1)
-data = data.round(2)
-data = data.pivot("alpha", "beta", "log_lik")
-ax = sns.heatmap(data=data, cmap="viridis")
-ax.invert_yaxis()
-plt.savefig(os.path.join("fig", f"param_grid_{user_name}.pdf"))
 # def enclose_log_lik_df(df, eps):
 #     def log_lik_closure(param_pair):
 #         return log_lik(param_pair, df["item"], df["success"], df["ts_reply"], np.ones_like(df["item"]), eps)
 #     return log_lik_closure
 # log_lik_cl = enclose_log_lik_df(df_, EPS)
+#
+# def cp_grid_param(grid_size, bounds):
+#     diff = bounds[:, 1] - bounds[:, 0] > 0
+#     not_diff = np.invert(diff)
+#
+#     values = np.atleast_2d([np.linspace(*b, num=grid_size) for b in bounds[diff]])
+#     var = cartesian_product(*values)
+#     grid = np.zeros((max(1, len(var)), len(bounds)))
+#     if np.sum(diff):
+#         grid[:, diff] = var
+#     if np.sum(not_diff):
+#         grid[:, not_diff] = bounds[not_diff, 0]
+#
+#     return grid

@@ -7,7 +7,7 @@ from analysis.preprocess import preprocess_data
 from plot.subplot import box, chocolate, hist
 from settings import paths
 
-FORCE = False
+FORCE = True
 
 
 def main():
