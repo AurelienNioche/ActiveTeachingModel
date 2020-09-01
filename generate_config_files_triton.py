@@ -164,6 +164,14 @@ def main() -> None:
 
     job_number = 0
 
+    print("Generating cluster config files...")
+
+    n_job = len(learner_models) \
+        * len(teacher_models) \
+        * len(psy_models) \
+        * n_agent
+    pbar = tqdm(total=n_job)
+
     for learner_md in learner_models:
 
         if learner_md == Walsh2018:
@@ -178,8 +186,7 @@ def main() -> None:
         pr_lab = cst["param_labels"]
         cst_time = cst["cst_time"]
 
-        print("Generating cluster config files...")
-        for agent in tqdm(range(n_agent)):
+        for agent in range(n_agent):
 
             for teacher_md in teacher_models:
 
@@ -244,7 +251,9 @@ def main() -> None:
 
                     with open(f_name, "w") as f:
                         json.dump(json_content, f, sort_keys=False, indent=4)
+                    pbar.update()
                     job_number += 1
+    pbar.close()
     print("Config files created!")
 
     os.makedirs(paths.DATA_CLUSTER_DIR, exist_ok=True)
