@@ -26,4 +26,5 @@ def map_teacher_colors() -> dict:
         "leitner": "blue",
         "threshold": "orange",
         "sampling": "green",
+        "recursive": "green"
     }

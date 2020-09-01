@@ -28,9 +28,7 @@ class Recursive(Teacher):
                                time_between_ss)])
 
     def _recursive_exp_decay(self, hist, review_ts, param, eval_ts,
-                             cst_time):
-
-        alpha, beta = param
+                             cst_time, is_item_specific):
 
         old_n_learnt = 0
         itr = 0
@@ -64,10 +62,19 @@ class Recursive(Teacher):
                     item = 0
                 else:
                     seen = n_pres > 0
+
+                    if is_item_specific:
+                        init_forget = param[seen, 0]
+                        rep_effect = param[seen, 1]
+                    else:
+                        init_forget, rep_effect = param
+
                     p_seen = np.exp(
-                        -alpha * (1 - beta) ** (n_pres[seen] - 1) * (
-                                ts - last_pres[seen])
+                        -init_forget
+                        * (1 - rep_effect) ** (n_pres[seen] - 1)
+                        * (ts - last_pres[seen])
                         * cst_time)
+
                     if np.min(p_seen) <= 0.90 or np.sum(seen) == n_item:
                         item = np.flatnonzero(seen)[np.argmin(p_seen)]
                     else:
@@ -80,9 +87,17 @@ class Recursive(Teacher):
                 last_pres[item] = ts
 
             seen = n_pres > 0
-            p_seen = np.exp(-alpha * (1 - beta) ** (n_pres[seen] - 1) * (
-                    eval_ts - last_pres[seen])
-                            * cst_time)
+            if is_item_specific:
+                init_forget = param[seen, 0]
+                rep_effect = param[seen, 1]
+            else:
+                init_forget, rep_effect = param
+
+            p_seen = np.exp(
+                -init_forget
+                * (1 - rep_effect) ** (n_pres[seen] - 1)
+                * (eval_ts - last_pres[seen])
+                * cst_time)
 
             n_learnt = np.sum(p_seen > thr)
 
@@ -187,6 +202,7 @@ class Recursive(Teacher):
 
         if learner_model == ExponentialNDelta and not is_item_specific:
             item = self._recursive_exp_decay(
+                is_item_specific=is_item_specific,
                 review_ts=self.review_ts,
                 cst_time=cst_time,
                 eval_ts=self.eval_ts,
