@@ -91,6 +91,8 @@ class Recursive(Teacher):
                 break
             elif old_n_learnt > n_learnt:
                 break
+            elif n_item <= 1:
+                break
             else:
                 old_n_learnt = n_learnt
                 n_item = np.sum(n_pres > 0) - 1
@@ -164,6 +166,8 @@ class Recursive(Teacher):
                 # old_n_learnt = n_item
                 break
             elif n_learnt < old_n_learnt:
+                break
+            elif n_item <= 1:
                 break
             else:
                 old_n_learnt = n_learnt
