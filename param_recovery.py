@@ -61,8 +61,8 @@ def log_lik(param, hist, success, timestamp, cst_time, eps):
     p_hist = np.exp(log_p_hist)
     failure = np.invert(success)
     p_hist[failure] = 1 - p_hist[failure]
-    log_lik = np.log(p_hist + eps)
-    sum_ll = log_lik.sum()
+    _log_lik = np.log(p_hist + eps)
+    sum_ll = _log_lik.sum()
     return sum_ll
 
 

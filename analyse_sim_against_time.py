@@ -18,8 +18,10 @@ os.makedirs(FIG_FOLDER, exist_ok=True)
 
 def main():
 
-    raw_data_folder = os.path.join("data", "triton", "exp_large_sample")
+    raw_data_folder = os.path.join("data", "triton", "walsh_new")
     path, dirs, files = next(os.walk(raw_data_folder))
+
+    print("n files", len(files))
 
     teachers = []
     dfs = []

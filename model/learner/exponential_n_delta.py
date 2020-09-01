@@ -6,7 +6,7 @@ EPS = np.finfo(np.float).eps
 
 class ExponentialNDelta(Learner):
 
-    def __init__(self, n_item, n_iter, cst_time):
+    def __init__(self, n_item, n_iter):
 
         self.n_item = n_item
 
@@ -17,12 +17,10 @@ class ExponentialNDelta(Learner):
         self.n_seen = 0
         self.i = 0
 
-        self.cst_time = cst_time
-
         self.n_pres = np.zeros(n_item, dtype=int)
         self.last_pres = np.zeros(n_item, dtype=float)
 
-    def p_seen(self, param, is_item_specific, now):
+    def p_seen(self, param, is_item_specific, now, cst_time):
 
         seen = self.n_pres >= 1
         if np.sum(seen) == 0:
@@ -39,19 +37,21 @@ class ExponentialNDelta(Learner):
         last_pres = self.last_pres[seen]
         delta = now - last_pres
 
-        delta *= self.cst_time
+        delta *= cst_time
 
         p = np.exp(-fr * delta)
         return p, seen
 
-    def p_seen_spec_hist(self, param, now, hist, ts, seen, is_item_specific):
+    @staticmethod
+    def p_seen_spec_hist(param, now, hist, ts, seen, is_item_specific,
+                         cst_time):
 
         # seen = np.zeros(self.n_item, dtype=bool)
         # seen[np.unique(hist)] = True
 
-        param = np.asarray(param)
-        hist = np.asarray(hist)
-        ts = np.asarray(ts)
+        # param = np.asarray(param)
+        # hist = np.asarray(hist)
+        # ts = np.asarray(ts)
 
         # len(param.shape) > 1:  # Is item specific
         if is_item_specific:
@@ -61,30 +61,31 @@ class ExponentialNDelta(Learner):
             init_forget, rep_effect = param
 
         seen_item = sorted(np.flatnonzero(seen))
-        n_pres = np.zeros(self.n_item)
-        last_pres = np.zeros(self.n_item)
+        n_seen = np.sum(seen)
+        n_pres = np.zeros(n_seen)
+        last_pres = np.zeros(n_seen)
         for i, item in enumerate(seen_item):
             is_item = hist == item
             n_pres[i] = np.sum(is_item)
             last_pres[i] = np.max(ts[is_item])
 
-        fr = init_forget * (1-rep_effect) ** (n_pres[seen] - 1)
+        fr = init_forget * (1-rep_effect) ** (n_pres - 1)
 
-        delta = now - last_pres[seen]
-
-        delta *= self.cst_time
+        delta = now - last_pres
+        delta *= cst_time
 
         p = np.exp(-fr * delta)
         return p, seen
 
-    def log_lik_grid(self, item, grid_param, response, timestamp):
+    def log_lik_grid(self, item, grid_param, response, timestamp,
+                     cst_time):
 
         fr = grid_param[:, 0] \
              * (1 - grid_param[:, 1]) ** (self.n_pres[item] - 1)
 
         delta = timestamp - self.last_pres[item]
 
-        delta *= self.cst_time
+        delta *= cst_time
         p_success = np.exp(- fr * delta)
 
         p = p_success if response else 1-p_success
@@ -92,37 +93,7 @@ class ExponentialNDelta(Learner):
         log_lik = np.log(p + EPS)
         return log_lik
 
-    def log_lik(self, param, hist, success, timestamp):
-        a, b = param
-
-        log_p_hist = np.zeros(len(hist))
-
-        for item in np.unique(hist):
-
-            is_item = hist == item
-            rep = timestamp[is_item]
-            n = len(rep)
-
-            log_p_item = np.zeros(n)
-            # !!! To adapt for xp
-            log_p_item[0] = -np.inf  # whatever the model, p=0
-            # !!! To adapt for xp
-            for i in range(1, n):
-                delta_rep = rep[i] - rep[i-1]
-                fr = a * (1 - b) ** (i - 1)
-
-                delta_rep *= self.cst_time
-                log_p_item[i] = -fr * delta_rep
-
-            log_p_hist[is_item] = log_p_item
-        p_hist = np.exp(log_p_hist)
-        failure = np.invert(success)
-        p_hist[failure] = 1 - p_hist[failure]
-        log_lik = np.log(p_hist + EPS)
-        sum_ll = log_lik.sum()
-        return sum_ll
-
-    def p(self, item, param, now, is_item_specific):
+    def p(self, item, param, now, is_item_specific, cst_time):
 
         if is_item_specific:
             init_forget = param[item, 0]
@@ -134,7 +105,7 @@ class ExponentialNDelta(Learner):
 
         delta = now - self.last_pres[item]
 
-        delta *= self.cst_time
+        delta *= cst_time
         return np.exp(- fr * delta)
 
     def update(self, item, timestamp):
@@ -151,3 +122,33 @@ class ExponentialNDelta(Learner):
         self.n_seen = np.sum(self.seen)
 
         self.i += 1
+
+    # def log_lik(self, param, hist, success, timestamp):
+    #     a, b = param
+    #
+    #     log_p_hist = np.zeros(len(hist))
+    #
+    #     for item in np.unique(hist):
+    #
+    #         is_item = hist == item
+    #         rep = timestamp[is_item]
+    #         n = len(rep)
+    #
+    #         log_p_item = np.zeros(n)
+    #         # !!! To adapt for xp
+    #         log_p_item[0] = -np.inf  # whatever the model, p=0
+    #         # !!! To adapt for xp
+    #         for i in range(1, n):
+    #             delta_rep = rep[i] - rep[i-1]
+    #             fr = a * (1 - b) ** (i - 1)
+    #
+    #             delta_rep *= self.cst_time
+    #             log_p_item[i] = -fr * delta_rep
+    #
+    #         log_p_hist[is_item] = log_p_item
+    #     p_hist = np.exp(log_p_hist)
+    #     failure = np.invert(success)
+    #     p_hist[failure] = 1 - p_hist[failure]
+    #     log_lik = np.log(p_hist + EPS)
+    #     sum_ll = log_lik.sum()
+    #     return sum_ll

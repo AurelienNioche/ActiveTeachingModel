@@ -37,8 +37,9 @@ class Sampling(Teacher):
             param=param, hist=new_hist,
             ts=new_ts, seen=seen,
             now=eval_ts,
-            is_item_specific=psy.is_item_specific
-        )
+            is_item_specific=psy.is_item_specific,
+            cst_time=psy.cst_time)
+
         return np.sum(p_seen > self.learnt_threshold), np.sum(p_seen)
 
     def ask(self, now, psy, ss_iter):

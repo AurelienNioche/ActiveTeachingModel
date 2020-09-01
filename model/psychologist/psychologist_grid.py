@@ -9,7 +9,7 @@ EPS = np.finfo(np.float).eps
 class PsychologistGrid(Psychologist):
 
     def __init__(self, n_item, is_item_specific, learner,
-                 bounds, grid_size, true_param=None):
+                 bounds, grid_size, cst_time, true_param=None):
 
         self.omniscient = true_param is not None
         if not self.omniscient:
@@ -47,10 +47,12 @@ class PsychologistGrid(Psychologist):
             self.est_param = true_param
 
         self.is_item_specific = is_item_specific
+        self.cst_time = cst_time
         self.learner = learner
 
     @staticmethod
     def cartesian_product(*arrays):
+
         la = len(arrays)
         dtype = np.result_type(*arrays)
         arr = np.empty([len(a) for a in arrays] + [la], dtype=dtype)
@@ -112,6 +114,7 @@ class PsychologistGrid(Psychologist):
         return self.learner.p_seen(
             param=param,
             is_item_specific=self.is_item_specific,
+            cst_time=self.cst_time,
             now=now)
 
     def inferred_learner_param(self):
