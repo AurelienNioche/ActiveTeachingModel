@@ -185,7 +185,7 @@ class Recursive(Teacher):
         learner_model = psy.learner.__class__
         is_item_specific = psy.is_item_specific
 
-        if learner_model == ExponentialNDelta and not is_item_specific and False:
+        if learner_model == ExponentialNDelta and not is_item_specific:
             item = self._recursive_exp_decay(
                 review_ts=self.review_ts,
                 cst_time=cst_time,
