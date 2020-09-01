@@ -3,6 +3,8 @@ from . generic import Teacher
 
 from model.learner.exponential_n_delta import ExponentialNDelta
 # from model.learner.walsh2018 import Walsh2018
+from tqdm import tqdm
+import datetime
 
 
 class Recursive(Teacher):
@@ -120,6 +122,8 @@ class Recursive(Teacher):
             seen[current_seen_item[current_seen_item < n_item]] = True
             hist[current_step:] = lm.DUMMY_VALUE
 
+            # a = datetime.datetime.now()
+
             for i, ts in enumerate(future):
 
                 if np.sum(seen) == 0:
@@ -134,16 +138,19 @@ class Recursive(Teacher):
                         cst_time=cst_time)
                     min_p_seen = np.min(p_seen)
                     n_seen = np.sum(seen)
+                    item_seen = np.flatnonzero(seen)
                     if min_p_seen <= self.learnt_threshold \
                             or n_seen == n_item:
-                        item = np.flatnonzero(seen)[np.argmin(p_seen)]
+                        item = item_seen[np.argmin(p_seen)]
                     else:
-                        item = np.max(np.flatnonzero(seen)) + 1
+                        item = np.max(item_seen) + 1
                     if i == 0:
                         first_item = item
 
                 hist[current_step + i] = item
                 seen[item] = True
+            #
+            # print(n_item, datetime.datetime.now() - a)
 
             p_seen, _ = lm.p_seen_spec_hist(
                 param=param, now=eval_ts,
@@ -174,7 +181,7 @@ class Recursive(Teacher):
         learner_model = psy.learner.__class__
         is_item_specific = psy.is_item_specific
 
-        if learner_model == ExponentialNDelta and not is_item_specific:
+        if learner_model == ExponentialNDelta and not is_item_specific and False:
             item = self._recursive_exp_decay(
                 review_ts=self.review_ts,
                 cst_time=cst_time,

@@ -48,21 +48,14 @@ class ExponentialNDelta(Learner):
     def p_seen_spec_hist(param, now, hist, ts, seen, is_item_specific,
                          cst_time):
 
-        # seen = np.zeros(self.n_item, dtype=bool)
-        # seen[np.unique(hist)] = True
-
-        # param = np.asarray(param)
-        # hist = np.asarray(hist)
-        # ts = np.asarray(ts)
-
-        # len(param.shape) > 1:  # Is item specific
         if is_item_specific:
             init_forget = param[seen, 0]
             rep_effect = param[seen, 1]
         else:
             init_forget, rep_effect = param
 
-        seen_item = sorted(np.flatnonzero(seen))
+        seen_item = np.flatnonzero(seen)
+        # seen_item.sort()
         n_seen = np.sum(seen)
         n_pres = np.zeros(n_seen)
         last_pres = np.zeros(n_seen)
