@@ -118,7 +118,7 @@ def plot_param_space(user_name: str, grid: pd.DataFrame, log_liks: np.ndarray) -
 
 
 def main(f_results: str) -> (pd.DataFrame, pd.DataFrame):
-    """Get grid values, log-lik, and plot"""
+    """Get grid values, log-likelihood, and plot heatmap"""
 
     eps = np.finfo(np.float).eps
 
@@ -142,7 +142,9 @@ def main(f_results: str) -> (pd.DataFrame, pd.DataFrame):
         if "carlos2" not in user
     }
     users = list(likelihoods.keys())
-    map(plot_param_space, users)
+
+    for user in users:
+        plot_param_space(user, grid, likelihoods[user])
 
     return likelihoods, grid
 
