@@ -66,9 +66,3 @@ class Leitner(Teacher):
             item_idx = self._pickup_item(now)
 
         return item_idx
-
-    @classmethod
-    def create(cls, n_item, delay_factor, delay_min, *args, **kwargs):
-        return cls(n_item=n_item,
-                   delay_factor=delay_factor,
-                   delay_min=delay_min)

@@ -20,10 +20,3 @@ class Threshold(Teacher):
             item_idx = np.argmin(seen)
 
         return item_idx
-
-    @classmethod
-    def create(cls, n_item, learnt_threshold):
-
-        return cls(
-            n_item=n_item,
-            learnt_threshold=learnt_threshold)

@@ -6,13 +6,15 @@ EPS = np.finfo(np.float).eps
 
 class ExponentialNDelta(Learner):
 
+    DUMMY_VALUE = -1
+
     def __init__(self, n_item, n_iter):
 
         self.n_item = n_item
 
         self.seen = np.zeros(n_item, dtype=bool)
-        self.ts = np.full(n_iter, -1, dtype=float)
-        self.hist = np.full(n_iter, -1, dtype=int)
+        self.ts = np.full(n_iter, self.DUMMY_VALUE, dtype=float)
+        self.hist = np.full(n_iter, self.DUMMY_VALUE, dtype=int)
         self.seen_item = None
         self.n_seen = 0
         self.i = 0

@@ -124,19 +124,6 @@ class PsychologistGrid(Psychologist):
         return self.learner.p(
             item=item,
             is_item_specific=self.is_item_specific,
+            cst_time=self.cst_time,
             param=param,
             now=now)
-
-    @classmethod
-    def create(cls, n_item, learner,
-               is_item_specific,
-               grid_size,
-               bounds, true_param=None):
-
-        return cls(
-            true_param=true_param,
-            n_item=n_item,
-            bounds=bounds,
-            grid_size=grid_size,
-            is_item_specific=is_item_specific,
-            learner=learner)

@@ -13,6 +13,7 @@ import settings.paths as paths
 from model.learner.exponential_n_delta import ExponentialNDelta
 from model.learner.walsh2018 import Walsh2018
 from model.psychologist.psychologist_grid import PsychologistGrid
+from model.teacher.recursive import Recursive
 from model.teacher.leitner import Leitner
 from model.teacher.sampling import Sampling
 from model.teacher.threshold import Threshold
@@ -113,6 +114,10 @@ def main() -> None:
 
     f_name_root = f"at-{datetime.datetime.now().strftime('%Y_%m_%d_%H_%M_%S_%f')}"
 
+    learner_models = (ExponentialNDelta,)
+    teacher_models = (Leitner, Threshold, Recursive)
+    psy_models = (PsychologistGrid,)
+
     data_folder = select_data_folder()
     cleanup(data_folder)
 
@@ -157,10 +162,6 @@ def main() -> None:
         "cst_time": 1 / (60 ** 2),  # 1 / (24 * 60**2),
     }
 
-    learner_models = (ExponentialNDelta,)
-    teacher_models = (Leitner, Sampling, Threshold)
-    psy_models = (PsychologistGrid,)
-
     for learner_md in learner_models:
 
         if learner_md == Walsh2018:
@@ -184,7 +185,7 @@ def main() -> None:
                     teacher_pr = leitner_cst
                 elif teacher_md == Sampling:
                     teacher_pr = sampling_cst
-                elif teacher_md == Threshold:
+                elif teacher_md in (Threshold, Recursive):
                     teacher_pr = {}
                 else:
                     raise ValueError
@@ -248,8 +249,7 @@ def main() -> None:
     mod_job_file(
         os.path.join(paths.TEMPLATE_DIR, "template.job"),
         paths.CONFIG_CLUSTER_DIR,
-        os.path.join(paths.BASE_DIR, "simulation.job"),
-    )
+        os.path.join(paths.BASE_DIR, "simulation.job"))
 
     run_simulation()
 

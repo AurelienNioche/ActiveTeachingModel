@@ -6,6 +6,7 @@ from tqdm import tqdm
 from model.teacher.leitner import Leitner
 from model.teacher.threshold import Threshold
 from model.teacher.sampling import Sampling
+from model.teacher.recursive import Recursive
 
 from model.learner.walsh2018 import Walsh2018
 from model.learner.exponential_n_delta import ExponentialNDelta
@@ -38,17 +39,25 @@ def run(config, with_tqdm=False):
     bounds = config.bounds
 
     if teacher_cls == Leitner:
-        teacher = teacher_cls.create(n_item=n_item, **teacher_pr)
+        teacher = teacher_cls(n_item=n_item, **teacher_pr)
 
     elif teacher_cls == Threshold:
-        teacher = teacher_cls.create(n_item=n_item,
-                                     learnt_threshold=learnt_threshold)
+        teacher = teacher_cls(n_item=n_item,
+                              learnt_threshold=learnt_threshold)
     elif teacher_cls == Sampling:
-        teacher = teacher_cls.create(
+        teacher = teacher_cls(
             n_item=n_item, learnt_threshold=learnt_threshold,
             time_per_iter=time_per_iter,
             ss_n_iter=ss_n_iter, time_between_ss=time_between_ss,
             **teacher_pr)
+    elif teacher_cls == Recursive:
+        teacher = teacher_cls(n_item=n_item,
+                              learnt_threshold=learnt_threshold,
+                              time_per_iter=time_per_iter,
+                              n_ss=n_ss,
+                              ss_n_iter=ss_n_iter,
+                              time_between_ss=time_between_ss)
+
     else:
         raise ValueError
 
@@ -57,25 +66,27 @@ def run(config, with_tqdm=False):
 
     if learner_cls in (Walsh2018, ExponentialNDelta):
         learner = learner_cls(n_item=n_item,
-                              n_iter=n_ss * ss_n_iter,
-                              cst_time=cst_time)
+                              n_iter=n_ss * ss_n_iter)
     else:
         raise ValueError
 
     if omniscient or is_leitner:
-        psy = psy_cls.create(
+        psy = psy_cls(
             n_item=n_item,
             is_item_specific=is_item_specific,
             learner=learner,
             bounds=bounds,
-            **psy_pr, true_param=pr)
+            cst_time=cst_time,
+            true_param=pr,
+            **psy_pr)
     else:
-        psy = psy_cls.create(
+        psy = psy_cls(
             n_item=n_item,
             is_item_specific=is_item_specific,
             learner=learner,
             bounds=bounds,
-            **psy_pr,)
+            cst_time=cst_time,
+            **psy_pr)
 
     np.random.seed(seed)
 
@@ -115,24 +126,17 @@ def run(config, with_tqdm=False):
                                        idx_last_q=item)
 
                 elif is_sampling:
-                    item = teacher.ask(now=now,
-                                       psy=psy,
-                                       ss_iter=j)
+                    item = teacher.ask(now=now, psy=psy, ss_iter=j)
 
                 else:
-                    item = teacher.ask(now=now,
-                                       psy=psy)
+                    item = teacher.ask(now=now, psy=psy)
 
-                p = psy.p(
-                    item=item,
-                    param=pr,
-                    now=ts)
+                p = psy.p(item=item, param=pr, now=ts)
 
             ts = now
             was_success = np.random.random() < p
 
-            psy.update(item=item, response=was_success,
-                       timestamp=ts)
+            psy.update(item=item, response=was_success, timestamp=ts)
 
             p_seen_real, seen = psy.p_seen(now=now, param=pr)
 
@@ -192,6 +196,11 @@ def run(config, with_tqdm=False):
     n_learnt = np.sum(p_seen_real > learnt_threshold)
     n_seen = np.sum(seen)
 
+    if with_tqdm:
+        pbar.close()
+        print()
+        print("n_learnt", n_learnt, "n_seen", n_seen)
+
     row = {
         "iter": itr,
         "item": item,
@@ -212,8 +221,5 @@ def run(config, with_tqdm=False):
         **config_dic
     }
     row_list.append(row)
-
-    if with_tqdm:
-        pbar.close()
 
     return pd.DataFrame(row_list)

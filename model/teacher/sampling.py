@@ -89,18 +89,6 @@ class Sampling(Teacher):
         item_idx = first[is_max][np.argmax(r2[is_max])]
         return item_idx
 
-    @classmethod
-    def create(cls, n_item, learnt_threshold, n_sample,
-               time_per_iter, ss_n_iter, time_between_ss):
-
-        return cls(
-            n_item=n_item,
-            learnt_threshold=learnt_threshold,
-            n_sample=n_sample,
-            time_per_iter=time_per_iter,
-            ss_n_iter=ss_n_iter,
-            time_between_ss=time_between_ss)
-
 
 #         #self.horizon = horizon
         # self.iter = -1

@@ -1,6 +1,6 @@
 import numpy as np
-
 from tqdm import tqdm
+import datetime
 
 
 class Leitner:
@@ -176,7 +176,7 @@ def use_random_sampling(n_item, review_ts, alpha, beta, eval_ts, thr):
     # plt.show()
 
 
-def recursive(n_item, review_ts, alpha, beta, eval_ts, thr):
+def recursive(n_item, review_ts, alpha, beta, eval_ts, thr, verbose=False):
 
     old_n_learnt = 0
     itr = 0
@@ -207,7 +207,9 @@ def recursive(n_item, review_ts, alpha, beta, eval_ts, thr):
                     eval_ts - last_pres[seen]))
 
         n_learnt = np.sum(p_seen > thr)
-        print("--- iter", itr, "n item", n_item, "n learnt", n_learnt, "---")
+        if verbose:
+            print("--- iter", itr, "n item", n_item,
+                  "n learnt", n_learnt, "---")
 
         if n_learnt == n_item:
             old_n_learnt = n_item
@@ -257,11 +259,12 @@ def main():
                   beta=beta,
                   review_ts=review_ts,
                   eval_ts=eval_ts, thr=thr)
-
+    a = datetime.datetime.now()
     recursive(n_item=n_item,
               review_ts=review_ts,
               alpha=alpha,
               beta=beta, eval_ts=eval_ts, thr=thr)
+    print(datetime.datetime.now() - a)
 
     use_random_sampling(n_item=n_item,
                         review_ts=review_ts,
