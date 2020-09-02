@@ -129,7 +129,7 @@ def main() -> None:
     omni = False
 
     task_param = {
-        "is_item_specific": False,
+        "is_item_specific": True,
         "ss_n_iter": 100,
         "time_between_ss": 86400,
         "n_ss": 7,
