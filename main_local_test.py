@@ -39,10 +39,9 @@ def main():
     omni = True
 
     learner_md = ExponentialNDelta
-    pr_val = [0.216, 0.44]
-        # [[0.216, 0.44] for i in range(n_item)]
+    pr_val = [[0.216, 0.44] for i in range(n_item)]
 
-    teacher_md = RecursiveThreshold #Recursive  # Leitner
+    teacher_md = Recursive  # Leitner
     psy_md = PsychologistGrid
 
     is_item_specific = len(np.asarray(pr_val).shape) > 1
