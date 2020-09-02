@@ -1,42 +1,30 @@
-import datetime
-
 import numpy as np
-from model.learner.exponential_n_delta import ExponentialNDelta
-# from model.learner.walsh2018 import Walsh2018
-from tqdm import tqdm
 
+from model.learner.exponential_n_delta import ExponentialNDelta
 from .generic import Teacher
 
 
 class Recursive(Teacher):
-    def __init__(
-        self, n_item, learnt_threshold, time_per_iter, n_ss, ss_n_iter, time_between_ss
-    ):
+
+    def __init__(self, n_item, learnt_threshold, time_per_iter,
+                 n_ss, ss_n_iter, time_between_ss):
 
         self.n_item = n_item
         self.learnt_threshold = learnt_threshold
 
         # Time between each *beginning* of session
-        time_between_ss -= time_per_iter * ss_n_iter
+        time_between_ss += time_per_iter * ss_n_iter
 
         self.eval_ts = n_ss * time_between_ss
         self.review_ts = np.hstack(
             [
                 np.arange(x, x + (ss_n_iter * time_per_iter), time_per_iter)
                 for x in np.arange(0, time_between_ss * n_ss, time_between_ss)
-            ]
-        )
+            ])
 
-<<<<<<< HEAD
-    def _recursive_exp_decay(self, hist, review_ts, param, eval_ts, cst_time):
-
-        alpha, beta = param
-=======
     def _recursive_exp_decay(self, hist, review_ts, param, eval_ts,
                              cst_time, is_item_specific):
->>>>>>> 2e7fa06f188fbb53986c45e116267153f2d2de09
 
-        old_n_learnt = 0
         itr = 0
         n_item = self.n_item
 
@@ -76,19 +64,11 @@ class Recursive(Teacher):
                         init_forget, rep_effect = param
 
                     p_seen = np.exp(
-<<<<<<< HEAD
-                        -alpha
-                        * (1 - beta) ** (n_pres[seen] - 1)
-                        * (ts - last_pres[seen])
-                        * cst_time
-                    )
-=======
                         -init_forget
                         * (1 - rep_effect) ** (n_pres[seen] - 1)
                         * (ts - last_pres[seen])
                         * cst_time)
 
->>>>>>> 2e7fa06f188fbb53986c45e116267153f2d2de09
                     if np.min(p_seen) <= 0.90 or np.sum(seen) == n_item:
                         item = np.flatnonzero(seen)[np.argmin(p_seen)]
                     else:
@@ -101,14 +81,7 @@ class Recursive(Teacher):
                 last_pres[item] = ts
 
             seen = n_pres > 0
-<<<<<<< HEAD
-            p_seen = np.exp(
-                -alpha
-                * (1 - beta) ** (n_pres[seen] - 1)
-                * (eval_ts - last_pres[seen])
-                * cst_time
-            )
-=======
+
             if is_item_specific:
                 init_forget = param[seen, 0]
                 rep_effect = param[seen, 1]
@@ -120,19 +93,15 @@ class Recursive(Teacher):
                 * (1 - rep_effect) ** (n_pres[seen] - 1)
                 * (eval_ts - last_pres[seen])
                 * cst_time)
->>>>>>> 2e7fa06f188fbb53986c45e116267153f2d2de09
 
             n_learnt = np.sum(p_seen > thr)
 
             if n_learnt == n_item:
-                # old_n_learnt = n_item
                 break
-            elif old_n_learnt > n_learnt:
-                break
+
             elif n_item <= 1:
                 break
             else:
-                old_n_learnt = n_learnt
                 n_item = np.sum(n_pres > 0) - 1
 
                 itr += 1
@@ -144,7 +113,6 @@ class Recursive(Teacher):
         self, review_ts, learner_model, hist, param, cst_time, is_item_specific, eval_ts
     ):
 
-        old_n_learnt = 0
         itr = 0
         n_item = self.n_item
         lm = learner_model
@@ -210,13 +178,12 @@ class Recursive(Teacher):
             if n_learnt == n_item:
                 # old_n_learnt = n_item
                 break
-            elif n_learnt < old_n_learnt:
-                break
+
             elif n_item <= 1:
                 break
             else:
-                old_n_learnt = n_learnt
                 n_item = np.sum(seen) - 1
+
                 itr += 1
                 continue
 
@@ -230,7 +197,8 @@ class Recursive(Teacher):
         learner_model = psy.learner.__class__
         is_item_specific = psy.is_item_specific
 
-        if learner_model == ExponentialNDelta and not is_item_specific:
+        if learner_model == ExponentialNDelta:
+
             item = self._recursive_exp_decay(
                 is_item_specific=is_item_specific,
                 review_ts=self.review_ts,

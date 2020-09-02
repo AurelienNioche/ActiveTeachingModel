@@ -199,7 +199,7 @@ def run(config, with_tqdm=False):
     if with_tqdm:
         pbar.close()
         print()
-        print("n_learnt", n_learnt, "n_seen", n_seen)
+        print("now", now, "n_learnt", n_learnt, "n_seen", n_seen)
 
     row = {
         "iter": itr,

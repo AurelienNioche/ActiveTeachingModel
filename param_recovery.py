@@ -124,7 +124,7 @@ def plot_param_space(user_name: str, grid: pd.DataFrame, log_liks: np.ndarray) -
 
 
 def main(f_results: str) -> (pd.DataFrame, pd.DataFrame):
-    """Get grid values, log-lik, and plot"""
+    """Get grid values, log-likelihood, and plot heatmap"""
 
     eps = np.finfo(np.float).eps
 
