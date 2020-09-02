@@ -30,7 +30,6 @@ class Recursive(Teacher):
     def _recursive_exp_decay(self, hist, review_ts, param, eval_ts,
                              cst_time, is_item_specific):
 
-        old_n_learnt = 0
         itr = 0
         n_item = self.n_item
 
@@ -102,14 +101,11 @@ class Recursive(Teacher):
             n_learnt = np.sum(p_seen > thr)
 
             if n_learnt == n_item:
-                # old_n_learnt = n_item
                 break
-            elif old_n_learnt > n_learnt:
-                break
+
             elif n_item <= 1:
                 break
             else:
-                old_n_learnt = n_learnt
                 n_item = np.sum(n_pres > 0) - 1
 
                 itr += 1
@@ -121,7 +117,6 @@ class Recursive(Teacher):
                    hist, param, cst_time,
                    is_item_specific, eval_ts):
 
-        old_n_learnt = 0
         itr = 0
         n_item = self.n_item
         lm = learner_model
@@ -180,13 +175,12 @@ class Recursive(Teacher):
             if n_learnt == n_item:
                 # old_n_learnt = n_item
                 break
-            elif n_learnt < old_n_learnt:
-                break
+
             elif n_item <= 1:
                 break
             else:
-                old_n_learnt = n_learnt
                 n_item = np.sum(seen) - 1
+
                 itr += 1
                 continue
 
@@ -200,7 +194,8 @@ class Recursive(Teacher):
         learner_model = psy.learner.__class__
         is_item_specific = psy.is_item_specific
 
-        if learner_model == ExponentialNDelta and not is_item_specific:
+        if learner_model == ExponentialNDelta:
+
             item = self._recursive_exp_decay(
                 is_item_specific=is_item_specific,
                 review_ts=self.review_ts,
