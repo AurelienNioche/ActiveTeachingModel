@@ -88,6 +88,8 @@ def run(config, with_tqdm=False):
             cst_time=cst_time,
             **psy_pr)
 
+    delta_end_ss_begin_ss = time_between_ss - time_per_iter * ss_n_iter
+
     np.random.seed(seed)
 
     row_list = []
@@ -189,7 +191,7 @@ def run(config, with_tqdm=False):
             if with_tqdm:
                 pbar.update()
 
-        now += time_between_ss
+        now += delta_end_ss_begin_ss
 
     p_seen_real, seen = psy.p_seen(now=now, param=pr)
 

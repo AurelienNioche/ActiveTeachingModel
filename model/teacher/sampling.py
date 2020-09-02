@@ -15,13 +15,15 @@ class Sampling(Teacher):
         self.learnt_threshold = learnt_threshold
         self.time_per_iter = time_per_iter
         self.ss_n_iter = ss_n_iter
-        self.time_between_ss = time_between_ss
+
+        self.delta_end_ss_begin_ss = time_between_ss \
+            - time_per_iter*ss_n_iter
 
     def _revise_goal(self, now, ss_iter):
 
         h = self.ss_n_iter - ss_iter
         ts = now + np.arange(h) * self.time_per_iter
-        eval_ts = ts[-1] + self.time_between_ss
+        eval_ts = ts[-1] + self.delta_end_ss_begin_ss
         return h, ts, eval_ts
 
     def _value_future(self, psy, future, param, new_ts, eval_ts):

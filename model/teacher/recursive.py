@@ -13,7 +13,7 @@ class Recursive(Teacher):
         self.learnt_threshold = learnt_threshold
 
         # Time between each *beginning* of session
-        time_between_ss += time_per_iter * ss_n_iter
+        # time_between_ss += time_per_iter * ss_n_iter
 
         self.eval_ts = n_ss * time_between_ss
         self.review_ts = np.hstack(
@@ -205,8 +205,7 @@ class Recursive(Teacher):
                 cst_time=cst_time,
                 eval_ts=self.eval_ts,
                 param=param,
-                hist=hist,
-            )
+                hist=hist)
 
         else:
 
@@ -217,7 +216,6 @@ class Recursive(Teacher):
                 param=param,
                 hist=hist,
                 is_item_specific=is_item_specific,
-                learner_model=learner_model,
-            )
+                learner_model=learner_model)
 
         return item

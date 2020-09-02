@@ -143,6 +143,8 @@ def plot(
             ax.set_aspect(1)
             ax.set_xlim(min_x, max_x)
             ax.set_ylim(min_x, max_x)
+            ax.set_xticks((0, 100, 150))
+            ax.set_yticks((0, 100, 150))
 
     # Text left
     # DO NOT REMOVE, FOR FINAL PLOT
