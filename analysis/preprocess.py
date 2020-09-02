@@ -1,6 +1,7 @@
 import os
-from tqdm import tqdm
+
 import pandas as pd
+from tqdm import tqdm
 
 
 def preprocess_data(preprocess_data_file, raw_data_folder):
@@ -15,6 +16,7 @@ def preprocess_data(preprocess_data_file, raw_data_folder):
     row_list = []
 
     for i, p in tqdm(enumerate(os.scandir(raw_data_folder)), total=file_count):
+        print(p)
         df = pd.read_csv(p.path, index_col=[0])
 
         last_iter = max(df["iter"])

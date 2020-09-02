@@ -13,8 +13,8 @@ import settings.paths as paths
 from model.learner.exponential_n_delta import ExponentialNDelta
 from model.learner.walsh2018 import Walsh2018
 from model.psychologist.psychologist_grid import PsychologistGrid
-from model.teacher.recursive import Recursive
 from model.teacher.leitner import Leitner
+from model.teacher.recursive import Recursive
 from model.teacher.sampling import Sampling
 from model.teacher.threshold import Threshold
 from settings.config_triton import LEARNER, PSYCHOLOGIST, TEACHER
@@ -112,7 +112,7 @@ def mod_job_file(template_path: str, config_path: str, saving_path: str) -> None
 def main() -> None:
     """Set the parameters and generate the JSON config files"""
 
-    ts = datetime.datetime.now().strftime('%Y_%m_%d_%H_%M_%S_%f')
+    ts = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S_%f")
 
     learner_models = (ExponentialNDelta,)
     teacher_models = (Leitner, Threshold, Recursive)
@@ -126,7 +126,7 @@ def main() -> None:
 
     n_agent = 100
     n_item = 150
-    omni = True
+    omni = False
 
     task_param = {
         "is_item_specific": False,
@@ -134,12 +134,12 @@ def main() -> None:
         "time_between_ss": 86400,
         "n_ss": 7,
         "learnt_threshold": 0.9,
-        "time_per_iter": 2,
+        "time_per_iter": 4,
     }
 
     sampling_cst = {"n_sample": 10000}
 
-    leitner_cst = {"delay_factor": 2, "delay_min": 2}
+    leitner_cst = {"delay_factor": 2, "delay_min": 4}
 
     walsh_cst = {
         "param_labels": ["tau", "s", "b", "m", "c", "x"],
@@ -158,20 +158,17 @@ def main() -> None:
 
     exp_decay_cst = {
         "param_labels": ["alpha", "beta"],
-        "bounds": [[0.001, 0.5], [0.00, 0.5]],
+        "bounds": [[0.0000001, 100], [0.0001, 0.99]],
         "grid_methods": [PsychologistGrid.LOG, PsychologistGrid.LIN],
         "grid_size": 20,
-        "cst_time": 1 / (60 ** 2),  # 1 / (24 * 60**2),
+        "cst_time": 1,  # 1 / (60 ** 2),  # 1 / (24 * 60**2),
     }
 
     job_number = 0
 
     print("Generating cluster config files...")
 
-    n_job = len(learner_models) \
-        * len(teacher_models) \
-        * len(psy_models) \
-        * n_agent
+    n_job = len(learner_models) * len(teacher_models) * len(psy_models) * n_agent
     pbar = tqdm(total=n_job)
 
     for learner_md in learner_models:
@@ -207,12 +204,8 @@ def main() -> None:
                 for psy_md in psy_models:
 
                     if psy_md == PsychologistGrid:
-                        psy_pr_lab = [
-                            "grid_size", "grid_methods"
-                        ]
-                        psy_pr_val = [
-                            grid_size, grid_methods
-                        ]
+                        psy_pr_lab = ["grid_size", "grid_methods"]
+                        psy_pr_val = [grid_size, grid_methods]
                     else:
                         raise ValueError
 
@@ -265,7 +258,8 @@ def main() -> None:
     mod_job_file(
         os.path.join(paths.TEMPLATE_DIR, "template.job"),
         paths.CONFIG_CLUSTER_DIR,
-        os.path.join(paths.BASE_DIR, "simulation.job"))
+        os.path.join(paths.BASE_DIR, "simulation.job"),
+    )
 
     run_simulation()
 

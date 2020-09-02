@@ -88,7 +88,8 @@ def get_all_log_lik(user_df: pd.DataFrame, grid_df: pd.DataFrame, eps: float) ->
     print("Computing log-likelihood for all param pairs...")
     sums_ll = []
     beginning_history = pd.Timestamp("1970-01-01", tz="UTC")
-    one_s = pd.Timedelta("60s")
+    # 5s is good
+    one_s = pd.Timedelta("1s")
     for _, param_pair in tqdm(grid_df.iterrows()):
         sums_ll.append(
             log_lik(
@@ -97,7 +98,7 @@ def get_all_log_lik(user_df: pd.DataFrame, grid_df: pd.DataFrame, eps: float) ->
                 user_df["success"],
                 (user_df["ts_reply"] - beginning_history)
                 // one_s,  # To seconds as in pandas docs
-                1 / (1 * 60 ** 2),
+                1,  # 1 / (5 * 60 ** 2),
                 eps,
             )
         )
@@ -116,9 +117,10 @@ def plot_param_space(user_name: str, grid: pd.DataFrame, log_liks: np.ndarray) -
     try:  # Duplicated entries can appear with rounding
         data = data.round(2).pivot("alpha", "beta", "log_lik")
     except:
-        data = data.round(5).pivot("alpha", "beta", "log_lik")
+        data = data.pivot("alpha", "beta", "log_lik")
     ax = sns.heatmap(data=data, cmap="viridis")
     ax.invert_yaxis()
+    plt.tight_layout()
     plt.savefig(os.path.join("fig", f"param_grid_{user_name}.pdf"))
     print("Done!")
 
@@ -129,8 +131,7 @@ def main(f_results: str) -> (pd.DataFrame, pd.DataFrame):
     eps = np.finfo(np.float).eps
 
     # Grid
-    # original bounds := np.array([[0.001, 0.5], [0.00, 0.5]])
-    bounds = np.array([[0.0001, 4.0], [0.00, 0.5]])
+    bounds = np.array([[0.0000001, 100.0], [0.0001, 0.99]])
     grid_size = 20
     methods = np.array([np.geomspace, np.linspace])  # Use log scale for alpha
     grid = cp_grid_param_loglin(grid_size, bounds, methods)
@@ -179,3 +180,23 @@ if __name__ == "__main__":
 #         grid[:, not_diff] = bounds[not_diff, 0]
 #
 #     return grid
+#%%
+# plt.close()
+# user_name = "carlos@test.com"
+#
+# beginning_history = pd.Timestamp("1970-01-01", tz="UTC")
+# one_s = pd.Timedelta("1s")
+#
+# results_df = pd.read_csv(os.path.join(paths.DATA_DIR, "results.csv"), index_col=[0])
+# results_df = results_df.query("user == @user_name")
+# results_df["ts_reply"] = pd.to_datetime(results_df["ts_reply"])
+# results_df["ts_reply"] = (results_df["ts_reply"] - beginning_history) // one_s
+# sessions_arrs = []
+# for n_session, sub_df in results_df.groupby("session"):
+#     sessions_arrs.append(sub_df["ts_reply"].diff().values)
+# # sessions_arr = np.hstack(sessions_arrs)
+# sessions_arr = pd.Series(np.hstack(sessions_arrs), name="ts_reply")
+# sns.distplot(sessions_arr[sessions_arr < 50], bins=100, kde=False)
+# # plt.hist(sessions_arr[sessions_arr < 50], bins=30)
+# plt.savefig(os.path.join("fig", f"histo-reply-{user_name}.pdf"))
+# print(sessions_arr.value_counts())
