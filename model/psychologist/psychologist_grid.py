@@ -19,7 +19,7 @@ class PsychologistGrid(Psychologist):
         self.omniscient = true_param is not None
         if not self.omniscient:
             self.bounds = np.asarray(bounds)
-            self.methods = [self.METHODS[k] for k in grid_methods]
+            self.methods = np.asarray([self.METHODS[k] for k in grid_methods])
             grid_param = self.cp_grid_param(grid_size=grid_size)
 
             n_param_set, n_param = grid_param.shape
