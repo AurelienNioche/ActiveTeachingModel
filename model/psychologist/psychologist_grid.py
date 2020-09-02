@@ -72,8 +72,8 @@ class PsychologistGrid(Psychologist):
 
         values = np.atleast_2d(
             [m(*b, num=grid_size) for (b, m) in
-             zip(self.bounds[diff], self.methods[diff])]
-        )
+             zip(self.bounds[diff], self.methods[diff])])
+
         var = self.cartesian_product(*values)
         grid = np.zeros((max(1, len(var)), len(self.bounds)))
         if np.sum(diff):

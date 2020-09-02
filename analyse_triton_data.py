@@ -12,7 +12,7 @@ FORCE = True
 
 def main():
 
-    trial_name = input("Trial name: ")
+    trial_name = "recursive_nomni_nospec" # input("Trial name: ")
     raw_data_folder = os.path.join(paths.DATA_CLUSTER_DIR, trial_name)
     fig_folder = os.path.join("fig", trial_name)
 
@@ -43,14 +43,14 @@ def main():
     for k, v in items_learnt.items():
 
         fig_path = os.path.join(fig_folder, f"{trial_name}_chocolate_{k}.pdf")
-        # chocolate.plot(
-        #     df=df,
-        #     teachers=teachers,
-        #     learners=learners,
-        #     psychologists=psy,
-        #     fig_path=fig_path,
-        #     learnt_label=v,
-        # )
+        chocolate.plot(
+            df=df,
+            teachers=teachers,
+            learners=learners,
+            psychologists=psy,
+            fig_path=fig_path,
+            learnt_label=v,
+        )
 
         fig_path = os.path.join(fig_folder, f"{trial_name}_box_{k}.pdf")
 

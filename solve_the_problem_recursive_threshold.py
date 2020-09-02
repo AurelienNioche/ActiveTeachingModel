@@ -197,10 +197,10 @@ def recursive(n_item, review_ts, alpha, beta, eval_ts, thr, verbose=False):
                         ts - last_pres[seen]))
                 if np.min(p_seen) <= thr_opt or np.sum(seen) == n_item:
                     item = np.flatnonzero(seen)[np.argmin(p_seen)]
-                    print("review")
+
                 else:
                     item = np.max(np.flatnonzero(seen)) + 1
-                    print("new")
+
             n_pres[item] += 1
             last_pres[item] = ts
 
@@ -216,13 +216,13 @@ def recursive(n_item, review_ts, alpha, beta, eval_ts, thr, verbose=False):
         if n_learnt == n_item:
             old_n_learnt = n_item
             break
-        elif n_learnt < old_n_learnt:
+        elif old_n_learnt > n_learnt:
             break
 
         else:
             old_n_learnt = n_learnt
             # n_item = np.sum(n_pres > 0) - 1
-            thr_opt += 0.01
+            thr_opt += 0.0001
             if thr_opt >= 1:
                 break
             else:

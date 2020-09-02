@@ -69,7 +69,7 @@ class RecursiveThreshold(Teacher):
                         * (ts - last_pres[seen])
                         * cst_time)
 
-                    if np.min(p_seen) <= 0.90 or np.sum(seen) == n_item:
+                    if np.min(p_seen) <= thr or np.sum(seen) == n_item:
                         item = np.flatnonzero(seen)[np.argmin(p_seen)]
                     else:
                         item = np.max(np.flatnonzero(seen)) + 1
@@ -98,97 +98,96 @@ class RecursiveThreshold(Teacher):
 
             if n_learnt == n_item:
                 break
-
-            elif thr >= 1:
-                break
             else:
                 # n_item = np.sum(n_pres > 0) - 1
-                thr += 0.1
-
-                itr += 1
-                continue
-
-        return first_item
-
-    def _recursive(
-        self, review_ts, learner_model, hist, param, cst_time, is_item_specific, eval_ts
-    ):
-
-        itr = 0
-        n_item = self.n_item
-        lm = learner_model
-
-        current_step = np.sum(hist != lm.DUMMY_VALUE)
-        current_seen_item = np.unique(hist[hist != lm.DUMMY_VALUE])
-
-        future = review_ts[current_step:]
-
-        first_item = None
-
-        while True:
-
-            seen = np.zeros(n_item, dtype=int)
-            seen[current_seen_item[current_seen_item < n_item]] = True
-            hist[current_step:] = lm.DUMMY_VALUE
-
-            # a = datetime.datetime.now()
-
-            for i, ts in enumerate(future):
-
-                if np.sum(seen) == 0:
-                    item = 0
-                    first_item = item
+                thr += 0.01
+                if thr >= 1:
+                    break
                 else:
-
-                    p_seen, _ = lm.p_seen_spec_hist(
-                        param=param,
-                        now=ts,
-                        hist=hist,
-                        ts=review_ts,
-                        seen=seen,
-                        is_item_specific=is_item_specific,
-                        cst_time=cst_time,
-                    )
-                    min_p_seen = np.min(p_seen)
-                    n_seen = np.sum(seen)
-                    item_seen = np.flatnonzero(seen)
-                    if min_p_seen <= self.learnt_threshold or n_seen == n_item:
-                        item = item_seen[np.argmin(p_seen)]
-                    else:
-                        item = np.max(item_seen) + 1
-                    if i == 0:
-                        first_item = item
-
-                hist[current_step + i] = item
-                seen[item] = True
-            #
-            # print(n_item, datetime.datetime.now() - a)
-
-            p_seen, _ = lm.p_seen_spec_hist(
-                param=param,
-                now=eval_ts,
-                hist=hist,
-                ts=review_ts,
-                seen=seen,
-                is_item_specific=is_item_specific,
-                cst_time=cst_time,
-            )
-
-            n_learnt = np.sum(p_seen > self.learnt_threshold)
-
-            if n_learnt == n_item:
-                # old_n_learnt = n_item
-                break
-
-            elif n_item <= 1:
-                break
-            else:
-                n_item = np.sum(seen) - 1
-
-                itr += 1
-                continue
+                    itr += 1
+                    continue
 
         return first_item
+
+    # def _recursive(
+    #     self, review_ts, learner_model, hist, param, cst_time, is_item_specific, eval_ts
+    # ):
+    #
+    #     itr = 0
+    #     n_item = self.n_item
+    #     lm = learner_model
+    #
+    #     current_step = np.sum(hist != lm.DUMMY_VALUE)
+    #     current_seen_item = np.unique(hist[hist != lm.DUMMY_VALUE])
+    #
+    #     future = review_ts[current_step:]
+    #
+    #     first_item = None
+    #
+    #     while True:
+    #
+    #         seen = np.zeros(n_item, dtype=int)
+    #         seen[current_seen_item[current_seen_item < n_item]] = True
+    #         hist[current_step:] = lm.DUMMY_VALUE
+    #
+    #         # a = datetime.datetime.now()
+    #
+    #         for i, ts in enumerate(future):
+    #
+    #             if np.sum(seen) == 0:
+    #                 item = 0
+    #                 first_item = item
+    #             else:
+    #
+    #                 p_seen, _ = lm.p_seen_spec_hist(
+    #                     param=param,
+    #                     now=ts,
+    #                     hist=hist,
+    #                     ts=review_ts,
+    #                     seen=seen,
+    #                     is_item_specific=is_item_specific,
+    #                     cst_time=cst_time,
+    #                 )
+    #                 min_p_seen = np.min(p_seen)
+    #                 n_seen = np.sum(seen)
+    #                 item_seen = np.flatnonzero(seen)
+    #                 if min_p_seen <= self.learnt_threshold or n_seen == n_item:
+    #                     item = item_seen[np.argmin(p_seen)]
+    #                 else:
+    #                     item = np.max(item_seen) + 1
+    #                 if i == 0:
+    #                     first_item = item
+    #
+    #             hist[current_step + i] = item
+    #             seen[item] = True
+    #         #
+    #         # print(n_item, datetime.datetime.now() - a)
+    #
+    #         p_seen, _ = lm.p_seen_spec_hist(
+    #             param=param,
+    #             now=eval_ts,
+    #             hist=hist,
+    #             ts=review_ts,
+    #             seen=seen,
+    #             is_item_specific=is_item_specific,
+    #             cst_time=cst_time,
+    #         )
+    #
+    #         n_learnt = np.sum(p_seen > self.learnt_threshold)
+    #
+    #         if n_learnt == n_item:
+    #             # old_n_learnt = n_item
+    #             break
+    #
+    #         elif n_item <= 1:
+    #             break
+    #         else:
+    #             n_item = np.sum(seen) - 1
+    #
+    #             itr += 1
+    #             continue
+    #
+    #     return first_item
 
     def ask(self, now, psy):
 

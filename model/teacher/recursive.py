@@ -69,7 +69,7 @@ class Recursive(Teacher):
                         * (ts - last_pres[seen])
                         * cst_time)
 
-                    if np.min(p_seen) <= 0.90 or np.sum(seen) == n_item:
+                    if np.min(p_seen) <= thr or np.sum(seen) == n_item:
                         item = np.flatnonzero(seen)[np.argmin(p_seen)]
                     else:
                         item = np.max(np.flatnonzero(seen)) + 1
@@ -102,10 +102,11 @@ class Recursive(Teacher):
             elif n_item <= 1:
                 break
             else:
-                n_item = np.sum(n_pres > 0) - 1
-
-                itr += 1
-                continue
+                if n_item <= 1:
+                    break
+                else:
+                    itr += 1
+                    continue
 
         return first_item
 
@@ -178,14 +179,14 @@ class Recursive(Teacher):
             if n_learnt == n_item:
                 # old_n_learnt = n_item
                 break
-
-            elif n_item <= 1:
-                break
             else:
                 n_item = np.sum(seen) - 1
 
-                itr += 1
-                continue
+                if n_item <= 1:
+                    break
+                else:
+                    itr += 1
+                    continue
 
         return first_item
 
