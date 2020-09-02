@@ -85,9 +85,10 @@ def log_lik(
 def get_all_log_lik(user_df: pd.DataFrame, grid_df: pd.DataFrame, eps: float) -> list:
     """Compute log-likelihood for all grid values"""
 
+    print("Computing log-likelihood for all param pairs...")
     sums_ll = []
     beginning_history = pd.Timestamp("1970-01-01", tz="UTC")
-    one_s = pd.Timedelta("1s")
+    one_s = pd.Timedelta("60s")
     for _, param_pair in tqdm(grid_df.iterrows()):
         sums_ll.append(
             log_lik(
@@ -96,10 +97,11 @@ def get_all_log_lik(user_df: pd.DataFrame, grid_df: pd.DataFrame, eps: float) ->
                 user_df["success"],
                 (user_df["ts_reply"] - beginning_history)
                 // one_s,  # To seconds as in pandas docs
-                1 / (10000 * 60 ** 2),
+                1 / (1 * 60 ** 2),
                 eps,
             )
         )
+    print("Done!")
 
     return sums_ll
 
@@ -107,14 +109,18 @@ def get_all_log_lik(user_df: pd.DataFrame, grid_df: pd.DataFrame, eps: float) ->
 def plot_param_space(user_name: str, grid: pd.DataFrame, log_liks: np.ndarray) -> None:
     """Heatmap of the alpha-beta parameter space"""
 
+    print("Plotting heatmap...")
     plt.close()
-    log_liks = pd.Series(log_liks[f"{user_name}@test.com"], name="log_lik")
+    log_liks = pd.Series(log_liks, name="log_lik")
     data = pd.concat((grid, log_liks), axis=1)
-    data = data.round(2)
-    data = data.pivot("alpha", "beta", "log_lik")
+    try:  # Duplicated entries can appear with rounding
+        data = data.round(2).pivot("alpha", "beta", "log_lik")
+    except:
+        data = data.round(5).pivot("alpha", "beta", "log_lik")
     ax = sns.heatmap(data=data, cmap="viridis")
     ax.invert_yaxis()
     plt.savefig(os.path.join("fig", f"param_grid_{user_name}.pdf"))
+    print("Done!")
 
 
 def main(f_results: str) -> (pd.DataFrame, pd.DataFrame):
@@ -124,9 +130,9 @@ def main(f_results: str) -> (pd.DataFrame, pd.DataFrame):
 
     # Grid
     # original bounds := np.array([[0.001, 0.5], [0.00, 0.5]])
-    bounds = np.array([[0.00001, 4.0], [0.00, 0.5]])
+    bounds = np.array([[0.0001, 4.0], [0.00, 0.5]])
     grid_size = 20
-    methods = np.array([np.logspace, np.linspace])  # Use log scale for alpha
+    methods = np.array([np.geomspace, np.linspace])  # Use log scale for alpha
     grid = cp_grid_param_loglin(grid_size, bounds, methods)
     grid = pd.DataFrame(grid, columns=("alpha", "beta"))
 
@@ -141,8 +147,11 @@ def main(f_results: str) -> (pd.DataFrame, pd.DataFrame):
         for user, user_df in results_df.groupby("user")
         if "carlos2" not in user
     }
+
+    # Plot
     users = list(likelihoods.keys())
-    map(plot_param_space, users)
+    for user in users:
+        plot_param_space(user, grid, likelihoods[user])
 
     return likelihoods, grid
 
