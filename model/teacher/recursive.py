@@ -58,8 +58,8 @@ class Recursive(Teacher):
                     seen = n_pres > 0
 
                     if is_item_specific:
-                        init_forget = param[seen, 0]
-                        rep_effect = param[seen, 1]
+                        init_forget = param[:n_item][seen, 0]
+                        rep_effect = param[:n_item][seen, 1]
                     else:
                         init_forget, rep_effect = param
 
@@ -83,8 +83,8 @@ class Recursive(Teacher):
             seen = n_pres > 0
 
             if is_item_specific:
-                init_forget = param[seen, 0]
-                rep_effect = param[seen, 1]
+                init_forget = param[:n_item][seen, 0]
+                rep_effect = param[:n_item][seen, 1]
             else:
                 init_forget, rep_effect = param
 

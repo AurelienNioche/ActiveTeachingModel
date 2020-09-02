@@ -6,6 +6,7 @@ from settings.config_triton import Config
 from run.make_data_triton import run
 
 import os
+import numpy as np
 
 from model.learner.exponential_n_delta import ExponentialNDelta
 from model.learner.walsh2018 import Walsh2018
@@ -34,16 +35,16 @@ def dic_to_lab_val(dic):
 
 def main():
 
-    learner_md = ExponentialNDelta
-    pr_val = [0.216, 0.44]
-
-    teacher_md = RecursiveThreshold #Recursive  # Leitner
-    psy_md = PsychologistGrid
-
-    is_item_specific = False
-
     n_item = 150
     omni = True
+
+    learner_md = ExponentialNDelta
+    pr_val = [[0.216, 0.44] for i in range(n_item)]
+
+    teacher_md = Recursive  # Leitner
+    psy_md = PsychologistGrid
+
+    is_item_specific = len(np.asarray(pr_val).shape) != 1
 
     ss_n_iter = 100
     time_between_ss = 86200
