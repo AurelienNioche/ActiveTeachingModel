@@ -8,12 +8,18 @@ EPS = np.finfo(np.float).eps
 
 class PsychologistGrid(Psychologist):
 
+    LIN = 'lin'
+    LOG = 'log'
+
+    METHODS = {LIN: np.linspace, LOG: np.geomspace}
+
     def __init__(self, n_item, is_item_specific, learner,
-                 bounds, grid_size, cst_time, true_param=None):
+                 bounds, grid_size, grid_methods, cst_time, true_param=None):
 
         self.omniscient = true_param is not None
         if not self.omniscient:
             self.bounds = np.asarray(bounds)
+            self.methods = [self.METHODS[k] for k in grid_methods]
             grid_param = self.cp_grid_param(grid_size=grid_size)
 
             n_param_set, n_param = grid_param.shape
@@ -64,8 +70,10 @@ class PsychologistGrid(Psychologist):
         diff = self.bounds[:, 1] - self.bounds[:, 0] > 0
         not_diff = np.invert(diff)
 
-        values = np.atleast_2d([np.linspace(*b, num=grid_size)
-                                for b in self.bounds[diff]])
+        values = np.atleast_2d(
+            [m(*b, num=grid_size) for (b, m) in
+             zip(self.bounds[diff], self.methods[diff])]
+        )
         var = self.cartesian_product(*values)
         grid = np.zeros((max(1, len(var)), len(self.bounds)))
         if np.sum(diff):

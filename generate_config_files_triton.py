@@ -151,6 +151,7 @@ def main() -> None:
             [0.1, 0.1],
             [0.6, 0.6],
         ],
+        "grid_methods": [PsychologistGrid.LIN for _ in range(6)],
         "grid_size": 10,
         "cst_time": 1 / (4 * 24 * 60 ** 2),
     }
@@ -158,6 +159,7 @@ def main() -> None:
     exp_decay_cst = {
         "param_labels": ["alpha", "beta"],
         "bounds": [[0.001, 0.5], [0.00, 0.5]],
+        "grid_methods": [PsychologistGrid.LOG, PsychologistGrid.LIN],
         "grid_size": 20,
         "cst_time": 1 / (60 ** 2),  # 1 / (24 * 60**2),
     }
@@ -183,6 +185,7 @@ def main() -> None:
 
         bounds = cst["bounds"]
         grid_size = cst["grid_size"]
+        grid_methods = cst["grid_methods"]
         pr_lab = cst["param_labels"]
         cst_time = cst["cst_time"]
 
@@ -205,10 +208,10 @@ def main() -> None:
 
                     if psy_md == PsychologistGrid:
                         psy_pr_lab = [
-                            "grid_size",
+                            "grid_size", "grid_methods"
                         ]
                         psy_pr_val = [
-                            grid_size,
+                            grid_size, grid_methods
                         ]
                     else:
                         raise ValueError
