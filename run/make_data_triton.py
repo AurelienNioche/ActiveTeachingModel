@@ -116,11 +116,24 @@ def run(config, with_tqdm=False):
                 p = 0
                 n_learnt_before = 0
                 n_seen_before = 0
+
+                pr_inf, p_err_mean, p_err_std = None, None, None
             else:
 
                 p_seen_real_before, seen_before = psy.p_seen(now=now, param=pr)
                 n_learnt_before = np.sum(p_seen_real_before > learnt_threshold)
                 n_seen_before = np.sum(seen_before)
+
+                if is_leitner or omniscient:
+                    pr_inf, p_err_mean, p_err_std = None, None, None
+
+                else:
+                    pr_inf = psy.inferred_learner_param()
+                    p_seen_inf, seen = psy.p_seen(now=now,
+                                                  param=pr_inf)
+
+                    p_err = np.abs(p_seen_real_before - p_seen_inf)
+                    p_err_mean, p_err_std = np.mean(p_err), np.std(p_err)
 
                 if is_leitner:
                     item = teacher.ask(now=now,
