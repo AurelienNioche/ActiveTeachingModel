@@ -7,6 +7,7 @@ from model.teacher.leitner import Leitner
 from model.teacher.threshold import Threshold
 from model.teacher.sampling import Sampling
 from model.teacher.recursive import Recursive
+from model.teacher.recursive_threshold import RecursiveThreshold
 
 from model.learner.walsh2018 import Walsh2018
 from model.learner.exponential_n_delta import ExponentialNDelta
@@ -50,7 +51,7 @@ def run(config, with_tqdm=False):
             time_per_iter=time_per_iter,
             ss_n_iter=ss_n_iter, time_between_ss=time_between_ss,
             **teacher_pr)
-    elif teacher_cls == Recursive:
+    elif teacher_cls in (Recursive, RecursiveThreshold):
         teacher = teacher_cls(n_item=n_item,
                               learnt_threshold=learnt_threshold,
                               time_per_iter=time_per_iter,
@@ -148,19 +149,6 @@ def run(config, with_tqdm=False):
             #     print("********n_learnt", n_learnt)
             # else:
             #     print("n_learnt", n_learnt)
-
-            if is_leitner or omniscient:
-                pr_inf, p_err_mean, p_err_std = None, None, None
-
-            else:
-                pr_inf = psy.inferred_learner_param()
-                p_seen_inf, seen = psy.p_seen(now=now, param=pr_inf)
-
-                if np.sum(seen):
-                    p_err = np.abs(p_seen_real - p_seen_inf)
-                    p_err_mean, p_err_std = np.mean(p_err), np.std(p_err)
-                else:
-                    p_err_mean, p_err_std = None, None
 
             now_real = datetime.datetime.now().timestamp()
 

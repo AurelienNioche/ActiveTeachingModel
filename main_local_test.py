@@ -14,6 +14,7 @@ from model.teacher.leitner import Leitner
 from model.teacher.sampling import Sampling
 from model.teacher.threshold import Threshold
 from model.teacher.recursive import Recursive
+from model.teacher.recursive_threshold import RecursiveThreshold
 
 from settings.config_triton import LEARNER, PSYCHOLOGIST, TEACHER
 
@@ -36,7 +37,7 @@ def main():
     learner_md = ExponentialNDelta
     pr_val = [0.216, 0.44]
 
-    teacher_md = Recursive  # Leitner
+    teacher_md = RecursiveThreshold #Recursive  # Leitner
     psy_md = PsychologistGrid
 
     is_item_specific = False
@@ -91,7 +92,7 @@ def main():
         teacher_pr = leitner_cst
     elif teacher_md == Sampling:
         teacher_pr = sampling_cst
-    elif teacher_md in (Threshold, Recursive):
+    elif teacher_md in (Threshold, Recursive, RecursiveThreshold):
         teacher_pr = {}
     else:
         raise ValueError

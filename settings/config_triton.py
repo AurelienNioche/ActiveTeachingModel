@@ -7,6 +7,7 @@ from model.teacher.threshold import Threshold
 from model.teacher.mcts import MCTSTeacher
 from model.teacher.sampling import Sampling
 from model.teacher.recursive import Recursive
+from model.teacher.recursive_threshold import RecursiveThreshold
 
 from model.psychologist.psychologist_grid import PsychologistGrid
 from model.psychologist.psychologist_gradient import PsychologistGradient
@@ -21,7 +22,8 @@ TEACHER = {
     "leitner": Leitner,
     "mcts": MCTSTeacher,
     "sampling": Sampling,
-    "recursive": Recursive
+    "recursive": Recursive,
+    "recursive_threshold": RecursiveThreshold
 }
 
 LEARNER = {

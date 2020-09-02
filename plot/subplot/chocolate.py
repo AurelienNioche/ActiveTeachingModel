@@ -5,7 +5,7 @@ from typing import Hashable, Iterable, Mapping
 import matplotlib.pyplot as plt
 import pandas as pd
 
-# import numpy as np
+import numpy as np
 
 # import settings.paths as paths
 from plot import utils  # fake_data,
@@ -143,8 +143,8 @@ def plot(
             ax.set_aspect(1)
             ax.set_xlim(min_x, max_x)
             ax.set_ylim(min_x, max_x)
-            ax.set_xticks((0, 100, 150))
-            ax.set_yticks((0, 100, 150))
+            ax.set_xticks(np.arange(0, 151, 50))
+            ax.set_yticks(np.arange(0, 151, 50))
 
     # Text left
     # DO NOT REMOVE, FOR FINAL PLOT
