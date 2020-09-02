@@ -93,7 +93,8 @@ class PsychologistGrid(Psychologist):
                     item=item,
                     grid_param=self.grid_param,
                     response=response,
-                    timestamp=timestamp)
+                    timestamp=timestamp,
+                    cst_time=self.cst_time)
 
                 if self.is_item_specific:
                     lp = self.log_post[item]
