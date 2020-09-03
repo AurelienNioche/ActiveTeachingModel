@@ -17,7 +17,7 @@ def plot(df: pd.DataFrame, learnt_label: str, fig_path: str) -> None:
         sns.distplot(df[is_t][learnt_label], label=t, bins=10)
     plt.legend()
 
-    plt.show()
+    # plt.show()
     print("Saving fig...")
     box.savefig(fig_path)
     print("Done!")

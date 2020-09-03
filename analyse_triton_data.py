@@ -12,7 +12,7 @@ FORCE = True
 
 def main():
 
-    trial_name = "new_bounds_omni_Nspec"   # input("Trial name: ")
+    trial_name = "new_bounds2_omni_Nspec"   # input("Trial name: ")
     raw_data_folder = os.path.join(paths.DATA_CLUSTER_DIR, trial_name)
     fig_folder = os.path.join("fig", trial_name)
 
@@ -41,24 +41,20 @@ def main():
 
     for k, v in items_learnt.items():
 
-        fig_path = os.path.join(fig_folder, f"{trial_name}_chocolate_{k}.pdf")
-        chocolate.plot(
-            df=df,
-            teachers=teachers,
-            learners=learners,
-            psychologists=psy,
-            fig_path=fig_path,
-            learnt_label=v,
-        )
+        # fig_path = os.path.join(fig_folder, f"{trial_name}_chocolate_{k}.pdf")
+        # chocolate.plot(
+        #     df=df,
+        #     teachers=teachers,
+        #     learners=learners,
+        #     psychologists=psy,
+        #     fig_path=fig_path,
+        #     learnt_label=v,
+        # )
 
         fig_path = os.path.join(fig_folder, f"{trial_name}_box_{k}.pdf")
-
-        box.plot(
-            df=df, fig_path=fig_path, learnt_label=v,
-        )
+        box.plot(df=df, fig_path=fig_path, learnt_label=v)
 
         fig_path = os.path.join(fig_folder, f"{trial_name}_hist_{k}.pdf")
-
         hist.plot(learnt_label=v, df=df, fig_path=fig_path)
 
 
