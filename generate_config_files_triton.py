@@ -130,7 +130,7 @@ def main() -> None:
 
     n_agent = 100
     n_item = 500
-    omni = True
+    omni = False
 
     is_item_specific = True
     ss_n_iter = 100
