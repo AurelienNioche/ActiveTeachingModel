@@ -132,7 +132,7 @@ def main() -> None:
 
     n_agent = 100
     n_item = 500
-    omni = False
+    omni = True
 
     is_item_specific = True
     gen_methods = [loguniform.rvs, np.random.uniform]
