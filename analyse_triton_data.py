@@ -17,8 +17,7 @@ def main():
     fig_folder = os.path.join("fig", trial_name)
 
     preprocess_data_file = os.path.join(
-        "data", "preprocessed", f"chocolate_triton{trial_name}.csv"
-    )
+        "data", "preprocessed", f"chocolate_triton{trial_name}.csv")
 
     os.makedirs(os.path.join("data", "preprocessed"), exist_ok=True)
     os.makedirs(os.path.join("fig", trial_name), exist_ok=True)
