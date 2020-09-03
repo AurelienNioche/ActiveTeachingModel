@@ -164,7 +164,7 @@ def main() -> None:
     exp_decay_cst = {
         "param_labels": ["alpha", "beta"],
         "bounds": [[0.0000001, 0.1], [0.0001, 0.99]],
-        "grid_methods": [PsychologistGrid.LOG, PsychologistGrid.LIN],
+        "grid_methods": [PsychologistGrid.LIN, PsychologistGrid.LIN],
         "grid_size": 20,
         "gen_methods": [np.random.uniform, np.random.uniform],
         "gen_bounds": [[0.0000001, 0.1], [0.0001, 0.99]],

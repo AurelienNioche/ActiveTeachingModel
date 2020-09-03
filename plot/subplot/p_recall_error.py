@@ -93,6 +93,8 @@ def plot(
                 color=color,
             )
 
+            ax.set_ylim((0, 1))
+
             if i_row == 0:
                 ax.set_title(psychologist)
 
