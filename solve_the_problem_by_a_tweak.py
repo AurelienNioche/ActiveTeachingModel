@@ -69,7 +69,9 @@ class Leitner:
         return item_idx
 
 
-def use_leitner(n_item, review_ts, rd, alpha, beta, eval_ts, thr):
+def use_leitner(n_item, review_ts, rd, param, eval_ts, thr):
+
+    is_item_specific = len(np.asarray(param).shape) > 1
 
     lei = Leitner(n_item=n_item, delay_min=2, delay_factor=2)
 
@@ -85,9 +87,18 @@ def use_leitner(n_item, review_ts, rd, alpha, beta, eval_ts, thr):
         item = lei.ask(now=ts, idx_last_q=last_item,
                        last_was_success=last_success,
                        last_time_reply=last_ts)
-        p = 0 if not n_pres[item] else np.exp(-alpha
-                                              * (1 - beta)**(n_pres[item] - 1)
-                                              * (ts-last_pres[item]))
+
+        if is_item_specific:
+            init_forget = param[item, 0]
+            rep_effect = param[item, 1]
+        else:
+            init_forget, rep_effect = param
+
+        p = 0 if not n_pres[item] \
+            else np.exp(-init_forget
+                        * (1 - rep_effect) ** (n_pres[item] - 1)
+                        * (ts - last_pres[item]))
+
         last_success = p > rd[i]
 
         n_pres[item] += 1
@@ -97,15 +108,24 @@ def use_leitner(n_item, review_ts, rd, alpha, beta, eval_ts, thr):
         last_item = item
 
     seen = n_pres > 0
-    p_seen = np.exp(-alpha
-                    * (1 - beta) ** (n_pres[seen] - 1)
-                    * (eval_ts-last_pres[seen]))
+
+    if is_item_specific:
+        init_forget = param[seen, 0]
+        rep_effect = param[seen, 1]
+    else:
+        init_forget, rep_effect = param
+
+    p_seen = np.exp(-init_forget
+                    * (1 - rep_effect) ** (n_pres[seen] - 1)
+                    * (eval_ts - last_pres[seen]))
     n_learnt = np.sum(p_seen > thr)
     print("leitner n learnt", n_learnt)
     print()
 
 
-def use_threshold(n_item, alpha, beta, review_ts, eval_ts, thr):
+def use_threshold(n_item, param, review_ts, eval_ts, thr):
+
+    is_item_specific = len(np.asarray(param).shape) > 1
 
     n_pres = np.zeros(n_item, dtype=int)
     last_pres = np.zeros(n_item)
@@ -116,9 +136,16 @@ def use_threshold(n_item, alpha, beta, review_ts, eval_ts, thr):
             item = 0
         else:
             seen = n_pres > 0
-            p_seen = np.exp(-alpha * (1 - beta) ** (n_pres[seen] - 1) * (
-                    ts - last_pres[seen]))
-            if np.min(p_seen) <= 0.90:
+            if is_item_specific:
+                init_forget = param[seen, 0]
+                rep_effect = param[seen, 1]
+            else:
+                init_forget, rep_effect = param
+
+            p_seen = np.exp(-init_forget
+                            * (1 - rep_effect) ** (n_pres[seen] - 1)
+                            * (ts - last_pres[seen]))
+            if np.min(p_seen) <= thr:
                 item = np.flatnonzero(seen)[np.argmin(p_seen)]
             else:
                 item = np.min([n_item, np.max(np.flatnonzero(seen)) + 1])
@@ -127,8 +154,15 @@ def use_threshold(n_item, alpha, beta, review_ts, eval_ts, thr):
         last_pres[item] = ts
 
     seen = n_pres > 0
-    p_seen = np.exp(-alpha * (1 - beta) ** (n_pres[seen] - 1) * (
-            eval_ts - last_pres[seen]))
+    if is_item_specific:
+        init_forget = param[seen, 0]
+        rep_effect = param[seen, 1]
+    else:
+        init_forget, rep_effect = param
+
+    p_seen = np.exp(-init_forget
+                    * (1 - rep_effect) ** (n_pres[seen] - 1)
+                    * (eval_ts - last_pres[seen]))
 
     n_learnt = np.sum(p_seen > thr)
     print("threshold n learnt", n_learnt)
@@ -176,7 +210,9 @@ def use_random_sampling(n_item, review_ts, alpha, beta, eval_ts, thr):
     # plt.show()
 
 
-def recursive(n_item, review_ts, alpha, beta, eval_ts, thr, verbose=False):
+def recursive(n_item, review_ts, param, eval_ts, thr, verbose=False):
+
+    is_item_specific = len(np.asarray(param).shape) > 1
 
     old_n_learnt = 0
     itr = 0
@@ -192,9 +228,16 @@ def recursive(n_item, review_ts, alpha, beta, eval_ts, thr, verbose=False):
                 item = 0
             else:
                 seen = n_pres > 0
-                p_seen = np.exp(-alpha * (1 - beta) ** (n_pres[seen] - 1) * (
-                        ts - last_pres[seen]))
-                if np.min(p_seen) <= 0.90 or np.sum(seen) == n_item:
+                if is_item_specific:
+                    init_forget = param[:n_item][seen, 0]
+                    rep_effect = param[:n_item][seen, 1]
+                else:
+                    init_forget, rep_effect = param
+
+                p_seen = np.exp(-init_forget
+                                * (1 - rep_effect) ** (n_pres[seen] - 1)
+                                * (ts - last_pres[seen]))
+                if np.min(p_seen) <= thr or np.sum(seen) == n_item:
                     item = np.flatnonzero(seen)[np.argmin(p_seen)]
                 else:
                     item = np.max(np.flatnonzero(seen)) + 1
@@ -203,8 +246,15 @@ def recursive(n_item, review_ts, alpha, beta, eval_ts, thr, verbose=False):
             last_pres[item] = ts
 
         seen = n_pres > 0
-        p_seen = np.exp(-alpha * (1 - beta) ** (n_pres[seen] - 1) * (
-                    eval_ts - last_pres[seen]))
+        if is_item_specific:
+            init_forget = param[:n_item][seen, 0]
+            rep_effect = param[:n_item][seen, 1]
+        else:
+            init_forget, rep_effect = param
+
+        p_seen = np.exp(-init_forget
+                        * (1 - rep_effect) ** (n_pres[seen] - 1)
+                        * (eval_ts - last_pres[seen]))
 
         n_learnt = np.sum(p_seen > thr)
         if verbose:
@@ -228,18 +278,20 @@ def recursive(n_item, review_ts, alpha, beta, eval_ts, thr, verbose=False):
 
 def main():
 
-    alpha, beta = [0.02 * 0.003, 0.44]
+    n_item = 150
+
+    param = [[0.00006, 0.44] for _ in range(n_item)]
+    param = np.asarray(param)
+
     ss_n_iter = 100
     time_per_iter = 2
-    n_sec_day = 24*60**2
+    n_sec_day = 24 * 60**2
     n_ss = 6
     eval_ts = n_ss*n_sec_day
     review_ts = np.hstack([np.arange(x,
                                      x+(ss_n_iter*time_per_iter),
                                      time_per_iter)
                            for x in np.arange(0, n_sec_day*n_ss, n_sec_day)])
-
-    n_item = 150
 
     thr = 0.90
 
@@ -251,27 +303,25 @@ def main():
     use_leitner(n_item=n_item,
                 review_ts=review_ts, eval_ts=eval_ts,
                 rd=rd,
-                alpha=alpha, beta=beta,
+                param=param,
                 thr=thr)
 
     use_threshold(n_item=n_item,
-                  alpha=alpha,
-                  beta=beta,
+                  param=param,
                   review_ts=review_ts,
                   eval_ts=eval_ts, thr=thr)
     a = datetime.datetime.now()
     recursive(n_item=n_item,
               review_ts=review_ts,
-              alpha=alpha,
-              beta=beta, eval_ts=eval_ts, thr=thr)
-    print(datetime.datetime.now() - a)
+              param=param, eval_ts=eval_ts, thr=thr)
+    print("[Time to execute recursive", datetime.datetime.now() - a, "]")
 
-    use_random_sampling(n_item=n_item,
-                        review_ts=review_ts,
-                        alpha=alpha,
-                        beta=beta,
-                        eval_ts=eval_ts,
-                        thr=thr)
+    # use_random_sampling(n_item=n_item,
+    #                     review_ts=review_ts,
+    #                     alpha=alpha,
+    #                     beta=beta,
+    #                     eval_ts=eval_ts,
+    #                     thr=thr)
 
 
 if __name__ == "__main__":

@@ -39,7 +39,7 @@ def main():
     omni = True
 
     learner_md = ExponentialNDelta
-    pr_val = [[0.216, 0.44] for i in range(n_item)]
+    pr_val = [[0.00006, 0.44] for _ in range(n_item)]
 
     teacher_md = Recursive  # Leitner
     psy_md = PsychologistGrid
@@ -47,7 +47,7 @@ def main():
     is_item_specific = len(np.asarray(pr_val).shape) > 1
 
     ss_n_iter = 100
-    time_between_ss = 86200
+    time_between_ss = 24 * 60**2
     n_ss = 6
     learnt_threshold = 0.9
     time_per_iter = 2
@@ -76,7 +76,7 @@ def main():
         "bounds": [[0.001, 0.5], [0.00, 0.5]],
         "grid_methods": [PsychologistGrid.LOG, PsychologistGrid.LIN],
         "grid_size": 20,
-        "cst_time": 1 / (60 ** 2),  # 1 / (24 * 60**2),
+        "cst_time": 1,  # 1 / (24 * 60**2),
     }
 
     if learner_md == Walsh2018:

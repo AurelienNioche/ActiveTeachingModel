@@ -27,7 +27,7 @@ class Leitner(Teacher):
                 max(0, self.box[last_idx] - 1)
 
         delay = self.delay_factor ** self.box[last_idx]
-        # Delay is 1, 2, 4, 8, 16, 32, 64, 128, 256, 512 ... minutes
+        # Delay is 1, 2, 4, 8, 16, 32, 64, 128, 256, 512 ...
         self.due[last_idx] = \
             last_time_reply + self.delay_min * delay
 

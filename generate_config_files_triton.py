@@ -67,7 +67,8 @@ def delete_config():
     """Delete cluster config files if user confirms"""
 
     if os.path.exists(paths.CONFIG_CLUSTER_DIR):
-        erase = input("Do you want to erase the config folder first? " "('y' or 'yes')")
+        erase = input("Do you want to erase the config folder first? " 
+                      "('y' or 'yes')")
         if erase in ("y", "yes"):
             shutil.rmtree(paths.CONFIG_CLUSTER_DIR)
             print("Done!")
@@ -79,7 +80,8 @@ def delete_data(data_name):
     """Delete cluster data files if user confirms"""
 
     if os.path.exists(data_name):
-        erase = input("Do you want to erase the data folder first? " "('y' or 'yes')")
+        erase = input("Do you want to erase the data folder first? " 
+                      "('y' or 'yes')")
         if erase in ("y", "yes"):
             shutil.rmtree(data_name)
             print("Done!")
@@ -103,10 +105,12 @@ def run_simulation():
         print("Nothing run.")
 
 
-def mod_job_file(template_path: str, config_path: str, saving_path: str) -> None:
+def mod_job_file(template_path: str, config_path: str,
+                 saving_path: str) -> None:
     """Call the shell script that modifies the number of parallel branches"""
 
-    os.system(f"/bin/sh mod_job.sh {template_path} {config_path} {saving_path}")
+    os.system(f"/bin/sh mod_job.sh "
+              f"{template_path} {config_path} {saving_path}")
 
 
 def main() -> None:
@@ -125,21 +129,19 @@ def main() -> None:
     np.random.seed(seed)
 
     n_agent = 100
-    n_item = 150
+    n_item = 500
     omni = False
 
-    task_param = {
-        "is_item_specific": True,
-        "ss_n_iter": 100,
-        "time_between_ss": 86400,
-        "n_ss": 7,
-        "learnt_threshold": 0.9,
-        "time_per_iter": 4,
-    }
+    is_item_specific = True
+    ss_n_iter = 100
+    time_between_ss = 24 * 60**2
+    n_ss = 6
+    learnt_threshold = 0.9
+    time_per_iter = 4
 
     sampling_cst = {"n_sample": 10000}
 
-    leitner_cst = {"delay_factor": 2, "delay_min": 4}
+    leitner_cst = {"delay_factor": 2, "delay_min": time_per_iter}
 
     walsh_cst = {
         "param_labels": ["tau", "s", "b", "m", "c", "x"],
@@ -168,7 +170,8 @@ def main() -> None:
 
     print("Generating cluster config files...")
 
-    n_job = len(learner_models) * len(teacher_models) * len(psy_models) * n_agent
+    n_job = len(learner_models) * len(teacher_models) \
+        * len(psy_models) * n_agent
     pbar = tqdm(total=n_job)
 
     for learner_md in learner_models:
@@ -211,7 +214,7 @@ def main() -> None:
 
                     pr_val = generate_param(
                         bounds=bounds,
-                        is_item_specific=task_param["is_item_specific"],
+                        is_item_specific=is_item_specific,
                         n_item=n_item,
                     )
 
@@ -232,9 +235,13 @@ def main() -> None:
                         "pr_val": pr_val,
                         "cst_time": cst_time,
                         "data_folder": data_folder,
+                        "is_item_specific": is_item_specific,
+                        "ss_n_iter": ss_n_iter,
+                        "time_between_ss": time_between_ss,
+                        "n_ss": n_ss,
+                        "learnt_threshold": learnt_threshold,
+                        "time_per_iter": time_per_iter
                     }
-
-                    json_content.update(**task_param)
 
                     f_name = os.path.join(
                         paths.CONFIG_CLUSTER_DIR,

@@ -99,9 +99,8 @@ class Recursive(Teacher):
             if n_learnt == n_item:
                 break
 
-            elif n_item <= 1:
-                break
             else:
+                n_item = np.sum(seen) - 1
                 if n_item <= 1:
                     break
                 else:
@@ -181,7 +180,6 @@ class Recursive(Teacher):
                 break
             else:
                 n_item = np.sum(seen) - 1
-
                 if n_item <= 1:
                     break
                 else:

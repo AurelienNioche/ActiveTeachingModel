@@ -40,8 +40,8 @@ class ExponentialNDelta(Learner):
         delta = now - last_pres
 
         delta *= cst_time
-
-        p = np.exp(-fr * delta)
+        with np.errstate(divide="ignore", invalid="ignore"):
+            p = np.exp(-fr * delta)
         return p, seen
 
     @staticmethod
@@ -68,8 +68,8 @@ class ExponentialNDelta(Learner):
 
         delta = now - last_pres
         delta *= cst_time
-
-        p = np.exp(-fr * delta)
+        with np.errstate(divide="ignore", invalid="ignore"):
+            p = np.exp(-fr * delta)
         return p, seen
 
     def log_lik_grid(self, item, grid_param, response, timestamp,
@@ -101,7 +101,9 @@ class ExponentialNDelta(Learner):
         delta = now - self.last_pres[item]
 
         delta *= cst_time
-        return np.exp(- fr * delta)
+        with np.errstate(divide="ignore", invalid="ignore"):
+            p = np.exp(- fr * delta)
+        return p
 
     def update(self, item, timestamp):
 
