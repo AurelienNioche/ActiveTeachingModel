@@ -134,7 +134,7 @@ def main() -> None:
     n_item = 500
     omni = False
 
-    is_item_specific = False
+    is_item_specific = True
 
     ss_n_iter = 100
     time_between_ss = 24 * 60**2

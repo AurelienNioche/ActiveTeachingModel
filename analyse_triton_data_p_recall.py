@@ -42,7 +42,7 @@ def main():
 
     force = True
 
-    trial_name = "bounds2_Nomni_Nspec"  # input("Trial name: ")
+    trial_name = "lin_Nomni_Nspec"  # input("Trial name: ")
     raw_data_folder = os.path.join(paths.DATA_CLUSTER_DIR, trial_name)
 
     preprocess_file = os.path.join(
