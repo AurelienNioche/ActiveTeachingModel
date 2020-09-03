@@ -40,7 +40,7 @@ class ExponentialNDelta(Learner):
         delta = now - last_pres
 
         delta *= cst_time
-        with np.errstate(divide="ignore", invalid="ignore"):
+        with np.errstate(divide="ignore", invalid="ignore", over="ignore"):
             p = np.exp(-fr * delta)
         return p, seen
 
@@ -68,7 +68,7 @@ class ExponentialNDelta(Learner):
 
         delta = now - last_pres
         delta *= cst_time
-        with np.errstate(divide="ignore", invalid="ignore"):
+        with np.errstate(divide="ignore", invalid="ignore", over="ignore"):
             p = np.exp(-fr * delta)
         return p, seen
 
@@ -101,7 +101,7 @@ class ExponentialNDelta(Learner):
         delta = now - self.last_pres[item]
 
         delta *= cst_time
-        with np.errstate(divide="ignore", invalid="ignore"):
+        with np.errstate(divide="ignore", invalid="ignore", over="ignore"):
             p = np.exp(- fr * delta)
         return p
 
