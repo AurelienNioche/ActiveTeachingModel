@@ -8,6 +8,7 @@ import shutil
 import numpy as np
 from numpy.random import default_rng
 from tqdm import tqdm
+from scipy.stats import loguniform
 
 import settings.paths as paths
 from model.learner.exponential_n_delta import ExponentialNDelta
@@ -27,22 +28,23 @@ PSY_INV = {v: k for k, v in PSYCHOLOGIST.items()}
 LEARNER_INV = {v: k for k, v in LEARNER.items()}
 
 
-def generate_param(bounds, is_item_specific, n_item):
+def generate_param(bounds, methods, is_item_specific, n_item):
 
     if is_item_specific:
         param = np.zeros((n_item, len(bounds)))
         for i, b in enumerate(bounds):
-            mean = np.random.uniform(b[0], b[1], size=n_item)
-            std = (b[1] - b[0]) * 0.1
-            v = np.random.normal(loc=mean, scale=std, size=n_item)
-            v[v < b[0]] = b[0]
-            v[v > b[1]] = b[1]
-            param[:, i] = v
+            param[:, i] = methods[i](b[0], b[1], n_item)
+            # mean = np.random.uniform(b[0], b[1], size=n_item)
+            # std = (b[1] - b[0]) * 0.1
+            # v = np.random.normal(loc=mean, scale=std, size=n_item)
+            # v[v < b[0]] = b[0]
+            # v[v > b[1]] = b[1]
+            # param[:, i] = v
 
     else:
         param = np.zeros(len(bounds))
         for i, b in enumerate(bounds):
-            param[i] = np.random.uniform(b[0], b[1])
+            param[i] = methods[i](b[0], b[1])
 
     param = param.tolist()
     return param
@@ -132,7 +134,9 @@ def main() -> None:
     n_item = 500
     omni = False
 
-    is_item_specific = True
+    is_item_specific = False
+    gen_methods = [loguniform.rvs, np.random.uniform]
+
     ss_n_iter = 100
     time_between_ss = 24 * 60**2
     n_ss = 6
@@ -194,7 +198,8 @@ def main() -> None:
             pr_val = generate_param(
                 bounds=bounds,
                 is_item_specific=is_item_specific,
-                n_item=n_item)
+                n_item=n_item,
+                methods=gen_methods)
 
             for teacher_md in teacher_models:
 
