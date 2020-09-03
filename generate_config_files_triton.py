@@ -163,11 +163,11 @@ def main() -> None:
 
     exp_decay_cst = {
         "param_labels": ["alpha", "beta"],
-        "bounds": [[0.0000001, 1], [0.0001, 0.99]],
+        "bounds": [[0.0000001, 0.1], [0.0001, 0.99]],
         "grid_methods": [PsychologistGrid.LOG, PsychologistGrid.LIN],
         "grid_size": 20,
         "gen_methods": [np.random.uniform, np.random.uniform],
-        "gen_bounds": [[0.0000001, 1], [0.0001, 0.99]],
+        "gen_bounds": [[0.0000001, 0.1], [0.0001, 0.99]],
         "cst_time": 1  # 1 / (60 ** 2),  # 1 / (24 * 60**2),
     }
 
