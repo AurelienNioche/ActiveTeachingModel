@@ -42,14 +42,14 @@ def main():
 
     force = True
 
-    trial_name = "lin_Nomni_Nspec"  # input("Trial name: ")
+    trial_name = "lin_Nomni_spec"  # input("Trial name: ")
     raw_data_folder = os.path.join(paths.DATA_CLUSTER_DIR, trial_name)
 
     preprocess_file = os.path.join(
         "data", "preprocessed", f"{trial_name}_p_recall.csv")
 
     fig_folder = os.path.join("fig", trial_name)
-    fig_path = os.path.join(fig_folder, "p_recall.pdf")
+    fig_path = os.path.join(fig_folder, f"{trial_name}_p_recall.pdf")
 
     os.makedirs(os.path.join("data", "preprocessed"), exist_ok=True)
     os.makedirs(fig_folder, exist_ok=True)

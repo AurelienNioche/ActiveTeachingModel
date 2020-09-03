@@ -12,7 +12,7 @@ FORCE = True
 
 def main():
 
-    trial_name = "lin_Nomni_Nspec"   # input("Trial name: ")
+    trial_name = "lin_Nomni_spec"   # input("Trial name: ")
     raw_data_folder = os.path.join(paths.DATA_CLUSTER_DIR, trial_name)
     fig_folder = os.path.join("fig", trial_name)
 
