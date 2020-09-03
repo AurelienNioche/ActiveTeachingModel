@@ -36,7 +36,7 @@ def generate_param(bounds, is_item_specific, n_item):
             std = (b[1] - b[0]) * 0.1
             v = np.random.normal(loc=mean, scale=std, size=n_item)
             v[v < b[0]] = b[0]
-            v[v < [b[1]]] = b[1]
+            v[v > b[1]] = b[1]
             param[:, i] = v
 
     else:
@@ -132,7 +132,7 @@ def main() -> None:
     n_item = 500
     omni = False
 
-    is_item_specific = False
+    is_item_specific = True
     ss_n_iter = 100
     time_between_ss = 24 * 60**2
     n_ss = 6
