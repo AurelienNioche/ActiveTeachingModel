@@ -135,7 +135,6 @@ def main() -> None:
     omni = True
 
     is_item_specific = False
-    gen_methods = [loguniform.rvs, np.random.uniform]
 
     ss_n_iter = 100
     time_between_ss = 24 * 60**2
@@ -164,9 +163,11 @@ def main() -> None:
 
     exp_decay_cst = {
         "param_labels": ["alpha", "beta"],
-        "bounds": [[0.0000001, 100], [0.0001, 0.99]],
+        "bounds": [[0.0000001, 1], [0.0001, 0.99]],
         "grid_methods": [PsychologistGrid.LOG, PsychologistGrid.LIN],
         "grid_size": 20,
+        "gen_methods": [np.random.uniform, np.random.uniform],
+        "gen_bounds": [[0.0000001, 1], [0.0001, 0.99]],
         "cst_time": 1  # 1 / (60 ** 2),  # 1 / (24 * 60**2),
     }
 
@@ -192,11 +193,13 @@ def main() -> None:
         grid_methods = cst["grid_methods"]
         pr_lab = cst["param_labels"]
         cst_time = cst["cst_time"]
+        gen_methods = cst["gen_methods"]
+        gen_bounds = cst["gen_bounds"]
 
         for agent in range(n_agent):
 
             pr_val = generate_param(
-                bounds=bounds,
+                bounds=gen_bounds,
                 is_item_specific=is_item_specific,
                 n_item=n_item,
                 methods=gen_methods)
