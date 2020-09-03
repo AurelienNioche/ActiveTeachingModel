@@ -134,7 +134,7 @@ def main() -> None:
     n_item = 500
     omni = True
 
-    is_item_specific = True
+    is_item_specific = False
     gen_methods = [loguniform.rvs, np.random.uniform]
 
     ss_n_iter = 100
