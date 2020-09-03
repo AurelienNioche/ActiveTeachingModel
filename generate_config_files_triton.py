@@ -163,7 +163,7 @@ def main() -> None:
         "bounds": [[0.0000001, 100], [0.0001, 0.99]],
         "grid_methods": [PsychologistGrid.LOG, PsychologistGrid.LIN],
         "grid_size": 20,
-        "cst_time": 1,  # 1 / (60 ** 2),  # 1 / (24 * 60**2),
+        "cst_time": 1  # 1 / (60 ** 2),  # 1 / (24 * 60**2),
     }
 
     job_number = 0
@@ -191,6 +191,11 @@ def main() -> None:
 
         for agent in range(n_agent):
 
+            pr_val = generate_param(
+                bounds=bounds,
+                is_item_specific=is_item_specific,
+                n_item=n_item)
+
             for teacher_md in teacher_models:
 
                 if teacher_md == Leitner:
@@ -211,12 +216,6 @@ def main() -> None:
                         psy_pr_val = [grid_size, grid_methods]
                     else:
                         raise ValueError
-
-                    pr_val = generate_param(
-                        bounds=bounds,
-                        is_item_specific=is_item_specific,
-                        n_item=n_item,
-                    )
 
                     json_content = {
                         "seed": seed + agent,
@@ -249,8 +248,7 @@ def main() -> None:
                         f"{json_content['md_learner']}-"
                         f"{json_content['md_psy']}-"
                         f"{json_content['md_teacher']}-"
-                        f"{agent}.json",
-                    )
+                        f"{agent}.json")
 
                     with open(f_name, "w") as f:
                         json.dump(json_content, f, sort_keys=False, indent=4)
