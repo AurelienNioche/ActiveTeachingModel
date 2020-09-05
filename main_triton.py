@@ -25,6 +25,7 @@ def main(job_id: int) -> None:
     config = Config.get(f_path)
     saving_df = run(config=config)
     f_name = f"{config.config_file.split('.')[0]}.csv"
+    os.makedirs(config.data_folder, exist_ok=True)
     saving_df.to_csv(os.path.join(config.data_folder, f_name))
 
 

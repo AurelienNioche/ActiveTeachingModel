@@ -1,12 +1,11 @@
 """
 Run simulations and save results
 """
-
-from settings.config_triton import Config
-from run.make_data_triton import run
-
 import os
 import numpy as np
+
+from settings.config_triton import Config, LEARNER, PSYCHOLOGIST, TEACHER
+from run.make_data_triton import run
 
 from model.learner.exponential_n_delta import ExponentialNDelta
 from model.learner.walsh2018 import Walsh2018
@@ -16,11 +15,6 @@ from model.teacher.sampling import Sampling
 from model.teacher.threshold import Threshold
 from model.teacher.recursive import Recursive
 from model.teacher.recursive_threshold import RecursiveThreshold
-
-from settings.config_triton import LEARNER, PSYCHOLOGIST, TEACHER
-
-N_SEC_PER_DAY = 24 * 60**2  # 86400
-N_SEC_PER_ITER = 2
 
 TEACHER_INV = {v: k for k, v in TEACHER.items()}
 PSY_INV = {v: k for k, v in PSYCHOLOGIST.items()}

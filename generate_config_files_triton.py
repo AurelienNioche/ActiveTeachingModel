@@ -50,6 +50,37 @@ def generate_param(bounds, methods, is_item_specific, n_item):
     return param
 
 
+def cartesian_product(*arrays):
+    la = len(arrays)
+    dtype = np.result_type(*arrays)
+    arr = np.empty([len(a) for a in arrays] + [la], dtype=dtype)
+    for i, a in enumerate(np.ix_(*arrays)):
+        arr[..., i] = a
+    return arr.reshape(-1, la)
+
+
+def cp_grid_param(grid_size, bounds, methods):
+    """Get grid parameters"""
+
+    bounds = np.asarray(bounds)
+    methods = np.asarray(methods)
+
+    diff = bounds[:, 1] - bounds[:, 0] > 0
+    not_diff = np.invert(diff)
+
+    values = np.atleast_2d(
+        [m(*b, num=grid_size) for (b, m) in zip(bounds[diff], methods[diff])]
+    )
+    var = cartesian_product(*values)
+    grid = np.zeros((max(1, len(var)), len(bounds)))
+    if np.sum(diff):
+        grid[:, diff] = var
+    if np.sum(not_diff):
+        grid[:, not_diff] = bounds[not_diff, 0]
+
+    return grid.tolist()
+
+
 def dic_to_lab_val(dic):
     lab = list(dic.keys())
     val = [dic[k] for k in dic]
@@ -130,7 +161,7 @@ def main() -> None:
     seed = 123
     np.random.seed(seed)
 
-    n_agent = 100
+    # n_agent = 100
     n_item = 500
     omni = False
 
@@ -163,10 +194,10 @@ def main() -> None:
 
     exp_decay_cst = {
         "param_labels": ["alpha", "beta"],
-        "bounds": [[0.0000001, 0.1], [0.0001, 0.99]],
+        "bounds": [[0.0000001, 0.00005], [0.0001, 0.9999]],
         "grid_methods": [PsychologistGrid.LIN, PsychologistGrid.LIN],
         "grid_size": 20,
-        "gen_methods": [np.random.uniform, np.random.uniform],
+        "gen_methods": [np.linspace, np.linspace],
         "gen_bounds": [[0.0000001, 0.1], [0.0001, 0.99]],
         "cst_time": 1  # 1 / (60 ** 2),  # 1 / (24 * 60**2),
     }
@@ -175,9 +206,9 @@ def main() -> None:
 
     print("Generating cluster config files...")
 
-    n_job = len(learner_models) * len(teacher_models) \
-        * len(psy_models) * n_agent
-    pbar = tqdm(total=n_job)
+    # n_job = len(learner_models) * len(teacher_models) \
+    #     * len(psy_models) * n_agent
+    pbar = tqdm()  #total=n_job)
 
     for learner_md in learner_models:
 
@@ -196,13 +227,20 @@ def main() -> None:
         gen_methods = cst["gen_methods"]
         gen_bounds = cst["gen_bounds"]
 
+        grid = cp_grid_param(grid_size=grid_size,
+                             methods=gen_methods,
+                             bounds=gen_bounds)
+
+        n_agent = len(grid)
         for agent in range(n_agent):
 
-            pr_val = generate_param(
-                bounds=gen_bounds,
-                is_item_specific=is_item_specific,
-                n_item=n_item,
-                methods=gen_methods)
+            pr_val = grid[agent]
+
+            # pr_val = generate_param(
+            #     bounds=gen_bounds,
+            #     is_item_specific=is_item_specific,
+            #     n_item=n_item,
+            #     methods=gen_methods)
 
             for teacher_md in teacher_models:
 
@@ -225,13 +263,23 @@ def main() -> None:
                     else:
                         raise ValueError
 
+                    learner_md_str = LEARNER_INV[learner_md]
+                    psy_md_str = PSY_INV[psy_md]
+                    teacher_md_str = TEACHER_INV[teacher_md]
+
+                    data_folder_run = \
+                        os.path.join(data_folder,
+                                     f"{learner_md_str}-"
+                                     f"{psy_md_str}-"
+                                     f"{teacher_md_str}")
+
                     json_content = {
                         "seed": seed + agent,
                         "agent": agent,
                         "bounds": bounds,
-                        "md_learner": LEARNER_INV[learner_md],
-                        "md_psy": PSY_INV[psy_md],
-                        "md_teacher": TEACHER_INV[teacher_md],
+                        "md_learner": learner_md_str,
+                        "md_psy": psy_md_str,
+                        "md_teacher": teacher_md_str,
                         "omni": omni,
                         "n_item": n_item,
                         "teacher_pr_lab": teacher_pr_lab,
@@ -241,7 +289,7 @@ def main() -> None:
                         "pr_lab": pr_lab,
                         "pr_val": pr_val,
                         "cst_time": cst_time,
-                        "data_folder": data_folder,
+                        "data_folder": data_folder_run,
                         "is_item_specific": is_item_specific,
                         "ss_n_iter": ss_n_iter,
                         "time_between_ss": time_between_ss,
@@ -253,9 +301,9 @@ def main() -> None:
                     f_name = os.path.join(
                         paths.CONFIG_CLUSTER_DIR,
                         f"{job_number}-{ts}-"
-                        f"{json_content['md_learner']}-"
-                        f"{json_content['md_psy']}-"
-                        f"{json_content['md_teacher']}-"
+                        f"{learner_md_str}-"
+                        f"{psy_md_str}-"
+                        f"{teacher_md_str}-"
                         f"{agent}.json")
 
                     with open(f_name, "w") as f:

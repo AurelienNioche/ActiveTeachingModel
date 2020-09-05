@@ -280,7 +280,7 @@ def main():
 
     n_item = 150
 
-    param = [[0.00006, 0.44] for _ in range(n_item)]
+    param = [[0.0006, 0.44] for _ in range(n_item)]
     param = np.asarray(param)
 
     ss_n_iter = 100

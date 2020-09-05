@@ -37,6 +37,10 @@ PSYCHOLOGIST = {
     "psy_grid": PsychologistGrid,
     "psy_gradient": PsychologistGradient}
 
+TEACHER_INV = {v: k for k, v in TEACHER.items()}
+PSY_INV = {v: k for k, v in PSYCHOLOGIST.items()}
+LEARNER_INV = {v: k for k, v in LEARNER.items()}
+
 
 class Config:
     def __init__(
