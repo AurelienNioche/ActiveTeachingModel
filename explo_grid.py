@@ -1,27 +1,25 @@
-import numpy as np
-import matplotlib.pyplot as plt
+#%%
 import os
-from tqdm import tqdm
+
+import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 import seaborn as sns
-
-from settings.config_triton import Config, \
-    LEARNER, PSYCHOLOGIST, TEACHER, \
-    LEARNER_INV, PSY_INV, TEACHER_INV
-
-# from utils.cp.grid import generate_param
-from utils.convert import dic
-
-from run.make_data_triton import run
+from tqdm import tqdm
 
 from model.learner.exponential_n_delta import ExponentialNDelta
 # from model.learner.walsh2018 import Walsh2018
 from model.psychologist.psychologist_grid import PsychologistGrid
 from model.teacher.leitner import Leitner
-from model.teacher.sampling import Sampling
-from model.teacher.threshold import Threshold
 from model.teacher.recursive import Recursive
 from model.teacher.recursive_threshold import RecursiveThreshold
+from model.teacher.sampling import Sampling
+from model.teacher.threshold import Threshold
+from run.make_data_triton import run
+from settings.config_triton import (LEARNER, LEARNER_INV, PSY_INV,
+                                    PSYCHOLOGIST, TEACHER, TEACHER_INV, Config)
+# from utils.cp.grid import generate_param
+from utils.convert import dic
 
 
 def cartesian_product(*arrays):
@@ -83,7 +81,7 @@ def produce_data(data_folder):
     is_item_specific = False
 
     ss_n_iter = 100
-    time_between_ss = 24 * 60**2
+    time_between_ss = 24 * 60 ** 2
     n_ss = 6
     learnt_threshold = 0.9
     time_per_iter = 2
@@ -99,8 +97,8 @@ def produce_data(data_folder):
 
     psy_pr = {
         "grid_size": 20,
-        "grid_methods": [PsychologistGrid.LIN, PsychologistGrid.LIN]
-        }
+        "grid_methods": [PsychologistGrid.LIN, PsychologistGrid.LIN],
+    }
     cst_time = 1
 
     if teacher_md == Leitner:
@@ -115,8 +113,11 @@ def produce_data(data_folder):
     teacher_pr_lab, teacher_pr_val = dic.to_key_val_list(teacher_pr)
     psy_pr_lab, psy_pr_val = dic.to_key_val_list(psy_pr)
 
-    pr_grid = cp_grid_param(bounds=bounds, grid_size=gen_grid_size,
-                            methods=np.array([np.linspace, np.linspace]))
+    pr_grid = cp_grid_param(
+        bounds=bounds,
+        grid_size=gen_grid_size,
+        methods=np.array([np.linspace, np.linspace]),
+    )
 
     for i, pr_val in tqdm(enumerate(pr_grid), total=len(pr_grid)):
 
@@ -143,31 +144,36 @@ def produce_data(data_folder):
             "psy_pr_lab": psy_pr_lab,
             "psy_pr_val": psy_pr_val,
             "pr_lab": pr_lab,
-            "pr_val": pr_val.tolist()}
+            "pr_val": pr_val.tolist(),
+        }
         config = Config(**config_dic, config_dic=config_dic)
 
         df = run(config=config, with_tqdm=False)
-        f_name = f"{learner_md.__name__}-" \
-                 f"{psy_md.__name__}-" \
-                 f"{teacher_md.__name__}-{i}.csv"
+        f_name = (
+            f"{learner_md.__name__}-"
+            f"{psy_md.__name__}-"
+            f"{teacher_md.__name__}-{i}.csv"
+        )
         os.makedirs(config.data_folder, exist_ok=True)
         df.to_csv(os.path.join(config.data_folder, f_name))
 
 
-def preprocess_data(data_folder, preprocess_data_file):
+def preprocess_data(data_folder: str, preprocess_data_file: str) -> pd.DataFrame:
 
     assert os.path.exists(data_folder)
 
-    files = [p.path for p in os.scandir("data/local/explo_leitner")
-             if os.path.splitext(p.path)[1] == ".csv"]
+    files = [
+        p.path for p in os.scandir(data_folder) if os.path.splitext(p.path)[1] == ".csv"
+    ]
     file_count = len(files)
+
     assert file_count > 0
 
     row_list = []
 
     for i, p in tqdm(enumerate(files), total=file_count):
         filename, file_extension = os.path.splitext(p)
-        if file_extension != '.csv':
+        if file_extension != ".csv":
             print(f"ignore {p}")
             continue
 
@@ -185,8 +191,7 @@ def preprocess_data(data_folder, preprocess_data_file):
 
             is_last_iter_ss = df["ss_iter"] == ss_n_iter
 
-            n_learnt_end_ss = \
-                df[is_last_ss & is_last_iter_ss]["n_learnt"].iloc[0]
+            n_learnt_end_ss = df[is_last_ss & is_last_iter_ss]["n_learnt"].iloc[0]
 
             md_learner = df["md_learner"].iloc[0]
             md_teacher = df["md_teacher"].iloc[0]
@@ -215,48 +220,55 @@ def preprocess_data(data_folder, preprocess_data_file):
 
     df = pd.DataFrame(row_list)
     df.to_csv(preprocess_data_file)
+    print(df)
     return df
 
 
 def main():
-    raw_data_folder = os.path.join("data", "local",
-                                   "explo_leitner")
-    preprocess_data_file = os.path.join("data", "local",
-                                        "explo_leitner_preprocess.csv")
+    data_dir = os.path.join("data", "triton", "ukko-run")
+    # raw_data_folder = os.path.join("data", "local", "ukko-run")
+    # preprocess_data_file = os.path.join("data", "local", "ukko-run.csv")
 
     force = False
 
-    if not os.path.exists(raw_data_folder) or force:
-        produce_data(data_folder=raw_data_folder)
+    dirs = [p for p in os.scandir(data_dir) if p.name != ".DS_Store"]
+    # dir_count = len(dirs)
 
-    if not os.path.exists(preprocess_data_file) or force:
-        df = preprocess_data(data_folder=raw_data_folder,
-                             preprocess_data_file=preprocess_data_file)
-    else:
-        df = pd.read_csv(preprocess_data_file, index_col=[0])
+    for dir_ in dirs:
 
-    print("Plotting heatmap...")
-    # plt.close()
-    # log_liks = pd.Series(log_liks, name="log_lik")
-    # data = pd.concat((grid, log_liks), axis=1)
-    # try:  # Duplicated entries can appear with rounding
-    #     data = data.round(2).pivot("alpha", "beta", "log_lik")
-    # except:
-    #     data = data.pivot("alpha", "beta", "log_lik")
-    data = pd.DataFrame(
-        {
-            "alpha": df["alpha"],
-            "beta": df["beta"],
-            "n_learnt": df["n_learnt"]
-        }
-    )
-    data = data.round(8).pivot("alpha", "beta", "n_learnt")
-    ax = sns.heatmap(data=data, cmap="viridis", cbar_kws={'label': 'N learnt'})
-    ax.invert_yaxis()
-    plt.tight_layout()
-    plt.show()
-    # plt.savefig(os.path.join("fig", f"param_grid_{user_name}.pdf"))
-    print("Done!")
+        print("current dir", dir_.path)
+
+        preprocess_data_file = f"{dir_.name}.csv"
+        working_data_dir = dir_.path
+
+        if not os.path.exists(preprocess_data_file) or force:
+            df = preprocess_data(
+                data_folder=working_data_dir,
+                preprocess_data_file=preprocess_data_file
+            )
+        else:
+            df = pd.read_csv(preprocess_data_file, index_col=[0])
+
+        print("Plotting heatmap...")
+        # plt.close()
+        # log_liks = pd.Series(log_liks, name="log_lik")
+        # data = pd.concat((grid, log_liks), axis=1)
+        # try:  # Duplicated entries can appear with rounding
+        #     data = data.round(2).pivot("alpha", "beta", "log_lik")
+        # except:
+        #     data = data.pivot("alpha", "beta", "log_lik")
+        data = pd.DataFrame(
+            {"alpha": df["alpha"], "beta": df["beta"], "n_learnt": df["n_learnt"]}
+        )
+        data = data.round(8).pivot("alpha", "beta", "n_learnt")
+        ax = sns.heatmap(data=data, cmap="viridis", cbar_kws={"label": "N learnt"})
+        ax.invert_yaxis()
+
+        ax.set_title(dir_.name)
+        plt.tight_layout()
+        plt.savefig(os.path.join("fig", f"explo_grid_{dir_.name}.pdf"))
+        # plt.savefig(os.path.join("fig", f"param_grid_{user_name}.pdf"))
+        print("Done!")
 
 
 if __name__ == "__main__":
