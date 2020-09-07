@@ -1,8 +1,8 @@
 import os
-import settings.paths as paths
 
+import settings.paths as paths
 from plot import fake_data
-from plot.subplot import chocolate, box, efficiency_cost, p_recall_error
+from plot.subplot import box, chocolate, efficiency_cost, p_recall_error
 
 
 def main() -> None:
@@ -20,18 +20,31 @@ def main() -> None:
     # Fake data
     models = (LEARNERS, PSYCHOLOGISTS, TEACHERS)
     cumulative_df = fake_data.prepare_data_chocolate(
-        1.3, 1.2, models, NUM_AGENTS, paths.BKP_DIR, force_save=False,
+        1.3,
+        1.2,
+        models,
+        NUM_AGENTS,
+        paths.BKP_DIR,
+        force_save=False,
     )
 
     primary_df = fake_data.make_primary_df(
-        models, NUM_AGENTS, T_TOTAL, BKP_DIR, force_save=False,
+        models,
+        NUM_AGENTS,
+        T_TOTAL,
+        BKP_DIR,
+        force_save=False,
     )
 
     # Individual plots
-    chocolate.plot(TEACHERS, LEARNERS, PSYCHOLOGISTS, cumulative_df,
-                   os.path.join(paths.FIG_DIR, "chocolate_fake.pdf"))
-    box.plot(cumulative_df,
-             os.path.join(paths.FIG_DIR, "box_fake.pdf"))
+    chocolate.plot(
+        TEACHERS,
+        LEARNERS,
+        PSYCHOLOGISTS,
+        cumulative_df,
+        os.path.join(paths.FIG_DIR, "chocolate_fake.pdf"),
+    )
+    box.plot(cumulative_df, os.path.join(paths.FIG_DIR, "box_fake.pdf"))
     efficiency_cost.plot(cumulative_df, paths.FIG_DIR)
     p_recall_error.plot(TEACHERS, LEARNERS, PSYCHOLOGISTS, primary_df, paths.FIG_DIR)
 

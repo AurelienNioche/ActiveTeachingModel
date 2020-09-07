@@ -1,13 +1,9 @@
-# import os
 from itertools import combinations, product
-from typing import Hashable, Iterable, Mapping
+from typing import Iterable, Mapping
 
 import matplotlib.pyplot as plt
-import pandas as pd
-
 import numpy as np
-
-# import settings.paths as paths
+import pandas as pd
 from plot import utils  # fake_data,
 
 
@@ -34,9 +30,9 @@ def get_color_sequence(
 
 def plot(
     learnt_label: str,
-    teachers: Hashable,
-    learners: Hashable,
-    psychologists: Hashable,
+    teachers: Iterable,
+    learners: Iterable,
+    psychologists: Iterable,
     df: pd.DataFrame,
     fig_path: str,
 ) -> None:
@@ -83,6 +79,7 @@ def plot(
     dict_cond_scores = utils.get_plot_values(
         df, "Agent ID", ["Teacher", "Learner", "Psychologist"], learnt_label
     )
+    print(dict_cond_scores)
 
     # Text positions
     n_row = len(learners_psychologists_combos)

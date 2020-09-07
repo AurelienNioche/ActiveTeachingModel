@@ -1,12 +1,12 @@
 import os
 import sys
 
-import numpy as np
-from tqdm import tqdm
-import pandas as pd
 import matplotlib.pyplot as plt
-from matplotlib.patches import Patch
+import numpy as np
+import pandas as pd
 from matplotlib.lines import Line2D
+from matplotlib.patches import Patch
+from tqdm import tqdm
 
 FORCE = True
 
@@ -32,21 +32,28 @@ def main():
         _, date, learner, psy, teacher, agent_id = fn.split("-")
         teachers.append(teacher)
 
-    colors = {t: f'C{i}' for (i,t) in enumerate(np.unique(teachers))}
+    colors = {t: f"C{i}" for (i, t) in enumerate(np.unique(teachers))}
 
     fig, ax = plt.subplots()
     for df, teacher in zip(dfs, teachers):
-        ax.plot(df['timestamp'], df['n_learnt'], label=teacher,
-                color=colors[teacher], alpha=0.1, lw=0.5)
+        ax.plot(
+            df["timestamp"],
+            df["n_learnt"],
+            label=teacher,
+            color=colors[teacher],
+            alpha=0.1,
+            lw=0.5,
+        )
     ax.set_xlabel("time")
     ax.set_ylabel("n learnt")
 
-    legend_elements = [Line2D([0], [0], color=v, lw=1, label=k)
-                       for (k, v) in colors.items()]
-                       # Line2D([0], [0], marker='o', color='w', label='Scatter',
-                       #        markerfacecolor='g', markersize=15),
-                       # Patch(facecolor='orange', edgecolor='r',
-                       #       label='Color Patch')
+    legend_elements = [
+        Line2D([0], [0], color=v, lw=1, label=k) for (k, v) in colors.items()
+    ]
+    # Line2D([0], [0], marker='o', color='w', label='Scatter',
+    #        markerfacecolor='g', markersize=15),
+    # Patch(facecolor='orange', edgecolor='r',
+    #       label='Color Patch')
 
     ax.legend(handles=legend_elements)
 

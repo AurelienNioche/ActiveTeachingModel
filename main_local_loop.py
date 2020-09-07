@@ -1,14 +1,15 @@
 """
 Run simulations and save results
 """
+
 import os
 import sys
-
-from settings.config_triton import Config
-from run.make_data_triton import run
+from multiprocessing import Pool, cpu_count
 
 from tqdm import tqdm
-from multiprocessing import cpu_count, Pool
+
+from run.make_data_triton import run
+from settings.config_triton import Config
 
 
 def make_data(config_file):
@@ -21,8 +22,11 @@ def make_data(config_file):
 
 def main():
 
-    files = [p.path for p in os.scandir(os.path.join("config", "triton"))
-             if os.path.splitext(p.path)[1] == ".json"]
+    files = [
+        p.path
+        for p in os.scandir(os.path.join("config", "triton"))
+        if os.path.splitext(p.path)[1] == ".json"
+    ]
     file_count = len(files)
     assert file_count > 0
 
@@ -35,4 +39,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

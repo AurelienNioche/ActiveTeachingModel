@@ -1,11 +1,12 @@
 """
 Run simulations and save results
 """
+
 import os
 import sys
 
-from settings.config_triton import Config
 from run.make_data_triton import run
+from settings.config_triton import Config
 
 
 def main():
@@ -20,8 +21,7 @@ def main():
         # config_file = os.path.join("config",
         #                            "trial_triton_leitner_walsh.json")
 
-        config_file = os.path.join("config",
-                                   "threshold_walsh.json")
+        config_file = os.path.join("config", "threshold_walsh.json")
 
     config = Config.get(config_file)
     df = run(config=config, with_tqdm=True)
@@ -32,4 +32,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

@@ -1,4 +1,3 @@
-#%%
 """
 Param recovery
 """

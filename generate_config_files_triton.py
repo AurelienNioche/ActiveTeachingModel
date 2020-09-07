@@ -7,8 +7,8 @@ import shutil
 
 import numpy as np
 from numpy.random import default_rng
-from tqdm import tqdm
 from scipy.stats import loguniform
+from tqdm import tqdm
 
 import settings.paths as paths
 from model.learner.exponential_n_delta import ExponentialNDelta
@@ -100,8 +100,7 @@ def delete_config():
     """Delete cluster config files if user confirms"""
 
     if os.path.exists(paths.CONFIG_CLUSTER_DIR):
-        erase = input("Do you want to erase the config folder first? " 
-                      "('y' or 'yes')")
+        erase = input("Do you want to erase the config folder first? " "('y' or 'yes')")
         if erase in ("y", "yes"):
             shutil.rmtree(paths.CONFIG_CLUSTER_DIR)
             print("Done!")
@@ -113,8 +112,7 @@ def delete_data(data_name):
     """Delete cluster data files if user confirms"""
 
     if os.path.exists(data_name):
-        erase = input("Do you want to erase the data folder first? " 
-                      "('y' or 'yes')")
+        erase = input("Do you want to erase the data folder first? " "('y' or 'yes')")
         if erase in ("y", "yes"):
             shutil.rmtree(data_name)
             print("Done!")
@@ -138,12 +136,10 @@ def run_simulation():
         print("Nothing run.")
 
 
-def mod_job_file(template_path: str, config_path: str,
-                 saving_path: str) -> None:
+def mod_job_file(template_path: str, config_path: str, saving_path: str) -> None:
     """Call the shell script that modifies the number of parallel branches"""
 
-    os.system(f"/bin/sh mod_job.sh "
-              f"{template_path} {config_path} {saving_path}")
+    os.system(f"/bin/sh mod_job.sh " f"{template_path} {config_path} {saving_path}")
 
 
 def main() -> None:
@@ -168,7 +164,7 @@ def main() -> None:
     is_item_specific = False
 
     ss_n_iter = 100
-    time_between_ss = 24 * 60**2
+    time_between_ss = 24 * 60 ** 2
     n_ss = 6
     learnt_threshold = 0.9
     time_per_iter = 4
@@ -199,7 +195,7 @@ def main() -> None:
         "grid_size": 20,
         "gen_methods": [np.linspace, np.linspace],
         "gen_bounds": [[0.0000001, 0.00005], [0.0001, 0.9999]],
-        "cst_time": 1  # 1 / (60 ** 2),  # 1 / (24 * 60**2),
+        "cst_time": 1,  # 1 / (60 ** 2),  # 1 / (24 * 60**2),
     }
 
     job_number = 0
@@ -208,7 +204,7 @@ def main() -> None:
 
     # n_job = len(learner_models) * len(teacher_models) \
     #     * len(psy_models) * n_agent
-    pbar = tqdm()  #total=n_job)
+    pbar = tqdm()  # total=n_job)
 
     for learner_md in learner_models:
 
@@ -227,9 +223,9 @@ def main() -> None:
         gen_methods = cst["gen_methods"]
         gen_bounds = cst["gen_bounds"]
 
-        grid = cp_grid_param(grid_size=grid_size,
-                             methods=gen_methods,
-                             bounds=gen_bounds)
+        grid = cp_grid_param(
+            grid_size=grid_size, methods=gen_methods, bounds=gen_bounds
+        )
 
         n_agent = len(grid)
         for agent in range(n_agent):
@@ -267,11 +263,10 @@ def main() -> None:
                     psy_md_str = PSY_INV[psy_md]
                     teacher_md_str = TEACHER_INV[teacher_md]
 
-                    data_folder_run = \
-                        os.path.join(data_folder,
-                                     f"{learner_md_str}-"
-                                     f"{psy_md_str}-"
-                                     f"{teacher_md_str}")
+                    data_folder_run = os.path.join(
+                        data_folder,
+                        f"{learner_md_str}-" f"{psy_md_str}-" f"{teacher_md_str}",
+                    )
 
                     json_content = {
                         "seed": seed + agent,
@@ -295,7 +290,7 @@ def main() -> None:
                         "time_between_ss": time_between_ss,
                         "n_ss": n_ss,
                         "learnt_threshold": learnt_threshold,
-                        "time_per_iter": time_per_iter
+                        "time_per_iter": time_per_iter,
                     }
 
                     f_name = os.path.join(
@@ -304,7 +299,8 @@ def main() -> None:
                         f"{learner_md_str}-"
                         f"{psy_md_str}-"
                         f"{teacher_md_str}-"
-                        f"{agent}.json")
+                        f"{agent}.json",
+                    )
 
                     with open(f_name, "w") as f:
                         json.dump(json_content, f, sort_keys=False, indent=4)

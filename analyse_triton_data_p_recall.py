@@ -1,4 +1,5 @@
 import os
+
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
@@ -45,8 +46,7 @@ def main():
     trial_name = "lin_Nomni_spec"  # input("Trial name: ")
     raw_data_folder = os.path.join(paths.DATA_CLUSTER_DIR, trial_name)
 
-    preprocess_file = os.path.join(
-        "data", "preprocessed", f"{trial_name}_p_recall.csv")
+    preprocess_file = os.path.join("data", "preprocessed", f"{trial_name}_p_recall.csv")
 
     fig_folder = os.path.join("fig", trial_name)
     fig_path = os.path.join(fig_folder, f"{trial_name}_p_recall.pdf")
@@ -55,8 +55,9 @@ def main():
     os.makedirs(fig_folder, exist_ok=True)
 
     if not os.path.exists(preprocess_file) or force:
-        df = preprocess_data(raw_data_folder=raw_data_folder,
-                             preprocess_file=preprocess_file)
+        df = preprocess_data(
+            raw_data_folder=raw_data_folder, preprocess_file=preprocess_file
+        )
     else:
         df = pd.read_csv(preprocess_file, index_col=[0])
 
@@ -69,7 +70,8 @@ def main():
         learners=learners,
         psychologists=psy,
         df=df,
-        fig_path=fig_path)
+        fig_path=fig_path,
+    )
 
 
 if __name__ == "__main__":
