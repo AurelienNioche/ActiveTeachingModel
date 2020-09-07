@@ -1,3 +1,4 @@
+#%%
 import os
 
 import matplotlib.pyplot as plt
@@ -157,16 +158,15 @@ def produce_data(data_folder):
         df.to_csv(os.path.join(config.data_folder, f_name))
 
 
-def preprocess_data(data_folder, preprocess_data_file):
+def preprocess_data(data_folder: str, preprocess_data_file: str) -> pd.DataFrame:
 
     assert os.path.exists(data_folder)
 
     files = [
-        p.path
-        for p in os.scandir("data/local/explo_leitner")
-        if os.path.splitext(p.path)[1] == ".csv"
+        p.path for p in os.scandir(data_folder) if os.path.splitext(p.path)[1] == ".csv"
     ]
     file_count = len(files)
+
     assert file_count > 0
 
     row_list = []
@@ -220,43 +220,52 @@ def preprocess_data(data_folder, preprocess_data_file):
 
     df = pd.DataFrame(row_list)
     df.to_csv(preprocess_data_file)
+    print(df)
     return df
 
 
 def main():
-    raw_data_folder = os.path.join("data", "local", "test")
-    preprocess_data_file = os.path.join("data", "local", "test.csv")
+    data_dir = os.path.join("data", "triton", "testo")
+    # raw_data_folder = os.path.join("data", "local", "ukko-run")
+    # preprocess_data_file = os.path.join("data", "local", "ukko-run.csv")
 
-    force = False
+    force = True
 
-    if not os.path.exists(raw_data_folder) or force:
-        produce_data(data_folder=raw_data_folder)
+    dirs = [p.path for p in os.scandir(data_dir)]
+    dir_count = len(dirs)
 
-    if not os.path.exists(preprocess_data_file) or force:
-        df = preprocess_data(
-            data_folder=raw_data_folder, preprocess_data_file=preprocess_data_file
+    for dir_ in dirs:
+        working_data_dir = os.path.join(data_dir, dir_)
+        preprocess_data_file = f"{dir_}.csv"
+
+        if not os.path.exists(data_dir) or force:
+            produce_data(data_folder=working_data_dir)
+
+        if not os.path.exists(preprocess_data_file) or force:
+            df = preprocess_data(
+                data_folder=working_data_dir, preprocess_data_file=preprocess_data_file
+            )
+        else:
+            df = pd.read_csv(preprocess_data_file, index_col=[0])
+
+        print("Plotting heatmap...")
+        # plt.close()
+        # log_liks = pd.Series(log_liks, name="log_lik")
+        # data = pd.concat((grid, log_liks), axis=1)
+        # try:  # Duplicated entries can appear with rounding
+        #     data = data.round(2).pivot("alpha", "beta", "log_lik")
+        # except:
+        #     data = data.pivot("alpha", "beta", "log_lik")
+        data = pd.DataFrame(
+            {"alpha": df["alpha"], "beta": df["beta"], "n_learnt": df["n_learnt"]}
         )
-    else:
-        df = pd.read_csv(preprocess_data_file, index_col=[0])
-
-    print("Plotting heatmap...")
-    # plt.close()
-    # log_liks = pd.Series(log_liks, name="log_lik")
-    # data = pd.concat((grid, log_liks), axis=1)
-    # try:  # Duplicated entries can appear with rounding
-    #     data = data.round(2).pivot("alpha", "beta", "log_lik")
-    # except:
-    #     data = data.pivot("alpha", "beta", "log_lik")
-    data = pd.DataFrame(
-        {"alpha": df["alpha"], "beta": df["beta"], "n_learnt": df["n_learnt"]}
-    )
-    data = data.round(8).pivot("alpha", "beta", "n_learnt")
-    ax = sns.heatmap(data=data, cmap="viridis", cbar_kws={"label": "N learnt"})
-    ax.invert_yaxis()
-    plt.tight_layout()
-    plt.show()
-    # plt.savefig(os.path.join("fig", f"param_grid_{user_name}.pdf"))
-    print("Done!")
+        data = data.round(8).pivot("alpha", "beta", "n_learnt")
+        ax = sns.heatmap(data=data, cmap="viridis", cbar_kws={"label": "N learnt"})
+        ax.invert_yaxis()
+        plt.tight_layout()
+        plt.show()
+        # plt.savefig(os.path.join("fig", f"param_grid_{user_name}.pdf"))
+        print("Done!")
 
 
 if __name__ == "__main__":
