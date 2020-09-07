@@ -198,7 +198,7 @@ def main() -> None:
         "grid_methods": [PsychologistGrid.LIN, PsychologistGrid.LIN],
         "grid_size": 20,
         "gen_methods": [np.linspace, np.linspace],
-        "gen_bounds": [[0.0000001, 0.1], [0.0001, 0.99]],
+        "gen_bounds": [[0.0000001, 0.00005], [0.0001, 0.9999]],
         "cst_time": 1  # 1 / (60 ** 2),  # 1 / (24 * 60**2),
     }
 
