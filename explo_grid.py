@@ -261,7 +261,11 @@ def main():
             {"alpha": df["alpha"], "beta": df["beta"], "n_learnt": df["n_learnt"]}
         )
         data = data.round(8).pivot("alpha", "beta", "n_learnt")
-        ax = sns.heatmap(data=data, cmap="viridis", cbar_kws={"label": "N learnt"})
+        fig, ax = plt.subplots()
+
+        sns.heatmap(data=data, cmap="viridis", cbar_kws={"label": "N learnt"},
+                    ax=ax)
+
         ax.invert_yaxis()
 
         ax.set_title(dir_.name)
