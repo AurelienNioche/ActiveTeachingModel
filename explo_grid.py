@@ -238,7 +238,7 @@ def main():
 
         print("current dir", dir_.path)
 
-        preprocess_data_file = f"{dir_.name}.csv"
+        preprocess_data_file = os.path.join("data", "preprocessed", f"explo_grid_{dir_.name}.csv")
         working_data_dir = dir_.path
 
         if not os.path.exists(preprocess_data_file) or force:
