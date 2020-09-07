@@ -6,10 +6,8 @@ import pandas as pd
 import seaborn as sns
 
 from settings.config_triton import Config, \
-    LEARNER, PSYCHOLOGIST, TEACHER, \
     LEARNER_INV, PSY_INV, TEACHER_INV
 
-# from utils.cp.grid import generate_param
 from utils.convert import dic
 
 from run.make_data_triton import run
@@ -50,24 +48,6 @@ def cp_grid_param(grid_size, bounds, methods):
         grid[:, not_diff] = bounds[not_diff, 0]
 
     return grid
-
-
-def plot_param_space(user_name: str, grid: pd.DataFrame, log_liks: np.ndarray) -> None:
-    """Heatmap of the alpha-beta parameter space"""
-
-    print("Plotting heatmap...")
-    plt.close()
-    log_liks = pd.Series(log_liks, name="log_lik")
-    data = pd.concat((grid, log_liks), axis=1)
-    try:  # Duplicated entries can appear with rounding
-        data = data.round(2).pivot("alpha", "beta", "log_lik")
-    except:
-        data = data.pivot("alpha", "beta", "log_lik")
-    ax = sns.heatmap(data=data, cmap="viridis")
-    ax.invert_yaxis()
-    plt.tight_layout()
-    plt.savefig(os.path.join("fig", f"param_grid_{user_name}.pdf"))
-    print("Done!")
 
 
 def produce_data(data_folder):
@@ -236,13 +216,7 @@ def main():
         df = pd.read_csv(preprocess_data_file, index_col=[0])
 
     print("Plotting heatmap...")
-    # plt.close()
-    # log_liks = pd.Series(log_liks, name="log_lik")
-    # data = pd.concat((grid, log_liks), axis=1)
-    # try:  # Duplicated entries can appear with rounding
-    #     data = data.round(2).pivot("alpha", "beta", "log_lik")
-    # except:
-    #     data = data.pivot("alpha", "beta", "log_lik")
+
     data = pd.DataFrame(
         {
             "alpha": df["alpha"],
@@ -255,7 +229,7 @@ def main():
     ax.invert_yaxis()
     plt.tight_layout()
     plt.show()
-    # plt.savefig(os.path.join("fig", f"param_grid_{user_name}.pdf"))
+
     print("Done!")
 
 

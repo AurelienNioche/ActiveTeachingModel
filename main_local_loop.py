@@ -3,7 +3,6 @@ Run simulations and save results
 """
 
 import os
-import sys
 from multiprocessing import Pool, cpu_count
 
 from tqdm import tqdm
@@ -13,6 +12,7 @@ from settings.config_triton import Config
 
 
 def make_data(config_file):
+
     config = Config.get(config_file)
     saving_df = run(config=config)
     f_name = f"{config.config_file.split('.')[0]}.csv"
