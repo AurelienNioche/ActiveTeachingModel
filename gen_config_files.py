@@ -20,7 +20,6 @@ from model.teacher.sampling import Sampling
 from model.teacher.threshold import Threshold
 from settings.config_triton import LEARNER, PSYCHOLOGIST, TEACHER
 
-
 TEACHER_INV = {v: k for k, v in TEACHER.items()}
 PSY_INV = {v: k for k, v in PSYCHOLOGIST.items()}
 LEARNER_INV = {v: k for k, v in LEARNER.items()}
@@ -42,6 +41,8 @@ def generate_param(bounds, methods, is_item_specific, n_item):
     else:
         param = np.zeros(len(bounds))
         for i, b in enumerate(bounds):
+            print(methods[i](b[0], b[1]))
+            print(param)
             param[i] = methods[i](b[0], b[1])
 
     param = param.tolist()
@@ -108,8 +109,7 @@ def delete_config():
     """Delete cluster config files if user confirms"""
 
     if os.path.exists(paths.CONFIG_CLUSTER_DIR):
-        erase = input("Do you want to erase the config folder first? " 
-                      "('y' or 'yes')")
+        erase = input("Do you want to erase the config folder first? " "('y' or 'yes')")
         if erase in ("y", "yes"):
             shutil.rmtree(paths.CONFIG_CLUSTER_DIR)
             print("Done!")
@@ -121,8 +121,7 @@ def delete_data(data_name):
     """Delete cluster data files if user confirms"""
 
     if os.path.exists(data_name):
-        erase = input("Do you want to erase the data folder first? " 
-                      "('y' or 'yes')")
+        erase = input("Do you want to erase the data folder first? " "('y' or 'yes')")
         if erase in ("y", "yes"):
             shutil.rmtree(data_name)
             print("Done!")
@@ -138,12 +137,10 @@ def run_simulation():
         print("Nothing run.")
 
 
-def mod_job_file(template_path: str, config_path: str,
-                 saving_path: str) -> None:
+def mod_job_file(template_path: str, config_path: str, saving_path: str) -> None:
     """Call the shell script that modifies the number of parallel branches"""
 
-    os.system(f"/bin/sh mod_job.sh " 
-              f"{template_path} {config_path} {saving_path}")
+    os.system(f"/bin/sh mod_job.sh " f"{template_path} {config_path} {saving_path}")
 
 
 def main() -> None:
@@ -154,9 +151,12 @@ def main() -> None:
 
     # -------------     SET PARAM HERE      ---------------------------- #
 
-    use_grid = True
+    use_grid = False
+
     omni = False
     is_item_specific = False
+
+    print(f"omni: {omni}, spec: {is_item_specific}, use grid: {use_grid}")
 
     learner_md = ExponentialNDelta
     psy_md = PsychologistGrid
@@ -180,7 +180,8 @@ def main() -> None:
     grid_methods = [PsychologistGrid.LIN, PsychologistGrid.LIN]
     grid_size = 20
     gen_methods = [np.linspace, np.linspace]
-    gen_bounds = [[0.0000001, 0.00005], [0.0001, 0.9999]]
+    # gen_bounds = [[0.0000001, 0.00005], [0.0001, 0.9999]]
+    gen_bounds = [[0.00000273, 0.00005], [0.42106842, 0.9999]]
     cst_time = 1  # 1 / (60 ** 2),  # 1 / (24 * 60**2)
 
     seed = 123
@@ -197,7 +198,8 @@ def main() -> None:
         assert not is_item_specific
         np.random.seed(seed)
         grid = cp_grid_param(
-            grid_size=gen_grid_size, methods=gen_methods, bounds=gen_bounds)
+            grid_size=gen_grid_size, methods=gen_methods, bounds=gen_bounds
+        )
         n_agent = len(grid)
 
     ts = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S_%f")
@@ -216,7 +218,8 @@ def main() -> None:
                 bounds=gen_bounds,
                 is_item_specific=is_item_specific,
                 n_item=n_item,
-                methods=gen_methods)
+                methods=gen_methods,
+            )
 
         for teacher_md in teacher_models:
 
@@ -244,7 +247,8 @@ def main() -> None:
                 f"{'omni' if omni else 'Nomni'}-"
                 f"{learner_md_str}-"
                 f"{psy_md_str}-"
-                f"{teacher_md_str}")
+                f"{teacher_md_str}",
+            )
 
             json_content = {
                 "seed": seed + agent,
