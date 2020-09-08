@@ -5,12 +5,12 @@
 #SBATCH -c 1
 #SBATCH --mem=1000MB
 #SBATCH --ntasks=1
-#SBATCH --array=0-1199 
+#SBATCH --array=0-2399 
 #SBATCH -o triton_out/debug.out
 ############## Here starts the actual UNIX commands and payload:
 
 module purge
-module load Anaconda3
+module load anaconda
 
 srun python main_triton.py $SLURM_ARRAY_TASK_ID
 
