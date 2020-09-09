@@ -247,8 +247,7 @@ def main() -> None:
                 f"{'omni' if omni else 'Nomni'}-"
                 f"{learner_md_str}-"
                 f"{psy_md_str}-"
-                f"{teacher_md_str}",
-            )
+                f"{teacher_md_str}")
 
             json_content = {
                 "seed": seed + agent,
@@ -266,14 +265,13 @@ def main() -> None:
                 "pr_lab": pr_lab,
                 "pr_val": pr_val,
                 "cst_time": cst_time,
-                "data_folder": data_folder_run,
                 "is_item_specific": is_item_specific,
                 "ss_n_iter": ss_n_iter,
                 "time_between_ss": time_between_ss,
                 "n_ss": n_ss,
                 "learnt_threshold": learnt_threshold,
                 "time_per_iter": time_per_iter,
-            }
+                "data_folder": data_folder_run}
 
             f_name = os.path.join(
                 paths.CONFIG_CLUSTER_DIR,

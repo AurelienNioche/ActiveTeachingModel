@@ -15,11 +15,12 @@ def main(job_id: int) -> None:
     f_names = sorted(
         file_name
         for file_name in os.listdir(paths.CONFIG_CLUSTER_DIR)
-        if ".json" in file_name
-    )
+        if ".json" in file_name)
+
     f_paths = sorted(
-        os.path.join(paths.CONFIG_CLUSTER_DIR, f_name) for f_name in f_names
-    )
+        os.path.join(paths.CONFIG_CLUSTER_DIR, f_name)
+        for f_name in f_names)
+
     f_path = f_paths[job_id]
     config = Config.get(f_path)
     saving_df = run(config=config)
