@@ -12,12 +12,14 @@ FORCE = True
 
 def main():
 
-    trial_name = "lin_Nomni_spec"   # input("Trial name: ")
+    trial_name = input("Trial name: ")
     raw_data_folder = os.path.join(paths.DATA_CLUSTER_DIR, trial_name)
+    print(raw_data_folder)
     fig_folder = os.path.join("fig", trial_name)
 
     preprocess_data_file = os.path.join(
-        "data", "preprocessed", f"chocolate_triton_{trial_name}.csv")
+        "data", "preprocessed", f"chocolate_triton_{trial_name}.csv"
+    )
 
     os.makedirs(os.path.join("data", "preprocessed"), exist_ok=True)
     os.makedirs(os.path.join("fig", trial_name), exist_ok=True)

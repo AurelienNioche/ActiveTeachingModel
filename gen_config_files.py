@@ -41,8 +41,6 @@ def generate_param(bounds, methods, is_item_specific, n_item):
     else:
         param = np.zeros(len(bounds))
         for i, b in enumerate(bounds):
-            print(methods[i](b[0], b[1]))
-            print(param)
             param[i] = methods[i](b[0], b[1])
 
     param = param.tolist()
@@ -153,8 +151,8 @@ def main() -> None:
 
     use_grid = False
 
-    omni = False
-    is_item_specific = False
+    omni = True
+    is_item_specific = True
 
     print(f"omni: {omni}, spec: {is_item_specific}, use grid: {use_grid}")
 
@@ -179,7 +177,7 @@ def main() -> None:
     bounds = [[0.0000001, 0.00005], [0.0001, 0.9999]]
     grid_methods = [PsychologistGrid.LIN, PsychologistGrid.LIN]
     grid_size = 20
-    gen_methods = [np.linspace, np.linspace]
+    # gen_methods = [np.linspace, np.linspace]
     # gen_bounds = [[0.0000001, 0.00005], [0.0001, 0.9999]]
     gen_bounds = [[0.00000273, 0.00005], [0.42106842, 0.9999]]
     cst_time = 1  # 1 / (60 ** 2),  # 1 / (24 * 60**2)
@@ -188,10 +186,12 @@ def main() -> None:
 
     if not use_grid:
         n_agent = 100
+        gen_methods = [np.random.uniform, np.random.uniform]
 
     else:
 
         gen_grid_size = 20
+        gen_methods = [np.linspace, np.linspace]
 
         # ------------------  END OF PARAMETER SETTING -------------------- #
 
