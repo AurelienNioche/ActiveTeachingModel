@@ -183,6 +183,7 @@ def main() -> None:
     cst_time = 1  # 1 / (60 ** 2),  # 1 / (24 * 60**2)
 
     seed = 123
+    np.random.seed(seed)
 
     if not use_grid:
         n_agent = 100
@@ -196,7 +197,6 @@ def main() -> None:
         # ------------------  END OF PARAMETER SETTING -------------------- #
 
         assert not is_item_specific
-        np.random.seed(seed)
         grid = cp_grid_param(
             grid_size=gen_grid_size, methods=gen_methods, bounds=gen_bounds
         )
@@ -213,7 +213,6 @@ def main() -> None:
         if use_grid:
             pr_val = grid[agent]
         else:
-            np.random.seed(seed)
             pr_val = generate_param(
                 bounds=gen_bounds,
                 is_item_specific=is_item_specific,
