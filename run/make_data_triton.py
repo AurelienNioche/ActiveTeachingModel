@@ -217,6 +217,8 @@ def run(config, with_tqdm=False):
         "pr_inf": None,
         "p_err_mean": None,
         "p_err_std": None,
+        "p_err_raw_mean": None,
+        "p_err_raw_std": None,
         "n_learnt_before": None,
         "n_learnt": n_learnt,
         "n_seen_before": None,
