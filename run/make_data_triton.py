@@ -135,6 +135,10 @@ def run(config, with_tqdm=False):
                     p_err = np.abs(p_seen_real_before - p_seen_inf)
                     p_err_mean, p_err_std = np.mean(p_err), np.std(p_err)
 
+                    p_err_raw = p_seen_inf - p_seen_real_before
+                    p_err_raw_mean, p_err_raw_std = \
+                        np.mean(p_err_raw), np.std(p_err_raw)
+
                 if is_leitner:
                     item = teacher.ask(now=now,
                                        last_was_success=was_success,
@@ -174,6 +178,8 @@ def run(config, with_tqdm=False):
                 "pr_inf": pr_inf,
                 "p_err_mean": p_err_mean,
                 "p_err_std": p_err_std,
+                "p_err_raw_mean": p_err_raw_mean,
+                "p_err_raw_std": p_err_raw_std,
                 "n_learnt_before": n_learnt_before,
                 "n_learnt": n_learnt,
                 "n_seen_before": n_seen_before,
