@@ -118,6 +118,7 @@ def run(config, with_tqdm=False):
                 n_seen_before = 0
 
                 pr_inf, p_err_mean, p_err_std = None, None, None
+                p_err_raw_mean, p_err_raw_std = None, None
             else:
 
                 p_seen_real_before, seen_before = psy.p_seen(now=now, param=pr)
@@ -126,6 +127,7 @@ def run(config, with_tqdm=False):
 
                 if is_leitner or omniscient:
                     pr_inf, p_err_mean, p_err_std = None, None, None
+                    p_err_raw_mean, p_err_raw_std = None, None
 
                 else:
                     pr_inf = psy.inferred_learner_param()
@@ -162,10 +164,6 @@ def run(config, with_tqdm=False):
 
             n_learnt = np.sum(p_seen_real > learnt_threshold)
             n_seen = np.sum(seen)
-            # if j == 0:
-            #     print("********n_learnt", n_learnt)
-            # else:
-            #     print("n_learnt", n_learnt)
 
             now_real = datetime.datetime.now().timestamp()
 
