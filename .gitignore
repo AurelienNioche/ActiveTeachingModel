@@ -167,9 +167,12 @@ results/
 out/*
 .last.pid
 .last_run_name
+.figold
 
 # Snippet pulls
 snippet
 
 triton_out/
 /._.DS_Store
+credentials.py
+
