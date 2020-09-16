@@ -30,14 +30,14 @@ def dic_to_lab_val(dic):
 
 def main():
 
-    n_item = 500
-    omni = False
+    n_item = 150
+    omni = True
 
     learner_md = ExponentialNDelta
-    pr_val = [[np.mean([0.0000001, 0.00005]) * 0.8, 0.5] for _ in range(n_item)]  # [[0.00006, 0.44] for _ in range(n_item)]
+    pr_val = [[0.00006, 0.44] for _ in range(n_item)]
     is_item_specific = len(np.asarray(pr_val).shape) > 1
 
-    teacher_md = Threshold   # Leitner   # Recursive  # Leitner
+    teacher_md = Recursive  # Leitner
     psy_md = PsychologistGrid
 
     ss_n_iter = 100
@@ -46,28 +46,59 @@ def main():
     learnt_threshold = 0.9
     time_per_iter = 2
 
+    sampling_cst = {"n_sample": 10000}
+
     leitner_cst = {"delay_factor": 2, "delay_min": 2}
 
-    pr_lab = ["alpha", "beta"],
-    bounds = [[0.0000001, 0.025], [0.0001, 0.9999]]
-    # bounds = [[0.0000001, 0.00005], [0.0001, 0.9999]]
-    grid_methods = [PsychologistGrid.LOG, PsychologistGrid.LIN]
-    grid_size = 100
-    cst_time = 1
+    walsh_cst = {
+        "param_labels": ["tau", "s", "b", "m", "c", "x"],
+        "bounds": [
+            [0.5, 1.5],
+            [0.001, 0.10],
+            [0.001, 0.2],
+            [0.001, 0.2],
+            [0.1, 0.1],
+            [0.6, 0.6],
+        ],
+        "grid_methods": [PsychologistGrid.LIN for _ in range(6)],
+        "grid_size": 10,
+        "cst_time": 1 / (4 * 24 * 60 ** 2),
+    }
 
-    assert learner_md == ExponentialNDelta
+    exp_decay_cst = {
+        "param_labels": ["alpha", "beta"],
+        "bounds": [[0.001, 0.5], [0.00, 0.5]],
+        "grid_methods": [PsychologistGrid.LOG, PsychologistGrid.LIN],
+        "grid_size": 20,
+        "cst_time": 1,  # 1 / (24 * 60**2),
+    }
+
+    if learner_md == Walsh2018:
+        cst = walsh_cst
+    elif learner_md == ExponentialNDelta:
+        cst = exp_decay_cst
+    else:
+        raise ValueError
+
+    bounds = cst["bounds"]
+    grid_size = cst["grid_size"]
+    grid_methods = cst["grid_methods"]
+    pr_lab = cst["param_labels"]
+    cst_time = cst["cst_time"]
 
     if teacher_md == Leitner:
         teacher_pr = leitner_cst
-    elif teacher_md in (Threshold, Recursive, ):
+    elif teacher_md == Sampling:
+        teacher_pr = sampling_cst
+    elif teacher_md in (Threshold, Recursive, RecursiveThreshold):
         teacher_pr = {}
     else:
         raise ValueError
 
     teacher_pr_lab, teacher_pr_val = dic_to_lab_val(teacher_pr)
 
-    assert psy_md == PsychologistGrid
-
+    if not psy_md == PsychologistGrid:
+        raise ValueError
     psy_pr_lab = [
         "grid_size", "grid_methods"
     ]
