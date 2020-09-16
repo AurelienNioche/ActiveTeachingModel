@@ -27,27 +27,29 @@ LEARNER_INV = {v: k for k, v in LEARNER.items()}
 
 def generate_param(bounds, methods, is_item_specific, n_item):
 
+    param = np.zeros(len(bounds))
+    for i, b in enumerate(bounds):
+        param[i] = methods[i](b[0], b[1])
+
     if is_item_specific:
         print(f"Warning: methods for generating parameters "
               f"will be ignored as it is item specific")
 
-        param = np.zeros((n_item, len(bounds)))
+        param_spec = np.zeros((n_item, len(bounds)))
         for i, b in enumerate(bounds):
             # param[:, i] = methods[i](b[0], b[1], n_item)
 
-            mean = np.random.uniform(b[0], b[1])
+            mean = param[i]
             std = (b[1] - b[0]) * 0.05
 
             v = np.random.normal(loc=mean, scale=std, size=n_item)
 
             v[v < b[0]] = b[0]
             v[v > b[1]] = b[1]
-            param[:, i] = v
 
-    else:
-        param = np.zeros(len(bounds))
-        for i, b in enumerate(bounds):
-            param[i] = methods[i](b[0], b[1])
+            param_spec[:, i] = v
+
+        param = param_spec
 
     param = param.tolist()
     return param
