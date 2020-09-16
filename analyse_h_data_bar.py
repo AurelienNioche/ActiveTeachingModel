@@ -77,6 +77,8 @@ def main():
     plt.tight_layout()
     plt.savefig("wonderful_violin.pdf")
     plt.show()
+
+
 if __name__ == "__main__":
 
     main()

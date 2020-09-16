@@ -35,11 +35,10 @@ def main():
 
     learner_md = ExponentialNDelta
     pr_val = [[0.00006, 0.44] for _ in range(n_item)]
+    is_item_specific = len(np.asarray(pr_val).shape) > 1
 
     teacher_md = Recursive  # Leitner
     psy_md = PsychologistGrid
-
-    is_item_specific = len(np.asarray(pr_val).shape) > 1
 
     ss_n_iter = 100
     time_between_ss = 24 * 60**2
@@ -98,15 +97,14 @@ def main():
 
     teacher_pr_lab, teacher_pr_val = dic_to_lab_val(teacher_pr)
 
-    if psy_md == PsychologistGrid:
-        psy_pr_lab = [
-            "grid_size", "grid_methods"
-        ]
-        psy_pr_val = [
-            grid_size, grid_methods
-        ]
-    else:
+    if not psy_md == PsychologistGrid:
         raise ValueError
+    psy_pr_lab = [
+        "grid_size", "grid_methods"
+    ]
+    psy_pr_val = [
+        grid_size, grid_methods
+    ]
 
     config = Config(
         data_folder="data/local",
