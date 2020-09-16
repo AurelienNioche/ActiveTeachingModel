@@ -60,17 +60,17 @@ def preprocess_cond(cond_data_folder, preprocess_data_file):
 
 def main(force=True, fig_folder="fig"):
 
-    root_data_folder = os.path.join("data", "triton", "local_log_container")
+    root_data_folder = os.path.join("data", "triton")
     assert os.path.exists(root_data_folder)
 
     cond_f = [p for p in os.scandir(root_data_folder) if not p.name.startswith(".")]
     # cond_f: condition_dir
 
     for i, cp in enumerate(cond_f):
-    # cp: cond_path
+        # cp: cond_path
         print("cond data folder", cp.name)
 
-        pp_data_file = os.path.join("data", "preprocessed", f"{cp.name}-here-i-am.csv")
+        pp_data_file = os.path.join("data", "preprocessed", f"{cp.name}.csv")
         # pp: preproc_path
 
         if not os.path.exists(pp_data_file) or force:
