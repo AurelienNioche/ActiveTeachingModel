@@ -132,11 +132,10 @@ class PsychologistGrid(Psychologist):
             return self.est_param
 
         is_rep = self.n_pres > 1
-
-        if np.sum(is_rep) == self.n_item:
-            return self.est_param
-
         not_is_rep = np.invert(is_rep)
+
+        if np.sum(is_rep) == self.n_item or np.sum(not_is_rep) == self.n_item:
+            return self.est_param
 
         lp_to_consider = self.log_post[self.n_pres > 1]
 
