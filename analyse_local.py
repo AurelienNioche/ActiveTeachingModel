@@ -70,7 +70,7 @@ def main(force=True, fig_folder="fig"):
     # cp: cond_path
         print("cond data folder", cp.name)
 
-        pp_data_file = os.path.join("data", "preprocessed", f"{cp.name}-here-i-am.csv")
+        pp_data_file = os.path.join("data", "preprocessed", f"{cp.name}.csv")
         # pp: preproc_path
 
         if not os.path.exists(pp_data_file) or force:
