@@ -58,7 +58,7 @@ def preprocess_cond(cond_data_folder, preprocess_data_file):
     return df
 
 
-def main(force=True, fig_folder="fig"):
+def main(force=False, fig_folder="fig"):
 
     root_data_folder = os.path.join("data", "triton")
     assert os.path.exists(root_data_folder)
@@ -67,10 +67,10 @@ def main(force=True, fig_folder="fig"):
     # cond_f: condition_dir
 
     for i, cp in enumerate(cond_f):
-        # cp: cond_path
+    # cp: cond_path
         print("cond data folder", cp.name)
 
-        pp_data_file = os.path.join("data", "preprocessed", f"{cp.name}.csv")
+        pp_data_file = os.path.join("data", "preprocessed", f"{cp.name}-here-i-am.csv")
         # pp: preproc_path
 
         if not os.path.exists(pp_data_file) or force:
@@ -90,4 +90,4 @@ def main(force=True, fig_folder="fig"):
 
 
 if __name__ == "__main__":
-    main()
+    main(force=True)
