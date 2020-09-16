@@ -71,7 +71,6 @@ def preprocess_data(data_folder: str, preprocess_data_file: str) -> pd.DataFrame
 
     df = pd.DataFrame(row_list)
     df.to_csv(preprocess_data_file)
-    print(df)
     return df
 
 

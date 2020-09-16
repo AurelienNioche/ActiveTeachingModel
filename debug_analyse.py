@@ -1,4 +1,5 @@
 import os
+
 import pandas as pd
 
 from plot.subplot import box, chocolate, hist
@@ -29,22 +30,22 @@ def row_for_single_run(csv_path):
         "Psychologist": df["md_psy"][0],
         "Teacher": df["md_teacher"][0],
         "Items learnt one day later": n_learnt,
-        "Items learnt end last session": n_learnt_end_ss}
+        "Items learnt end last session": n_learnt_end_ss,
+    }
 
 
 def preprocess_cond(cond_data_folder, preprocess_data_file):
 
-    teach_f = [p for p in os.scandir(cond_data_folder.path)
-               if not p.name.startswith(".")]
+    teach_f = [
+        p for p in os.scandir(cond_data_folder.path) if not p.name.startswith(".")
+    ]
 
     row_list = []
 
     for j, tp in enumerate(teach_f):
         print("teacher data folder", tp.name)
 
-        csv_files = \
-            [p for p in os.scandir(tp.path)
-             if p.name.endswith("csv")]
+        csv_files = [p for p in os.scandir(tp.path) if p.name.endswith("csv")]
 
         for k, csv_file in enumerate(csv_files):
             row = row_for_single_run(csv_file.path)
@@ -62,25 +63,22 @@ def main(force=False, fig_folder="fig"):
     root_data_folder = os.path.join("data", "triton")
     assert os.path.exists(root_data_folder)
 
-    cond_f = [p for p in os.scandir(root_data_folder)
-              if not p.name.startswith(".")]
+    cond_f = [p for p in os.scandir(root_data_folder) if not p.name.startswith(".")]
+    # cond_f: condition_dir
 
     for i, cp in enumerate(cond_f):
+    # cp: cond_path
         print("cond data folder", cp.name)
 
-        pp_data_file = os.path.join(
-            "data",
-            "preprocessed",
-            f"{cp.name}-here-i-am.csv")
+        pp_data_file = os.path.join("data", "preprocessed", f"{cp.name}-here-i-am.csv")
+        # pp: preproc_path
 
         if not os.path.exists(pp_data_file) or force:
-            df = preprocess_cond(cond_data_folder=cp,
-                                 preprocess_data_file=pp_data_file)
+            df = preprocess_cond(cond_data_folder=cp, preprocess_data_file=pp_data_file)
         else:
             df = pd.read_csv(pp_data_file, index_col=[0])
 
-        for v in ("Items learnt one day later",
-                  "Items learnt end last session"):
+        for v in ("Items learnt one day later", "Items learnt end last session"):
 
             lab = v.replace("Items learnt", "").replace(" ", "-")
 

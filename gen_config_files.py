@@ -151,8 +151,8 @@ def main() -> None:
 
     use_grid = False
 
-    omni = True
-    is_item_specific = True
+    omni = False
+    is_item_specific = False
 
     print(f"omni: {omni}, spec: {is_item_specific}, use grid: {use_grid}")
 
@@ -161,22 +161,27 @@ def main() -> None:
 
     teacher_models = (Leitner, Threshold, Recursive)
 
-    n_item = 500
-
     ss_n_iter = 100
     time_between_ss = 24 * 60 ** 2
     n_ss = 6
     learnt_threshold = 0.9
     time_per_iter = 4
 
+    n_item = 500 * n_ss // 6
+
     sampling_cst = {"n_sample": 10000}
 
     leitner_cst = {"delay_factor": 2, "delay_min": time_per_iter}
 
     pr_lab = ["alpha", "beta"]
+    ### Good bounds in-silico
     bounds = [[0.0000001, 0.00005], [0.0001, 0.9999]]
+    ### With prior in silico
+    bounds = [[0.0000001, 0.025], [0.0001, 0.9999]]
+    ### Bounds for user experiment
+    # bounds = [[0.0000001, 0.1], [0.0001, 0.9999]]
     grid_methods = [PsychologistGrid.LIN, PsychologistGrid.LIN]
-    grid_size = 20
+    grid_size = 100  # 20
     # gen_methods = [np.linspace, np.linspace]
     # gen_bounds = [[0.0000001, 0.00005], [0.0001, 0.9999]]
     gen_bounds = [[0.00000273, 0.00005], [0.42106842, 0.9999]]
@@ -246,7 +251,8 @@ def main() -> None:
                 f"{'omni' if omni else 'Nomni'}-"
                 f"{learner_md_str}-"
                 f"{psy_md_str}-"
-                f"{teacher_md_str}")
+                f"{teacher_md_str}",
+            )
 
             json_content = {
                 "seed": seed + agent,
@@ -270,7 +276,8 @@ def main() -> None:
                 "n_ss": n_ss,
                 "learnt_threshold": learnt_threshold,
                 "time_per_iter": time_per_iter,
-                "data_folder": data_folder_run}
+                "data_folder": data_folder_run,
+            }
 
             f_name = os.path.join(
                 paths.CONFIG_CLUSTER_DIR,
