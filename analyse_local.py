@@ -58,7 +58,7 @@ def preprocess_cond(cond_data_folder, preprocess_data_file):
     return df
 
 
-def main(force=True, fig_folder="fig"):
+def main(force=False, fig_folder="fig"):
 
     root_data_folder = os.path.join("data", "triton", "local_log_container")
     assert os.path.exists(root_data_folder)

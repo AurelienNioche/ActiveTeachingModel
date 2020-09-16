@@ -25,19 +25,18 @@ PSY_INV = {v: k for k, v in PSYCHOLOGIST.items()}
 LEARNER_INV = {v: k for k, v in LEARNER.items()}
 
 
-def generate_param(bounds, methods, is_item_specific, n_item):
+def generate_param(bounds, is_item_specific, n_item):
 
     param = np.zeros(len(bounds))
     for i, b in enumerate(bounds):
-        param[i] = methods[i](b[0], b[1])
+        param[i] = np.random.uniform(b[0], b[1])
 
     if is_item_specific:
-        print(f"Warning: methods for generating parameters "
-              f"will be ignored as it is item specific")
 
         param_spec = np.zeros((n_item, len(bounds)))
         for i, b in enumerate(bounds):
-            # param[:, i] = methods[i](b[0], b[1], n_item)
+
+            # param[:, i] = np.random.uniform(b[0], b[1], n_item)
 
             mean = param[i]
             std = (b[1] - b[0]) * 0.05
@@ -167,7 +166,7 @@ def main() -> None:
     learner_md = ExponentialNDelta
     psy_md = PsychologistGrid
 
-    teacher_models = (Leitner, Threshold, )
+    teacher_models = (Leitner, Threshold, Recursive)
 
     ss_n_iter = 100
     time_between_ss = 24 * 60 ** 2
@@ -200,7 +199,6 @@ def main() -> None:
 
     if not use_grid:
         n_agent = 100
-        gen_methods = [np.random.uniform, np.random.uniform]
 
     else:
 
@@ -229,9 +227,7 @@ def main() -> None:
             pr_val = generate_param(
                 bounds=gen_bounds,
                 is_item_specific=is_item_specific,
-                n_item=n_item,
-                methods=gen_methods,
-            )
+                n_item=n_item)
 
         for teacher_md in teacher_models:
 
