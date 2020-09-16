@@ -6,14 +6,12 @@ import seaborn as sns
 from tqdm import tqdm
 
 
-def preprocess_data(data_folder: str,
-                    preprocess_data_file: str) -> pd.DataFrame:
+def preprocess_data(data_folder: str, preprocess_data_file: str) -> pd.DataFrame:
 
     assert os.path.exists(data_folder)
 
     files = [
-        p.path for p in os.scandir(data_folder)
-        if os.path.splitext(p.path)[1] == ".csv"
+        p.path for p in os.scandir(data_folder) if os.path.splitext(p.path)[1] == ".csv"
     ]
     file_count = len(files)
 
@@ -75,7 +73,7 @@ def preprocess_data(data_folder: str,
 
 
 def main():
-    data_dir = os.path.join("data", "triton", "ukko-run")
+    data_dir = os.path.join("data", "triton", "nomni-nospec-grid100")
 
     force = False
 
@@ -86,14 +84,14 @@ def main():
 
         print("current dir", dir_.path)
 
-        preprocess_data_file = os.path.join("data", "preprocessed",
-                                            f"explo_grid_{dir_.name}.csv")
+        preprocess_data_file = os.path.join(
+            "data", "preprocessed", f"explo_grid_{dir_.name}.csv"
+        )
         working_data_dir = dir_.path
 
         if not os.path.exists(preprocess_data_file) or force:
             df = preprocess_data(
-                data_folder=working_data_dir,
-                preprocess_data_file=preprocess_data_file
+                data_folder=working_data_dir, preprocess_data_file=preprocess_data_file
             )
         else:
             df = pd.read_csv(preprocess_data_file, index_col=[0])
@@ -101,14 +99,12 @@ def main():
         print("Plotting heatmap...")
 
         data = pd.DataFrame(
-            {"alpha": df["alpha"], "beta": df["beta"],
-             "n_learnt": df["n_learnt"]}
+            {"alpha": df["alpha"], "beta": df["beta"], "n_learnt": df["n_learnt"]}
         )
         data = data.round(8).pivot("alpha", "beta", "n_learnt")
         fig, ax = plt.subplots()
 
-        sns.heatmap(data=data, cmap="viridis", cbar_kws={"label": "N learnt"},
-                    ax=ax)
+        sns.heatmap(data=data, cmap="viridis", cbar_kws={"label": "N learnt"}, ax=ax)
 
         ax.invert_yaxis()
 

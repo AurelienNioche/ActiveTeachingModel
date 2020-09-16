@@ -1,5 +1,5 @@
 """
-Param recovery
+User parameter recovery
 """
 
 import os
@@ -50,7 +50,7 @@ def log_lik(
     cst_time: float,
     eps: float,
 ):
-    """Compute log-likelihood for one bounds param pair"""
+    """Compute log-likelihood for one param bounds pair"""
 
     a, b = param
 
@@ -157,7 +157,7 @@ def main(f_results: str) -> (pd.DataFrame, pd.DataFrame):
 
 
 if __name__ == "__main__":
-    loglikes, grid_ = main("results.csv")
+    loglikes, grid_ = main("user/data_full.csv")
 
 
 # def enclose_log_lik_df(df, eps):
