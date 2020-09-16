@@ -35,7 +35,7 @@ def generate_param(bounds, methods, is_item_specific, n_item):
         for i, b in enumerate(bounds):
             # param[:, i] = methods[i](b[0], b[1], n_item)
 
-            mean = np.random.uniform(b[0], b[1], size=n_item)
+            mean = np.random.uniform(b[0], b[1])
             std = (b[1] - b[0]) * 0.05
 
             v = np.random.normal(loc=mean, scale=std, size=n_item)
