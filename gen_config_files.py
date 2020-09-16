@@ -28,15 +28,21 @@ LEARNER_INV = {v: k for k, v in LEARNER.items()}
 def generate_param(bounds, methods, is_item_specific, n_item):
 
     if is_item_specific:
+        print(f"Warning: methods for generating parameters "
+              f"will be ignored as it is item specific")
+
         param = np.zeros((n_item, len(bounds)))
         for i, b in enumerate(bounds):
-            param[:, i] = methods[i](b[0], b[1], n_item)
-            # mean = np.random.uniform(b[0], b[1], size=n_item)
-            # std = (b[1] - b[0]) * 0.1
-            # v = np.random.normal(loc=mean, scale=std, size=n_item)
-            # v[v < b[0]] = b[0]
-            # v[v > b[1]] = b[1]
-            # param[:, i] = v
+            # param[:, i] = methods[i](b[0], b[1], n_item)
+
+            mean = np.random.uniform(b[0], b[1], size=n_item)
+            std = (b[1] - b[0]) * 0.05
+
+            v = np.random.normal(loc=mean, scale=std, size=n_item)
+
+            v[v < b[0]] = b[0]
+            v[v > b[1]] = b[1]
+            param[:, i] = v
 
     else:
         param = np.zeros(len(bounds))
@@ -152,14 +158,14 @@ def main() -> None:
     use_grid = False
 
     omni = False
-    is_item_specific = False
+    is_item_specific = True
 
     print(f"omni: {omni}, spec: {is_item_specific}, use grid: {use_grid}")
 
     learner_md = ExponentialNDelta
     psy_md = PsychologistGrid
 
-    teacher_models = (Leitner, Threshold, Recursive)
+    teacher_models = (Leitner, Threshold, )
 
     ss_n_iter = 100
     time_between_ss = 24 * 60 ** 2
@@ -167,7 +173,7 @@ def main() -> None:
     learnt_threshold = 0.9
     time_per_iter = 4
 
-    n_item = 500 * n_ss // 6
+    n_item = 500   # 500 * n_ss // 6
 
     sampling_cst = {"n_sample": 10000}
 
@@ -175,17 +181,17 @@ def main() -> None:
 
     pr_lab = ["alpha", "beta"]
     ### Good bounds in-silico
-    bounds = [[0.0000001, 0.00005], [0.0001, 0.9999]]
+    # bounds = [[0.0000001, 0.00005], [0.0001, 0.9999]]
     ### With prior in silico
     bounds = [[0.0000001, 0.025], [0.0001, 0.9999]]
     ### Bounds for user experiment
     # bounds = [[0.0000001, 0.1], [0.0001, 0.9999]]
-    grid_methods = [PsychologistGrid.LIN, PsychologistGrid.LIN]
+    grid_methods = [PsychologistGrid.LOG, PsychologistGrid.LIN]
     grid_size = 100  # 20
     # gen_methods = [np.linspace, np.linspace]
     # gen_bounds = [[0.0000001, 0.00005], [0.0001, 0.9999]]
     gen_bounds = [[0.00000273, 0.00005], [0.42106842, 0.9999]]
-    cst_time = 1  # 1 / (60 ** 2),  # 1 / (24 * 60**2)
+    cst_time = 1
 
     seed = 123
     np.random.seed(seed)
