@@ -169,7 +169,7 @@ def main() -> None:
 
     ss_n_iter = 100
     time_between_ss = 24 * 60 ** 2
-    n_ss = 6
+    n_ss = 12
     learnt_threshold = 0.9
     time_per_iter = 4
 
@@ -186,7 +186,7 @@ def main() -> None:
     bounds = [[0.0000001, 0.025], [0.0001, 0.9999]]
     ### Bounds for user experiment
     # bounds = [[0.0000001, 0.1], [0.0001, 0.9999]]
-    grid_methods = [PsychologistGrid.LIN, PsychologistGrid.LIN]
+    grid_methods = [PsychologistGrid.LOG, PsychologistGrid.LIN]
     grid_size = 100  # 20
     # gen_methods = [np.linspace, np.linspace]
     # gen_bounds = [[0.0000001, 0.00005], [0.0001, 0.9999]]
