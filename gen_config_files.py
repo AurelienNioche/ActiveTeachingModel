@@ -158,7 +158,7 @@ def main() -> None:
     use_grid = False
 
     omni = False
-    is_item_specific = True
+    is_item_specific = False
 
     print(f"omni: {omni}, spec: {is_item_specific}, use grid: {use_grid}")
 
