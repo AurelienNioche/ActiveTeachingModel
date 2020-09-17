@@ -38,13 +38,11 @@ def generate_param(bounds, is_item_specific, n_item):
 
             # param[:, i] = np.random.uniform(b[0], b[1], n_item)
 
-            mean = param[i]
-            std = (b[1] - b[0]) * 0.05
-
-            v = np.random.normal(loc=mean, scale=std, size=n_item)
-
-            v[v < b[0]] = b[0]
-            v[v > b[1]] = b[1]
+            v = param[i]
+            # std = (b[1] - b[0]) * 0.05
+            # v = np.random.normal(loc=mean, scale=std, size=n_item)
+            # v[v < b[0]] = b[0]
+            # v[v > b[1]] = b[1]
 
             param_spec[:, i] = v
 
@@ -55,6 +53,7 @@ def generate_param(bounds, is_item_specific, n_item):
 
 
 def cartesian_product(*arrays):
+
     la = len(arrays)
     dtype = np.result_type(*arrays)
     arr = np.empty([len(a) for a in arrays] + [la], dtype=dtype)

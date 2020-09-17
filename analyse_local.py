@@ -37,8 +37,8 @@ def row_for_single_run(csv_path):
 def preprocess_cond(cond_data_folder, preprocess_data_file):
 
     teach_f = [
-        p for p in os.scandir(cond_data_folder.path) if not p.name.startswith(".")
-    ]
+        p for p in os.scandir(cond_data_folder.path)
+        if not p.name.startswith(".")]
 
     row_list = []
 
@@ -53,6 +53,8 @@ def preprocess_cond(cond_data_folder, preprocess_data_file):
 
     print("*" * 100)
 
+    os.makedirs(os.path.dirname(preprocess_data_file), exist_ok=True)
+
     df = pd.DataFrame(row_list)
     df.to_csv(preprocess_data_file)
     return df
@@ -60,33 +62,36 @@ def preprocess_cond(cond_data_folder, preprocess_data_file):
 
 def main(force=False, fig_folder="fig"):
 
-    root_data_folder = os.path.join("data", "triton", "local_log_container")
+    root_data_folder = os.path.join("data", "triton", "triton")
     assert os.path.exists(root_data_folder)
 
-    cond_f = [p for p in os.scandir(root_data_folder) if not p.name.startswith(".")]
+    cond_f = [p for p in os.scandir(root_data_folder)
+              if not p.name.startswith(".")]
     # cond_f: condition_dir
 
     for i, cp in enumerate(cond_f):
-    # cp: cond_path
+
+        # cp: cond_path
         print("cond data folder", cp.name)
 
         pp_data_file = os.path.join("data", "preprocessed", f"{cp.name}.csv")
         # pp: preproc_path
 
         if not os.path.exists(pp_data_file) or force:
-            df = preprocess_cond(cond_data_folder=cp, preprocess_data_file=pp_data_file)
+            df = preprocess_cond(cond_data_folder=cp,
+                                 preprocess_data_file=pp_data_file)
         else:
             df = pd.read_csv(pp_data_file, index_col=[0])
 
-        for v in ("Items learnt one day later", "Items learnt end last session"):
+        for v in ("Items learnt one day later",): # "Items learnt end last session"):
 
             lab = v.replace("Items learnt", "").replace(" ", "-")
 
-            fig_path = os.path.join(fig_folder, f"{ cp.name}_box_{lab}_here-i-am.pdf")
+            fig_path = os.path.join(fig_folder, f"{ cp.name}_box{lab}.png")
             box.plot(df=df, fig_path=fig_path, learnt_label=v)
 
-            fig_path = os.path.join(fig_folder, f"{cp.name}_hist_here-i-am.pdf")
-            hist.plot(learnt_label=v, df=df, fig_path=fig_path)
+            # fig_path = os.path.join(fig_folder, f"{cp.name}_hist_{lab}.pdf")
+            # hist.plot(learnt_label=v, df=df, fig_path=fig_path)
 
 
 if __name__ == "__main__":

@@ -7,17 +7,12 @@ import seaborn as sns
 def plot(df: pd.DataFrame, learnt_label: str, fig_path: str) -> None:
     """Swarm plot total items recalled per agent"""
 
-    print("Plotting box and swarm...")
-    box, ax = plt.subplots()
-    df = df.sort_values("Teacher")
-    teachers = df["Teacher"].unique()
-
-    for i, t in enumerate(teachers):
-        is_t = df["Teacher"] == t
-        sns.distplot(df[is_t][learnt_label], label=t, bins=10)
-    plt.legend()
+    print("Plotting hist...")
+    fig, ax = plt.subplots()
+    sns.histplot(x=learnt_label, hue="Teacher", ax=ax, data=df,
+                 lw=0, alpha=0.5)
 
     # plt.show()
     print("Saving fig...")
-    box.savefig(fig_path)
+    fig.savefig(fig_path)
     print("Done!")

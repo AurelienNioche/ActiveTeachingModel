@@ -128,14 +128,14 @@ class PsychologistGrid(Psychologist):
 
     def inferred_learner_param(self):
 
-        # if self.omniscient or not self.is_item_specific:
-        #     return self.est_param
-        #
-        # is_rep = self.n_pres > 0
-        # not_is_rep = np.invert(is_rep)
-        #
-        # if np.sum(is_rep) == self.n_item or np.sum(not_is_rep) == self.n_item:
-        #     return self.est_param
+        if self.omniscient or not self.is_item_specific:
+            return self.est_param
+
+        is_rep = self.n_pres > 1
+        not_is_rep = np.invert(is_rep)
+
+        if np.sum(is_rep) == self.n_item or np.sum(not_is_rep) == self.n_item:
+            return self.est_param
 
         # lp_to_consider = self.log_post[is_rep]
         #
@@ -144,7 +144,7 @@ class PsychologistGrid(Psychologist):
         # est_param = np.dot(np.exp(lp), self.grid_param)
         #
         # self.log_post[not_is_rep] = lp
-        # self.est_param[not_is_rep] = est_param
+        self.est_param[not_is_rep] = np.mean(self.est_param[is_rep], axis=0)
 
         return self.est_param
 
