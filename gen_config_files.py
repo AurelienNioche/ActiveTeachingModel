@@ -153,148 +153,148 @@ def main() -> None:
     data_folder = select_data_folder()
     print("Generating cluster config files...")
 
-    # -------------     SET PARAM HERE      ---------------------------- #
-
-    use_grid = False
-
-    omni = False
-    is_item_specific = False
-
-    print(f"omni: {omni}, spec: {is_item_specific}, use grid: {use_grid}")
-
-    learner_md = ExponentialNDelta
-    psy_md = PsychologistGrid
-
-    teacher_models = (Leitner, Threshold, Recursive)
-
-    ss_n_iter = 100
-    time_between_ss = 24 * 60 ** 2
-    n_ss = 12
-    learnt_threshold = 0.9
-    time_per_iter = 4
-
-    n_item = 500   # 500 * n_ss // 6
-
-    sampling_cst = {"n_sample": 10000}
-
-    leitner_cst = {"delay_factor": 2, "delay_min": time_per_iter}
-
-    pr_lab = ["alpha", "beta"]
-    ### Good bounds in-silico
-    # bounds = [[0.0000001, 0.00005], [0.0001, 0.9999]]
-    ### With prior in silico
-    bounds = [[0.0000001, 0.025], [0.0001, 0.9999]]
-    ### Bounds for user experiment
-    # bounds = [[0.0000001, 0.1], [0.0001, 0.9999]]
-    grid_methods = [PsychologistGrid.LOG, PsychologistGrid.LIN]
-    grid_size = 100  # 20
-    # gen_methods = [np.linspace, np.linspace]
-    # gen_bounds = [[0.0000001, 0.00005], [0.0001, 0.9999]]
-    gen_bounds = [[0.00000273, 0.00005], [0.42106842, 0.9999]]
-    cst_time = 1
-
-    seed = 123
-    np.random.seed(seed)
-
-    if not use_grid:
-        n_agent = 100
-
-    else:
-
-        gen_grid_size = 20
-        gen_methods = [np.linspace, np.linspace]
-
-        # ------------------  END OF PARAMETER SETTING -------------------- #
-
-        assert not is_item_specific
-        grid = cp_grid_param(
-            grid_size=gen_grid_size, methods=gen_methods, bounds=gen_bounds
-        )
-        n_agent = len(grid)
-
-    ts = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S_%f")
+    pbar = tqdm()
 
     job_number = 0
 
-    pbar = tqdm()
+    for omni in (False, True):
+        for is_item_specific in (False, True):
 
-    for agent in range(n_agent):
+            # -------------     SET PARAM HERE      ---------------------------- #
 
-        if use_grid:
-            pr_val = grid[agent]
-        else:
-            pr_val = generate_param(
-                bounds=gen_bounds,
-                is_item_specific=is_item_specific,
-                n_item=n_item)
+            use_grid = False
 
-        for teacher_md in teacher_models:
+            print(f"omni: {omni}, spec: {is_item_specific}, use grid: {use_grid}")
 
-            if teacher_md == Leitner:
-                teacher_pr = leitner_cst
-            elif teacher_md == Sampling:
-                teacher_pr = sampling_cst
-            elif teacher_md in (Threshold, Recursive):
-                teacher_pr = {}
+            learner_md = ExponentialNDelta
+            psy_md = PsychologistGrid
+
+            teacher_models = (Leitner, Threshold, Recursive)
+
+            ss_n_iter = 100
+            time_between_ss = 24 * 60 ** 2
+            n_ss = 12
+            learnt_threshold = 0.9
+            time_per_iter = 4
+
+            n_item = 500   # 500 * n_ss // 6
+
+            sampling_cst = {"n_sample": 10000}
+
+            leitner_cst = {"delay_factor": 2, "delay_min": time_per_iter}
+
+            pr_lab = ["alpha", "beta"]
+            ### Good bounds in-silico
+            # bounds = [[0.0000001, 0.00005], [0.0001, 0.9999]]
+            ### With prior in silico
+            bounds = [[0.0000001, 0.025], [0.0001, 0.9999]]
+            ### Bounds for user experiment
+            # bounds = [[0.0000001, 0.1], [0.0001, 0.9999]]
+            grid_methods = [PsychologistGrid.LOG, PsychologistGrid.LIN]
+            grid_size = 100  # 20
+            # gen_methods = [np.linspace, np.linspace]
+            # gen_bounds = [[0.0000001, 0.00005], [0.0001, 0.9999]]
+            gen_bounds = [[0.00000273, 0.00005], [0.42106842, 0.9999]]
+            cst_time = 1
+
+            seed = 123
+            np.random.seed(seed)
+
+            if not use_grid:
+                n_agent = 100
+
             else:
-                raise ValueError
 
-            teacher_pr_lab, teacher_pr_val = dic_to_lab_val(teacher_pr)
+                gen_grid_size = 20
+                gen_methods = [np.linspace, np.linspace]
 
-            psy_pr_lab = ["grid_size", "grid_methods"]
-            psy_pr_val = [grid_size, grid_methods]
+                # ------------------  END OF PARAMETER SETTING -------------------- #
 
-            learner_md_str = LEARNER_INV[learner_md]
-            psy_md_str = PSY_INV[psy_md]
-            teacher_md_str = TEACHER_INV[teacher_md]
+                assert not is_item_specific
+                grid = cp_grid_param(
+                    grid_size=gen_grid_size, methods=gen_methods, bounds=gen_bounds
+                )
+                n_agent = len(grid)
 
-            data_folder_run = os.path.join(
-                data_folder,
-                f"{'spec' if is_item_specific else 'Nspec'}-"
-                f"{'omni' if omni else 'Nomni'}-"
-                f"{learner_md_str}-"
-                f"{psy_md_str}-"
-                f"{teacher_md_str}",
-            )
+            ts = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S_%f")
 
-            json_content = {
-                "seed": seed + agent,
-                "agent": agent,
-                "bounds": bounds,
-                "md_learner": learner_md_str,
-                "md_psy": psy_md_str,
-                "md_teacher": teacher_md_str,
-                "omni": omni,
-                "n_item": n_item,
-                "teacher_pr_lab": teacher_pr_lab,
-                "teacher_pr_val": teacher_pr_val,
-                "psy_pr_lab": psy_pr_lab,
-                "psy_pr_val": psy_pr_val,
-                "pr_lab": pr_lab,
-                "pr_val": pr_val,
-                "cst_time": cst_time,
-                "is_item_specific": is_item_specific,
-                "ss_n_iter": ss_n_iter,
-                "time_between_ss": time_between_ss,
-                "n_ss": n_ss,
-                "learnt_threshold": learnt_threshold,
-                "time_per_iter": time_per_iter,
-                "data_folder": data_folder_run,
-            }
+            for agent in range(n_agent):
 
-            f_name = os.path.join(
-                paths.CONFIG_CLUSTER_DIR,
-                f"{job_number}-{ts}-"
-                f"{learner_md_str}-"
-                f"{psy_md_str}-"
-                f"{teacher_md_str}-"
-                f"{agent}.json",
-            )
+                if use_grid:
+                    pr_val = grid[agent]
+                else:
+                    pr_val = generate_param(
+                        bounds=gen_bounds,
+                        is_item_specific=is_item_specific,
+                        n_item=n_item)
 
-            with open(f_name, "w") as f:
-                json.dump(json_content, f, sort_keys=False, indent=4)
-            pbar.update()
-            job_number += 1
+                for teacher_md in teacher_models:
+
+                    if teacher_md == Leitner:
+                        teacher_pr = leitner_cst
+                    elif teacher_md == Sampling:
+                        teacher_pr = sampling_cst
+                    elif teacher_md in (Threshold, Recursive):
+                        teacher_pr = {}
+                    else:
+                        raise ValueError
+
+                    teacher_pr_lab, teacher_pr_val = dic_to_lab_val(teacher_pr)
+
+                    psy_pr_lab = ["grid_size", "grid_methods"]
+                    psy_pr_val = [grid_size, grid_methods]
+
+                    learner_md_str = LEARNER_INV[learner_md]
+                    psy_md_str = PSY_INV[psy_md]
+                    teacher_md_str = TEACHER_INV[teacher_md]
+
+                    data_folder_run = os.path.join(
+                        data_folder,
+                        f"{'spec' if is_item_specific else 'Nspec'}-"
+                        f"{'omni' if omni else 'Nomni'}-"
+                        f"{learner_md_str}-"
+                        f"{psy_md_str}-"
+                        f"{teacher_md_str}",
+                    )
+
+                    json_content = {
+                        "seed": seed + agent,
+                        "agent": agent,
+                        "bounds": bounds,
+                        "md_learner": learner_md_str,
+                        "md_psy": psy_md_str,
+                        "md_teacher": teacher_md_str,
+                        "omni": omni,
+                        "n_item": n_item,
+                        "teacher_pr_lab": teacher_pr_lab,
+                        "teacher_pr_val": teacher_pr_val,
+                        "psy_pr_lab": psy_pr_lab,
+                        "psy_pr_val": psy_pr_val,
+                        "pr_lab": pr_lab,
+                        "pr_val": pr_val,
+                        "cst_time": cst_time,
+                        "is_item_specific": is_item_specific,
+                        "ss_n_iter": ss_n_iter,
+                        "time_between_ss": time_between_ss,
+                        "n_ss": n_ss,
+                        "learnt_threshold": learnt_threshold,
+                        "time_per_iter": time_per_iter,
+                        "data_folder": data_folder_run,
+                    }
+
+                    f_name = os.path.join(
+                        paths.CONFIG_CLUSTER_DIR,
+                        f"{job_number}-{ts}-"
+                        f"{learner_md_str}-"
+                        f"{psy_md_str}-"
+                        f"{teacher_md_str}-"
+                        f"{agent}.json",
+                    )
+
+                    with open(f_name, "w") as f:
+                        json.dump(json_content, f, sort_keys=False, indent=4)
+                    pbar.update()
+                    job_number += 1
 
     pbar.close()
     print("Config files created!")
