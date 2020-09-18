@@ -47,67 +47,41 @@ def cp_grid_param(grid_size, bounds, methods):
     return grid
 
 
-def produce_data(data_folder):
+def produce_data(raw_data_folder, bounds, methods, grid_size=20):
 
     n_item = 150
     omni = True
 
     learner_md = ExponentialNDelta
-
-    teacher_md = Leitner  # Leitner
-    psy_md = PsychologistGrid
+    teacher_md = Leitner
 
     is_item_specific = False
-
     ss_n_iter = 100
     time_between_ss = 24 * 60 ** 2
     n_ss = 6
     learnt_threshold = 0.9
-    time_per_iter = 2
-
-    sampling_cst = {"n_sample": 10000}
-
-    leitner_cst = {"delay_factor": 2, "delay_min": 2}
+    time_per_iter = 4
 
     pr_lab = ["alpha", "beta"]
-    bounds = np.asarray([[0.0000001, 0.00005], [0.0001, 0.9999]])
 
-    gen_grid_size = 20
-
-    psy_pr = {
-        "grid_size": 20,
-        "grid_methods": [PsychologistGrid.LIN, PsychologistGrid.LIN],
-    }
-    cst_time = 1
-
-    if teacher_md == Leitner:
-        teacher_pr = leitner_cst
-    elif teacher_md == Sampling:
-        teacher_pr = sampling_cst
-    elif teacher_md in (Threshold, Recursive, RecursiveThreshold):
-        teacher_pr = {}
-    else:
-        raise ValueError
-
+    teacher_pr = {"delay_factor": 2, "delay_min": 2}
     teacher_pr_lab, teacher_pr_val = dic.to_key_val_list(teacher_pr)
-    psy_pr_lab, psy_pr_val = dic.to_key_val_list(psy_pr)
 
     pr_grid = cp_grid_param(
-        bounds=bounds,
-        grid_size=gen_grid_size,
-        methods=np.array([np.linspace, np.linspace]),
-    )
+        bounds=np.asarray(bounds),
+        grid_size=grid_size,
+        methods=np.array(methods))
 
     for i, pr_val in tqdm(enumerate(pr_grid), total=len(pr_grid)):
 
         config_dic = {
-            "data_folder": data_folder,
+            "data_folder": None,
             "config_file": None,
             "seed": 0,
             "agent": i,
-            "bounds": bounds,
+            "bounds": None,
             "md_learner": LEARNER_INV[learner_md],
-            "md_psy": PSY_INV[psy_md],
+            "md_psy": None,
             "md_teacher": TEACHER_INV[teacher_md],
             "omni": omni,
             "n_item": n_item,
@@ -117,33 +91,25 @@ def produce_data(data_folder):
             "n_ss": n_ss,
             "learnt_threshold": learnt_threshold,
             "time_per_iter": time_per_iter,
-            "cst_time": cst_time,
+            "cst_time": 1,
             "teacher_pr_lab": teacher_pr_lab,
             "teacher_pr_val": teacher_pr_val,
-            "psy_pr_lab": psy_pr_lab,
-            "psy_pr_val": psy_pr_val,
+            "psy_pr_lab": None,
+            "psy_pr_val": None,
             "pr_lab": pr_lab,
             "pr_val": pr_val.tolist(),
         }
         config = Config(**config_dic, config_dic=config_dic)
 
         df = run(config=config, with_tqdm=False)
-        f_name = (
-            f"{learner_md.__name__}-"
-            f"{psy_md.__name__}-"
-            f"{teacher_md.__name__}-{i}.csv"
-        )
-        os.makedirs(config.data_folder, exist_ok=True)
-        df.to_csv(os.path.join(config.data_folder, f_name))
+        df.to_csv(os.path.join(raw_data_folder, f"{i}.csv"))
 
 
-def preprocess_data(data_folder, preprocess_data_path):
-
-    assert os.path.exists(data_folder)
+def preprocess_data(data_folder, preprocess_data_file):
 
     files = [
         p.path
-        for p in os.scandir("data/local/explo_leitner")
+        for p in os.scandir(data_folder)
         if os.path.splitext(p.path)[1] == ".csv"
     ]
     file_count = len(files)
@@ -152,73 +118,84 @@ def preprocess_data(data_folder, preprocess_data_path):
     row_list = []
 
     for i, p in tqdm(enumerate(files), total=file_count):
-        filename, file_extension = os.path.splitext(p)
-        if file_extension != ".csv":
-            print(f"ignore {p}")
-            continue
 
-        try:
-            df = pd.read_csv(p, index_col=[0])
+        df = pd.read_csv(p, index_col=[0])
 
-            last_iter = max(df["iter"])
-            is_last_iter = df["iter"] == last_iter
+        last_iter = max(df["iter"])
+        is_last_iter = df["iter"] == last_iter
 
-            n_learnt = df[is_last_iter]["n_learnt"].iloc[0]
+        n_learnt = df[is_last_iter]["n_learnt"].iloc[0]
 
-            is_last_ss = df["ss_idx"] == max(df["ss_idx"]) - 1
+        is_last_ss = df["ss_idx"] == max(df["ss_idx"]) - 1
 
-            ss_n_iter = df["ss_n_iter"][0] - 1
+        ss_n_iter = df["ss_n_iter"][0] - 1
 
-            is_last_iter_ss = df["ss_iter"] == ss_n_iter
+        is_last_iter_ss = df["ss_iter"] == ss_n_iter
 
-            n_learnt_end_ss = df[is_last_ss & is_last_iter_ss]["n_learnt"].iloc[0]
+        n_learnt_end_ss = df[is_last_ss & is_last_iter_ss]["n_learnt"].iloc[0]
 
-            md_learner = df["md_learner"].iloc[0]
-            md_teacher = df["md_teacher"].iloc[0]
-            md_psy = df["md_psy"].iloc[0]
-            pr_lab = df["pr_lab"].iloc[0]
-            pr_val = df["pr_val"].iloc[0]
-            pr_lab = eval(pr_lab)
-            pr_val = eval(pr_val)
-            row = {
-                "agent": i,
-                "md_learner": md_learner,
-                "md_psy": md_psy,
-                "md_teacher": md_teacher,
-                "n_learnt": n_learnt,
-                "n_learnt_end_ss": n_learnt_end_ss,
-            }
+        md_learner = df["md_learner"].iloc[0]
+        md_teacher = df["md_teacher"].iloc[0]
+        md_psy = df["md_psy"].iloc[0]
+        pr_lab = df["pr_lab"].iloc[0]
+        pr_val = df["pr_val"].iloc[0]
+        pr_lab = eval(pr_lab)
+        pr_val = eval(pr_val)
+        row = {
+            "agent": i,
+            "md_learner": md_learner,
+            "md_psy": md_psy,
+            "md_teacher": md_teacher,
+            "n_learnt": n_learnt,
+            "n_learnt_end_ss": n_learnt_end_ss}
 
-            for k, v in zip(pr_lab, pr_val):
-                row.update({k: v})
+        for k, v in zip(pr_lab, pr_val):
+            row.update({k: v})
 
-            row_list.append(row)
-
-        except Exception as e:
-            print(p)
-            raise e
+        row_list.append(row)
 
     df = pd.DataFrame(row_list)
-    df.to_csv(preprocess_data_path)
+    df.to_csv(preprocess_data_file)
     return df
 
 
 def main():
-    file_name = "omni-spec-grid100"
-    raw_data_path = os.path.join("data", "triton", file_name)
-    preprocess_data_path = os.path.join("data", "local", file_name)
+
+    bounds = [[0.0000001, 0.025], [0.0001, 0.9999]]
+    methods = [np.geomspace, np.linspace]
+    # bounds = [[0.0000001, 0.1], [0.0001, 0.9999]]
+    # bounds = [[0.0000001, 0.00005], [0.0001, 0.9999]]
+
+    trial_name = str(bounds).replace("[", "]").replace(" ", "_")\
+        .replace(",", "").replace(".", "-").replace("]", "") + \
+        str(methods).replace("[", "").replace("]", "").replace(" ", "_")\
+            .replace("np", "")
+    raw_data_folder = os.path.join("data", "leitner_explo", trial_name)
+    os.makedirs(raw_data_folder, exist_ok=True)
+    preprocess_folder = os.path.join("data",
+                                     "preprocess",
+                                     "explo_leitner")
+    os.makedirs(preprocess_folder, exist_ok=True)
+    preprocess_data_file = os.path.join(preprocess_folder,
+                                        f'{trial_name}.csv')
 
     force = False
 
-    if not os.path.exists(raw_data_path) or force:
-        produce_data(data_folder=raw_data_path)
+    if not os.path.exists(raw_data_folder) \
+            or not [
+        p
+        for p in os.scandir(raw_data_folder)
+        if os.path.splitext(p.path)[1] == ".csv"
+            ] or force:
+        produce_data(raw_data_folder=raw_data_folder, bounds=bounds,
+                     methods=methods)
 
-    if not os.path.exists(preprocess_data_path) or force:
+    if not os.path.exists(preprocess_data_file) or force:
         df = preprocess_data(
-            data_folder=raw_data_path, preprocess_data_path=preprocess_data_path
-        )
+            data_folder=raw_data_folder,
+            preprocess_data_file=preprocess_data_file)
     else:
-        df = pd.read_csv(preprocess_data_path, index_col=[0])
+        df = pd.read_csv(preprocess_data_file, index_col=[0])
 
     print("Plotting heatmap...")
 
@@ -229,8 +206,10 @@ def main():
     ax = sns.heatmap(data=data, cmap="viridis", cbar_kws={"label": "N learnt"})
     ax.invert_yaxis()
     plt.tight_layout()
-    plt.show()
-    plt.savefig(f"fig/explo-leitner-{file_name}.pdf")
+    fig_folder = os.path.join("fig", "explo_leitner")
+    os.makedirs(fig_folder, exist_ok=True)
+    plt.savefig(os.path.join(fig_folder, f"explo-leitner-{trial_name}.png"),
+                dpi=300)
 
     print("Done!")
 

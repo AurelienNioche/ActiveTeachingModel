@@ -9,6 +9,8 @@ from model.teacher.sampling import Sampling
 from model.teacher.recursive import Recursive
 from model.teacher.recursive_threshold import RecursiveThreshold
 
+from model.psychologist.psychologist_grid import PsychologistGrid
+
 from model.learner.walsh2018 import Walsh2018
 from model.learner.exponential_n_delta import ExponentialNDelta
 # from model.learner.act_r2008 import ActR2008
@@ -72,14 +74,15 @@ def run(config, with_tqdm=False):
         raise ValueError
 
     if omniscient or is_leitner:
-        psy = psy_cls(
+        psy = PsychologistGrid(
             n_item=n_item,
             is_item_specific=is_item_specific,
             learner=learner,
-            bounds=bounds,
             cst_time=cst_time,
             true_param=pr,
-            **psy_pr)
+            bounds=None,
+            grid_size=None,
+            grid_methods=None)
     else:
         psy = psy_cls(
             n_item=n_item,

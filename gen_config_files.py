@@ -216,7 +216,7 @@ def main() -> None:
                 )
                 n_agent = len(grid)
 
-            ts = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S_%f")
+            # ts = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S_%f")
 
             for agent in range(n_agent):
 
@@ -248,14 +248,16 @@ def main() -> None:
                     psy_md_str = PSY_INV[psy_md]
                     teacher_md_str = TEACHER_INV[teacher_md]
 
+                    spec_str = 'spec' if is_item_specific else 'Nspec'
+                    omni_str = 'omni' if omni else 'Nomni'
+
                     data_folder_run = os.path.join(
                         data_folder,
-                        f"{'spec' if is_item_specific else 'Nspec'}-"
-                        f"{'omni' if omni else 'Nomni'}-"
+                        f"{spec_str}-"
+                        f"{omni_str}",
                         f"{learner_md_str}-"
                         f"{psy_md_str}-"
-                        f"{teacher_md_str}",
-                    )
+                        f"{teacher_md_str}")
 
                     json_content = {
                         "seed": seed + agent,
@@ -284,11 +286,11 @@ def main() -> None:
 
                     f_name = os.path.join(
                         paths.CONFIG_CLUSTER_DIR,
-                        f"{job_number}-{ts}-"
+                        f"{job_number}-"
                         f"{learner_md_str}-"
                         f"{psy_md_str}-"
                         f"{teacher_md_str}-"
-                        f"{agent}.json",
+                        f"a{agent}.json",
                     )
 
                     with open(f_name, "w") as f:

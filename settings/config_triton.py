@@ -76,7 +76,8 @@ class Config:
 
         self.teacher_cls = TEACHER[md_teacher]
         self.learner_cls = LEARNER[md_learner]
-        self.psy_cls = PSYCHOLOGIST[md_psy]
+        self.psy_cls = PSYCHOLOGIST[md_psy] \
+            if md_psy is not None else None
 
         self.bounds = np.asarray(bounds)
 
@@ -94,7 +95,7 @@ class Config:
         self.learnt_threshold = learnt_threshold
         self.cst_time = cst_time
 
-        if len(psy_pr_lab):
+        if psy_pr_lab is not None and len(psy_pr_lab):
             self.psy_pr = {k: v
                            for k, v in zip(psy_pr_lab, psy_pr_val)}
         else:

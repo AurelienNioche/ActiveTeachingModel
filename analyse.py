@@ -62,7 +62,7 @@ def preprocess_cond(cond_data_folder, preprocess_data_file):
 
 def main(force=False, ):
 
-    trial_name = "spec-average-estimate-lin"
+    trial_name = "long-log"
 
     root_data_folder = os.path.join("data", "triton", trial_name)
     assert os.path.exists(root_data_folder)

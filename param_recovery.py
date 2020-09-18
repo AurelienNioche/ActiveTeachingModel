@@ -64,7 +64,8 @@ def log_lik(
 
         log_p_item = np.zeros(n)
         # !!! To adapt for xp
-        log_p_item[0] = -np.inf  # whatever the model, p=0
+        log_p_item[0] = 0
+        # -np.inf  # whatever the model, p=0
         # !!! To adapt for xp
         for i in range(1, n):
             delta_rep = rep.iloc[i] - rep.iloc[i - 1]
@@ -130,23 +131,29 @@ def main(f_results: str) -> (pd.DataFrame, pd.DataFrame):
     eps = np.finfo(np.float).eps
 
     # Grid
-    bounds = np.array([[0.0000001, 100.0], [0.0001, 0.99]])
+    bounds = np.array([[0.0000001, 0.025], [0.0001, 0.9999]])
     grid_size = 20
     methods = np.array([np.geomspace, np.linspace])  # Use log scale for alpha
     grid = cp_grid_param_loglin(grid_size, bounds, methods)
     grid = pd.DataFrame(grid, columns=("alpha", "beta"))
 
     # Log-likelihood
-    results_df = pd.read_csv(os.path.join(paths.DATA_DIR, f_results), index_col=[0])
+    results_df = pd.read_csv(f_results, index_col=[0])
     results_df["ts_display"] = pd.to_datetime(
         results_df["ts_display"]
     )  # str to datetime
     results_df["ts_reply"] = pd.to_datetime(results_df["ts_reply"])  # str to datetime
-    likelihoods = {
-        user: get_all_log_lik(user_df, grid, eps)
-        for user, user_df in results_df.groupby("user")
-        if "carlos2" not in user
-    }
+
+    likelihoods = {}
+
+    for user, user_df in results_df.groupby("user"):
+
+        if '@test' not in user and user_df.n_session_done.iloc[0] == 14:
+            print("user", user)
+            print(user_df.head())
+
+            lls = get_all_log_lik(user_df, grid, eps)
+            likelihoods[user] = lls
 
     # Plot
     users = list(likelihoods.keys())
@@ -157,8 +164,8 @@ def main(f_results: str) -> (pd.DataFrame, pd.DataFrame):
 
 
 if __name__ == "__main__":
-    loglikes, grid_ = main("user/data_full.csv")
-
+    # loglikes, grid_ = main("user/data_full.csv")
+    main("data_full.csv")
 
 # def enclose_log_lik_df(df, eps):
 #     def log_lik_closure(param_pair):
