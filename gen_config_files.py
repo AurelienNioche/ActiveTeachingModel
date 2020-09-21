@@ -215,8 +215,8 @@ def main() -> None:
         gen_methods = [np.linspace, np.linspace]
 
         grid = cp_grid_param(
-            grid_size=gen_grid_size, methods=gen_methods, bounds=gen_bounds
-        )
+            grid_size=gen_grid_size, methods=gen_methods, bounds=gen_bounds)
+
         n_agent = len(grid)
     else:
         raise Exception
