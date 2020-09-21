@@ -18,7 +18,7 @@ def plot_param_space(grid: pd.DataFrame,
     plt.close()
     values = pd.Series(values, name="values")
     data = pd.concat((grid, values), axis=1)
-    print("data", data.head())
+
     try:  # Duplicated entries can appear with rounding
         data = data.round(4).pivot("alpha", "beta", "values")
     except:
@@ -27,7 +27,7 @@ def plot_param_space(grid: pd.DataFrame,
     ax.invert_yaxis()
     plt.tight_layout()
     plt.savefig(os.path.join(FIG_FOLDER,
-                             f"{f_name}.pdf"))
+                             f"{f_name}.png"), dpi=300)
     print("Done!")
 
 
@@ -37,30 +37,17 @@ def main():
     ll_df = pd.read_csv("lls.csv", index_col=[0])
 
     lls = np.sum(ll_df.values, axis=1)
-    # p = lls/np.sum(lls)
-
-    # grid = grid_df.values
-    # idx = np.random.choice(np.arange(len(grid)), p=p)
-    # print(grid[idx])
-
-    # print("grid", grid_df.head())
-    # print("p", p[:4])
 
     plot_param_space(grid=grid_df, values=lls, f_name="lls")
 
     p = (lls-min(lls))/(max(lls)-min(lls))
     p /= np.sum(p)
-    # p = lls/lls.min()
-    # p /= p.sum()
-    print("p", p)
 
-    grid = grid_df.values
-    idx = np.random.choice(np.arange(len(grid)), p=p)
-    print(grid[idx])
+    # grid = grid_df.values
+    # idx = np.random.choice(np.arange(len(grid)), p=p)
+    # print(grid[idx])
 
     plot_param_space(grid=grid_df, values=p, f_name="p")
-
-
 
 
 if __name__ == "__main__":

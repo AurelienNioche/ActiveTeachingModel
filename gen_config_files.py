@@ -156,7 +156,7 @@ def main() -> None:
 
     # -------------     SET PARAM HERE      ------------------------ #
 
-    gen_method = "p_depending_on_lls"
+    gen_method = "p_depending_on_best_fit"
 
     learner_md = ExponentialNDelta
     psy_md = PsychologistGrid
@@ -209,6 +209,12 @@ def main() -> None:
 
         grid = grid_df.values
 
+    elif gen_method == 'p_depending_on_best_fit':
+
+        grid = pd.read_csv("best_param.csv", index_col=[0]).values
+        n_agent = len(grid)
+        print(n_agent)
+
     elif gen_method == 'use_grid':
 
         gen_grid_size = 20
@@ -255,6 +261,21 @@ def main() -> None:
                         param_spec = np.zeros((n_item, len(bounds)))
                         for i, b in enumerate(bounds):
 
+                            v = param[i]
+                            param_spec[:, i] = v
+
+                        param = param_spec
+
+                    pr_val = param.tolist()
+
+                elif gen_method == 'p_depending_on_best_fit':
+
+                    param = grid[agent]
+
+                    if is_item_specific:
+
+                        param_spec = np.zeros((n_item, len(bounds)))
+                        for i, b in enumerate(bounds):
                             v = param[i]
                             param_spec[:, i] = v
 

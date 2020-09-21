@@ -64,7 +64,7 @@ def main(
     force=False,
 ):
 
-    trial_name = "long-log"
+    trial_name = "lls"
 
     root_data_folder = os.path.join("data", "triton", trial_name)
     assert os.path.exists(root_data_folder)
