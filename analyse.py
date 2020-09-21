@@ -37,8 +37,8 @@ def row_for_single_run(csv_path):
 def preprocess_cond(cond_data_folder, preprocess_data_file):
 
     teach_f = [
-        p for p in os.scandir(cond_data_folder.path)
-        if not p.name.startswith(".")]
+        p for p in os.scandir(cond_data_folder.path) if not p.name.startswith(".")
+    ]
 
     row_list = []
 
@@ -60,7 +60,9 @@ def preprocess_cond(cond_data_folder, preprocess_data_file):
     return df
 
 
-def main(force=False, ):
+def main(
+    force=False,
+):
 
     trial_name = "long-log"
 
@@ -73,11 +75,10 @@ def main(force=False, ):
     preprocess_folder = os.path.join("data", "preprocessed", trial_name)
     os.makedirs(preprocess_folder, exist_ok=True)
 
-    cond_f = [p for p in os.scandir(root_data_folder)
-              if not p.name.startswith(".")]
+    cond_f = [p for p in os.scandir(root_data_folder) if not p.name.startswith(".")]
     # cond_f: condition_dir
 
-    for i, cp in enumerate(cond_f):
+    for _, cp in enumerate(cond_f):
 
         # cp: cond_path
         print("cond data folder:", cp.name)
@@ -86,12 +87,11 @@ def main(force=False, ):
         # pp: preproc_path
 
         if not os.path.exists(pp_data_file) or force:
-            df = preprocess_cond(cond_data_folder=cp,
-                                 preprocess_data_file=pp_data_file)
+            df = preprocess_cond(cond_data_folder=cp, preprocess_data_file=pp_data_file)
         else:
             df = pd.read_csv(pp_data_file, index_col=[0])
 
-        for v in ("Items learnt one day later",): # "Items learnt end last session"):
+        for v in ("Items learnt one day later",):  # "Items learnt end last session"):
 
             lab = v.replace("Items learnt", "").replace(" ", "-")
 
