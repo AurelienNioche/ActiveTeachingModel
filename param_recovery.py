@@ -3,6 +3,8 @@ User parameter recovery
 """
 
 import os
+import sys
+
 from typing import Iterable
 
 import matplotlib.pyplot as plt
@@ -11,7 +13,9 @@ import pandas as pd
 import seaborn as sns
 from tqdm import tqdm
 
-import settings.paths as paths
+
+FIG_FOLDER = os.path.join("fig", "param_recovery")
+os.makedirs(FIG_FOLDER, exist_ok=True)
 
 
 def cartesian_product(*arrays):
@@ -44,11 +48,11 @@ def cp_grid_param_loglin(grid_size, bounds, methods):
 
 def log_lik(
     param: Iterable,
-    hist: Iterable,
-    success: Iterable,
-    timestamp: Iterable,
-    cst_time: float,
-    eps: float,
+    hist: np.ndarray,
+    success: np.ndarray,
+    timestamp: np.ndarray,
+    cst_time=1.0,
+    eps=np.finfo(np.float).eps,
 ):
     """Compute log-likelihood for one param bounds pair"""
 
@@ -56,6 +60,7 @@ def log_lik(
 
     log_p_hist = np.zeros(len(hist))
 
+    # For each item
     for item in np.unique(hist):
 
         is_item = hist == item
@@ -68,46 +73,43 @@ def log_lik(
         # -np.inf  # whatever the model, p=0
         # !!! To adapt for xp
         for i in range(1, n):
-            delta_rep = rep.iloc[i] - rep.iloc[i - 1]
+            delta_rep = rep[i] - rep[i - 1]
             fr = a * (1 - b) ** (i - 1)
             delta_rep *= cst_time
             log_p_item[i] = -fr * delta_rep
 
         log_p_hist[is_item] = log_p_item
     p_hist = np.exp(log_p_hist)
-    failure = np.invert(success.astype(bool))
-    p_hist[failure.values] = 1 - p_hist[failure.values]
+    failure = np.invert(success)
+    p_hist[failure] = 1 - p_hist[failure]
     _log_lik = np.log(p_hist + eps)
     sum_ll = _log_lik.sum()
     return sum_ll
 
 
-def get_all_log_lik(user_df: pd.DataFrame, grid_df: pd.DataFrame, eps: float) -> list:
+def get_all_log_lik(user_df: pd.DataFrame,
+                    grid_df: pd.DataFrame) -> list:
     """Compute log-likelihood for all grid values"""
 
-    print("Computing log-likelihood for all param pairs...")
     sums_ll = []
+
+    # Convert timestamps into seconds
     beginning_history = pd.Timestamp("1970-01-01", tz="UTC")
-    # 5s is good
-    one_s = pd.Timedelta("1s")
-    for _, param_pair in tqdm(grid_df.iterrows()):
+    ts = (user_df["ts_reply"] - beginning_history).dt.total_seconds().values
+
+    for _, param_pair in tqdm(grid_df.iterrows(), file=sys.stdout):
         sums_ll.append(
             log_lik(
                 param_pair,
-                user_df["item"],
-                user_df["success"],
-                (user_df["ts_reply"] - beginning_history)
-                // one_s,  # To seconds as in pandas docs
-                1,  # 1 / (5 * 60 ** 2),
-                eps,
-            )
-        )
-    print("Done!")
+                user_df["item"].values,
+                user_df["success"].values.astype(bool),
+                ts))
 
     return sums_ll
 
 
-def plot_param_space(user_name: str, grid: pd.DataFrame, log_liks: np.ndarray) -> None:
+def plot_param_space(user_name: str, grid: pd.DataFrame,
+                     log_liks: np.ndarray) -> None:
     """Heatmap of the alpha-beta parameter space"""
 
     print("Plotting heatmap...")
@@ -121,21 +123,20 @@ def plot_param_space(user_name: str, grid: pd.DataFrame, log_liks: np.ndarray) -
     ax = sns.heatmap(data=data, cmap="viridis")
     ax.invert_yaxis()
     plt.tight_layout()
-    plt.savefig(os.path.join("fig", f"param_grid_{user_name}.pdf"))
+    plt.savefig(os.path.join(FIG_FOLDER,
+                             f"{user_name}.pdf"))
     print("Done!")
 
 
 def main(f_results: str) -> (pd.DataFrame, pd.DataFrame):
     """Get grid values, log-likelihood, and plot heatmap"""
 
-    eps = np.finfo(np.float).eps
-
     # Grid
     bounds = np.array([[0.0000001, 0.025], [0.0001, 0.9999]])
     grid_size = 20
     methods = np.array([np.geomspace, np.linspace])  # Use log scale for alpha
     grid = cp_grid_param_loglin(grid_size, bounds, methods)
-    grid = pd.DataFrame(grid, columns=("alpha", "beta"))
+    grid_df = pd.DataFrame(grid, columns=("alpha", "beta"))
 
     # Log-likelihood
     results_df = pd.read_csv(f_results, index_col=[0])
@@ -150,59 +151,23 @@ def main(f_results: str) -> (pd.DataFrame, pd.DataFrame):
 
         if '@test' not in user and user_df.n_session_done.iloc[0] == 14:
             print("user", user)
-            print(user_df.head())
 
-            lls = get_all_log_lik(user_df, grid, eps)
+            lls = get_all_log_lik(user_df, grid_df)
             likelihoods[user] = lls
+
+    ll_df = pd.DataFrame(likelihoods)
+    ll_df.to_csv("lls.csv")
+
+    grid_df.to_csv("grid.csv")
 
     # Plot
     users = list(likelihoods.keys())
     for user in users:
-        plot_param_space(user, grid, likelihoods[user])
+        plot_param_space(user, grid_df, likelihoods[user])
 
-    return likelihoods, grid
+    return likelihoods, grid_df
 
 
 if __name__ == "__main__":
-    # loglikes, grid_ = main("user/data_full.csv")
     main("data_full.csv")
 
-# def enclose_log_lik_df(df, eps):
-#     def log_lik_closure(param_pair):
-#         return log_lik(param_pair, df["item"], df["success"], df["ts_reply"], np.ones_like(df["item"]), eps)
-#     return log_lik_closure
-# log_lik_cl = enclose_log_lik_df(df_, EPS)
-#
-# def cp_grid_param(grid_size, bounds):
-#     diff = bounds[:, 1] - bounds[:, 0] > 0
-#     not_diff = np.invert(diff)
-#
-#     values = np.atleast_2d([np.linspace(*b, num=grid_size) for b in bounds[diff]])
-#     var = cartesian_product(*values)
-#     grid = np.zeros((max(1, len(var)), len(bounds)))
-#     if np.sum(diff):
-#         grid[:, diff] = var
-#     if np.sum(not_diff):
-#         grid[:, not_diff] = bounds[not_diff, 0]
-#
-#     return grid
-#%%
-# plt.close()
-# user_name = "carlos@test.com"
-#
-# beginning_history = pd.Timestamp("1970-01-01", tz="UTC")
-# one_s = pd.Timedelta("1s")
-#
-# results_df = pd.read_csv(os.path.join(paths.DATA_DIR, "results.csv"), index_col=[0])
-# results_df = results_df.query("user == @user_name")
-# results_df["ts_reply"] = pd.to_datetime(results_df["ts_reply"])
-# results_df["ts_reply"] = (results_df["ts_reply"] - beginning_history) // one_s
-# sessions_arrs = []
-# for n_session, sub_df in results_df.groupby("session"):
-#     sessions_arrs.append(sub_df["ts_reply"].diff().values)
-# # sessions_arr = np.hstack(sessions_arrs)
-# sessions_arr = pd.Series(np.hstack(sessions_arrs), name="ts_reply")
-# sns.distplot(sessions_arr[sessions_arr < 50], bins=100, kde=False)
-# # plt.hist(sessions_arr[sessions_arr < 50], bins=30)
-# plt.savefig(os.path.join("fig", f"histo-reply-{user_name}.pdf"))
-# print(sessions_arr.value_counts())

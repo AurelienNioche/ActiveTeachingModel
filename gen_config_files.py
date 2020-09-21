@@ -9,6 +9,7 @@ import numpy as np
 from numpy.random import default_rng
 # from scipy.stats import loguniform
 from tqdm import tqdm
+import pandas as pd
 
 import settings.paths as paths
 from model.learner.exponential_n_delta import ExponentialNDelta
@@ -153,80 +154,116 @@ def main() -> None:
     data_folder = select_data_folder()
     print("Generating cluster config files...")
 
-    pbar = tqdm()
+    # -------------     SET PARAM HERE      ------------------------ #
 
+    gen_method = "p_depending_on_lls"
+
+    learner_md = ExponentialNDelta
+    psy_md = PsychologistGrid
+
+    teacher_models = (Leitner, Threshold, Recursive)
+
+    ss_n_iter = 100
+    time_between_ss = 24 * 60 ** 2
+    n_ss = 12
+    learnt_threshold = 0.9
+    time_per_iter = 4
+
+    n_item = 500  # 500 * n_ss // 6
+
+    sampling_cst = {"n_sample": 10000}
+
+    leitner_cst = {"delay_factor": 2, "delay_min": time_per_iter}
+
+    pr_lab = ["alpha", "beta"]
+    ### Good bounds in-silico
+    # bounds = [[0.0000001, 0.00005], [0.0001, 0.9999]]
+    ### With prior in silico
+    bounds = [[0.0000001, 0.025], [0.0001, 0.9999]]
+    ### Bounds for user experiment
+    # bounds = [[0.0000001, 0.1], [0.0001, 0.9999]]
+    grid_methods = [PsychologistGrid.LOG, PsychologistGrid.LIN]
+    grid_size = 100  # 20
+    # gen_methods = [np.linspace, np.linspace]
+    # gen_bounds = [[0.0000001, 0.00005], [0.0001, 0.9999]]
+    gen_bounds = [[0.00000273, 0.00005], [0.42106842, 0.9999]]
+    cst_time = 1
+
+    seed = 123
+    np.random.seed(seed)
+
+    if gen_method == 'random':
+
+        n_agent = 100
+
+    elif gen_method == 'p_depending_on_lls':
+
+        n_agent = 100
+
+        grid_df = pd.read_csv("grid.csv", index_col=[0])
+        ll_df = pd.read_csv("lls.csv", index_col=[0])
+
+        lls = np.sum(ll_df.values, axis=1)
+        p = (lls - min(lls)) / (max(lls) - min(lls))
+        p /= np.sum(p)
+
+        grid = grid_df.values
+
+    elif gen_method == 'use_grid':
+
+        gen_grid_size = 20
+        gen_methods = [np.linspace, np.linspace]
+
+        grid = cp_grid_param(
+            grid_size=gen_grid_size, methods=gen_methods, bounds=gen_bounds
+        )
+        n_agent = len(grid)
+    else:
+        raise Exception
+
+    # ------------------  END OF PARAMETER SETTING -------------------- #
+
+    # ts = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S_%f")
+
+    pbar = tqdm()
     job_number = 0
 
     for omni in (False, True):
         for is_item_specific in (False, True):
 
-            # -------------     SET PARAM HERE      ---------------------------- #
-
-            use_grid = False
-
-            print(f"omni: {omni}, spec: {is_item_specific}, use grid: {use_grid}")
-
-            learner_md = ExponentialNDelta
-            psy_md = PsychologistGrid
-
-            teacher_models = (Leitner, Threshold, Recursive)
-
-            ss_n_iter = 100
-            time_between_ss = 24 * 60 ** 2
-            n_ss = 12
-            learnt_threshold = 0.9
-            time_per_iter = 4
-
-            n_item = 500   # 500 * n_ss // 6
-
-            sampling_cst = {"n_sample": 10000}
-
-            leitner_cst = {"delay_factor": 2, "delay_min": time_per_iter}
-
-            pr_lab = ["alpha", "beta"]
-            ### Good bounds in-silico
-            # bounds = [[0.0000001, 0.00005], [0.0001, 0.9999]]
-            ### With prior in silico
-            bounds = [[0.0000001, 0.025], [0.0001, 0.9999]]
-            ### Bounds for user experiment
-            # bounds = [[0.0000001, 0.1], [0.0001, 0.9999]]
-            grid_methods = [PsychologistGrid.LOG, PsychologistGrid.LIN]
-            grid_size = 100  # 20
-            # gen_methods = [np.linspace, np.linspace]
-            # gen_bounds = [[0.0000001, 0.00005], [0.0001, 0.9999]]
-            gen_bounds = [[0.00000273, 0.00005], [0.42106842, 0.9999]]
-            cst_time = 1
-
-            seed = 123
-            np.random.seed(seed)
-
-            if not use_grid:
-                n_agent = 100
-
-            else:
-
-                gen_grid_size = 20
-                gen_methods = [np.linspace, np.linspace]
-
-                # ------------------  END OF PARAMETER SETTING -------------------- #
-
-                assert not is_item_specific
-                grid = cp_grid_param(
-                    grid_size=gen_grid_size, methods=gen_methods, bounds=gen_bounds
-                )
-                n_agent = len(grid)
-
-            # ts = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S_%f")
-
             for agent in range(n_agent):
 
-                if use_grid:
+                if gen_method == 'use_grid':
+
                     pr_val = grid[agent]
-                else:
+                    assert not is_item_specific
+
+                elif gen_method == 'random':
+
                     pr_val = generate_param(
                         bounds=gen_bounds,
                         is_item_specific=is_item_specific,
                         n_item=n_item)
+
+                elif gen_method == 'p_depending_on_lls':
+
+                    idx = np.random.choice(np.arange(len(grid)), p=p)
+                    param = grid[idx]
+
+                    if is_item_specific:
+
+                        param_spec = np.zeros((n_item, len(bounds)))
+                        for i, b in enumerate(bounds):
+
+                            v = param[i]
+                            param_spec[:, i] = v
+
+                        param = param_spec
+
+                    pr_val = param.tolist()
+
+                else:
+                    raise ValueError
 
                 for teacher_md in teacher_models:
 
