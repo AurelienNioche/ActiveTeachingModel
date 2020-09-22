@@ -176,9 +176,6 @@ triton_out/
 /._.DS_Store
 credentials.py
 
-r.csv
-wonderful.pdf
-wonderful_violin.pdf
 /data_summary.csv
 /human_box.png
 /human_scatter.png
