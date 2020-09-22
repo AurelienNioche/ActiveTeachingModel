@@ -157,19 +157,6 @@ def analyse(f_results):
     lls_df.to_csv(os.path.join(BKP_FOLDER, "lls_item_spec.csv"))
     grid_df.to_csv(os.path.join(BKP_FOLDER, "grid.csv"))
 
-    return lls_df, grid_df
-
-
-def main(f_results: str) -> (pd.DataFrame, pd.DataFrame):
-    """Get grid values, log-likelihood, and plot heatmap"""
-
-    if not os.path.exists("lls_item_spec.csv"):
-        lls_df, grid_df = analyse(f_results=f_results)
-
-    else:
-        lls_df = pd.read_csv(os.path.join(BKP_FOLDER, "lls_item_spec.csv"))
-        grid_df = pd.read_csv(os.path.join(BKP_FOLDER, "grid.csv"))
-
     row_list = []
     for (user, item), df in lls_df.groupby(["user", "item"]):
         best_idx = np.argmax(df["lls"].values)
@@ -188,18 +175,52 @@ def main(f_results: str) -> (pd.DataFrame, pd.DataFrame):
     row_list = []
 
     for user, df in lls_df.groupby("user"):
+
+        lls = []
+        alpha_list = []
+        beta_list = []
+
         for (alpha, beta), df_pair in df.groupby(['alpha', 'beta']):
-            best_idx = np.argmax(df_pair['lls'].sum().values)
-            best_alpha_user.append(gp['alpha'].unique()[best_idx])
-            best_beta_user.append(gp["beta"].unique()[best_idx])
+            lls.append(df_pair['lls'].values.sum())
+            alpha_list.append(alpha)
+            beta_list.append(beta)
+
+        best_idx = np.argmax(lls)
+        best_alpha = alpha_list[best_idx]
+        best_beta = beta_list[best_idx]
+        row_list.append({
+            "user": user,
+            "alpha": best_alpha,
+            "beta": best_beta
+        })
+
+    bp_user = pd.DataFrame(row_list)
+    bp_user.to_csv(os.path.join(BKP_FOLDER, "bp_user.csv"))
+
+    return lls_df, grid_df, bp_item_spec_df, bp_user
+
+
+def main(f_results: str) -> (pd.DataFrame, pd.DataFrame):
+    """Get grid values, log-likelihood, and plot heatmap"""
+
+    if not os.path.exists("lls_item_spec.csv"):
+        lls_df, grid_df, bp_item_spec_df, bp_user = \
+            analyse(f_results=f_results)
+
+    else:
+        grid_df = pd.read_csv(os.path.join(BKP_FOLDER, "grid.csv"))
+        bp_user = pd.read_csv(os.path.join(BKP_FOLDER, "bp_user.csv"))
+        bp_item_spec_df = pd.read_csv(os.path.join(BKP_FOLDER,
+                                                   "bp_item_spec.csv"))
 
     fig, ax = plt.subplots()
 
     sns.scatterplot(data=bp_item_spec_df,
                     x="beta",
                     y="alpha", alpha=0.01, color="C0", ax=ax)
-    # ax.scatter(best_beta_user, best_alpha_user, color="red")
-    #
+
+    ax.scatter(data=bp_user, x="beta", y="alpha",  color="red")
+
     ax.set_xlabel("beta")
     ax.set_yscale('log')
     ax.set_ylabel("alpha")
