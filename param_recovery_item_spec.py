@@ -11,9 +11,14 @@ import pandas as pd
 import seaborn as sns
 from tqdm import tqdm
 
+SCRIPT_NAME = os.path.splitext(os.path.basename(__file__))[0]
 
-FIG_FOLDER = os.path.join("fig", "param_recovery_item_spec")
+
+FIG_FOLDER = os.path.join("fig", SCRIPT_NAME)
 os.makedirs(FIG_FOLDER, exist_ok=True)
+
+BKP_FOLDER = os.path.join("bkp", SCRIPT_NAME)
+os.makedirs(BKP_FOLDER, exist_ok=True)
 
 
 EPS = np.finfo(np.float).eps
@@ -75,8 +80,6 @@ def get_all_log_lik(results_df: pd.DataFrame,
 
             a, b = param_pair
 
-            log_p_hist = np.zeros(len(hist))
-
             # For each item
             for item in np.unique(hist):
 
@@ -107,8 +110,7 @@ def get_all_log_lik(results_df: pd.DataFrame,
                     "item": item,
                     "idx_pair": idx_pair,
                     "lls": lls,
-                    "user": user,
-                    "user_item": f"{user}_{item}"})
+                    "user": user})
 
     return pd.DataFrame(row_list)
 
@@ -152,8 +154,8 @@ def analyse(f_results):
     lls_df = get_all_log_lik(results_df=results_df,
                              grid_df=grid_df)
 
-    lls_df.to_csv("lls_item_spec.csv")
-    grid_df.to_csv("grid.csv")
+    lls_df.to_csv(os.path.join(BKP_FOLDER, "lls_item_spec.csv"))
+    grid_df.to_csv(os.path.join(BKP_FOLDER, "grid.csv"))
 
     return lls_df, grid_df
 
@@ -165,37 +167,44 @@ def main(f_results: str) -> (pd.DataFrame, pd.DataFrame):
         lls_df, grid_df = analyse(f_results=f_results)
 
     else:
-        lls_df = pd.read_csv("lls_item_spec.csv")
-        grid_df = pd.read_csv("grid.csv")
+        lls_df = pd.read_csv(os.path.join(BKP_FOLDER, "lls_item_spec.csv"))
+        grid_df = pd.read_csv(os.path.join(BKP_FOLDER, "grid.csv"))
 
-    # Plot
-    best_alpha = []
-    best_beta = []
-    for _, df in lls_df.groupby("user_item"):
+    row_list = []
+    for (user, item), df in lls_df.groupby(["user", "item"]):
         best_idx = np.argmax(df["lls"].values)
-        best_alpha.append(df["alpha"].values[best_idx])
-        best_beta.append(df["beta"].values[best_idx])
+        alpha = df["alpha"].values[best_idx]
+        beta = df["beta"].values[best_idx]
+        row_list.append({
+            "user": user,
+            "item": item,
+            "alpha": alpha,
+            "beta": beta
+        })
 
-    best_alpha_user = []
-    best_beta_user = []
+    bp_item_spec_df = pd.DataFrame(row_list)
+    bp_item_spec_df.to_csv(os.path.join(BKP_FOLDER, "bp_item_spec.csv"))
 
-    for _, df in lls_df.groupby("user"):
-        gp = df.groupby('idx_pair')
-        best_idx = np.argmax(gp['lls'].sum().values)
-        best_alpha_user.append(gp['alpha'].unique()[best_idx])
-        best_beta_user.append(gp["beta"].unique()[best_idx])
+    row_list = []
+
+    for user, df in lls_df.groupby("user"):
+        for (alpha, beta), df_pair in df.groupby(['alpha', 'beta']):
+            best_idx = np.argmax(df_pair['lls'].sum().values)
+            best_alpha_user.append(gp['alpha'].unique()[best_idx])
+            best_beta_user.append(gp["beta"].unique()[best_idx])
 
     fig, ax = plt.subplots()
 
-    ax.scatter(best_beta, best_alpha, alpha=0.1, color="C0")
-    ax.scatter(best_beta_user, best_alpha_user, color="red")
-
+    sns.scatterplot(data=bp_item_spec_df,
+                    x="beta",
+                    y="alpha", alpha=0.01, color="C0", ax=ax)
+    # ax.scatter(best_beta_user, best_alpha_user, color="red")
+    #
     ax.set_xlabel("beta")
     ax.set_yscale('log')
     ax.set_ylabel("alpha")
     ax.set_xlim(min(grid_df["beta"]), max(grid_df["beta"]))
     ax.set_ylim(min(grid_df["alpha"]), max(grid_df["alpha"]))
-
 
     plt.savefig(os.path.join(FIG_FOLDER, "scatter.png"), dpi=300)
 

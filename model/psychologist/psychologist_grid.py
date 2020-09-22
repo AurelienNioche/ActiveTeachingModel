@@ -144,7 +144,9 @@ class PsychologistGrid(Psychologist):
         # est_param = np.dot(np.exp(lp), self.grid_param)
         #
         # self.log_post[not_is_rep] = lp
-        self.est_param[not_is_rep] = np.mean(self.est_param[is_rep], axis=0)
+        self.est_param[not_is_rep] = np.average(self.est_param[is_rep],
+                                                weights=self.n_pres[is_rep],
+                                                axis=0)
 
         return self.est_param
 

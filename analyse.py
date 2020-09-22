@@ -64,7 +64,7 @@ def main(
     force=False,
 ):
 
-    trial_name = "lls"
+    trial_name = "best_param"
 
     root_data_folder = os.path.join("data", "triton", trial_name)
     assert os.path.exists(root_data_folder)

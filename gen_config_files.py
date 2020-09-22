@@ -156,7 +156,7 @@ def main() -> None:
 
     # -------------     SET PARAM HERE      ------------------------ #
 
-    gen_method = "p_depending_on_best_fit"
+    gen_method = "random"
 
     learner_md = ExponentialNDelta
     psy_md = PsychologistGrid
@@ -209,7 +209,7 @@ def main() -> None:
 
         grid = grid_df.values
 
-    elif gen_method == 'p_depending_on_best_fit':
+    elif gen_method == 'best_fit':
 
         grid = pd.read_csv("best_param.csv", index_col=[0]).values
         n_agent = len(grid)
