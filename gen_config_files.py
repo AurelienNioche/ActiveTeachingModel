@@ -165,7 +165,7 @@ def main() -> None:
 
     ss_n_iter = 100
     time_between_ss = 24 * 60 ** 2
-    n_ss = 6
+    n_ss = 12   # !!!!!!!!!!!!!!!!! LONG !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     learnt_threshold = 0.9
     time_per_iter = 4
 
