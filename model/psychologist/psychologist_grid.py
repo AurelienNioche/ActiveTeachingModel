@@ -150,14 +150,18 @@ class PsychologistGrid(Psychologist):
             self.est_param[not_is_rep] = np.mean(self.est_param[is_rep],
                                                  axis=0)
         elif method == "average-post":
-            # lp_to_consider = self.log_post[is_rep]
-            #
-            # lp = np.mean(lp_to_consider, axis=0)
-            # # lp -= logsumexp(lp)
 
             lp_to_consider = self.log_post[is_rep]
-            lp = np.sum(lp_to_consider, axis=0)
-            lp -= logsumexp(lp)
+
+            # Method 1
+            # lp = np.sum(lp_to_consider, axis=0)
+            # lp -= logsumexp(lp)
+
+            # Method 2
+            # lp = np.mean(lp_to_consider, axis=0)
+
+            # Method 3
+            lp = logsumexp(lp_to_consider, axis=0) - np.log(lp_to_consider.shape[0])
 
             self.log_post[not_is_rep] = lp
             self.est_param[not_is_rep] = np.dot(np.exp(lp), self.grid_param)

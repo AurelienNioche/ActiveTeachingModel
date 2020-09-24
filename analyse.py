@@ -64,7 +64,7 @@ def main(
     force=False,
 ):
 
-    trial_name = "rec-inv-corr2"
+    trial_name = "rec-inv-new-post"
 
     root_data_folder = os.path.join("data", "triton", trial_name)
     assert os.path.exists(root_data_folder)
