@@ -40,7 +40,7 @@ def main():
     # [[0.00006, 0.44] for _ in range(n_item)]
     is_item_specific = len(np.asarray(pr_val).shape) > 1
 
-    teacher_md = Threshold   #Inverse #Threshold  #Recursive   # Leitner   # Recursive  # Leitner
+    teacher_md = Recursive    #Inverse #Threshold  #Recursive   # Leitner   # Recursive  # Leitner
     psy_md = PsychologistGrid
 
     ss_n_iter = 100
