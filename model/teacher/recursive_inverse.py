@@ -108,21 +108,37 @@ class RecursiveInverse(Teacher):
                 n_pres[item] += 1
                 last_pres[item] = ts
 
+            # if is_item_specific:
+            #     init_forget = param[:n_item][first_item, 0]
+            #     rep_effect = param[:n_item][first_item, 1]
+            # else:
+            #     init_forget, rep_effect = param
+            #
+            # p = np.exp(
+            #     -init_forget
+            #     * (1 - rep_effect) ** (n_pres[first_item] - 1)
+            #     * (eval_ts - last_pres[first_item])
+            #     * cst_time)
+            #
+            # learnt = p > thr
+
+            seen = n_pres > 0
+
             if is_item_specific:
-                init_forget = param[:n_item][first_item, 0]
-                rep_effect = param[:n_item][first_item, 1]
+                init_forget = param[:n_item][seen, 0]
+                rep_effect = param[:n_item][seen, 1]
             else:
                 init_forget, rep_effect = param
 
-            p = np.exp(
+            p_seen = np.exp(
                 -init_forget
-                * (1 - rep_effect) ** (n_pres[first_item] - 1)
-                * (eval_ts - last_pres[first_item])
+                * (1 - rep_effect) ** (n_pres[seen] - 1)
+                * (eval_ts - last_pres[seen])
                 * cst_time)
 
-            learnt = p > thr
+            n_learnt = np.sum(p_seen > thr)
 
-            if learnt:
+            if n_learnt == n_item:
                 break
 
             n_item = first_item
