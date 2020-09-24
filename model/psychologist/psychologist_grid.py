@@ -126,7 +126,7 @@ class PsychologistGrid(Psychologist):
             cst_time=self.cst_time,
             now=now)
 
-    def inferred_learner_param(self, method="average-post"):
+    def inferred_learner_param(self, method="independent"):
 
         if self.omniscient or not self.is_item_specific:
             return self.est_param
@@ -137,7 +137,10 @@ class PsychologistGrid(Psychologist):
         if np.sum(is_rep) == self.n_item or np.sum(not_is_rep) == self.n_item:
             return self.est_param
 
-        if method == "average-est-weighting":
+        if method == "independent":
+            return self.est_param
+
+        elif method == "average-est-weighting":
 
             self.est_param[not_is_rep] = np.average(self.est_param[is_rep],
                                                     weights=self.n_pres[is_rep],
