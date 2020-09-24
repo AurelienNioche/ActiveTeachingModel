@@ -237,7 +237,7 @@ def main() -> None:
     job_number = 0
 
     for omni in (False,):  # (False, True):
-        for is_item_specific in (False,):  # (False, True):
+        for is_item_specific in (True,):  # (False, True):
 
             for agent in range(n_agent):
 
