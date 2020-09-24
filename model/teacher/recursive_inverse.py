@@ -12,9 +12,6 @@ class RecursiveInverse(Teacher):
         self.n_item = n_item
         self.log_thr = np.log(learnt_threshold)
 
-        # Time between each *beginning* of session
-        # time_between_ss += time_per_iter * ss_n_iter
-
         self.eval_ts = n_ss * time_between_ss
         self.review_ts = np.hstack(
             [
@@ -63,24 +60,17 @@ class RecursiveInverse(Teacher):
             * (ts - last_pres[seen]) \
             * cst_time
 
-    def _recursive_exp_decay(self, hist, review_ts, param, eval_ts,
+    def _recursive_exp_decay(self, n_pres, last_pres,
+                             future_ts, param, eval_ts,
                              cst_time, is_item_specific):
 
         n_item = self.n_item
 
-        no_dummy = hist != ExponentialNDelta.DUMMY_VALUE
-        current_step = np.sum(no_dummy)
-        current_seen_item = np.unique(hist[no_dummy])
+        now = future_ts[0]
+        future = future_ts[1:]
 
-        now = review_ts[current_step]
-        future = review_ts[current_step+1:]
-
-        n_pres_current = np.zeros(self.n_item)
-        last_pres_current = np.zeros(self.n_item)
-        for i, item in enumerate(current_seen_item):
-            is_item = hist == item
-            n_pres_current[item] = np.sum(is_item)
-            last_pres_current[item] = np.max(review_ts[is_item])
+        n_pres_current = n_pres
+        last_pres_current = last_pres
 
         while True:
 
@@ -147,13 +137,27 @@ class RecursiveInverse(Teacher):
 
         if learner_model == ExponentialNDelta:
 
+            no_dummy = hist != ExponentialNDelta.DUMMY_VALUE
+            current_step = np.sum(no_dummy)
+            current_seen_item = np.unique(hist[no_dummy])
+
+            future_ts = self.review_ts[current_step:]
+
+            n_pres = np.zeros(self.n_item)
+            last_pres = np.zeros(self.n_item)
+            for i, item in enumerate(current_seen_item):
+                is_item = hist == item
+                n_pres[item] = np.sum(is_item)
+                last_pres[item] = np.max(self.review_ts[is_item])
+
             item = self._recursive_exp_decay(
                 is_item_specific=is_item_specific,
-                review_ts=self.review_ts,
+                future_ts=future_ts,
                 cst_time=cst_time,
                 eval_ts=self.eval_ts,
                 param=param,
-                hist=hist)
+                n_pres=n_pres,
+                last_pres=last_pres)
 
         else:
             raise NotImplementedError
