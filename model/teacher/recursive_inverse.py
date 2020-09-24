@@ -62,7 +62,8 @@ class RecursiveInverse(Teacher):
         current_step = np.sum(no_dummy)
         current_seen_item = np.unique(hist[no_dummy])
 
-        future = review_ts[current_step:]
+        now = review_ts[current_step]
+        future = review_ts[current_step+1:]
 
         n_pres_current = np.zeros(self.n_item)
         last_pres_current = np.zeros(self.n_item)
@@ -76,22 +77,24 @@ class RecursiveInverse(Teacher):
             n_pres = n_pres_current[:n_item].copy()
             last_pres = last_pres_current[:n_item].copy()
 
-            item = self._threshold_select(
+            first_item = self._threshold_select(
                 n_pres=n_pres,
                 param=param,
                 n_item=n_item,
                 is_item_specific=is_item_specific,
-                ts=future[0], last_pres=last_pres,
+                ts=now, last_pres=last_pres,
                 cst_time=cst_time,
                 thr=thr)
 
-            first_item = item
-            n_item = min(item + 1, self.n_item)
+            n_item = min(first_item + 1, self.n_item)
 
             n_pres = n_pres_current[:n_item].copy()
             last_pres = last_pres_current[:n_item].copy()
 
-            for ts in future[1:]:
+            n_pres[first_item] += 1
+            last_pres[first_item] = now
+
+            for ts in future:
 
                 item = self._threshold_select(
                     n_pres=n_pres,
