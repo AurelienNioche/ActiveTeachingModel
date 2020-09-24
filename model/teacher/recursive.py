@@ -110,7 +110,8 @@ class Recursive(Teacher):
         return first_item
 
     def _recursive(
-        self, review_ts, learner_model, hist, param, cst_time, is_item_specific, eval_ts
+        self, review_ts, learner_model, hist, param, cst_time,
+            is_item_specific, eval_ts
     ):
 
         itr = 0

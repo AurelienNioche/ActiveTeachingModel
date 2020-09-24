@@ -19,6 +19,7 @@ from model.teacher.leitner import Leitner
 from model.teacher.recursive import Recursive
 from model.teacher.sampling import Sampling
 from model.teacher.threshold import Threshold
+from model.teacher.recursive_inverse import RecursiveInverse
 from settings.config_triton import LEARNER, PSYCHOLOGIST, TEACHER
 
 TEACHER_INV = {v: k for k, v in TEACHER.items()}
@@ -161,11 +162,11 @@ def main() -> None:
     learner_md = ExponentialNDelta
     psy_md = PsychologistGrid
 
-    teacher_models = (Leitner, Threshold, Recursive)
+    teacher_models = (Leitner, Threshold, RecursiveInverse)
 
     ss_n_iter = 100
     time_between_ss = 24 * 60 ** 2
-    n_ss = 12   # !!!!!!!!!!!!!!!!! LONG !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    n_ss = 6
     learnt_threshold = 0.9
     time_per_iter = 4
 
@@ -186,7 +187,6 @@ def main() -> None:
     grid_size = 100  # 20
     # gen_methods = [np.linspace, np.linspace]
     # gen_bounds = [[0.0000001, 0.00005], [0.0001, 0.9999]]
-    gen_bounds = [[0.00000273, 0.00005], [0.42106842, 0.9999]]
     cst_time = 1
 
     seed = 123
@@ -194,6 +194,7 @@ def main() -> None:
 
     if gen_method == 'random':
 
+        gen_bounds = [[0.00000273, 0.00005], [0.42106842, 0.9999]]
         n_agent = 100
 
     elif gen_method == 'p_depending_on_lls':
@@ -217,6 +218,7 @@ def main() -> None:
 
     elif gen_method == 'use_grid':
 
+        gen_bounds = [[0.00000273, 0.00005], [0.42106842, 0.9999]]
         gen_grid_size = 20
         gen_methods = [np.linspace, np.linspace]
 
@@ -234,8 +236,8 @@ def main() -> None:
     pbar = tqdm()
     job_number = 0
 
-    for omni in (False, ):  # (False, True):
-        for is_item_specific in (True, ):  # (False, True):
+    for omni in (False, True):
+        for is_item_specific in (False, True):
 
             for agent in range(n_agent):
 
@@ -292,7 +294,7 @@ def main() -> None:
                         teacher_pr = leitner_cst
                     elif teacher_md == Sampling:
                         teacher_pr = sampling_cst
-                    elif teacher_md in (Threshold, Recursive):
+                    elif teacher_md in (Threshold, Recursive, RecursiveInverse):
                         teacher_pr = {}
                     else:
                         raise ValueError

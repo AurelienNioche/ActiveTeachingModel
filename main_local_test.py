@@ -15,6 +15,7 @@ from model.teacher.leitner import Leitner
 from model.teacher.sampling import Sampling
 from model.teacher.threshold import Threshold
 from model.teacher.recursive import Recursive
+from model.teacher.recursive_inverse import RecursiveInverse
 from model.teacher.recursive_threshold import RecursiveThreshold
 
 TEACHER_INV = {v: k for k, v in TEACHER.items()}
@@ -39,7 +40,7 @@ def main():
     # [[0.00006, 0.44] for _ in range(n_item)]
     is_item_specific = len(np.asarray(pr_val).shape) > 1
 
-    teacher_md = Threshold  #Recursive   # Leitner   # Recursive  # Leitner
+    teacher_md = Threshold   #Inverse #Threshold  #Recursive   # Leitner   # Recursive  # Leitner
     psy_md = PsychologistGrid
 
     ss_n_iter = 100
@@ -61,7 +62,7 @@ def main():
 
     if teacher_md == Leitner:
         teacher_pr = leitner_cst
-    elif teacher_md in (Threshold, Recursive, ):
+    elif teacher_md in (Threshold, Recursive, RecursiveInverse):
         teacher_pr = {}
     else:
         raise ValueError
