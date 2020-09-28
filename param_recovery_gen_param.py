@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
 import os
-from sklearn.preprocessing import normalize
 
 FIG_FOLDER = os.path.join('fig', "param_recovery_gen_param")
 os.makedirs(FIG_FOLDER, exist_ok=True)

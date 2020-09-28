@@ -19,7 +19,7 @@ from model.teacher.leitner import Leitner
 from model.teacher.recursive import Recursive
 from model.teacher.sampling import Sampling
 from model.teacher.threshold import Threshold
-from model.teacher.recursive_inverse import RecursiveInverse
+from model.teacher.forward import Forward
 from settings.config_triton import LEARNER, PSYCHOLOGIST, TEACHER
 
 TEACHER_INV = {v: k for k, v in TEACHER.items()}
@@ -115,7 +115,8 @@ def delete_config():
     """Delete cluster config files if user confirms"""
 
     if os.path.exists(paths.CONFIG_CLUSTER_DIR):
-        erase = input("Do you want to erase the config folder first? " "('y' or 'yes')")
+        erase = input("Do you want to erase the config folder first? " 
+                      "('y' or 'yes')")
         if erase in ("y", "yes"):
             shutil.rmtree(paths.CONFIG_CLUSTER_DIR)
             print("Done!")
@@ -127,7 +128,8 @@ def delete_data(data_name):
     """Delete cluster data files if user confirms"""
 
     if os.path.exists(data_name):
-        erase = input("Do you want to erase the data folder first? " "('y' or 'yes')")
+        erase = input("Do you want to erase the data folder first? " 
+                      "('y' or 'yes')")
         if erase in ("y", "yes"):
             shutil.rmtree(data_name)
             print("Done!")
@@ -146,7 +148,8 @@ def run_simulation():
 def mod_job_file(template_path: str, config_path: str, saving_path: str) -> None:
     """Call the shell script that modifies the number of parallel branches"""
 
-    os.system(f"/bin/sh mod_job.sh " f"{template_path} {config_path} {saving_path}")
+    os.system(f"/bin/sh config/utils/mod_job.sh " 
+              f"{template_path} {config_path} {saving_path}")
 
 
 def main() -> None:

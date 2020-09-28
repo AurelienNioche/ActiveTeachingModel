@@ -8,7 +8,7 @@ from model.teacher.threshold import Threshold
 from model.teacher.sampling import Sampling
 from model.teacher.recursive import Recursive
 from model.teacher.recursive_threshold import RecursiveThreshold
-from model.teacher.recursive_inverse import RecursiveInverse
+from model.teacher.forward import Forward
 
 from model.psychologist.psychologist_grid import PsychologistGrid
 
@@ -54,7 +54,7 @@ def run(config, with_tqdm=False):
             time_per_iter=time_per_iter,
             ss_n_iter=ss_n_iter, time_between_ss=time_between_ss,
             **teacher_pr)
-    elif teacher_cls in (Recursive, RecursiveThreshold, RecursiveInverse):
+    elif teacher_cls in (Recursive, RecursiveThreshold, Forward):
         teacher = teacher_cls(n_item=n_item,
                               learnt_threshold=learnt_threshold,
                               time_per_iter=time_per_iter,
