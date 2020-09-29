@@ -47,7 +47,7 @@ def cp_grid_param(grid_size, bounds, methods):
     return grid
 
 
-def produce_data(raw_data_folder, bounds, methods, grid_size=20):
+def produce_data(raw_data_folder, bounds, methods, grid_size):
 
     n_item = 150
     omni = True
@@ -166,10 +166,12 @@ def main():
     # bounds = [[0.0000001, 0.1], [0.0001, 0.9999]]
     # bounds = [[0.0000001, 0.00005], [0.0001, 0.9999]]
 
+    grid_size = 20
+
     trial_name = str(bounds).replace("[", "]").replace(" ", "_")\
         .replace(",", "").replace(".", "-").replace("]", "") + \
         str(methods).replace("[", "").replace("]", "").replace(" ", "_")\
-            .replace("np", "")
+            .replace("np", "") + str(grid_size)
     raw_data_folder = os.path.join("data", "leitner_explo", trial_name)
     os.makedirs(raw_data_folder, exist_ok=True)
     preprocess_folder = os.path.join("data",
@@ -188,7 +190,7 @@ def main():
         if os.path.splitext(p.path)[1] == ".csv"
             ] or force:
         produce_data(raw_data_folder=raw_data_folder, bounds=bounds,
-                     methods=methods)
+                     methods=methods, grid_size=grid_size)
 
     if not os.path.exists(preprocess_data_file) or force:
         df = preprocess_data(
