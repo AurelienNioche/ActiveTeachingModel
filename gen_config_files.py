@@ -197,7 +197,7 @@ def main() -> None:
 
     if gen_method == 'random':
 
-        gen_bounds = [[1e-06, 0.025], [0.5, 0.9999]]
+        gen_bounds = bounds #[[1e-06, 0.025], [0.5, 0.9999]]
         n_agent = 100
 
     elif gen_method == 'p_depending_on_lls':
