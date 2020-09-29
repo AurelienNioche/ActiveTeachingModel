@@ -186,7 +186,7 @@ def main() -> None:
     bounds = [[2e-07, 0.025], [0.0001, 0.9999]]
     ### Bounds for user experiment
     # bounds = [[0.0000001, 0.1], [0.0001, 0.9999]]
-    grid_methods = [PsychologistGrid.GEO, PsychologistGrid.LIN]
+    grid_methods = [PsychologistGrid.LIN, PsychologistGrid.LIN]
     grid_size = 100  # 20
     # gen_methods = [np.linspace, np.linspace]
     # gen_bounds = [[0.0000001, 0.00005], [0.0001, 0.9999]]
