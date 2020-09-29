@@ -160,7 +160,7 @@ def main() -> None:
 
     # -------------     SET PARAM HERE      ------------------------ #
 
-    gen_method = "n_learnt_leitner"
+    gen_method = "n_learnt_leitner_non_uniform"
 
     learner_md = ExponentialNDelta
     psy_md = PsychologistGrid
@@ -210,6 +210,16 @@ def main() -> None:
         smart_enough = np.flatnonzero(n_learnt > 0)
         slc = np.random.choice(smart_enough, size=n_agent, replace=False)
         grid = np.vstack((alpha[slc], beta[slc])).T
+
+    elif gen_method == 'n_learnt_leitner_non_uniform':
+
+        n_agent = 100
+        df = pd.read_csv("config/parameters/n_learnt_leitner.csv", index_col=0)
+        n_learnt = df["n_learnt"].values
+        alpha = df["alpha"].values
+        beta = df["beta"].values
+        smart_enough = np.flatnonzero(n_learnt > 0)
+        grid = np.vstack((alpha[smart_enough], beta[smart_enough])).T
 
     elif gen_method == 'p_depending_on_lls':
 
@@ -272,6 +282,23 @@ def main() -> None:
                             param_spec[:, i] = v
 
                         pr_val = param_spec
+
+                    pr_val = pr_val.tolist()
+
+                elif gen_method == 'n_learnt_leitner_non_uniform':
+
+                    if is_item_specific:
+
+                        param_spec = np.zeros((n_item, len(bounds)))
+                        for i in range(n_item):
+                            idx = np.random.choice(smart_enough)
+                            param_spec[i] = grid[idx]
+
+                        pr_val = param_spec
+
+                    else:
+                        idx = np.random.choice(smart_enough)
+                        pr_val = grid[idx]
 
                     pr_val = pr_val.tolist()
 
