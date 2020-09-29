@@ -165,7 +165,7 @@ def main() -> None:
     learner_md = ExponentialNDelta
     psy_md = PsychologistGrid
 
-    teacher_models = (Leitner, Threshold, RecursiveInverse)
+    teacher_models = (Leitner, Threshold, Forward)
 
     ss_n_iter = 100
     time_between_ss = 24 * 60 ** 2
@@ -183,10 +183,10 @@ def main() -> None:
     ### Good bounds in-silico
     # bounds = [[0.0000001, 0.00005], [0.0001, 0.9999]]
     ### With prior in silico
-    bounds = [[0.0000001, 0.025], [0.0001, 0.9999]]
+    bounds = [[2e-07, 0.025], [0.0001, 0.9999]]
     ### Bounds for user experiment
     # bounds = [[0.0000001, 0.1], [0.0001, 0.9999]]
-    grid_methods = [PsychologistGrid.LOG, PsychologistGrid.LIN]
+    grid_methods = [PsychologistGrid.GEO, PsychologistGrid.LIN]
     grid_size = 100  # 20
     # gen_methods = [np.linspace, np.linspace]
     # gen_bounds = [[0.0000001, 0.00005], [0.0001, 0.9999]]
@@ -197,8 +197,8 @@ def main() -> None:
 
     if gen_method == 'random':
 
-        gen_bounds = [[0.00000273, 0.00005], [0.42106842, 0.9999]]
-        n_agent = 100
+        gen_bounds = [[1e-06, 0.025], [0.5, 0.9999]]
+        n_agent = 2
 
     elif gen_method == 'p_depending_on_lls':
 
@@ -221,7 +221,7 @@ def main() -> None:
 
     elif gen_method == 'use_grid':
 
-        gen_bounds = [[0.00000273, 0.00005], [0.42106842, 0.9999]]
+        gen_bounds = [[1e-06, 0.025], [0.5, 0.9999]]
         gen_grid_size = 20
         gen_methods = [np.linspace, np.linspace]
 
@@ -297,7 +297,7 @@ def main() -> None:
                         teacher_pr = leitner_cst
                     elif teacher_md == Sampling:
                         teacher_pr = sampling_cst
-                    elif teacher_md in (Threshold, Recursive, RecursiveInverse):
+                    elif teacher_md in (Threshold, Recursive, Forward):
                         teacher_pr = {}
                     else:
                         raise ValueError

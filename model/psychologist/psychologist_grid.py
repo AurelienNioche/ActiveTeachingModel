@@ -9,9 +9,9 @@ EPS = np.finfo(np.float).eps
 class PsychologistGrid(Psychologist):
 
     LIN = 'lin'
-    LOG = 'log'
+    GEO = 'geo'
 
-    METHODS = {LIN: np.linspace, LOG: np.geomspace}
+    METHODS = {LIN: np.linspace, GEO: np.geomspace}
 
     def __init__(self, n_item, is_item_specific, learner,
                  bounds, grid_size, grid_methods, cst_time, true_param=None):
