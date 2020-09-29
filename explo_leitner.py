@@ -161,7 +161,7 @@ def preprocess_data(data_folder, preprocess_data_file):
 
 def main():
 
-    bounds = [[0.0000001, 0.025], [0.0001, 0.9999]]
+    bounds = [[2e-07, 0.025], [0.0001, 0.9999]]
     methods = [np.geomspace, np.linspace]
     # bounds = [[0.0000001, 0.1], [0.0001, 0.9999]]
     # bounds = [[0.0000001, 0.00005], [0.0001, 0.9999]]
