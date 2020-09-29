@@ -160,7 +160,7 @@ def main() -> None:
 
     # -------------     SET PARAM HERE      ------------------------ #
 
-    gen_method = "n_learnt_leitner"
+    gen_method = "n_learnt_leitner_non_uniform"
 
     learner_md = ExponentialNDelta
     psy_md = PsychologistGrid
