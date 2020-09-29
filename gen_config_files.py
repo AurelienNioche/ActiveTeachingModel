@@ -291,13 +291,13 @@ def main() -> None:
 
                         param_spec = np.zeros((n_item, len(bounds)))
                         for i in range(n_item):
-                            idx = np.random.choice(smart_enough)
+                            idx = np.random.randint(len(grid))
                             param_spec[i] = grid[idx]
 
                         pr_val = param_spec
 
                     else:
-                        idx = np.random.choice(smart_enough)
+                        idx = np.random.randint(len(grid))
                         pr_val = grid[idx]
 
                     pr_val = pr_val.tolist()
