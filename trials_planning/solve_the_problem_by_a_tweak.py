@@ -256,7 +256,7 @@ def recursive(n_item, review_ts, param, eval_ts, thr, verbose=False):
                 if np.min(p_seen) <= thr or np.sum(seen) == n_item:
                     item = np.flatnonzero(seen)[np.argmin(p_seen)]
                 else:
-                    item = np.max(np.flatnonzero(seen)) + 1
+                    item = np.argmin(seen)
 
             n_pres[item] += 1
             last_pres[item] = ts

@@ -37,10 +37,10 @@ class Forward(Teacher):
                 ts=ts,
                 cst_time=cst_time)
 
-            if np.min(log_p_seen) <= self.log_thr or np.sum(seen) == n_item:
+            if np.sum(seen) == n_item or np.min(log_p_seen) <= self.log_thr:
                 item = np.flatnonzero(seen)[np.argmin(log_p_seen)]
             else:
-                item = np.max(np.flatnonzero(seen)) + 1
+                item = np.argmin(seen)
 
         return item
 

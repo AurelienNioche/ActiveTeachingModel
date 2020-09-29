@@ -126,7 +126,7 @@ class PsychologistGrid(Psychologist):
             cst_time=self.cst_time,
             now=now)
 
-    def inferred_learner_param(self, method="independent"):
+    def inferred_learner_param(self, method="average-post"):
 
         if self.omniscient or not self.is_item_specific:
             return self.est_param
