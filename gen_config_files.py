@@ -160,7 +160,7 @@ def main() -> None:
 
     # -------------     SET PARAM HERE      ------------------------ #
 
-    gen_method = "random"
+    gen_method = "n_learnt_leitner"
 
     learner_md = ExponentialNDelta
     psy_md = PsychologistGrid
@@ -199,6 +199,17 @@ def main() -> None:
 
         gen_bounds = bounds #[[1e-06, 0.025], [0.5, 0.9999]]
         n_agent = 100
+
+    elif gen_method == 'n_learnt_leitner':
+
+        n_agent = 100
+        df = pd.read_csv("config/parameters/n_learnt_leitner.csv", index_col=0)
+        n_learnt = df["n_learnt"].values
+        alpha = df["alpha"].values
+        beta = df["beta"].values
+        smart_enough = np.flatnonzero(n_learnt > 0)
+        slc = np.random.choice(smart_enough, size=n_agent, replace=False)
+        grid = np.vstack((alpha[slc], beta[slc])).T
 
     elif gen_method == 'p_depending_on_lls':
 
@@ -248,6 +259,21 @@ def main() -> None:
 
                     pr_val = grid[agent]
                     assert not is_item_specific
+
+                elif gen_method == 'n_learnt_leitner':
+                    pr_val = grid[agent]
+
+                    if is_item_specific:
+
+                        param_spec = np.zeros((n_item, len(bounds)))
+                        for i, b in enumerate(bounds):
+
+                            v = pr_val[i]
+                            param_spec[:, i] = v
+
+                        pr_val = param_spec
+
+                    pr_val = pr_val.tolist()
 
                 elif gen_method == 'random':
 
