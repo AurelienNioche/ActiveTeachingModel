@@ -17,6 +17,6 @@ day = 24*hour
 
 
 v = 6 * day
-print(- np.log(thr) / 1e-06 / day)
+print(- np.log(thr) / 2e-07 / day)
 
 # print(- np.log(thr) / 0.0000001/ day)
