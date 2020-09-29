@@ -49,7 +49,7 @@ def main(force=False):
 
     trial_name = "noprior"  # input("Trial name: ")
     for subfolder in "Nspec-Nomni", "spec-Nomni":
-        for teacher in "recursive_inverse", "threshold":
+        for teacher in "forward", "threshold":
 
             teacher_folder = f"exp_decay-psy_grid-{teacher}"
             raw_data_folder = os.path.join("data", "triton", trial_name, subfolder, teacher_folder)
