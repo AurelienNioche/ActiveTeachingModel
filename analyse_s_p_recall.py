@@ -47,7 +47,7 @@ def preprocess_data(raw_data_folder, preprocess_file):
 
 def main(force=False):
 
-    trial_name = "noprior"  # input("Trial name: ")
+    trial_name = "explo_leitner_geolin_rnditem"  # input("Trial name: ")
     for subfolder in "Nspec-Nomni", "spec-Nomni":
         for teacher in "forward", "threshold":
 
@@ -59,8 +59,8 @@ def main(force=False):
 
             preprocess_file = os.path.join(preprocessed_folder, f"{trial_name}_{subfolder}_{teacher}_p_recall.csv")
 
-            fig_folder = os.path.join("fig", "analyse_p_recall")
-            fig_path = os.path.join(fig_folder, f"{trial_name}_{subfolder}_{teacher}_p_recall.pdf")
+            fig_folder = os.path.join("fig", trial_name)
+            fig_path = os.path.join(fig_folder, f"{subfolder}_{teacher}_p_recall.png")
 
             for f in preprocessed_folder, fig_folder:
                 os.makedirs(f, exist_ok=True)
@@ -78,7 +78,10 @@ def main(force=False):
 
             ax.set_ylabel(f"p recall error")
             ax.set_ylim(0, 1)
-            plt.savefig(fig_path)
+
+            ax.set_title(teacher)
+
+            plt.savefig(fig_path, dpi=300)
 
 
 if __name__ == "__main__":

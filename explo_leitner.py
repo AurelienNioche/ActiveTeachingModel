@@ -159,7 +159,7 @@ def preprocess_data(data_folder, preprocess_data_file):
     return df
 
 
-def main():
+def get_data():
 
     bounds = [[2e-07, 0.025], [0.0001, 0.9999]]
     methods = [np.geomspace, np.linspace]
@@ -170,12 +170,12 @@ def main():
 
     trial_name = str(bounds).replace("[", "]").replace(" ", "_")\
         .replace(",", "").replace(".", "-").replace("]", "") + \
-        str(methods).replace("[", "").replace("]", "").replace(" ", "_")\
-            .replace("np", "") + str(grid_size)
+        "_".join([m.__name__ for m in methods])\
+        + str(grid_size)
     raw_data_folder = os.path.join("data", "leitner_explo", trial_name)
     os.makedirs(raw_data_folder, exist_ok=True)
     preprocess_folder = os.path.join("data",
-                                     "preprocess",
+                                     "preprocessed",
                                      "explo_leitner")
     os.makedirs(preprocess_folder, exist_ok=True)
     preprocess_data_file = os.path.join(preprocess_folder,
@@ -204,13 +204,21 @@ def main():
     data = pd.DataFrame(
         {"alpha": df["alpha"], "beta": df["beta"], "n_learnt": df["n_learnt"]}
     )
-    data = data.round(8).pivot("alpha", "beta", "n_learnt")
-    ax = sns.heatmap(data=data, cmap="viridis", cbar_kws={"label": "N learnt"})
+    return data
+
+
+def main():
+
+    data = get_data()
+
+    data_pivoted = data.round(8).pivot("alpha", "beta", "n_learnt")
+    ax = sns.heatmap(data=data_pivoted, cmap="viridis",
+                     cbar_kws={"label": "N learnt", })
     ax.invert_yaxis()
     plt.tight_layout()
     fig_folder = os.path.join("fig", "explo_leitner")
     os.makedirs(fig_folder, exist_ok=True)
-    plt.savefig(os.path.join(fig_folder, f"explo-leitner-{trial_name}.png"),
+    plt.savefig(os.path.join(fig_folder, f"explo-leitner.png"),
                 dpi=300)
 
     print("Done!")

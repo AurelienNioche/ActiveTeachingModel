@@ -15,6 +15,7 @@ def row_for_single_run(csv_path):
     is_last_iter = df["iter"] == last_iter
 
     n_learnt = df[is_last_iter]["n_learnt"].iloc[0]
+    n_seen = df[is_last_iter]["n_seen"].iloc[0]
 
     is_last_ss = df["ss_idx"] == max(df["ss_idx"]) - 1
 
@@ -31,6 +32,8 @@ def row_for_single_run(csv_path):
         "Teacher": df["md_teacher"][0],
         "Items learnt one day later": n_learnt,
         "Items learnt end last session": n_learnt_end_ss,
+        "N seen": n_seen,
+        "N learnt / N seen": n_learnt / n_seen
     }
 
 
@@ -60,11 +63,9 @@ def preprocess_cond(cond_data_folder, preprocess_data_file):
     return df
 
 
-def main(
-    force=False,
-):
+def main(force=False):
 
-    trial_name = "noprior"
+    trial_name = "explo_leitner_geolin"
 
     root_data_folder = os.path.join("data", "triton", trial_name)
     assert os.path.exists(root_data_folder)
@@ -91,11 +92,11 @@ def main(
         else:
             df = pd.read_csv(pp_data_file, index_col=[0])
 
-        for v in ("Items learnt one day later",):  # "Items learnt end last session"):
+        for v in ("Items learnt one day later", "N learnt / N seen"):  # "Items learnt end last session"):
 
-            lab = v.replace("Items learnt", "").replace(" ", "-")
+            lab = v.replace("Items learnt", "").replace("/", "div. by").replace(" ", "-")
 
-            fig_path = os.path.join(fig_folder, f"{ cp.name}_box{lab}.png")
+            fig_path = os.path.join(fig_folder, f"{cp.name}_box{lab}.png")
             box.plot(df=df, fig_path=fig_path, learnt_label=v)
 
             # fig_path = os.path.join(fig_folder, f"{cp.name}_hist_{lab}.pdf")

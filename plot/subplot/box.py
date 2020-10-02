@@ -14,6 +14,8 @@ def plot(df: pd.DataFrame, learnt_label: str, fig_path: str) -> None:
     sns.stripplot(x="Teacher", y=learnt_label, data=df,
                   color="0.25", alpha=0.7, ax=ax)
 
+    plt.tight_layout()
+
     print("Saving fig...")
     fig.savefig(fig_path, dpi=300)
     print("Done!")
