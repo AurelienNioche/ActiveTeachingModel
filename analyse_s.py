@@ -63,6 +63,23 @@ def preprocess_cond(cond_data_folder, preprocess_data_file):
     return df
 
 
+def get_data(trial_name, condition_name, force=False):
+
+    preprocess_folder = os.path.join("data", "preprocessed", trial_name)
+    os.makedirs(preprocess_folder, exist_ok=True)
+
+    pp_data_file = os.path.join(preprocess_folder, f"{condition_name}.csv")
+    # pp: preproc_path
+
+    if not os.path.exists(pp_data_file) or force:
+        df = preprocess_cond(cond_data_folder=condition_name,
+                             preprocess_data_file=pp_data_file)
+    else:
+        df = pd.read_csv(pp_data_file, index_col=[0])
+
+    return df
+
+
 def main(force=False):
 
     trial_name = "explo_leitner_geolin"
@@ -73,9 +90,6 @@ def main(force=False):
     fig_folder = os.path.join("fig", trial_name)
     os.makedirs(fig_folder, exist_ok=True)
 
-    preprocess_folder = os.path.join("data", "preprocessed", trial_name)
-    os.makedirs(preprocess_folder, exist_ok=True)
-
     cond_f = [p for p in os.scandir(root_data_folder) if not p.name.startswith(".")]
     # cond_f: condition_dir
 
@@ -84,13 +98,8 @@ def main(force=False):
         # cp: cond_path
         print("cond data folder:", cp.name)
 
-        pp_data_file = os.path.join(preprocess_folder, f"{cp.name}.csv")
-        # pp: preproc_path
-
-        if not os.path.exists(pp_data_file) or force:
-            df = preprocess_cond(cond_data_folder=cp, preprocess_data_file=pp_data_file)
-        else:
-            df = pd.read_csv(pp_data_file, index_col=[0])
+        df = get_data(trial_name=trial_name, condition_name=cp.name,
+                      force=force)
 
         for v in ("Items learnt one day later", "N learnt / N seen"):  # "Items learnt end last session"):
 
