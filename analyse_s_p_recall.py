@@ -42,10 +42,10 @@ def preprocess_data(raw_data_folder, preprocess_file):
     return df
 
 
-def get_data(trial_name, condition_name, teacher_name, force=False):
+def get_data(dataset_name, condition_name, teacher_name, force=False):
     teacher_folder = f"exp_decay-psy_grid-{teacher_name}"
     raw_data_folder = os.path.join("data", "triton",
-                                   trial_name, condition_name,
+                                   dataset_name, condition_name,
                                    teacher_folder)
     assert os.path.exists(raw_data_folder)
 
@@ -54,7 +54,7 @@ def get_data(trial_name, condition_name, teacher_name, force=False):
 
     preprocess_file = os.path.join(
         preprocessed_folder,
-        f"{trial_name}_{condition_name}_{teacher_name}_p_recall.csv")
+        f"{dataset_name}_{condition_name}_{teacher_name}_p_recall.csv")
 
     os.makedirs(preprocessed_folder, exist_ok=True)
 
@@ -70,17 +70,17 @@ def get_data(trial_name, condition_name, teacher_name, force=False):
 
 def main(force=False):
 
-    trial_name = "explo_leitner_geolin_rnditem"  # input("Trial name: ")
+    dataset_name = "explo_leitner_geolin_rnditem"  # input("Trial name: ")
     for condition_name in "Nspec-Nomni", "spec-Nomni":
 
         for teacher_name in "forward", "threshold":
 
-            data = get_data(trial_name=trial_name,
+            data = get_data(dataset_name=dataset_name,
                             condition_name=condition_name,
                             teacher_name=teacher_name,
                             force=force)
 
-            fig_folder = os.path.join("fig", trial_name)
+            fig_folder = os.path.join("fig", dataset_name)
             os.makedirs(fig_folder, exist_ok=True)
 
             fig_path = os.path.join(

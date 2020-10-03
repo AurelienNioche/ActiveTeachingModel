@@ -53,7 +53,6 @@ def heatmap(data, ax):
     ax.set_aspect(1)
 
     # Add letter
-
     ax.text(-0.1, 1.1, ascii_uppercase[0],
             transform=ax.transAxes, size=20, weight='bold')
 
@@ -128,21 +127,23 @@ def prediction_error(data, ax, title,
 
 def figure2():
 
+    dataset = "explo_leitner_geolin"
+
     df_heat = explo_leitner.get_data()
 
-    df_omni = analyse_s.get_data(trial_name="explo_leitner_geolin",
+    df_omni = analyse_s.get_data(dataset_name=dataset,
                                  condition_name="Nspec-omni")
 
-    df_not_omni = analyse_s.get_data(trial_name="explo_leitner_geolin",
+    df_not_omni = analyse_s.get_data(dataset_name=dataset,
                                      condition_name="Nspec-Nomni")
 
     err_threshold = analyse_s_p_recall.get_data(
-        trial_name="explo_leitner_geolin",
+        dataset_name=dataset,
         condition_name="Nspec-Nomni",
         teacher_name="threshold")
 
     err_forward = analyse_s_p_recall.get_data(
-        trial_name="explo_leitner_geolin",
+        dataset_name=dataset,
         condition_name="Nspec-Nomni",
         teacher_name="forward")
 
@@ -153,8 +154,6 @@ def figure2():
            (4, 3, 7), (4, 3, 10), (4, 3, (8, 11)), (4, 3, (9, 12))]
     axes = [fig.add_subplot(*p) for p in pos]
 
-    # Create figure and axes
-    # fig, ax = plt.subplots(figsize=(6, 6))
     heatmap(data=df_heat, ax=axes[0])
     boxplot_n_learnt(data=df_omni, ax=axes[1])
     boxplot_n_learnt_n_seen(data=df_omni, ax=axes[2])
@@ -167,36 +166,68 @@ def figure2():
     boxplot_n_learnt(data=df_not_omni, ax=axes[5])
     boxplot_n_learnt_n_seen(data=df_not_omni, ax=axes[6])
 
-    # print("Saving fig...")
-    # fig.savefig(fig_path, dpi=300)
-
-    # df = explo_leitner.get_data()
-    # heatmap(data=df, ax=ax)
-
     plt.tight_layout()
+
     plt.show()
 
     fig_folder = os.path.join("fig")
     os.makedirs(fig_folder, exist_ok=True)
-    plt.savefig(os.path.join(fig_folder, f"fig1_part.png"), dpi=300)
+    plt.savefig(os.path.join(fig_folder, f"fig2.png"), dpi=300)
+    plt.savefig(os.path.join(fig_folder, f"fig2.pdf"))
 
 
 def figure3():
 
-    fig = plt.figure(figsize=(6, 4))
+    dataset = "explo_leitner_geolin_rnditem"
+
+    df_omni = analyse_s.get_data(dataset_name=dataset,
+                                 condition_name="spec-omni")
+
+    df_not_omni = analyse_s.get_data(dataset_name=dataset,
+                                     condition_name="spec-Nomni")
+
+    err_threshold = analyse_s_p_recall.get_data(
+        dataset_name=dataset,
+        condition_name="spec-Nomni",
+        teacher_name="threshold")
+
+    err_forward = analyse_s_p_recall.get_data(
+        dataset_name=dataset,
+        condition_name="spec-Nomni",
+        teacher_name="forward")
+
+    fig = plt.figure(figsize=(14, 10))
 
     # Thanks to the Matplotlib creators that I love
     pos = [(4, 3, (2, 5)), (4, 3, (3, 6)),
            (4, 3, 7), (4, 3, 10), (4, 3, (8, 11)), (4, 3, (9, 12))]
     axes = [fig.add_subplot(*p) for p in pos]
 
+    boxplot_n_learnt(data=df_omni, ax=axes[0])
+    boxplot_n_learnt_n_seen(data=df_omni, ax=axes[1])
+
+    prediction_error(data=err_threshold, ax=axes[2],
+                     title="Myopic")
+    prediction_error(data=err_forward, ax=axes[3],
+                     title="Conservative Sampling")
+
+    boxplot_n_learnt(data=df_not_omni, ax=axes[4])
+    boxplot_n_learnt_n_seen(data=df_not_omni, ax=axes[5])
+
     plt.tight_layout()
+
     plt.show()
+
+    fig_folder = os.path.join("fig")
+    os.makedirs(fig_folder, exist_ok=True)
+    plt.savefig(os.path.join(fig_folder, f"fig3.png"), dpi=300)
+    plt.savefig(os.path.join(fig_folder, f"fig3.pdf"))
 
 
 def main():
 
     figure2()
+    figure3()
 
 if __name__ == "__main__":
     main()

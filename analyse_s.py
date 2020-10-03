@@ -40,7 +40,7 @@ def row_for_single_run(csv_path):
 def preprocess_cond(cond_data_folder, preprocess_data_file):
 
     teach_f = [
-        p for p in os.scandir(cond_data_folder.path) if not p.name.startswith(".")
+        p for p in os.scandir(cond_data_folder) if not p.name.startswith(".")
     ]
 
     row_list = []
@@ -63,16 +63,18 @@ def preprocess_cond(cond_data_folder, preprocess_data_file):
     return df
 
 
-def get_data(trial_name, condition_name, force=False):
+def get_data(dataset_name, condition_name, force=False):
 
-    preprocess_folder = os.path.join("data", "preprocessed", trial_name)
+    preprocess_folder = os.path.join("data", "preprocessed", dataset_name)
     os.makedirs(preprocess_folder, exist_ok=True)
 
     pp_data_file = os.path.join(preprocess_folder, f"{condition_name}.csv")
     # pp: preproc_path
 
     if not os.path.exists(pp_data_file) or force:
-        df = preprocess_cond(cond_data_folder=condition_name,
+        cond_data_folder = os.path.join("data", "triton",
+                                        dataset_name, condition_name)
+        df = preprocess_cond(cond_data_folder=cond_data_folder,
                              preprocess_data_file=pp_data_file)
     else:
         df = pd.read_csv(pp_data_file, index_col=[0])
@@ -82,12 +84,12 @@ def get_data(trial_name, condition_name, force=False):
 
 def main(force=False):
 
-    trial_name = "explo_leitner_geolin"
+    dataset_name = "explo_leitner_geolin"
 
-    root_data_folder = os.path.join("data", "triton", trial_name)
+    root_data_folder = os.path.join("data", "triton", dataset_name)
     assert os.path.exists(root_data_folder)
 
-    fig_folder = os.path.join("fig", trial_name)
+    fig_folder = os.path.join("fig", dataset_name)
     os.makedirs(fig_folder, exist_ok=True)
 
     cond_f = [p for p in os.scandir(root_data_folder) if not p.name.startswith(".")]
@@ -98,7 +100,8 @@ def main(force=False):
         # cp: cond_path
         print("cond data folder:", cp.name)
 
-        df = get_data(trial_name=trial_name, condition_name=cp.name,
+        df = get_data(dataset_name=dataset_name,
+                      condition_name=cp.name,
                       force=force)
 
         for v in ("Items learnt one day later", "N learnt / N seen"):  # "Items learnt end last session"):
