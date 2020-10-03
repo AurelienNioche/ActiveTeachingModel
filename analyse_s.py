@@ -26,14 +26,14 @@ def row_for_single_run(csv_path):
     n_learnt_end_ss = df[is_last_ss & is_last_iter_ss]["n_learnt"].iloc[0]
 
     return {
-        "Agent ID": agent_id,
-        "Learner": df["md_learner"][0],
-        "Psychologist": df["md_psy"][0],
-        "Teacher": df["md_teacher"][0],
-        "Items learnt one day later": n_learnt,
-        "Items learnt end last session": n_learnt_end_ss,
-        "N seen": n_seen,
-        "N learnt / N seen": n_learnt / n_seen
+        "agent": agent_id,
+        "learner": df["md_learner"][0],
+        "psy": df["md_psy"][0],
+        "teacher": df["md_teacher"][0],
+        "n_learnt": n_learnt,
+        "n_learnt_end_ss": n_learnt_end_ss,
+        "n_seen": n_seen,
+        "ratio_n_learnt_n_seen": n_learnt / n_seen
     }
 
 

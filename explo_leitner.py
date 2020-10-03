@@ -199,8 +199,6 @@ def get_data():
     else:
         df = pd.read_csv(preprocess_data_file, index_col=[0])
 
-    print("Plotting heatmap...")
-
     data = pd.DataFrame(
         {"alpha": df["alpha"], "beta": df["beta"], "n_learnt": df["n_learnt"]}
     )

@@ -29,9 +29,6 @@ def preprocess_data(raw_data_folder, preprocess_file):
 
             row = {
                 "agent": i,
-                # "Learner": df["md_learner"][0],
-                # "Psychologist": df["md_psy"][0],
-                # "Teacher": df["md_teacher"][0],
                 "p_err_mean": p_err,
                 "time": t,
             }
