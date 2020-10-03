@@ -39,12 +39,15 @@ def heatmap(data, ax):
 
     # Draw heatmap
     sns.heatmap(data=data_pivoted, cmap="viridis", ax=ax,
-                cbar_kws={'label': 'N learnt using Leitner',
+                cbar_kws={'label': 'N learned using Leitner',
                           "orientation": "horizontal"})
 
     alpha_unique = sorted(data["alpha"].unique())
     beta_unique = sorted(data["beta"].unique())
     grid_size = len(alpha_unique)
+
+    ax.set_ylabel(r"$\alpha$")
+    ax.set_xlabel(r"$\beta$")
 
     ax.set_xticks((0.5, grid_size / 2 - 0.5, grid_size - 0.5))
     ax.set_xticklabels((beta_unique[0], beta_unique[grid_size//2 -1],
@@ -69,7 +72,7 @@ def heatmap(data, ax):
                             for v in alpha_v], dtype=float) + 0.5
     beta_coord = np.array([beta_unique.index(v)
                            for v in beta_v], dtype=float) + 0.5
-    ax.scatter(beta_coord, alpha_coord, color='red')
+    ax.scatter(beta_coord, alpha_coord, color='red', s=10)
 
     # Invert y-axis
     ax.invert_yaxis()
@@ -92,7 +95,7 @@ def rename_teachers(data):
 
 def boxplot_n_learnt(data, ax,
                      x_label="Teacher",
-                     y_label="N learned"):
+                     y_label="N learned", dot_size=3, dot_alpha=0.7):
 
     data = rename_teachers(data)
     data = data.rename(columns={
@@ -104,9 +107,10 @@ def boxplot_n_learnt(data, ax,
     colors = ["C0", "C1", "C2"]
 
     sns.boxplot(x=x_label, y=y_label, data=data, ax=ax,
-                palette=colors, order=order)
-    sns.stripplot(x=x_label, y=y_label, data=data,
-                  color="0.25", alpha=0.7, ax=ax, order=order)
+                palette=colors, order=order,
+                showfliers=False)
+    sns.stripplot(x=x_label, y=y_label, data=data, s=dot_size,
+                  color="0.25", alpha=dot_alpha, ax=ax, order=order)
 
     ymax = roundup(np.max(data[y_label]))
     ax.set_ylim(-0.1, ymax+0.1)
@@ -117,7 +121,8 @@ def boxplot_n_learnt(data, ax,
 
 def boxplot_n_learnt_n_seen(data, ax,
                             x_label="Teacher",
-                            y_label="N learned / N seen"):
+                            y_label="N learned / N seen",
+                            dot_size=3, dot_alpha=0.7):
 
     data = rename_teachers(data)
     data = data.rename(columns={
@@ -129,9 +134,11 @@ def boxplot_n_learnt_n_seen(data, ax,
     colors = ["C0", "C1", "C2"]
 
     sns.boxplot(x="Teacher", y=y_label, data=data, ax=ax,
-                palette=colors, order=order)
+                palette=colors, order=order,
+                showfliers=False)
     sns.stripplot(x="Teacher", y=y_label, data=data,
-                  color="0.25", alpha=0.7, ax=ax, order=order)
+                  color="0.25", alpha=dot_alpha, ax=ax, order=order,
+                  s=dot_size)
 
     ax.set_ylim(-0.01, 1.01)
     ax.set_yticks((0, 0.5, 1))
@@ -139,7 +146,7 @@ def boxplot_n_learnt_n_seen(data, ax,
     ax.set_xlabel("")
 
 
-def prediction_error(data, ax, title,
+def prediction_error(data, ax, title, color,
                      x_label="Time",
                      y_label="Prediction error\n"
                              "(probability of recall)"):
@@ -149,7 +156,7 @@ def prediction_error(data, ax, title,
         "p_err_mean": y_label
     })
 
-    sns.lineplot(data=data, x=x_label, y=y_label, ci="sd", ax=ax)
+    sns.lineplot(data=data, x=x_label, y=y_label, ci="sd", ax=ax, color=color)
 
     ax.set_ylim(0, 1)
     ax.set_title(title)
@@ -245,8 +252,9 @@ def figure2():
         condition_name="Nspec-Nomni",
         teacher_name="forward")
 
-    fig = plt.figure(figsize=(14, 10))
-    fig.suptitle("Artificial: Not item specific", fontweight="bold",
+    fig = plt.figure(figsize=(13, 8.5))
+    fig.suptitle("Artificial: Non item specific",
+                 fontweight="bold",
                  fontsize=17)
 
     # Thanks to the Matplotlib creators that I love
@@ -255,7 +263,7 @@ def figure2():
     axes = [fig.add_subplot(*p) for p in pos]
 
     heatmap(data=df_heat, ax=axes[0])
-    axes[0].text(-0.2, 1.05, ascii_uppercase[0],
+    axes[0].text(-0.6, 1.05, ascii_uppercase[0],
                  transform=axes[0].transAxes, size=15, weight='bold')
 
     boxplot_n_learnt(data=df_omni, ax=axes[1])
@@ -263,18 +271,33 @@ def figure2():
     axes[1].text(-0.2, 1.05, ascii_uppercase[1],
                  transform=axes[1].transAxes, size=15, weight='bold')
 
+    axes[1].text(-0.25, 0.5, "Omniscient",
+                 horizontalalignment='center',
+                 verticalalignment='center',
+                 transform=axes[1].transAxes, size=15, weight='bold', rotation=90, style="italic")
+
     boxplot_n_learnt_n_seen(data=df_omni, ax=axes[2])
     axes[2].set_title("N learned / N seen\n", fontstyle='italic', fontsize=15)
     axes[2].text(-0.2, 1.05, ascii_uppercase[2],
                  transform=axes[2].transAxes, size=15, weight='bold')
 
     prediction_error(data=err_threshold, ax=axes[3],
-                     title="Myopic")
-    axes[3].text(-0.2, 1.05, ascii_uppercase[3],
+                     title="Myopic",
+                     color="C1")
+    axes[3].text(-0.25, 1.15, ascii_uppercase[3],
                  transform=axes[3].transAxes, size=15, weight='bold')
 
+    ax = fig.add_subplot(2, 3, 4)
+    ax.set_axis_off()
+    ax.text(-0.35, 0.5, "Non omniscient",
+            horizontalalignment='left',
+            verticalalignment='center',
+            transform=ax.transAxes, size=15, weight='bold',
+            rotation=90, style="italic")
+
     prediction_error(data=err_forward, ax=axes[4],
-                     title="Conservative Sampling")
+                     title="Conservative Sampling",
+                     color="C2")
 
     boxplot_n_learnt(data=df_not_omni, ax=axes[5])
     axes[5].text(-0.2, 1.05, ascii_uppercase[4],
@@ -284,9 +307,9 @@ def figure2():
     axes[6].text(-0.2, 1.05, ascii_uppercase[5],
                  transform=axes[6].transAxes, size=15, weight='bold')
 
-    plt.tight_layout()
+    plt.tight_layout(rect=[-0.05, 0, 1, 1])
 
-    plt.show()
+    # plt.show()
 
     fig_folder = os.path.join("fig")
     os.makedirs(fig_folder, exist_ok=True)
@@ -314,7 +337,10 @@ def figure3():
         condition_name="spec-Nomni",
         teacher_name="forward")
 
-    fig = plt.figure(figsize=(14, 12))
+    fig = plt.figure(figsize=(13, 8.5))
+    fig.suptitle("Artificial: Item specific",
+                 fontweight="bold",
+                 fontsize=17)
 
     # Thanks to the Matplotlib creators that I love
     pos = [(4, 3, (2, 5)), (4, 3, (3, 6)),
@@ -322,19 +348,48 @@ def figure3():
     axes = [fig.add_subplot(*p) for p in pos]
 
     boxplot_n_learnt(data=df_omni, ax=axes[0])
+    axes[0].set_title("N learned\n", fontstyle='italic', fontsize=15)
+    axes[0].text(-0.2, 1.05, ascii_uppercase[0],
+                 transform=axes[0].transAxes, size=15, weight='bold')
+
+    axes[0].text(-0.25, 0.5, "Omniscient",
+                 horizontalalignment='center',
+                 verticalalignment='center',
+                 transform=axes[0].transAxes, size=15, weight='bold',
+                 rotation=90, style="italic")
+
     boxplot_n_learnt_n_seen(data=df_omni, ax=axes[1])
+    axes[1].set_title("N learned / N seen\n", fontstyle='italic', fontsize=15)
+    axes[1].text(-0.2, 1.05, ascii_uppercase[1],
+                 transform=axes[1].transAxes, size=15, weight='bold')
 
     prediction_error(data=err_threshold, ax=axes[2],
-                     title="Myopic")
+                     title="Myopic",
+                     color="C1")
+    axes[2].text(-0.25, 1.15, ascii_uppercase[2],
+                 transform=axes[3].transAxes, size=15, weight='bold')
+
+    ax = fig.add_subplot(2, 3, 4)
+    ax.set_axis_off()
+    ax.text(-0.35, 0.5, "Non omniscient",
+            horizontalalignment='left',
+            verticalalignment='center',
+            transform=ax.transAxes, size=15, weight='bold',
+            rotation=90, style="italic")
+
     prediction_error(data=err_forward, ax=axes[3],
-                     title="Conservative Sampling")
+                     title="Conservative Sampling",
+                     color="C2")
 
     boxplot_n_learnt(data=df_not_omni, ax=axes[4])
+    axes[4].text(-0.2, 1.05, ascii_uppercase[3],
+                 transform=axes[4].transAxes, size=15, weight='bold')
+
     boxplot_n_learnt_n_seen(data=df_not_omni, ax=axes[5])
+    axes[5].text(-0.2, 1.05, ascii_uppercase[4],
+                 transform=axes[5].transAxes, size=15, weight='bold')
 
-    plt.tight_layout()
-
-    plt.show()
+    plt.tight_layout(rect=[-0.05, 0, 1, 1])
 
     fig_folder = os.path.join("fig")
     os.makedirs(fig_folder, exist_ok=True)
@@ -390,12 +445,12 @@ def figure4():
            (3, 4, 11), (3, 4, 12)]
     axes = [fig.add_subplot(*p) for p in pos]
 
-    boxplot_n_learnt(data=df_learnt, ax=axes[0])
+    boxplot_n_learnt(data=df_learnt, ax=axes[0], dot_size=5)
     axes[0].set_title("N learned\n", fontstyle='italic', fontsize=14)
     axes[0].text(-0.2, 1.05, ascii_uppercase[0],
                  transform=axes[0].transAxes, size=15, weight='bold')
 
-    boxplot_n_learnt_n_seen(data=df_learnt, ax=axes[1])
+    boxplot_n_learnt_n_seen(data=df_learnt, ax=axes[1], dot_size=5)
     axes[1].set_title("N learned / N seen\n", fontstyle='italic', fontsize=14)
     axes[1].text(-0.2, 1.05, ascii_uppercase[1],
                  transform=axes[1].transAxes, size=15, weight='bold')
@@ -443,6 +498,8 @@ def figure4():
 def main():
 
     figure2()
+    figure3()
+    figure4()
 
 
 if __name__ == "__main__":
