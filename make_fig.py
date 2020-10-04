@@ -2,6 +2,7 @@ import os
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+import scipy.stats as stats
 
 import numpy as np
 import math
@@ -232,7 +233,7 @@ def scatter_n_learnt_n_seen(data, active, ax, x_label, y_label):
 
 def figure2():
 
-    dataset = "explo_leitner_geolin"
+    dataset = "n_learnt_leitner"
 
     df_heat = explo_leitner.get_data()
 
@@ -319,7 +320,7 @@ def figure2():
 
 def figure3():
 
-    dataset = "explo_leitner_geolin_rnditem"
+    dataset = "n_learnt_leitner"
 
     df_omni = analyse_s.get_data(dataset_name=dataset,
                                  condition_name="spec-omni")
@@ -367,7 +368,7 @@ def figure3():
                      title="Myopic",
                      color="C1")
     axes[2].text(-0.25, 1.15, ascii_uppercase[2],
-                 transform=axes[3].transAxes, size=15, weight='bold')
+                 transform=axes[2].transAxes, size=15, weight='bold')
 
     ax = fig.add_subplot(2, 3, 4)
     ax.set_axis_off()
@@ -397,7 +398,7 @@ def figure3():
     plt.savefig(os.path.join(fig_folder, f"fig3.pdf"))
 
 
-def figure4():
+def get_user_data():
 
     # ######## TO EDIT WITH LAST DATA ############################
     user_domain = 'aalto.fi'  # 'active.fi'
@@ -434,6 +435,13 @@ def figure4():
             })
 
     df_learnt = pd.DataFrame(row_list)
+
+    return df, df_learnt
+
+
+def figure4():
+
+    df, df_learnt = get_user_data()
 
     fig = plt.figure(figsize=(8, 7))
 
@@ -495,11 +503,76 @@ def figure4():
     plt.savefig(os.path.join(fig_folder, f"fig4.pdf"))
 
 
+def make_statistics():
+
+    print("Human" + " " + "*"*50)
+
+    df, df_learnt = get_user_data()
+
+    print(f"n item learnt:")
+    for teacher in ('threshold', 'forward'):
+        u, p = stats.mannwhitneyu(
+            x=df[df.teacher_md == teacher]["n_recall_leitner"],
+            y=df[df.teacher_md == teacher]["n_recall_act"],
+            alternative='two-sided', use_continuity=False)
+        print(f"{teacher} > Leitner")
+        p_f = f"$p={p:.3f}$" if p >= 0.001 else "$p<0.001$"
+        print(f"$u={u}$; {p_f}")
+
+    print()
+    print(f"n learnt / n seen:")
+    for teacher in ('threshold', 'forward'):
+        u, p = stats.mannwhitneyu(
+            x=df[df.teacher_md == teacher]["n_recall_leitner"]/df[df.teacher_md == teacher]["n_eval_leitner"],
+            y=df[df.teacher_md == teacher]["n_recall_act"] / df[df.teacher_md == teacher]["n_eval_act"],
+            alternative='two-sided', use_continuity=True)
+        print(f"{teacher} > Leitner")
+        p_f = f"$p={p:.3f}$" if p >= 0.001 else "$p<0.001$"
+        print(f"$u={u}$; {p_f}")
+
+    print()
+    print()
+    # Artificial --------------- #
+    print("Artificial" + " " + "*"*50)
+
+    dataset = "n_learnt_leitner"
+
+    for condition in "Nspec-omni", "Nspec-Nomni", "spec-omni", "spec-Nomni":
+
+        df = analyse_s.get_data(dataset_name=dataset,
+                                condition_name=condition)
+        print(condition)
+
+        print(f"n item learnt:")
+        for teacher in ('threshold', 'forward'):
+            u, p = stats.mannwhitneyu(
+                x=df[df.teacher == teacher]["n_learnt"],
+                y=df[df.teacher == "leitner"]["n_learnt"],
+                alternative='two-sided', use_continuity=False)
+            print(f"{teacher} > Leitner")
+            p_f = f"$p={p:.3f}$" if p >= 0.001 else "$p<0.001$"
+            print(f"$u={u}$; {p_f}")
+
+        print()
+        print(f"n learnt / n seen:")
+        for teacher in ('threshold', 'forward'):
+            u, p = stats.mannwhitneyu(
+                x=df[df.teacher == teacher]["ratio_n_learnt_n_seen"],
+                y=df[df.teacher == "leitner"]["ratio_n_learnt_n_seen"],
+                alternative='two-sided', use_continuity=True)
+            print(f"{teacher} > Leitner")
+            p_f = f"$p={p:.3f}$" if p >= 0.001 else "$p<0.001$"
+            print(f"$u={u}$; {p_f}")
+        print()
+
+
 def main():
 
-    figure2()
-    figure3()
-    figure4()
+    make_statistics()
+
+    # figure2()
+    # figure3()
+    # figure4()
 
 
 if __name__ == "__main__":
