@@ -6,53 +6,59 @@ Note: All commands are given based on the assumption of using the Homebrew's pac
 
 #### Python 3
 
-Using brew on mac:
+* Install Python3
+
 
     brew install python3
 
-* Create a virtual environment (optional)
+* Create a virtual environment
 
-        source venv/bin/activate
 
-    (If using venv, replace 'pip3' by pip)
-
-* Python libraries
-
-        pip3 install -r requirements.txt
+    sudo apt-get install virtualenv
+    cd /var/www/html/ActiveTeachingServer
+    virtualenv -p python3 venv
+    source venv/bin/activate
+    pip install -r requirements.txt
 
 
  ## Triton
 Create the config files
 
-    generate_config_files_triton.py
+    gen_config_files.py
     
-Edit the number of array job in `simulation.job`
- 
-Launch the job with:
- 
-    ./run.sh simulation.job
+Data will be save under `data/triton/<trial_name>`
     
-See job status:
+See job status
     
     sacct -u <user>
     
-Count number of results files:
-    
-    ls data | wc -l
-    
-Check the last 10 lines of the log file:
+or 
 
-    tail -f triton_out/out
+    slurm q
+    
+Count number of results files
+    
+    ls data/triton/<trial_name> | wc -l
+    
+Check the last 10 lines of the log file
+
+    tail -f triton_out/
     
 or for seeing the complete file:
     
-    cat triton_out/out
+    cat triton_out/debug.out
     
-cancel the job:
+cancel the job
     
     scancel <job_id>
     
  
-check the resources used by the job:
+check the resources used by the job
 
     seff <job_id>
+    
+   
+   
+## Reproduce figures
+    
+    python make_fig.py
