@@ -1,17 +1,23 @@
 #!/bin/python3
+
+import datetime
 import json
 import os
 import shutil
 
 import numpy as np
 from numpy.random import default_rng
+# from scipy.stats import loguniform
 from tqdm import tqdm
 import pandas as pd
 
 import settings.paths as paths
 from model.learner.exponential_n_delta import ExponentialNDelta
+# from model.learner.walsh2018 import Walsh2018
 from model.psychologist.psychologist_grid import PsychologistGrid
 from model.teacher.leitner import Leitner
+from model.teacher.recursive import Recursive
+from model.teacher.sampling import Sampling
 from model.teacher.threshold import Threshold
 from model.teacher.forward import Forward
 from settings.config_triton import LEARNER, PSYCHOLOGIST, TEACHER
@@ -19,6 +25,65 @@ from settings.config_triton import LEARNER, PSYCHOLOGIST, TEACHER
 TEACHER_INV = {v: k for k, v in TEACHER.items()}
 PSY_INV = {v: k for k, v in PSYCHOLOGIST.items()}
 LEARNER_INV = {v: k for k, v in LEARNER.items()}
+
+
+def generate_param(bounds, is_item_specific, n_item):
+
+    param = np.zeros(len(bounds))
+    for i, b in enumerate(bounds):
+        param[i] = np.random.uniform(b[0], b[1])
+
+    if is_item_specific:
+
+        param_spec = np.zeros((n_item, len(bounds)))
+        for i, b in enumerate(bounds):
+
+            # param[:, i] = np.random.uniform(b[0], b[1], n_item)
+
+            v = param[i]
+            # std = (b[1] - b[0]) * 0.05
+            # v = np.random.normal(loc=mean, scale=std, size=n_item)
+            # v[v < b[0]] = b[0]
+            # v[v > b[1]] = b[1]
+
+            param_spec[:, i] = v
+
+        param = param_spec
+
+    param = param.tolist()
+    return param
+
+
+def cartesian_product(*arrays):
+
+    la = len(arrays)
+    dtype = np.result_type(*arrays)
+    arr = np.empty([len(a) for a in arrays] + [la], dtype=dtype)
+    for i, a in enumerate(np.ix_(*arrays)):
+        arr[..., i] = a
+    return arr.reshape(-1, la)
+
+
+def cp_grid_param(grid_size, bounds, methods):
+    """Get grid parameters"""
+
+    bounds = np.asarray(bounds)
+    methods = np.asarray(methods)
+
+    diff = bounds[:, 1] - bounds[:, 0] > 0
+    not_diff = np.invert(diff)
+
+    values = np.atleast_2d(
+        [m(*b, num=grid_size) for (b, m) in zip(bounds[diff], methods[diff])]
+    )
+    var = cartesian_product(*values)
+    grid = np.zeros((max(1, len(var)), len(bounds)))
+    if np.sum(diff):
+        grid[:, diff] = var
+    if np.sum(not_diff):
+        grid[:, not_diff] = bounds[not_diff, 0]
+
+    return grid.tolist()
 
 
 def dic_to_lab_val(dic):
@@ -95,10 +160,12 @@ def main() -> None:
 
     # -------------     SET PARAM HERE      ------------------------ #
 
+    gen_method = "n_learnt_leitner_non_uniform"
+
     learner_md = ExponentialNDelta
     psy_md = PsychologistGrid
 
-    teacher_models = (Leitner, Threshold, Forward)
+    teacher_models = (Leitner, Threshold, Recursive)
 
     ss_n_iter = 100
     time_between_ss = 24 * 60 ** 2
@@ -106,40 +173,85 @@ def main() -> None:
     learnt_threshold = 0.9
     time_per_iter = 4
 
-    n_item = 500
+    n_item = 500  # 500 * n_ss // 6
+
+    sampling_cst = {"n_sample": 10000}
 
     leitner_cst = {"delay_factor": 2, "delay_min": time_per_iter}
 
     pr_lab = ["alpha", "beta"]
-
+    ### Good bounds in-silico
+    # bounds = [[0.0000001, 0.00005], [0.0001, 0.9999]]
+    ### With prior in silico
     bounds = [[2e-07, 0.025], [0.0001, 0.9999]]
-
+    ### Bounds for user experiment
+    # bounds = [[0.0000001, 0.1], [0.0001, 0.9999]]
     grid_methods = [PsychologistGrid.GEO, PsychologistGrid.LIN]
-    grid_size = 100
-
+    grid_size = 100  # 20
+    # gen_methods = [np.linspace, np.linspace]
+    # gen_bounds = [[0.0000001, 0.00005], [0.0001, 0.9999]]
     cst_time = 1
 
     seed = 123
     np.random.seed(seed)
 
-    n_agent = 100
-    df = pd.read_csv("config/parameters/n_learnt_leitner.csv", index_col=0)
-    n_learnt = df["n_learnt"].values
-    alpha = df["alpha"].values
-    beta = df["beta"].values
-    smart_enough = np.flatnonzero(n_learnt > 0)
-    slc = np.random.choice(smart_enough, size=n_agent, replace=False)
-    grid = np.vstack((alpha[slc], beta[slc])).T
+    if gen_method == 'random':
 
-    seed = 123
-    np.random.seed(seed)
-    possibilities = np.vstack((alpha[smart_enough], beta[smart_enough])).T
+        gen_bounds = bounds #[[1e-06, 0.025], [0.5, 0.9999]]
+        n_agent = 100
 
-    grid_spec = np.zeros((n_agent, n_item, len(bounds)))
-    for agent in range(n_agent):
-        for item in range(n_item):
-            idx = np.random.randint(len(possibilities))
-            grid_spec[agent, item] = possibilities[idx]
+    elif gen_method == 'n_learnt_leitner':
+
+        n_agent = 100
+        df = pd.read_csv("config/parameters/n_learnt_leitner.csv", index_col=0)
+        n_learnt = df["n_learnt"].values
+        alpha = df["alpha"].values
+        beta = df["beta"].values
+        smart_enough = np.flatnonzero(n_learnt > 0)
+        slc = np.random.choice(smart_enough, size=n_agent, replace=False)
+        grid = np.vstack((alpha[slc], beta[slc])).T
+
+    elif gen_method == 'n_learnt_leitner_non_uniform':
+
+        n_agent = 100
+        df = pd.read_csv("config/parameters/n_learnt_leitner.csv", index_col=0)
+        n_learnt = df["n_learnt"].values
+        alpha = df["alpha"].values
+        beta = df["beta"].values
+        smart_enough = np.flatnonzero(n_learnt > 0)
+        grid = np.vstack((alpha[smart_enough], beta[smart_enough])).T
+
+    elif gen_method == 'p_depending_on_lls':
+
+        n_agent = 100
+
+        grid_df = pd.read_csv("grid.csv", index_col=[0])
+        ll_df = pd.read_csv("lls.csv", index_col=[0])
+
+        lls = np.sum(ll_df.values, axis=1)
+        p = (lls - min(lls)) / (max(lls) - min(lls))
+        p /= np.sum(p)
+
+        grid = grid_df.values
+
+    elif gen_method == 'best_fit':
+
+        grid = pd.read_csv("best_param.csv", index_col=[0]).values
+        n_agent = len(grid)
+        print(n_agent)
+
+    elif gen_method == 'use_grid':
+
+        gen_bounds = [[1e-06, 0.025], [0.5, 0.9999]]
+        gen_grid_size = 20
+        gen_methods = [np.linspace, np.linspace]
+
+        grid = cp_grid_param(
+            grid_size=gen_grid_size, methods=gen_methods, bounds=gen_bounds)
+
+        n_agent = len(grid)
+    else:
+        raise Exception
 
     # ------------------  END OF PARAMETER SETTING -------------------- #
 
@@ -148,22 +260,97 @@ def main() -> None:
     pbar = tqdm()
     job_number = 0
 
-    for omni in (True, False):
+    for omni in (False, True):
         for is_item_specific in (False, True):
 
             for agent in range(n_agent):
 
-                if not is_item_specific:
-                    pr_val = grid[agent].tolist()
+                if gen_method == 'use_grid':
+
+                    pr_val = grid[agent]
+                    assert not is_item_specific
+
+                elif gen_method == 'n_learnt_leitner':
+                    pr_val = grid[agent]
+
+                    if is_item_specific:
+
+                        param_spec = np.zeros((n_item, len(bounds)))
+                        for i, b in enumerate(bounds):
+
+                            v = pr_val[i]
+                            param_spec[:, i] = v
+
+                        pr_val = param_spec
+
+                    pr_val = pr_val.tolist()
+
+                elif gen_method == 'n_learnt_leitner_non_uniform':
+
+                    if is_item_specific:
+
+                        param_spec = np.zeros((n_item, len(bounds)))
+                        for i in range(n_item):
+                            idx = np.random.randint(len(grid))
+                            param_spec[i] = grid[idx]
+
+                        pr_val = param_spec
+
+                    else:
+                        idx = np.random.randint(len(grid))
+                        pr_val = grid[idx]
+
+                    pr_val = pr_val.tolist()
+
+                elif gen_method == 'random':
+
+                    pr_val = generate_param(
+                        bounds=gen_bounds,
+                        is_item_specific=is_item_specific,
+                        n_item=n_item)
+
+                elif gen_method == 'p_depending_on_lls':
+
+                    idx = np.random.choice(np.arange(len(grid)), p=p)
+                    param = grid[idx]
+
+                    if is_item_specific:
+
+                        param_spec = np.zeros((n_item, len(bounds)))
+                        for i, b in enumerate(bounds):
+
+                            v = param[i]
+                            param_spec[:, i] = v
+
+                        param = param_spec
+
+                    pr_val = param.tolist()
+
+                elif gen_method == 'p_depending_on_best_fit':
+
+                    param = grid[agent]
+
+                    if is_item_specific:
+
+                        param_spec = np.zeros((n_item, len(bounds)))
+                        for i, b in enumerate(bounds):
+                            v = param[i]
+                            param_spec[:, i] = v
+
+                        param = param_spec
+
+                    pr_val = param.tolist()
 
                 else:
-                    pr_val = grid_spec[agent].tolist()
+                    raise ValueError
 
                 for teacher_md in teacher_models:
 
                     if teacher_md == Leitner:
                         teacher_pr = leitner_cst
-                    elif teacher_md in (Threshold, Forward):
+                    elif teacher_md == Sampling:
+                        teacher_pr = sampling_cst
+                    elif teacher_md in (Threshold, Recursive, Forward):
                         teacher_pr = {}
                     else:
                         raise ValueError
