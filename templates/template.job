@@ -9,8 +9,7 @@
 #SBATCH -o triton_out/debug.out
 ############## Here starts the actual UNIX commands and payload:
 
-module purge
-module load Anaconda3
+source act venv/bin/activate
 
 srun python main_triton.py $SLURM_ARRAY_TASK_ID
 
