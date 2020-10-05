@@ -515,28 +515,35 @@ def make_statistics():
 
     print(f"n item learnt:")
     for teacher in ('threshold', 'forward'):
+        x = df[df.teacher_md == teacher]["n_recall_leitner"]
+        y = df[df.teacher_md == teacher]["n_recall_act"]
+
         u, p = stats.mannwhitneyu(
-            x=df[df.teacher_md == teacher]["n_recall_leitner"],
-            y=df[df.teacher_md == teacher]["n_recall_act"],
+            x=x,
+            y=y,
             alternative='two-sided', use_continuity=False)
         print(f"{teacher} > Leitner")
         p_f = f"$p={p:.3f}$" if p >= 0.001 else "$p<0.001$"
-        print(f"$u={u}$; {p_f}")
+        print(f"$u={u}$; {p_f}; $N={len(x)}"+r"\times 2$")
 
     print()
     print(f"n learnt / n seen:")
     for teacher in ('threshold', 'forward'):
+        x = df[df.teacher_md == teacher]["n_recall_leitner"]\
+            / df[df.teacher_md == teacher]["n_eval_leitner"]
+        y = df[df.teacher_md == teacher]["n_recall_act"] \
+            / df[df.teacher_md == teacher]["n_eval_act"]
         u, p = stats.mannwhitneyu(
-            x=df[df.teacher_md == teacher]["n_recall_leitner"]/df[df.teacher_md == teacher]["n_eval_leitner"],
-            y=df[df.teacher_md == teacher]["n_recall_act"] / df[df.teacher_md == teacher]["n_eval_act"],
+            x=x,
+            y=y,
             alternative='two-sided', use_continuity=True)
         print(f"{teacher} > Leitner")
         p_f = f"$p={p:.3f}$" if p >= 0.001 else "$p<0.001$"
-        print(f"$u={u}$; {p_f}")
+        print(f"$u={u}$; {p_f}; $N={len(x)}"+r"\times 2$")
 
     print()
     print()
-    # Artificial --------------- #
+
     print("Artificial" + " " + "*"*50)
 
     dataset = "n_learnt_leitner"
@@ -549,30 +556,34 @@ def make_statistics():
 
         print(f"n item learnt:")
         for teacher in ('threshold', 'forward'):
+            x = df[df.teacher == teacher]["n_learnt"]
+            y = df[df.teacher == "leitner"]["n_learnt"]
             u, p = stats.mannwhitneyu(
-                x=df[df.teacher == teacher]["n_learnt"],
-                y=df[df.teacher == "leitner"]["n_learnt"],
+                x=x,
+                y=y,
                 alternative='two-sided', use_continuity=False)
             print(f"{teacher} > Leitner")
             p_f = f"$p={p:.3f}$" if p >= 0.001 else "$p<0.001$"
-            print(f"$u={u}$; {p_f}")
+            print(f"$u={u}$; {p_f}; $N={len(x)}"+r"\times 2$")
 
         print()
         print(f"n learnt / n seen:")
         for teacher in ('threshold', 'forward'):
+            x = df[df.teacher == teacher]["ratio_n_learnt_n_seen"]
+            y = df[df.teacher == "leitner"]["ratio_n_learnt_n_seen"]
             u, p = stats.mannwhitneyu(
-                x=df[df.teacher == teacher]["ratio_n_learnt_n_seen"],
-                y=df[df.teacher == "leitner"]["ratio_n_learnt_n_seen"],
+                x=x,
+                y=y,
                 alternative='two-sided', use_continuity=True)
             print(f"{teacher} > Leitner")
             p_f = f"$p={p:.3f}$" if p >= 0.001 else "$p<0.001$"
-            print(f"$u={u}$; {p_f}")
+            print(f"$u={u}$; {p_f}; $N={len(x)}"+r"\times 2$")
         print()
 
 
 def main():
 
-    # make_statistics()
+    make_statistics()
 
     figure2()
     figure3()
