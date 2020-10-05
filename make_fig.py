@@ -113,6 +113,8 @@ def boxplot_n_learnt(data, ax,
     sns.stripplot(x=x_label, y=y_label, data=data, s=dot_size,
                   color="0.25", alpha=dot_alpha, ax=ax, order=order)
 
+    ax.set_xticklabels(ax.get_xmajorticklabels(), fontsize=13)
+
     ymax = roundup(np.max(data[y_label]))
     ax.set_ylim(-0.1, ymax+0.1)
     ax.set_yticks((0, ymax//2, ymax))
@@ -140,6 +142,8 @@ def boxplot_n_learnt_n_seen(data, ax,
     sns.stripplot(x="Teacher", y=y_label, data=data,
                   color="0.25", alpha=dot_alpha, ax=ax, order=order,
                   s=dot_size)
+
+    ax.set_xticklabels(ax.get_xmajorticklabels(), fontsize=13)
 
     ax.set_ylim(-0.01, 1.01)
     ax.set_yticks((0, 0.5, 1))
@@ -568,11 +572,11 @@ def make_statistics():
 
 def main():
 
-    make_statistics()
+    # make_statistics()
 
-    # figure2()
-    # figure3()
-    # figure4()
+    figure2()
+    figure3()
+    figure4()
 
 
 if __name__ == "__main__":
