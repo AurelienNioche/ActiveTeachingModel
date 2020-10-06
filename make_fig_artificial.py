@@ -1,5 +1,4 @@
 import os
-import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 import scipy.stats as stats
@@ -165,74 +164,6 @@ def prediction_error(data, ax, title, color,
 
     ax.set_ylim(0, 1)
     ax.set_title(title)
-
-
-def scatter_n_learnt(data, active, ax, x_label, y_label):
-
-    min_leitner = np.min(data.n_recall_leitner)
-    min_act = np.min(data.n_recall_act)
-    min_v = np.min((min_leitner, min_act))
-
-    max_leitner = np.max(data.n_recall_leitner)
-    max_act = np.max(data.n_recall_act)
-    max_v = np.max((max_leitner, max_act))
-
-    data = data[data.teacher_md == active]
-
-    data = data.rename(columns={
-        "n_recall_leitner": x_label,
-        "n_recall_act": y_label
-    })
-
-    color = "C1" if active == "threshold" else "C2"
-
-    sns.scatterplot(data=data,
-                    x=x_label,
-                    y=y_label,
-                    color=color,
-                    alpha=0.5, s=20,
-                    ax=ax)
-
-    ax.plot((min_v, max_v), (min_v, max_v), ls="--", color="black",
-            alpha=0.1)
-
-    ax.set_xticks((rounddown10(min_v), roundup10(max_v)))
-    ax.set_yticks((rounddown10(min_v), roundup10(max_v)))
-
-    ax.set_aspect(1)
-
-
-def scatter_n_learnt_n_seen(data, active, ax, x_label, y_label):
-
-    min_leitner = np.min(data.ratio_leitner)
-    min_act = np.min(data.ratio_act)
-    min_v = np.min((min_leitner, min_act))
-
-    max_leitner = np.max(data.ratio_leitner)
-    max_act = np.max(data.ratio_act)
-    max_v = np.max((max_leitner, max_act))
-
-    data = data[data.teacher_md == active]
-
-    data = data.rename(columns={
-        "ratio_leitner": x_label,
-        "ratio_act": y_label
-    })
-
-    color = "C1" if active == "threshold" else "C2"
-
-    sns.scatterplot(data=data,
-                    x=x_label,
-                    y=y_label,
-                    alpha=0.5, s=20, color=color, ax=ax)
-
-    ax.plot((min_v, max_v), (min_v, max_v), ls="--", color="black",
-            alpha=0.1)
-
-    ax.set_xticks((rounddowntenth(min_v), rounduptenth(max_v)))
-    ax.set_yticks((rounddowntenth(min_v), rounduptenth(max_v)))
-
-    ax.set_aspect(1)
 
 
 def figure2():
@@ -402,140 +333,7 @@ def figure3():
     plt.savefig(os.path.join(fig_folder, f"fig3.pdf"))
 
 
-def get_user_data():
-
-    # ######## TO EDIT WITH LAST DATA ############################
-    user_domain = 'aalto.fi'  # 'active.fi'
-    # ############################################################
-
-    df = pd.read_csv(os.path.join("data", "human", "data_summary.csv"),
-                     index_col=0)
-
-    # ######## TO EDIT WITH LAST DATA ############################
-    df.teacher_md = df.teacher_md.replace({"recursive": "forward"})
-    df = df[df.is_item_specific == True]
-    # ############################################################
-
-    df["ratio_leitner"] = df.n_recall_leitner / df.n_eval_leitner
-    df["ratio_act"] = df.n_recall_act / df.n_eval_act
-
-    row_list = []
-    for _, r in df.iterrows():
-        if user_domain not in r.user or r.n_ss_done != 14:
-            continue
-
-        row_list.append({
-                "user": r.user,
-                "teacher": "leitner",
-                "n_learnt": int(r.n_recall_leitner),
-                "ratio_n_learnt_n_seen": r.ratio_leitner,
-            })
-
-        row_list.append({
-                "user": r.user,
-                "teacher": r.teacher_md,
-                "n_learnt": int(r.n_recall_act),
-                "ratio_n_learnt_n_seen": r.ratio_act,
-            })
-
-    df_learnt = pd.DataFrame(row_list)
-
-    return df, df_learnt
-
-
-def figure4():
-
-    df, df_learnt = get_user_data()
-
-    fig = plt.figure(figsize=(8, 7))
-
-    fig.suptitle("Human", fontsize=18, fontweight='bold')
-
-    # Thanks to the Matplotlib creators that I love
-    pos = [(3, 4, (1, 6)), (3, 4, (3, 8)),
-           (3, 4, 9), (3, 4, 10),
-           (3, 4, 11), (3, 4, 12)]
-    axes = [fig.add_subplot(*p) for p in pos]
-
-    boxplot_n_learnt(data=df_learnt, ax=axes[0], dot_size=5)
-    axes[0].set_title("N learned\n", fontstyle='italic', fontsize=14)
-    axes[0].text(-0.2, 1.05, ascii_uppercase[0],
-                 transform=axes[0].transAxes, size=15, weight='bold')
-
-    boxplot_n_learnt_n_seen(data=df_learnt, ax=axes[1], dot_size=5)
-    axes[1].set_title("N learned / N seen\n", fontstyle='italic', fontsize=14)
-    axes[1].text(-0.2, 1.05, ascii_uppercase[1],
-                 transform=axes[1].transAxes, size=15, weight='bold')
-
-    scatter_n_learnt(data=df,
-                     active="threshold",
-                     x_label="N learned\nLeitner",
-                     y_label="N learned\nMyopic",
-                     ax=axes[2])
-
-    axes[2].text(-0.2, -0.16, ascii_uppercase[2],
-                 transform=axes[0].transAxes, size=15, weight='bold')
-
-    scatter_n_learnt(data=df,
-                     active="forward",
-                     x_label="N learned\nLeitner",
-                     y_label="N learned\nCons. Sampling",
-                     ax=axes[3])
-
-    scatter_n_learnt_n_seen(data=df,
-                            active="threshold",
-                            x_label="N learned / N seen\nLeitner",
-                            y_label="N learned / N seen\nMyopic",
-                            ax=axes[4])
-
-    axes[4].text(-0.2, -0.16, ascii_uppercase[3],
-                 transform=axes[1].transAxes, size=15, weight='bold')
-
-    scatter_n_learnt_n_seen(data=df,
-                            active="forward",
-                            x_label="N learned / N seen\nLeitner",
-                            y_label="N learned / N seen\nCons. Sampling",
-                            ax=axes[5])
-
-    plt.tight_layout()
-
-    # plt.show()
-
-    fig_folder = os.path.join("fig")
-    os.makedirs(fig_folder, exist_ok=True)
-    plt.savefig(os.path.join(fig_folder, f"fig4.png"), dpi=300)
-    plt.savefig(os.path.join(fig_folder, f"fig4.pdf"))
-
-
-def make_statistics():
-
-    print("Human" + " " + "*"*50)
-
-    df, df_learnt = get_user_data()
-
-    print(f"n item learnt:")
-    for teacher in ('threshold', 'forward'):
-        u, p = stats.mannwhitneyu(
-            x=df[df.teacher_md == teacher]["n_recall_leitner"],
-            y=df[df.teacher_md == teacher]["n_recall_act"],
-            alternative='two-sided', use_continuity=False)
-        print(f"{teacher} > Leitner")
-        p_f = f"$p={p:.3f}$" if p >= 0.001 else "$p<0.001$"
-        print(f"$u={u}$; {p_f}")
-
-    print()
-    print(f"n learnt / n seen:")
-    for teacher in ('threshold', 'forward'):
-        u, p = stats.mannwhitneyu(
-            x=df[df.teacher_md == teacher]["n_recall_leitner"]/df[df.teacher_md == teacher]["n_eval_leitner"],
-            y=df[df.teacher_md == teacher]["n_recall_act"] / df[df.teacher_md == teacher]["n_eval_act"],
-            alternative='two-sided', use_continuity=True)
-        print(f"{teacher} > Leitner")
-        p_f = f"$p={p:.3f}$" if p >= 0.001 else "$p<0.001$"
-        print(f"$u={u}$; {p_f}")
-
-    print()
-    print()
+def make_statistics_artificial():
     # Artificial --------------- #
     print("Artificial" + " " + "*"*50)
 
@@ -553,7 +351,7 @@ def make_statistics():
                 x=df[df.teacher == teacher]["n_learnt"],
                 y=df[df.teacher == "leitner"]["n_learnt"],
                 alternative='two-sided', use_continuity=False)
-            print(f"{teacher} > Leitner")
+            print(f"{teacher} // Leitner")
             p_f = f"$p={p:.3f}$" if p >= 0.001 else "$p<0.001$"
             print(f"$u={u}$; {p_f}")
 
@@ -564,7 +362,7 @@ def make_statistics():
                 x=df[df.teacher == teacher]["ratio_n_learnt_n_seen"],
                 y=df[df.teacher == "leitner"]["ratio_n_learnt_n_seen"],
                 alternative='two-sided', use_continuity=True)
-            print(f"{teacher} > Leitner")
+            print(f"{teacher} // Leitner")
             p_f = f"$p={p:.3f}$" if p >= 0.001 else "$p<0.001$"
             print(f"$u={u}$; {p_f}")
         print()
@@ -572,11 +370,9 @@ def make_statistics():
 
 def main():
 
-    # make_statistics()
-
+    make_statistics_artificial()
     figure2()
     figure3()
-    figure4()
 
 
 if __name__ == "__main__":
