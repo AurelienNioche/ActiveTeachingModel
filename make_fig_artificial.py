@@ -12,9 +12,15 @@ import explo_leitner
 import analyse_s_p_recall
 
 
-def roundup(x):
-    return int(math.ceil(x / 100.0)) * 100
+# def roundup(x):
+#     return int(math.ceil(x / 100.0)) * 100
 
+def roundup(x, base=100):
+    return base * math.ceil(x/base)
+
+
+def rounddown(x, base=100):
+    return base * math.floor(x / base)
 
 def roundup10(x):
     return int(math.ceil(x / 10.0)) * 10
@@ -94,6 +100,7 @@ def rename_teachers(data):
 
 
 def boxplot_n_learnt(data, ax,
+                     ylim,
                      x_label="Teacher",
                      y_label="N learned", dot_size=3, dot_alpha=0.7):
 
@@ -114,9 +121,9 @@ def boxplot_n_learnt(data, ax,
 
     ax.set_xticklabels(ax.get_xmajorticklabels(), fontsize=13)
 
-    ymax = roundup(np.max(data[y_label]))
-    ax.set_ylim(-0.1, ymax+0.1)
-    ax.set_yticks((0, ymax//2, ymax))
+    # ymax = roundup(np.max(data[y_label]), base=50)
+    ax.set_ylim(ylim[0], ylim[1])
+    # ax.set_yticks((0, ymax//2, ymax))
 
     ax.set_xlabel("")
 
@@ -144,7 +151,7 @@ def boxplot_n_learnt_n_seen(data, ax,
 
     ax.set_xticklabels(ax.get_xmajorticklabels(), fontsize=13)
 
-    ax.set_ylim(-0.01, 1.01)
+    ax.set_ylim(-0.025, 1.025)
     ax.set_yticks((0, 0.5, 1))
 
     ax.set_xlabel("")
@@ -162,7 +169,8 @@ def prediction_error(data, ax, title, color,
 
     sns.lineplot(data=data, x=x_label, y=y_label, ci="sd", ax=ax, color=color)
 
-    ax.set_ylim(0, 1)
+    ax.set_ylim(-0.05, 1.05)
+    ax.set_yticks([0, 0.5, 1])
     ax.set_title(title)
 
 
@@ -177,6 +185,14 @@ def figure2():
 
     df_not_omni = analyse_s.get_data(dataset_name=dataset,
                                      condition_name="Nspec-Nomni")
+
+    x1 = df_omni.n_learnt
+    x2 = df_not_omni.n_learnt
+    min1, max1 = np.min(x1), np.max(x1)
+    min2, max2 = np.min(x2), np.max(x2)
+    min_v = np.min((min1, min2))
+    max_v = np.max((max1, max2))
+    ylim = (rounddown(min_v, 50)-10, roundup(max_v, 50)+10)
 
     err_threshold = analyse_s_p_recall.get_data(
         dataset_name=dataset,
@@ -202,7 +218,7 @@ def figure2():
     axes[0].text(-0.6, 1.05, ascii_uppercase[0],
                  transform=axes[0].transAxes, size=15, weight='bold')
 
-    boxplot_n_learnt(data=df_omni, ax=axes[1])
+    boxplot_n_learnt(data=df_omni, ax=axes[1], ylim=ylim)
     axes[1].set_title("N learned\n", fontstyle='italic', fontsize=15)
     axes[1].text(-0.2, 1.05, ascii_uppercase[1],
                  transform=axes[1].transAxes, size=15, weight='bold')
@@ -235,7 +251,7 @@ def figure2():
                      title="Conservative Sampling",
                      color="C2")
 
-    boxplot_n_learnt(data=df_not_omni, ax=axes[5])
+    boxplot_n_learnt(data=df_not_omni, ax=axes[5], ylim=ylim)
     axes[5].text(-0.2, 1.05, ascii_uppercase[4],
                  transform=axes[5].transAxes, size=15, weight='bold')
 
@@ -259,9 +275,18 @@ def figure3():
 
     df_omni = analyse_s.get_data(dataset_name=dataset,
                                  condition_name="spec-omni")
+    print(df_omni.columns)
 
     df_not_omni = analyse_s.get_data(dataset_name=dataset,
                                      condition_name="spec-Nomni")
+
+    x1 = df_omni.n_learnt
+    x2 = df_not_omni.n_learnt
+    min1, max1 = np.min(x1), np.max(x1)
+    min2, max2 = np.min(x2), np.max(x2)
+    min_v = np.min((min1, min2))
+    max_v = np.max((max1, max2))
+    ylim = (rounddown(min_v, 10), roundup(max_v, 10))
 
     err_threshold = analyse_s_p_recall.get_data(
         dataset_name=dataset,
@@ -283,7 +308,7 @@ def figure3():
            (4, 3, 7), (4, 3, 10), (4, 3, (8, 11)), (4, 3, (9, 12))]
     axes = [fig.add_subplot(*p) for p in pos]
 
-    boxplot_n_learnt(data=df_omni, ax=axes[0])
+    boxplot_n_learnt(data=df_omni, ax=axes[0], ylim=ylim)
     axes[0].set_title("N learned\n", fontstyle='italic', fontsize=15)
     axes[0].text(-0.2, 1.05, ascii_uppercase[0],
                  transform=axes[0].transAxes, size=15, weight='bold')
@@ -317,7 +342,7 @@ def figure3():
                      title="Conservative Sampling",
                      color="C2")
 
-    boxplot_n_learnt(data=df_not_omni, ax=axes[4])
+    boxplot_n_learnt(data=df_not_omni, ax=axes[4], ylim=ylim)
     axes[4].text(-0.2, 1.05, ascii_uppercase[3],
                  transform=axes[4].transAxes, size=15, weight='bold')
 
