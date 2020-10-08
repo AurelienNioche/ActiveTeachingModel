@@ -121,42 +121,51 @@ def scatter_n_learnt_n_seen(data, active, ax, x_label, y_label):
 
 def boxplot(df, data_type, ylabel, axes, ylim):
 
-    color_dic = {"Leitner": "C0", "Myopic": "C1",
-                 "Conservative\nSampling": "C2"}
+    color_dic = {"leitner": "C0", "threshold": "C1", "forward": "C2"}
+    teacher_names = {"forward": "Recursive\nSampling",
+                     "leitner": "Leitner",
+                     "threshold": "Myopic"}
 
     for i, teacher in enumerate(('threshold', 'forward')):
+        slc = df.teacher_md == teacher
+        df_slc = df[slc]
+        user = df_slc["user"]
 
         if data_type == "n_learnt":
-            x = df[df.teacher_md == teacher]["n_recall_leitner"]
-            y = df[df.teacher_md == teacher]["n_recall_act"]
-        elif data_type == "ratio":
-            x = df[df.teacher_md == teacher]["ratio_leitner"]
-            y = df[df.teacher_md == teacher]["ratio_act"]
+            x = df_slc["n_recall_leitner"]
+            y = df_slc["n_recall_act"]
         else:
-            raise ValueError
+            x = df_slc["ratio_leitner"]
+            y = df_slc["ratio_act"]
 
-        teacher_name = "Conservative\nSampling" \
-            if teacher == "forward" else "Myopic"
-        df_plot = pd.DataFrame({"Leitner": x, teacher_name: y})
+        df_plot = pd.DataFrame({"user": user, "leitner": x, teacher: y})
 
-        xlabel = "Teacher"
-
-        df_melt = df_plot.melt(var_name=xlabel, value_name=ylabel)
+        df_melt = df_plot.melt(id_vars=["user"],
+                               value_vars=["leitner", teacher],
+                               value_name=ylabel, var_name="teacher")
 
         ax = axes[i]
-        order = ["Leitner", teacher_name]
-        sns.boxplot(data=df_melt, x=xlabel, y=ylabel, ax=ax,
-                    showfliers=False, order=order, palette=[color_dic[o]
-                                                            for o in order])
 
-        dot_alpha = 0.5
-        dot_size = 5
+        order = ["leitner", teacher]
+        colors = [color_dic[o] for o in order]
+        ticklabels = [teacher_names[o] for o in order]
 
-        sns.stripplot(x=xlabel, y=ylabel, data=df_melt, s=dot_size,
-                      color="0.25", alpha=dot_alpha, ax=ax, order=order)
+        sns.boxplot(data=df_melt, x="teacher", y=ylabel, ax=ax,
+                    showfliers=False, order=order, palette=colors,
+                    boxprops=dict(alpha=.5))
+        sns.lineplot(data=df_melt,
+                     x="teacher", y=ylabel, hue="user", alpha=0.4,
+                     color="black", ax=ax, legend=False, marker="o")
+
+        ax.set_xticklabels(ticklabels)
+        ax.set_xlabel("")
+        ax.set_ylabel(ylabel)
 
         ax.set_ylim(ylim)
         ax.set_xlabel("")
+
+    axes[-1].set_ylabel("")
+    # axes[-1].set_yticklabels(())
 
 
 def figure4():
@@ -171,8 +180,9 @@ def figure4():
     max_act = np.max(df.n_recall_act)
     max_v = np.max((max_leitner, max_act))
 
-    fig = plt.figure(figsize=(10, 7))
-    fig.suptitle("Human", fontsize=18, fontweight='bold')
+    fig = plt.figure(figsize=(10, 6))
+    fig.suptitle("Human", fontsize=18, fontweight='bold',
+                 verticalalignment='top')
 
     # Thanks to the Matplotlib creators that I love
     pos = [(3, 4, (1, 5)), (3, 4, (2, 6)),
@@ -233,7 +243,7 @@ def figure4():
     ax.set_axis_off()
     ax.set_title("N learned / N seen\n", fontstyle='italic', fontsize=14)
 
-    plt.tight_layout()
+    plt.tight_layout(rect=[0, 0, 1, 1.05])
 
     fig_folder = os.path.join("fig")
     os.makedirs(fig_folder, exist_ok=True)
@@ -257,7 +267,7 @@ def make_statistics_human():
             alternative='two-sided', use_continuity=False)
         print(f"{teacher} // Leitner")
         p_f = f"$p={p:.3f}$" if p >= 0.001 else "$p<0.001$"
-        print(f"$u={u}$; {p_f}; $N={len(x)}" + r"\times 2$")
+        print(f"$u={u}$, {p_f}, $N={len(x)}" + r"\times 2$")
 
     print()
     print(f"n learnt / n seen:")
@@ -270,7 +280,7 @@ def make_statistics_human():
             alternative='two-sided', use_continuity=True)
         print(f"{teacher} // Leitner")
         p_f = f"$p={p:.3f}$" if p >= 0.001 else "$p<0.001$"
-        print(f"$u={u}$; {p_f}; $N={len(x)}" + r"\times 2$")
+        print(f"$u={u}$, {p_f}, $N={len(x)}" + r"\times 2$")
 
     print()
     print()

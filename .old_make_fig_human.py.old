@@ -121,51 +121,42 @@ def scatter_n_learnt_n_seen(data, active, ax, x_label, y_label):
 
 def boxplot(df, data_type, ylabel, axes, ylim):
 
-    color_dic = {"leitner": "C0", "threshold": "C1", "forward": "C2"}
-    teacher_names = {"forward": "Recursive\nSampling",
-                     "leitner": "Leitner",
-                     "threshold": "Myopic"}
+    color_dic = {"Leitner": "C0", "Myopic": "C1",
+                 "Conservative\nSampling": "C2"}
 
     for i, teacher in enumerate(('threshold', 'forward')):
-        slc = df.teacher_md == teacher
-        df_slc = df[slc]
-        user = df_slc["user"]
 
         if data_type == "n_learnt":
-            x = df_slc["n_recall_leitner"]
-            y = df_slc["n_recall_act"]
+            x = df[df.teacher_md == teacher]["n_recall_leitner"]
+            y = df[df.teacher_md == teacher]["n_recall_act"]
+        elif data_type == "ratio":
+            x = df[df.teacher_md == teacher]["ratio_leitner"]
+            y = df[df.teacher_md == teacher]["ratio_act"]
         else:
-            x = df_slc["ratio_leitner"]
-            y = df_slc["ratio_act"]
+            raise ValueError
 
-        df_plot = pd.DataFrame({"user": user, "leitner": x, teacher: y})
+        teacher_name = "Conservative\nSampling" \
+            if teacher == "forward" else "Myopic"
+        df_plot = pd.DataFrame({"Leitner": x, teacher_name: y})
 
-        df_melt = df_plot.melt(id_vars=["user"],
-                               value_vars=["leitner", teacher],
-                               value_name=ylabel, var_name="teacher")
+        xlabel = "Teacher"
+
+        df_melt = df_plot.melt(var_name=xlabel, value_name=ylabel)
 
         ax = axes[i]
+        order = ["Leitner", teacher_name]
+        sns.boxplot(data=df_melt, x=xlabel, y=ylabel, ax=ax,
+                    showfliers=False, order=order, palette=[color_dic[o]
+                                                            for o in order])
 
-        order = ["leitner", teacher]
-        colors = [color_dic[o] for o in order]
-        ticklabels = [teacher_names[o] for o in order]
+        dot_alpha = 0.5
+        dot_size = 5
 
-        sns.boxplot(data=df_melt, x="teacher", y=ylabel, ax=ax,
-                    showfliers=False, order=order, palette=colors,
-                    boxprops=dict(alpha=.5))
-        sns.lineplot(data=df_melt,
-                     x="teacher", y=ylabel, hue="user", alpha=0.4,
-                     color="black", ax=ax, legend=False, marker="o")
-
-        ax.set_xticklabels(ticklabels)
-        ax.set_xlabel("")
-        ax.set_ylabel(ylabel)
+        sns.stripplot(x=xlabel, y=ylabel, data=df_melt, s=dot_size,
+                      color="0.25", alpha=dot_alpha, ax=ax, order=order)
 
         ax.set_ylim(ylim)
         ax.set_xlabel("")
-
-    axes[-1].set_ylabel("")
-    # axes[-1].set_yticklabels(())
 
 
 def figure4():
@@ -180,9 +171,8 @@ def figure4():
     max_act = np.max(df.n_recall_act)
     max_v = np.max((max_leitner, max_act))
 
-    fig = plt.figure(figsize=(10, 6))
-    fig.suptitle("Human", fontsize=18, fontweight='bold',
-                 verticalalignment='top')
+    fig = plt.figure(figsize=(10, 7))
+    fig.suptitle("Human", fontsize=18, fontweight='bold')
 
     # Thanks to the Matplotlib creators that I love
     pos = [(3, 4, (1, 5)), (3, 4, (2, 6)),
@@ -243,7 +233,7 @@ def figure4():
     ax.set_axis_off()
     ax.set_title("N learned / N seen\n", fontstyle='italic', fontsize=14)
 
-    plt.tight_layout(rect=[0, 0, 1, 1.05])
+    plt.tight_layout()
 
     fig_folder = os.path.join("fig")
     os.makedirs(fig_folder, exist_ok=True)

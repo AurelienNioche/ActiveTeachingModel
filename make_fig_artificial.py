@@ -378,7 +378,7 @@ def make_statistics_artificial():
                 alternative='two-sided', use_continuity=False)
             print(f"{teacher} // Leitner")
             p_f = f"$p={p:.3f}$" if p >= 0.001 else "$p<0.001$"
-            print(f"$u={u}$; {p_f}")
+            print(f"$u={u}$, {p_f}")
 
         print()
         print(f"n learnt / n seen:")
@@ -389,7 +389,7 @@ def make_statistics_artificial():
                 alternative='two-sided', use_continuity=True)
             print(f"{teacher} // Leitner")
             p_f = f"$p={p:.3f}$" if p >= 0.001 else "$p<0.001$"
-            print(f"$u={u}$; {p_f}")
+            print(f"$u={u}$, {p_f}")
         print()
 
 
