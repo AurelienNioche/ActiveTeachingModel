@@ -122,7 +122,7 @@ def scatter_n_learnt_n_seen(data, active, ax, x_label, y_label):
 def boxplot(df, data_type, ylabel, axes, ylim):
 
     color_dic = {"leitner": "C0", "threshold": "C1", "forward": "C2"}
-    teacher_names = {"forward": "Recursive\nSampling",
+    teacher_names = {"forward": "Conservative\nSampling",
                      "leitner": "Leitner",
                      "threshold": "Myopic"}
 
