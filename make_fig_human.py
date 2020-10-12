@@ -135,7 +135,7 @@ def boxplot(df, data_type, ylabel, axes, ylim):
                     boxprops=dict(alpha=.5))
         sns.lineplot(data=df_melt,
                      x="teacher", y=ylabel, hue="user", alpha=0.4,
-                     color="black", ax=ax, legend=False, marker="o")
+                     ax=ax, legend=False, marker="o")
 
         ax.set_xticklabels(ticklabels)
         ax.set_xlabel("")
