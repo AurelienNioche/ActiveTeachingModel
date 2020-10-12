@@ -7,16 +7,17 @@ import seaborn as sns
 from tqdm import tqdm
 
 from model.learner.exponential_n_delta import ExponentialNDelta
-# from model.learner.walsh2018 import Walsh2018
-from model.psychologist.psychologist_grid import PsychologistGrid
 from model.teacher.leitner import Leitner
-from model.teacher.recursive import Recursive
-from model.teacher.recursive_threshold import RecursiveThreshold
-from model.teacher.sampling import Sampling
-from model.teacher.threshold import Threshold
+
 from run.make_data_triton import run
-from settings.config_triton import LEARNER_INV, PSY_INV, TEACHER_INV, Config
-from utils.convert import dic
+
+from settings.config_triton import LEARNER_INV, TEACHER_INV, Config
+
+
+def dic_to_key_val_list(dic):
+    lab = list(dic.keys())
+    val = [dic[k] for k in lab]
+    return lab, val
 
 
 def cartesian_product(*arrays):
@@ -65,7 +66,7 @@ def produce_data(raw_data_folder, bounds, methods, grid_size):
     pr_lab = ["alpha", "beta"]
 
     teacher_pr = {"delay_factor": 2, "delay_min": 2}
-    teacher_pr_lab, teacher_pr_val = dic.to_key_val_list(teacher_pr)
+    teacher_pr_lab, teacher_pr_val = dic_to_key_val_list(teacher_pr)
 
     pr_grid = cp_grid_param(
         bounds=np.asarray(bounds),
@@ -163,8 +164,6 @@ def get_data():
 
     bounds = [[2e-07, 0.025], [0.0001, 0.9999]]
     methods = [np.geomspace, np.linspace]
-    # bounds = [[0.0000001, 0.1], [0.0001, 0.9999]]
-    # bounds = [[0.0000001, 0.00005], [0.0001, 0.9999]]
 
     grid_size = 20
 

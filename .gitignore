@@ -119,21 +119,6 @@ dmypy.json
 # MacOs
 .DS_Store
 
-# Very old_2019
-.old/very_old_2019/learner/trials/bkp/
-.old/very_old_2019/learner/bkp/*
-.old/very_old/data/*.p
-.old/very_old_2019/docs/_static/
-.old/very_old_2019/docs/_templates/
-.old/very_old_2019/docs/bkp/
-
-# Old
-.old/old_2019/learner/trials/bkp/
-.old/old_2019/learner/bkp/*
-.old/old/data/*.p
-.old/old_2019/docs/_static/
-.old/old_2019/docs/_templates/
-.old/old_2019/docs/bkp/
 
 # Figure folder
 /fig
@@ -141,45 +126,17 @@ dmypy.json
 # Back folder
 /bkp
 
+# Data
+/data/*
+!/data/triton/n_learnt_leitner.tar.zst
+!/data/human/data_summary.csv
 
-# Migrations
-*/migrations
-!*/*/__init__.py
-
-# SImulations
-/data
-/data/triton
-/data/triton/triton-done
-
-ActiveTeachingModel/credentials.py
-/user_data/bkp/
-/fit_pilot.txt
-/.old/
-pickle/
-/data.zip
-/user_data.zip
-
-# Cluster
-config/auto/
+# Config
 config/triton/
-config/triton-done/
-results/
-out/*
-.last.pid
-.last_run_name
-.figold
 
 # Snippet pulls
 snippet
 
+# Triton
 triton_out/
-/._.DS_Store
-credentials.py
-
-/data_summary.csv
-/human_box.png
-/human_scatter.png
-/data_full.csv
-/lls_item_spec.csv
-
 simulation.job

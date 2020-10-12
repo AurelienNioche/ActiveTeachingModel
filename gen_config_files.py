@@ -8,12 +8,13 @@ from numpy.random import default_rng
 from tqdm import tqdm
 import pandas as pd
 
-import settings.paths as paths
 from model.learner.exponential_n_delta import ExponentialNDelta
 from model.psychologist.psychologist_grid import PsychologistGrid
 from model.teacher.leitner import Leitner
 from model.teacher.threshold import Threshold
 from model.teacher.forward import Forward
+
+import settings.paths as paths
 from settings.config_triton import LEARNER, PSYCHOLOGIST, TEACHER
 
 TEACHER_INV = {v: k for k, v in TEACHER.items()}

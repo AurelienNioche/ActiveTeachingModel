@@ -4,8 +4,9 @@ Run simulations and save results
 
 import os
 
-import settings.paths as paths
 from run.make_data_triton import run
+
+import settings.paths as paths
 from settings.config_triton import Config
 
 

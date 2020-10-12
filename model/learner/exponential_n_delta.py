@@ -1,10 +1,9 @@
 import numpy as np
-from . generic import Learner
 
 EPS = np.finfo(np.float).eps
 
 
-class ExponentialNDelta(Learner):
+class ExponentialNDelta:
 
     DUMMY_VALUE = -1
 
@@ -55,7 +54,7 @@ class ExponentialNDelta(Learner):
             init_forget, rep_effect = param
 
         seen_item = np.flatnonzero(seen)
-        # seen_item.sort()
+
         n_seen = np.sum(seen)
         n_pres = np.zeros(n_seen)
         last_pres = np.zeros(n_seen)
@@ -119,33 +118,3 @@ class ExponentialNDelta(Learner):
         self.n_seen = np.sum(self.seen)
 
         self.i += 1
-
-    # def log_lik(self, param, hist, success, timestamp):
-    #     a, b = param
-    #
-    #     log_p_hist = np.zeros(len(hist))
-    #
-    #     for item in np.unique(hist):
-    #
-    #         is_item = hist == item
-    #         rep = timestamp[is_item]
-    #         n = len(rep)
-    #
-    #         log_p_item = np.zeros(n)
-    #         # !!! To adapt for xp
-    #         log_p_item[0] = -np.inf  # whatever the model, p=0
-    #         # !!! To adapt for xp
-    #         for i in range(1, n):
-    #             delta_rep = rep[i] - rep[i-1]
-    #             fr = a * (1 - b) ** (i - 1)
-    #
-    #             delta_rep *= self.cst_time
-    #             log_p_item[i] = -fr * delta_rep
-    #
-    #         log_p_hist[is_item] = log_p_item
-    #     p_hist = np.exp(log_p_hist)
-    #     failure = np.invert(success)
-    #     p_hist[failure] = 1 - p_hist[failure]
-    #     log_lik = np.log(p_hist + EPS)
-    #     sum_ll = log_lik.sum()
-    #     return sum_ll

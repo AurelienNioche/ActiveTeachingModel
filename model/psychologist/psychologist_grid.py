@@ -1,12 +1,10 @@
 import numpy as np
 from scipy.special import logsumexp
 
-from . generic import Psychologist
-
 EPS = np.finfo(np.float).eps
 
 
-class PsychologistGrid(Psychologist):
+class PsychologistGrid:
 
     LIN = 'lin'
     GEO = 'geo'

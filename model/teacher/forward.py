@@ -1,10 +1,9 @@
 import numpy as np
 
 from model.learner.exponential_n_delta import ExponentialNDelta
-from .generic import Teacher
 
 
-class Forward(Teacher):
+class Forward:
 
     def __init__(self, n_item, learnt_threshold, time_per_iter,
                  n_ss, ss_n_iter, time_between_ss):

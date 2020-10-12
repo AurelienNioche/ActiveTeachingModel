@@ -7,13 +7,10 @@ import numpy as np
 import math
 from string import ascii_uppercase
 
-import analyse_s
+import analysis.n_learnt
+import analysis.p_recall
 import explo_leitner
-import analyse_s_p_recall
 
-
-# def roundup(x):
-#     return int(math.ceil(x / 100.0)) * 100
 
 def roundup(x, base=100):
     return base * math.ceil(x/base)
@@ -22,23 +19,9 @@ def roundup(x, base=100):
 def rounddown(x, base=100):
     return base * math.floor(x / base)
 
-def roundup10(x):
-    return int(math.ceil(x / 10.0)) * 10
-
-
-def rounddown10(x):
-    return int(math.floor(x / 10.0)) * 10
-
-
-def rounduptenth(x):
-    return math.ceil(x * 10.0) / 10
-
-
-def rounddowntenth(x):
-    return math.floor(x * 10.0) / 10
-
 
 def heatmap(data, ax):
+
     data["alpha"] = data["alpha"].round(7)
     data["beta"] = data["beta"].round(4)
     data_pivoted = data.pivot("alpha", "beta", "n_learnt")
@@ -121,9 +104,7 @@ def boxplot_n_learnt(data, ax,
 
     ax.set_xticklabels(ax.get_xmajorticklabels(), fontsize=13)
 
-    # ymax = roundup(np.max(data[y_label]), base=50)
     ax.set_ylim(ylim[0], ylim[1])
-    # ax.set_yticks((0, ymax//2, ymax))
 
     ax.set_xlabel("")
 
@@ -180,11 +161,11 @@ def figure2():
 
     df_heat = explo_leitner.get_data()
 
-    df_omni = analyse_s.get_data(dataset_name=dataset,
-                                 condition_name="Nspec-omni")
+    df_omni = analysis.n_learnt.get_data(dataset_name=dataset,
+                                         condition_name="Nspec-omni")
 
-    df_not_omni = analyse_s.get_data(dataset_name=dataset,
-                                     condition_name="Nspec-Nomni")
+    df_not_omni = analysis.n_learnt.get_data(dataset_name=dataset,
+                                             condition_name="Nspec-Nomni")
 
     x1 = df_omni.n_learnt
     x2 = df_not_omni.n_learnt
@@ -194,12 +175,12 @@ def figure2():
     max_v = np.max((max1, max2))
     ylim = (rounddown(min_v, 50)-10, roundup(max_v, 50)+10)
 
-    err_threshold = analyse_s_p_recall.get_data(
+    err_threshold = analysis.p_recall.get_data(
         dataset_name=dataset,
         condition_name="Nspec-Nomni",
         teacher_name="threshold")
 
-    err_forward = analyse_s_p_recall.get_data(
+    err_forward = analysis.p_recall.get_data(
         dataset_name=dataset,
         condition_name="Nspec-Nomni",
         teacher_name="forward")
@@ -259,6 +240,7 @@ def figure2():
     axes[6].text(-0.2, 1.05, ascii_uppercase[5],
                  transform=axes[6].transAxes, size=15, weight='bold')
 
+    # noinspection PyTypeChecker
     plt.tight_layout(rect=[-0.05, 0, 1, 1])
 
     # plt.show()
@@ -273,12 +255,12 @@ def figure3():
 
     dataset = "n_learnt_leitner"
 
-    df_omni = analyse_s.get_data(dataset_name=dataset,
-                                 condition_name="spec-omni")
+    df_omni = analysis.n_learnt.get_data(dataset_name=dataset,
+                                         condition_name="spec-omni")
     print(df_omni.columns)
 
-    df_not_omni = analyse_s.get_data(dataset_name=dataset,
-                                     condition_name="spec-Nomni")
+    df_not_omni = analysis.n_learnt.get_data(dataset_name=dataset,
+                                             condition_name="spec-Nomni")
 
     x1 = df_omni.n_learnt
     x2 = df_not_omni.n_learnt
@@ -288,12 +270,12 @@ def figure3():
     max_v = np.max((max1, max2))
     ylim = (rounddown(min_v, 10), roundup(max_v, 10))
 
-    err_threshold = analyse_s_p_recall.get_data(
+    err_threshold = analysis.p_recall.get_data(
         dataset_name=dataset,
         condition_name="spec-Nomni",
         teacher_name="threshold")
 
-    err_forward = analyse_s_p_recall.get_data(
+    err_forward = analysis.p_recall.get_data(
         dataset_name=dataset,
         condition_name="spec-Nomni",
         teacher_name="forward")
@@ -350,6 +332,7 @@ def figure3():
     axes[5].text(-0.2, 1.05, ascii_uppercase[4],
                  transform=axes[5].transAxes, size=15, weight='bold')
 
+    # noinspection PyTypeChecker
     plt.tight_layout(rect=[-0.05, 0, 1, 1])
 
     fig_folder = os.path.join("fig")
@@ -366,8 +349,8 @@ def make_statistics_artificial():
 
     for condition in "Nspec-omni", "Nspec-Nomni", "spec-omni", "spec-Nomni":
 
-        df = analyse_s.get_data(dataset_name=dataset,
-                                condition_name=condition)
+        df = analysis.n_learnt.get_data(dataset_name=dataset,
+                                        condition_name=condition)
         print(condition)
 
         print(f"n item learnt:")

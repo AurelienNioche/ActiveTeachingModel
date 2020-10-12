@@ -1,8 +1,7 @@
 import numpy as np
-from .generic import Teacher
 
 
-class Threshold(Teacher):
+class Threshold:
 
     def __init__(self, n_item, learnt_threshold):
 

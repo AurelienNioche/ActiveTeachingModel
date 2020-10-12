@@ -1,8 +1,7 @@
 import numpy as np
-from . generic import Teacher
 
 
-class Leitner(Teacher):
+class Leitner:
 
     def __init__(self, n_item, delay_factor, delay_min):
 

@@ -9,43 +9,23 @@ import math
 from string import ascii_uppercase
 
 
-def roundup(x):
-    return int(math.ceil(x / 100.0)) * 100
+def roundup(x, base=1.):
+    return int(math.ceil(x / base)) * base
 
 
-def roundup10(x):
-    return int(math.ceil(x / 10.0)) * 10
-
-
-def rounddown10(x):
-    return int(math.floor(x / 10.0)) * 10
-
-
-def rounduptenth(x):
-    return math.ceil(x * 10.0) / 10
-
-
-def rounddowntenth(x):
-    return math.floor(x * 10.0) / 10
+def rounddown(x, base=1.):
+    return int(math.floor(x / base)) * base
 
 
 def get_user_data():
 
-    # ######## TO EDIT WITH LAST DATA ############################
-    # user_domain = 'active.fi'
-    # ############################################################
-
     df = pd.read_csv(os.path.join("data", "human", "data_summary.csv"),
                      index_col=0)
-
-    # ######## TO EDIT WITH LAST DATA ############################
-    # df.teacher_md = df.teacher_md.replace({"recursive": "forward"})
-    # df = df[df.is_item_specific == True]
-    # ############################################################
 
     df["ratio_leitner"] = df.n_recall_leitner / df.n_eval_leitner
     df["ratio_act"] = df.n_recall_act / df.n_eval_act
 
+    # Select only the user that complete the task
     df = df[df.n_ss_done == 14]
 
     return df
@@ -80,8 +60,8 @@ def scatter_n_learnt(data, active, ax, x_label, y_label):
     ax.plot((min_v, max_v), (min_v, max_v), ls="--", color="black",
             alpha=0.1)
 
-    ax.set_xticks((rounddown10(min_v), roundup10(max_v)))
-    ax.set_yticks((rounddown10(min_v), roundup10(max_v)))
+    ax.set_xticks((rounddown(min_v, base=10), roundup(max_v, base=10)))
+    ax.set_yticks((rounddown(min_v, base=10), roundup(max_v, base=10)))
 
     ax.set_aspect(1)
 
@@ -113,8 +93,8 @@ def scatter_n_learnt_n_seen(data, active, ax, x_label, y_label):
     ax.plot((min_v, max_v), (min_v, max_v), ls="--", color="black",
             alpha=0.1)
 
-    ax.set_xticks((rounddowntenth(min_v), rounduptenth(max_v)))
-    ax.set_yticks((rounddowntenth(min_v), rounduptenth(max_v)))
+    ax.set_xticks((rounddown(min_v, base=0.10), roundup(max_v, base=0.10)))
+    ax.set_yticks((rounddown(min_v, base=0.10), roundup(max_v, base=0.10)))
 
     ax.set_aspect(1)
 
@@ -165,7 +145,6 @@ def boxplot(df, data_type, ylabel, axes, ylim):
         ax.set_xlabel("")
 
     axes[-1].set_ylabel("")
-    # axes[-1].set_yticklabels(())
 
 
 def figure4():
@@ -184,7 +163,7 @@ def figure4():
     fig.suptitle("Human", fontsize=18, fontweight='bold',
                  verticalalignment='top')
 
-    # Thanks to the Matplotlib creators that I love
+    # ...sorry about that
     pos = [(3, 4, (1, 5)), (3, 4, (2, 6)),
            (3, 4, (3, 7)), (3, 4, (4, 8)),
            (3, 4, 9), (3, 4, 10),
@@ -195,7 +174,7 @@ def figure4():
     boxplot(df=df, axes=(axes[0], axes[1]),
             data_type="n_learnt",
             ylabel="N learned",
-            ylim=(rounddown10(min_v), roundup10(max_v)))
+            ylim=(rounddown(min_v, base=10), roundup(max_v, base=10)))
 
     boxplot(df=df, axes=(axes[2], axes[3]),
             data_type="ratio",
@@ -243,6 +222,7 @@ def figure4():
     ax.set_axis_off()
     ax.set_title("N learned / N seen\n", fontstyle='italic', fontsize=14)
 
+    # noinspection PyTypeChecker
     plt.tight_layout(rect=[0, 0, 1, 1.05])
 
     fig_folder = os.path.join("fig")
