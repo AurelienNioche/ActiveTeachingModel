@@ -1,12 +1,14 @@
 import numpy as np
 
-from model.learner.exponential_n_delta import ExponentialNDelta
+from model.learner.exponential import Exponential
 
 
-class Forward:
+class Robust:
 
     def __init__(self, n_item, learnt_threshold, time_per_iter,
-                 n_ss, ss_n_iter, time_between_ss):
+                 n_ss, ss_n_iter, time_between_ss, n_sample=10):
+
+        self.n_sample = n_sample
 
         self.n_item = n_item
         self.log_thr = np.log(learnt_threshold)
@@ -124,32 +126,68 @@ class Forward:
             if n_item <= 1:
                 break
 
-        return first_item
+        return first_item, n_learnt
 
-    def ask(self, now, psy):
+    def create_param_samples(self, log_post,
+                             is_item_specific,
+                             grid_param,
+                             n_sample):
 
-        param = psy.inferred_learner_param()
+        post = np.exp(log_post)
+        n_param_set, n_param = grid_param.shape
+
+        if is_item_specific:
+            n_item, n_param_set = log_post.shape
+            param_list = np.zeros((n_sample, n_item, n_param))
+            weights = np.zeros((n_sample, n_item))
+            for i in range(n_item):
+                slc = np.random.choice(np.arange(n_param_set),
+                                       p=post[i], size=n_sample)
+                param_list[:, i, :] = grid_param[slc]
+                weights[:, i] = post[i, slc]
+            weights = np.mean(weights, axis=1)
+        else:
+            slc = np.random.choice(np.arange(n_param_set),
+                                   p=post, size=n_sample)
+            param_list = grid_param[slc]
+            weights = post[slc]
+
+        return param_list, weights
+
+    def get_future_timestamp_n_pres_last_pres(self, hist):
+
+        no_dummy = hist != Exponential.DUMMY_VALUE
+        current_step = np.sum(no_dummy)
+        current_seen_item = np.unique(hist[no_dummy])
+
+        future_ts = self.review_ts[current_step:]
+
+        n_pres = np.zeros(self.n_item)
+        last_pres = np.zeros(self.n_item)
+        for i, item in enumerate(current_seen_item):
+            is_item = hist == item
+            n_pres[item] = np.sum(is_item)
+            last_pres[item] = np.max(self.review_ts[is_item])
+
+        return future_ts, n_pres, last_pres
+
+    def ask(self, psy):
+
         hist = psy.learner.hist.copy()
         cst_time = psy.cst_time
         learner_model = psy.learner.__class__
         is_item_specific = psy.is_item_specific
+        omniscient = psy.omniscient
 
-        if learner_model == ExponentialNDelta:
+        assert learner_model == Exponential
 
-            no_dummy = hist != ExponentialNDelta.DUMMY_VALUE
-            current_step = np.sum(no_dummy)
-            current_seen_item = np.unique(hist[no_dummy])
+        future_ts, n_pres, last_pres = \
+            self.get_future_timestamp_n_pres_last_pres(hist)
 
-            future_ts = self.review_ts[current_step:]
+        if omniscient:
 
-            n_pres = np.zeros(self.n_item)
-            last_pres = np.zeros(self.n_item)
-            for i, item in enumerate(current_seen_item):
-                is_item = hist == item
-                n_pres[item] = np.sum(is_item)
-                last_pres[item] = np.max(self.review_ts[is_item])
-
-            item = self._recursive_exp_decay(
+            param = psy.inferred_learner_param()
+            item, expected_n_learnt = self._recursive_exp_decay(
                 is_item_specific=is_item_specific,
                 future_ts=future_ts,
                 cst_time=cst_time,
@@ -157,8 +195,28 @@ class Forward:
                 param=param,
                 n_pres=n_pres,
                 last_pres=last_pres)
-
         else:
-            raise NotImplementedError
+            log_post = psy.log_post
+            grid_param = psy.grid_param
+
+            param_list, weights = self.create_param_samples(
+                log_post=log_post,
+                is_item_specific=is_item_specific,
+                grid_param=grid_param,
+                n_sample=self.n_sample)
+            rewards = np.zeros(self.n_sample)
+            items = np.zeros(self.n_sample, dtype=int)
+            for i, param in enumerate(param_list):
+                items[i], rewards[i] = self._recursive_exp_decay(
+                    is_item_specific=is_item_specific,
+                    future_ts=future_ts,
+                    cst_time=cst_time,
+                    eval_ts=self.eval_ts,
+                    param=param,
+                    n_pres=n_pres,
+                    last_pres=last_pres)
+            rewards *= weights
+            best = np.argmax(rewards)
+            item = items[best]
 
         return item

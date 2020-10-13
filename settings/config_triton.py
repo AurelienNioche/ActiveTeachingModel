@@ -3,30 +3,29 @@ import json
 import numpy as np
 
 from model.teacher.leitner import Leitner
-from model.teacher.threshold import Threshold
-from model.teacher.forward import Forward
+from model.teacher.myopic import Myopic
+from model.teacher.conservative import Conservative
+from model.teacher.robust import Robust
 
-from model.psychologist.psychologist_grid import PsychologistGrid
+from model.psychologist.psychologist_grid import PsyGrid
 
-from model.learner.exponential_n_delta import ExponentialNDelta
+from model.learner.exponential import Exponential
+
 
 TEACHER = {
-    "threshold": Threshold,
-    "leitner": Leitner,
-    "forward": Forward
+    Myopic.__name__: Myopic,
+    Leitner.__name__: Leitner,
+    Conservative.__name__: Conservative,
+    Robust.__name__: Robust
 }
 
 LEARNER = {
-    "exp_decay": ExponentialNDelta
+    Exponential.__name__: Exponential
 }
 
 PSYCHOLOGIST = {
-    "psy_grid": PsychologistGrid
+    PsyGrid.__name__: PsyGrid
 }
-
-TEACHER_INV = {v: k for k, v in TEACHER.items()}
-PSY_INV = {v: k for k, v in PSYCHOLOGIST.items()}
-LEARNER_INV = {v: k for k, v in LEARNER.items()}
 
 
 class Config:

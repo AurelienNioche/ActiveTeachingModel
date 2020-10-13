@@ -8,14 +8,15 @@ from numpy.random import default_rng
 from tqdm import tqdm
 import pandas as pd
 
-from model.learner.exponential_n_delta import ExponentialNDelta
-from model.psychologist.psychologist_grid import PsychologistGrid
+from model.learner.exponential import Exponential
+from model.psychologist.psychologist_grid import PsyGrid
 from model.teacher.leitner import Leitner
-from model.teacher.threshold import Threshold
-from model.teacher.forward import Forward
+from model.teacher.myopic import Myopic
+from model.teacher.conservative import Conservative
 
 import settings.paths as paths
 from settings.config_triton import LEARNER, PSYCHOLOGIST, TEACHER
+
 
 TEACHER_INV = {v: k for k, v in TEACHER.items()}
 PSY_INV = {v: k for k, v in PSYCHOLOGIST.items()}
@@ -96,10 +97,10 @@ def main() -> None:
 
     # -------------     SET PARAM HERE      ------------------------ #
 
-    learner_md = ExponentialNDelta
-    psy_md = PsychologistGrid
+    learner_md = Exponential
+    psy_md = PsyGrid
 
-    teacher_models = (Leitner, Threshold, Forward)
+    teacher_models = (Leitner, Myopic, Conservative)
 
     ss_n_iter = 100
     time_between_ss = 24 * 60 ** 2
@@ -115,7 +116,7 @@ def main() -> None:
 
     bounds = [[2e-07, 0.025], [0.0001, 0.9999]]
 
-    grid_methods = [PsychologistGrid.GEO, PsychologistGrid.LIN]
+    grid_methods = [PsyGrid.GEO, PsyGrid.LIN]
     grid_size = 100
 
     cst_time = 1
@@ -164,7 +165,7 @@ def main() -> None:
 
                     if teacher_md == Leitner:
                         teacher_pr = leitner_cst
-                    elif teacher_md in (Threshold, Forward):
+                    elif teacher_md in (Myopic, Conservative):
                         teacher_pr = {}
                     else:
                         raise ValueError

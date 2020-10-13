@@ -3,7 +3,7 @@ import numpy as np
 EPS = np.finfo(np.float).eps
 
 
-class ExponentialNDelta:
+class Exponential:
 
     DUMMY_VALUE = -1
 

@@ -1,11 +1,10 @@
 import numpy as np
-from . generic import Learner
 from scipy.special import expit
 
 EPS = np.finfo(np.float).eps
 
 
-class ActR2005(Learner):
+class ActR2005:
 
     def __init__(self, n_item):
 

@@ -1,7 +1,7 @@
 import numpy as np
 
 
-class Threshold:
+class Myopic:
 
     def __init__(self, n_item, learnt_threshold):
 

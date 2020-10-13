@@ -1,12 +1,11 @@
 import numpy as np
-from .generic import Learner
 from scipy.special import expit
 import math
 
 EPS = np.finfo(np.float).eps
 
 
-class Walsh2018(Learner):
+class Walsh2018:
     def __init__(self, n_item, n_iter, cst_time):
 
         self.seen = np.zeros(n_item, dtype=bool)

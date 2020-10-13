@@ -4,17 +4,14 @@ import pandas as pd
 from tqdm import tqdm
 
 from model.teacher.leitner import Leitner
-from model.teacher.threshold import Threshold
-from model.teacher.sampling import Sampling
-from model.teacher.recursive import Recursive
-from model.teacher.recursive_threshold import RecursiveThreshold
-from model.teacher.forward import Forward
+from model.teacher.myopic import Myopic
+from model.teacher.conservative import Conservative
+from model.teacher.robust import Robust
 
-from model.psychologist.psychologist_grid import PsychologistGrid
+from model.psychologist.psychologist_grid import PsyGrid
 
 from model.learner.walsh2018 import Walsh2018
-from model.learner.exponential_n_delta import ExponentialNDelta
-# from model.learner.act_r2008 import ActR2008
+from model.learner.exponential import Exponential
 
 
 def run(config, with_tqdm=False):
@@ -45,16 +42,11 @@ def run(config, with_tqdm=False):
     if teacher_cls == Leitner:
         teacher = teacher_cls(n_item=n_item, **teacher_pr)
 
-    elif teacher_cls == Threshold:
+    elif teacher_cls == Myopic:
         teacher = teacher_cls(n_item=n_item,
                               learnt_threshold=learnt_threshold)
-    elif teacher_cls == Sampling:
-        teacher = teacher_cls(
-            n_item=n_item, learnt_threshold=learnt_threshold,
-            time_per_iter=time_per_iter,
-            ss_n_iter=ss_n_iter, time_between_ss=time_between_ss,
-            **teacher_pr)
-    elif teacher_cls in (Recursive, RecursiveThreshold, Forward):
+
+    elif teacher_cls in (Conservative, Robust):
         teacher = teacher_cls(n_item=n_item,
                               learnt_threshold=learnt_threshold,
                               time_per_iter=time_per_iter,
@@ -66,16 +58,17 @@ def run(config, with_tqdm=False):
         raise ValueError(f"{teacher_cls} not recognized")
 
     is_leitner = teacher_cls == Leitner
-    is_sampling = teacher_cls == Sampling
+    is_myopic = teacher_cls == Myopic
 
-    if learner_cls in (Walsh2018, ExponentialNDelta):
+
+    if learner_cls in (Walsh2018, Exponential):
         learner = learner_cls(n_item=n_item,
                               n_iter=n_ss * ss_n_iter)
     else:
         raise ValueError
 
     if omniscient or is_leitner:
-        psy = PsychologistGrid(
+        psy = PsyGrid(
             n_item=n_item,
             is_item_specific=is_item_specific,
             learner=learner,
@@ -151,11 +144,11 @@ def run(config, with_tqdm=False):
                                        last_time_reply=ts,
                                        idx_last_q=item)
 
-                elif is_sampling:
-                    item = teacher.ask(now=now, psy=psy, ss_iter=j)
+                elif is_myopic:
+                    item = teacher.ask(now=now, psy=psy)
 
                 else:
-                    item = teacher.ask(now=now, psy=psy)
+                    item = teacher.ask(psy=psy)
 
                 p = psy.p(item=item, param=pr, now=ts)
 
