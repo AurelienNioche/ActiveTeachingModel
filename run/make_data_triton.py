@@ -141,10 +141,6 @@ def run(config, with_tqdm=False):
                                        last_was_success=was_success,
                                        last_time_reply=ts,
                                        idx_last_q=item)
-
-                elif is_sampling:
-                    item = teacher.ask(now=now, psy=psy, ss_iter=j)
-
                 else:
                     item = teacher.ask(now=now, psy=psy)
 
