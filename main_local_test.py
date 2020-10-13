@@ -34,7 +34,8 @@ def main():
 
     is_item_specific = len(np.asarray(pr_val).shape) > 1
 
-    teacher_md = Robust
+    teacher_md = Conservative
+
     psy_md = PsyGrid
 
     ss_n_iter = 100
