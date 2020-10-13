@@ -5,16 +5,11 @@ from tqdm import tqdm
 
 from model.teacher.leitner import Leitner
 from model.teacher.threshold import Threshold
-from model.teacher.sampling import Sampling
-from model.teacher.recursive import Recursive
-from model.teacher.recursive_threshold import RecursiveThreshold
 from model.teacher.forward import Forward
 
 from model.psychologist.psychologist_grid import PsychologistGrid
 
-from model.learner.walsh2018 import Walsh2018
 from model.learner.exponential_n_delta import ExponentialNDelta
-# from model.learner.act_r2008 import ActR2008
 
 
 def run(config, with_tqdm=False):
@@ -48,13 +43,8 @@ def run(config, with_tqdm=False):
     elif teacher_cls == Threshold:
         teacher = teacher_cls(n_item=n_item,
                               learnt_threshold=learnt_threshold)
-    elif teacher_cls == Sampling:
-        teacher = teacher_cls(
-            n_item=n_item, learnt_threshold=learnt_threshold,
-            time_per_iter=time_per_iter,
-            ss_n_iter=ss_n_iter, time_between_ss=time_between_ss,
-            **teacher_pr)
-    elif teacher_cls in (Recursive, RecursiveThreshold, Forward):
+
+    elif teacher_cls == Forward:
         teacher = teacher_cls(n_item=n_item,
                               learnt_threshold=learnt_threshold,
                               time_per_iter=time_per_iter,
@@ -66,13 +56,14 @@ def run(config, with_tqdm=False):
         raise ValueError(f"{teacher_cls} not recognized")
 
     is_leitner = teacher_cls == Leitner
-    is_sampling = teacher_cls == Sampling
 
-    if learner_cls in (Walsh2018, ExponentialNDelta):
+    if learner_cls == ExponentialNDelta:
         learner = learner_cls(n_item=n_item,
                               n_iter=n_ss * ss_n_iter)
     else:
         raise ValueError
+        
+    assert psy_cls == PsychologistGrid
 
     if omniscient or is_leitner:
         psy = PsychologistGrid(
@@ -85,7 +76,7 @@ def run(config, with_tqdm=False):
             grid_size=None,
             grid_methods=None)
     else:
-        psy = psy_cls(
+        psy = PsychologistGrid(
             n_item=n_item,
             is_item_specific=is_item_specific,
             learner=learner,
