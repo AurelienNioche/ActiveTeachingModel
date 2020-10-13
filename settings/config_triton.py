@@ -4,40 +4,25 @@ import numpy as np
 
 from model.teacher.leitner import Leitner
 from model.teacher.threshold import Threshold
-from model.teacher.mcts import MCTSTeacher
-from model.teacher.sampling import Sampling
-from model.teacher.recursive import Recursive
-from model.teacher.recursive_threshold import RecursiveThreshold
 from model.teacher.forward import Forward
 
 from model.psychologist.psychologist_grid import PsychologistGrid
-from model.psychologist.psychologist_gradient import PsychologistGradient
 
 from model.learner.exponential_n_delta import ExponentialNDelta
-from model.learner.act_r2005 import ActR2005
-from model.learner.act_r2008 import ActR2008
-from model.learner.walsh2018 import Walsh2018
 
 TEACHER = {
     "threshold": Threshold,
     "leitner": Leitner,
-    "mcts": MCTSTeacher,
-    "sampling": Sampling,
-    "recursive": Recursive,
-    "recursive_threshold": RecursiveThreshold,
     "forward": Forward
 }
 
 LEARNER = {
-    "exp_decay": ExponentialNDelta,
-    "act_r2005": ActR2005,
-    "act_r2008": ActR2008,
-    "walsh2018": Walsh2018,
+    "exp_decay": ExponentialNDelta
 }
 
 PSYCHOLOGIST = {
-    "psy_grid": PsychologistGrid,
-    "psy_gradient": PsychologistGradient}
+    "psy_grid": PsychologistGrid
+}
 
 TEACHER_INV = {v: k for k, v in TEACHER.items()}
 PSY_INV = {v: k for k, v in PSYCHOLOGIST.items()}
