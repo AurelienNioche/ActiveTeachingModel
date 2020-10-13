@@ -124,7 +124,7 @@ class PsychologistGrid:
             cst_time=self.cst_time,
             now=now)
 
-    def inferred_learner_param(self, method="average-post"):
+    def inferred_learner_param(self):
 
         if self.omniscient or not self.is_item_specific:
             return self.est_param
@@ -135,38 +135,11 @@ class PsychologistGrid:
         if np.sum(is_rep) == self.n_item or np.sum(not_is_rep) == self.n_item:
             return self.est_param
 
-        if method == "independent":
-            return self.est_param
-
-        elif method == "average-est-weighting":
-
-            self.est_param[not_is_rep] = np.average(self.est_param[is_rep],
-                                                    weights=self.n_pres[is_rep],
-                                                    axis=0)
-        elif method == "average-est":
-
-            self.est_param[not_is_rep] = np.mean(self.est_param[is_rep],
-                                                 axis=0)
-        elif method == "average-post":
-
-            lp_to_consider = self.log_post[is_rep]
-
-            # Method 1
-            # lp = np.sum(lp_to_consider, axis=0)
-            # lp -= logsumexp(lp)
-
-            # Method 2
-            # lp = np.mean(lp_to_consider, axis=0)
-
-            # Method 3
-            lp = logsumexp(lp_to_consider, axis=0) - np.log(lp_to_consider.shape[0])
-
-            self.log_post[not_is_rep] = lp
-            self.est_param[not_is_rep] = np.dot(np.exp(lp), self.grid_param)
-
-        else:
-            raise ValueError
-
+        lp_to_consider = self.log_post[is_rep]
+        lp = logsumexp(lp_to_consider, axis=0) - np.log(lp_to_consider.shape[0])
+        self.log_post[not_is_rep] = lp
+        self.est_param[not_is_rep] = np.dot(np.exp(lp), self.grid_param)
+        
         return self.est_param
 
     def p(self, param, item, now):
