@@ -6,7 +6,7 @@ from model.learner.exponential import Exponential
 class Robust:
 
     def __init__(self, n_item, learnt_threshold, time_per_iter,
-                 n_ss, ss_n_iter, time_between_ss, n_sample=10):
+                 n_ss, ss_n_iter, time_between_ss, n_sample=20):
 
         self.n_sample = n_sample
 
