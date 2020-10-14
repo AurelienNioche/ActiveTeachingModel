@@ -199,7 +199,7 @@ class Robust:
             log_post = psy.log_post
             grid_param = psy.grid_param
 
-            param_list, weights = self.create_param_samples(
+            param_list, p_param_list = self.create_param_samples(
                 log_post=log_post,
                 is_item_specific=is_item_specific,
                 grid_param=grid_param,
@@ -215,7 +215,7 @@ class Robust:
                     param=param,
                     n_pres=n_pres,
                     last_pres=last_pres)
-            rewards *= weights
+            # rewards *= p_param_list
             best = np.argmax(rewards)
             item = items[best]
 
