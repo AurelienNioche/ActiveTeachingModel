@@ -28,13 +28,13 @@ def main():
     n_item = 500
     omni = False
 
+    teacher_md = Robust
+
     learner_md = Exponential
     pr_val = [[2e-05, 0.5]
               for _ in range(n_item)]
 
     is_item_specific = len(np.asarray(pr_val).shape) > 1
-
-    teacher_md = Robust
 
     psy_md = PsyGrid
 

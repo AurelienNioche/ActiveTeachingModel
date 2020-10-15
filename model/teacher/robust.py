@@ -144,8 +144,10 @@ class Robust:
                 slc = np.random.choice(np.arange(n_param_set),
                                        p=post[i], size=n_sample)
                 param_list[:, i, :] = grid_param[slc]
-                weights[:, i] = log_post[i, slc]
-            weights = np.exp(np.sum(weights, axis=1))
+                weights[:, i] = post[i, slc]
+                # weights[:, i] = log_post[i, slc]
+            # weights = np.exp(np.sum(weights, axis=1))
+            weights = np.mean(weights, axis=1)
         else:
             slc = np.random.choice(np.arange(n_param_set),
                                    p=post, size=n_sample)
@@ -215,9 +217,13 @@ class Robust:
                     param=param,
                     n_pres=n_pres,
                     last_pres=last_pres)
-            # rewards *= p_param_list
 
-            best = np.random.choice(rewards)
-            item = items[best]
+            rewards *= p_param_list
+
+            if np.sum(rewards) == 0:
+                item = 0
+            else:
+                rewards /= np.sum(rewards)
+                item = np.random.choice(items, p=rewards)
 
         return item
