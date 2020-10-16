@@ -61,9 +61,60 @@ class Robust:
             * (ts - last_pres[seen]) \
             * cst_time
 
-    def _recursive_exp_decay(self, n_pres, last_pres,
-                             future_ts, param, eval_ts,
-                             cst_time, is_item_specific):
+    def _cp_reward(self,
+                   n_pres, last_pres,
+                   future_ts, param, eval_ts,
+                   is_item_specific, cst_time,
+                   min_n_learnt=0):
+
+        n_item = min_n_learnt + 1
+
+        n_pres_current = n_pres
+        last_pres_current = last_pres
+
+        while True:
+
+            n_pres = n_pres_current[:n_item].copy()
+            last_pres = last_pres_current[:n_item].copy()
+
+            for ts in future_ts:
+                item = self._threshold_select(
+                    n_pres=n_pres,
+                    param=param,
+                    n_item=n_item,
+                    is_item_specific=is_item_specific,
+                    ts=ts, last_pres=last_pres,
+                    cst_time=cst_time)
+
+                n_pres[item] += 1
+                last_pres[item] = ts
+
+            seen = n_pres > 0
+            log_p_seen = self._cp_log_p_seen(
+                seen=seen,
+                n_pres=n_pres,
+                param=param,
+                n_item=n_item,
+                is_item_specific=is_item_specific,
+                last_pres=last_pres,
+                ts=eval_ts,
+                cst_time=cst_time)
+
+            n_learnt = np.sum(log_p_seen > self.log_thr)
+            if n_learnt == n_item:
+                n_item += 1
+                if n_item > self.n_item:
+                    break
+
+            else:
+                n_learnt = n_item - 1
+                break
+
+        return n_learnt
+
+    def _exp_decay(self, n_pres, last_pres,
+                   future_ts, param, eval_ts,
+                   cst_time, is_item_specific):
 
         n_item = self.n_item
 
@@ -144,15 +195,16 @@ class Robust:
                 slc = np.random.choice(np.arange(n_param_set),
                                        p=post[i], size=n_sample)
                 param_list[:, i, :] = grid_param[slc]
-                weights[:, i] = post[i, slc]
-                # weights[:, i] = log_post[i, slc]
-            # weights = np.exp(np.sum(weights, axis=1))
-            weights = np.mean(weights, axis=1)
+                # weights[:, i] = post[i, slc]
+                weights[:, i] = log_post[i, slc]
+            weights = np.sum(weights, axis=1)
+            # weights = np.mean(weights, axis=1)
         else:
             slc = np.random.choice(np.arange(n_param_set),
                                    p=post, size=n_sample)
             param_list = grid_param[slc]
-            weights = post[slc]
+            # weights = post[slc]
+            weights = log_post[slc]
 
         return param_list, weights
 
@@ -189,7 +241,7 @@ class Robust:
         if omniscient:
 
             param = psy.inferred_learner_param()
-            item, expected_n_learnt = self._recursive_exp_decay(
+            item, expected_n_learnt = self._exp_decay(
                 is_item_specific=is_item_specific,
                 future_ts=future_ts,
                 cst_time=cst_time,
@@ -206,10 +258,11 @@ class Robust:
                 is_item_specific=is_item_specific,
                 grid_param=grid_param,
                 n_sample=self.n_sample)
-            rewards = np.zeros(self.n_sample)
-            items = np.zeros(self.n_sample, dtype=int)
+
+            best_items = np.zeros(self.n_sample, dtype=int)
+            min_n_learnt = np.zeros(self.n_sample, dtype=int)
             for i, param in enumerate(param_list):
-                items[i], rewards[i] = self._recursive_exp_decay(
+                best_items[i], min_n_learnt[i] = self._exp_decay(
                     is_item_specific=is_item_specific,
                     future_ts=future_ts,
                     cst_time=cst_time,
@@ -218,12 +271,37 @@ class Robust:
                     n_pres=n_pres,
                     last_pres=last_pres)
 
-            rewards *= p_param_list
+            candidates = np.unique(best_items)
+            rewards = np.zeros(len(candidates))
 
-            if np.sum(rewards) == 0:
-                item = 0
-            else:
-                rewards /= np.sum(rewards)
-                item = np.random.choice(items, p=rewards)
+            for i, best_it in enumerate(candidates):
+                if best_it in rewards:
+                    continue
+
+                now = future_ts[0]
+                future = future_ts[1:]
+
+                n_pres_current = n_pres.copy()
+                last_pres_current = last_pres.copy()
+
+                n_pres_current[best_it] += 1
+                last_pres_current[best_it] = now
+
+                rewards[i] = 0
+
+                for j, param in enumerate(param_list):
+
+                    r = self._cp_reward(
+                        n_pres=n_pres_current,
+                        last_pres=last_pres_current,
+                        future_ts=future,
+                        eval_ts=self.eval_ts,
+                        cst_time=cst_time,
+                        min_n_learnt=min_n_learnt[j],
+                        is_item_specific=is_item_specific,
+                        param=param)
+                    rewards[i] += p_param_list[j] + np.log(r)
+
+            item = candidates[np.argmax(rewards)]
 
         return item
