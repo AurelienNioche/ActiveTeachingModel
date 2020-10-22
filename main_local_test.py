@@ -27,9 +27,9 @@ def dic_to_lab_val(dic):
 def main():
 
     n_item = 500
-    omni = False
+    omni = True
 
-    teacher_md = Myopic
+    teacher_md = ConservativeWalsh
 
     learner_md = Walsh2018
     pr_val = [0.56, 0.077, 0.0, 0.17, 0.1, 0.6]
