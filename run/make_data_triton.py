@@ -1,17 +1,15 @@
-import numpy as np
 import datetime
-import pandas as pd
-from tqdm import tqdm
 
+import numpy as np
+import pandas as pd
+from model.learner.exponential import Exponential
+from model.learner.walsh2018 import Walsh2018
+from model.psychologist.psychologist_grid import PsyGrid
+from model.teacher.conservative import Conservative
 from model.teacher.leitner import Leitner
 from model.teacher.myopic import Myopic
-from model.teacher.conservative import Conservative
 from model.teacher.robust import Robust
-
-from model.psychologist.psychologist_grid import PsyGrid
-
-from model.learner.walsh2018 import Walsh2018
-from model.learner.exponential import Exponential
+from tqdm import tqdm
 
 
 def run(config, with_tqdm=False):
@@ -43,16 +41,17 @@ def run(config, with_tqdm=False):
         teacher = teacher_cls(n_item=n_item, **teacher_pr)
 
     elif teacher_cls == Myopic:
-        teacher = teacher_cls(n_item=n_item,
-                              learnt_threshold=learnt_threshold)
+        teacher = teacher_cls(n_item=n_item, learnt_threshold=learnt_threshold)
 
     elif teacher_cls in (Conservative, Robust):
-        teacher = teacher_cls(n_item=n_item,
-                              learnt_threshold=learnt_threshold,
-                              time_per_iter=time_per_iter,
-                              n_ss=n_ss,
-                              ss_n_iter=ss_n_iter,
-                              time_between_ss=time_between_ss)
+        teacher = teacher_cls(
+            n_item=n_item,
+            learnt_threshold=learnt_threshold,
+            time_per_iter=time_per_iter,
+            n_ss=n_ss,
+            ss_n_iter=ss_n_iter,
+            time_between_ss=time_between_ss,
+        )
 
     else:
         raise ValueError(f"{teacher_cls} not recognized")
@@ -60,10 +59,8 @@ def run(config, with_tqdm=False):
     is_leitner = teacher_cls == Leitner
     is_myopic = teacher_cls == Myopic
 
-
     if learner_cls in (Walsh2018, Exponential):
-        learner = learner_cls(n_item=n_item,
-                              n_iter=n_ss * ss_n_iter)
+        learner = learner_cls(n_item=n_item, n_iter=n_ss * ss_n_iter, cst_time=1)
     else:
         raise ValueError
 
@@ -76,7 +73,8 @@ def run(config, with_tqdm=False):
             true_param=pr,
             bounds=None,
             grid_size=None,
-            grid_methods=None)
+            grid_methods=None,
+        )
     else:
         psy = psy_cls(
             n_item=n_item,
@@ -84,7 +82,8 @@ def run(config, with_tqdm=False):
             learner=learner,
             bounds=bounds,
             cst_time=cst_time,
-            **psy_pr)
+            **psy_pr,
+        )
 
     delta_end_ss_begin_ss = time_between_ss - time_per_iter * ss_n_iter
 
@@ -102,6 +101,7 @@ def run(config, with_tqdm=False):
 
     if with_tqdm:
         import sys
+
         n_iter = n_ss * ss_n_iter
         pbar = tqdm(total=n_iter, file=sys.stdout)
 
@@ -128,21 +128,23 @@ def run(config, with_tqdm=False):
 
                 else:
                     pr_inf = psy.inferred_learner_param()
-                    p_seen_inf, seen = psy.p_seen(now=now,
-                                                  param=pr_inf)
+                    p_seen_inf, seen = psy.p_seen(now=now, param=pr_inf)
 
                     p_err = np.abs(p_seen_real_before - p_seen_inf)
                     p_err_mean, p_err_std = np.mean(p_err), np.std(p_err)
 
                     p_err_raw = p_seen_inf - p_seen_real_before
-                    p_err_raw_mean, p_err_raw_std = \
-                        np.mean(p_err_raw), np.std(p_err_raw)
+                    p_err_raw_mean, p_err_raw_std = np.mean(p_err_raw), np.std(
+                        p_err_raw
+                    )
 
                 if is_leitner:
-                    item = teacher.ask(now=now,
-                                       last_was_success=was_success,
-                                       last_time_reply=ts,
-                                       idx_last_q=item)
+                    item = teacher.ask(
+                        now=now,
+                        last_was_success=was_success,
+                        last_time_reply=ts,
+                        idx_last_q=item,
+                    )
 
                 elif is_myopic:
                     item = teacher.ask(now=now, psy=psy)
@@ -183,7 +185,7 @@ def run(config, with_tqdm=False):
                 "timestamp_cpt": now_real,
                 "config_file": config_file,
                 "is_human": False,
-                **config_dic
+                **config_dic,
             }
             row_list.append(row)
 
@@ -224,7 +226,7 @@ def run(config, with_tqdm=False):
         "timestamp_cpt": datetime.datetime.now().timestamp(),
         "config_file": config_file,
         "is_human": False,
-        **config_dic
+        **config_dic,
     }
     row_list.append(row)
 

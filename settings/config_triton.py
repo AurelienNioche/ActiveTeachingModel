@@ -1,31 +1,25 @@
-import os
 import json
-import numpy as np
+import os
 
+import numpy as np
+from model.learner.exponential import Exponential
+from model.learner.walsh2018 import Walsh2018
+from model.psychologist.psychologist_grid import PsyGrid
+from model.teacher.conservative import Conservative
 from model.teacher.leitner import Leitner
 from model.teacher.myopic import Myopic
-from model.teacher.conservative import Conservative
 from model.teacher.robust import Robust
-
-from model.psychologist.psychologist_grid import PsyGrid
-
-from model.learner.exponential import Exponential
-
 
 TEACHER = {
     Myopic.__name__: Myopic,
     Leitner.__name__: Leitner,
     Conservative.__name__: Conservative,
-    Robust.__name__: Robust
+    Robust.__name__: Robust,
 }
 
-LEARNER = {
-    Exponential.__name__: Exponential
-}
+LEARNER = {Exponential.__name__: Exponential, Walsh2018.__name__: Walsh2018}
 
-PSYCHOLOGIST = {
-    PsyGrid.__name__: PsyGrid
-}
+PSYCHOLOGIST = {PsyGrid.__name__: PsyGrid}
 
 
 class Config:
@@ -54,7 +48,7 @@ class Config:
         psy_pr_lab,
         psy_pr_val,
         pr_lab,
-        pr_val
+        pr_val,
     ):
 
         self.seed = seed
@@ -62,8 +56,7 @@ class Config:
 
         self.teacher_cls = TEACHER[md_teacher]
         self.learner_cls = LEARNER[md_learner]
-        self.psy_cls = PSYCHOLOGIST[md_psy] \
-            if md_psy is not None else None
+        self.psy_cls = PSYCHOLOGIST[md_psy] if md_psy is not None else None
 
         self.bounds = np.asarray(bounds)
 
@@ -82,12 +75,10 @@ class Config:
         self.cst_time = cst_time
 
         if psy_pr_lab is not None and len(psy_pr_lab):
-            self.psy_pr = {k: v
-                           for k, v in zip(psy_pr_lab, psy_pr_val)}
+            self.psy_pr = {k: v for k, v in zip(psy_pr_lab, psy_pr_val)}
         else:
             self.psy_pr = None
-        self.teacher_pr = {k: v
-                           for k, v in zip(teacher_pr_lab, teacher_pr_val)}
+        self.teacher_pr = {k: v for k, v in zip(teacher_pr_lab, teacher_pr_val)}
 
         self.config_file = config_file
         self.config_dic = config_dic

@@ -1,6 +1,5 @@
 import numpy as np
 from scipy.special import expit
-import math
 
 EPS = np.finfo(np.float).eps
 
@@ -54,7 +53,7 @@ class Walsh2018:
             _t_ = np.sum(w * delta)
             if n > 1:
                 lag = rep[1:] - rep[:-1]
-                d = b + m * np.mean(1 / np.log(lag + math.e))
+                d = b + m * np.mean(1 / np.log(lag + np.e))
             else:
                 d = b
 
@@ -73,11 +72,11 @@ class Walsh2018:
             ts=self.ts,
             seen=self.seen,
             is_item_specific=is_item_specific,
-            cst_time=cst_time)
+            cst_time=cst_time,
+        )
 
     @staticmethod
-    def p_seen_spec_hist(param, now, hist, ts, seen, is_item_specific,
-                         cst_time):
+    def p_seen_spec_hist(param, now, hist, ts, seen, is_item_specific, cst_time):
 
         if is_item_specific:
             tau = param[seen, 0]
@@ -123,7 +122,7 @@ class Walsh2018:
 
             if n_it > 1:
                 lag = rep[1:] - rep[:-1]
-                mean_lag[i_it] = np.mean(1 / np.log(lag + math.e))
+                mean_lag[i_it] = np.mean(1 / np.log(lag + np.e))
 
         one_view = n == 1
         more_than_one = np.invert(one_view)
@@ -139,7 +138,8 @@ class Walsh2018:
         _m_ = np.zeros(n_seen)
         _m_[one_view] = _t_[one_view] ** -b_one_view
         _m_[more_than_one] = n[more_than_one] ** c * _t_[more_than_one] ** -(
-            b_more_than_one + m * mean_lag[more_than_one])
+            b_more_than_one + m * mean_lag[more_than_one]
+        )
 
         with np.errstate(divide="ignore", invalid="ignore"):
             v = (-tau + _m_) / s
@@ -147,12 +147,16 @@ class Walsh2018:
 
         return p, seen
 
-    def log_lik_grid(self, item, grid_param, response, timestamp,
-                     cst_time):
+    def log_lik_grid(self, item, grid_param, response, timestamp, cst_time):
         p = np.zeros(len(grid_param))
         for i, param in enumerate(grid_param):
-            p[i] = self.p(item=item, param=param, now=timestamp,
-                          is_item_specific=False, cst_time=cst_time)
+            p[i] = self.p(
+                item=item,
+                param=param,
+                now=timestamp,
+                is_item_specific=False,
+                cst_time=cst_time,
+            )
         p = p if response else 1 - p
         return np.log(p + EPS)
 
@@ -166,6 +170,7 @@ class Walsh2018:
         self.seen_item = np.flatnonzero(self.seen)
 
         self.i += 1
+
     #
     # def log_lik(self, param, hist, success, timestamp):
     #
@@ -196,7 +201,7 @@ class Walsh2018:
     #             _t_ = np.sum(w * delta)
     #
     #             lag = rep[1: i + 1] - rep[:i]
-    #             d = b + m * np.mean(1 / np.log(lag + math.e))
+    #             d = b + m * np.mean(1 / np.log(lag + np.e))
     #             _m_item[i] = i ** c * _t_ ** -d
     #
     #         _m_[is_item] = _m_item
