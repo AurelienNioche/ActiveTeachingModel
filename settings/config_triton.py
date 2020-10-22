@@ -9,11 +9,13 @@ from model.teacher.conservative import Conservative
 from model.teacher.leitner import Leitner
 from model.teacher.myopic import Myopic
 from model.teacher.robust import Robust
+from model.teacher.conservative_walsh import ConservativeWalsh
 
 TEACHER = {
     Myopic.__name__: Myopic,
     Leitner.__name__: Leitner,
     Conservative.__name__: Conservative,
+    ConservativeWalsh.__name__: ConservativeWalsh,
     Robust.__name__: Robust,
 }
 

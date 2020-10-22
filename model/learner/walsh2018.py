@@ -5,11 +5,14 @@ EPS = np.finfo(np.float).eps
 
 
 class Walsh2018:
+
+    DUMMY_VALUE = -1
+
     def __init__(self, n_item, n_iter, cst_time):
 
         self.seen = np.zeros(n_item, dtype=bool)
-        self.ts = np.full(n_iter, -1, dtype=float)
-        self.hist = np.full(n_iter, -1, dtype=int)
+        self.ts = np.full(n_iter, self.DUMMY_VALUE, dtype=float)
+        self.hist = np.full(n_iter, self.DUMMY_VALUE, dtype=int)
 
         self.seen_item = None
         self.n_seen = 0
@@ -26,7 +29,7 @@ class Walsh2018:
 
     def p(self, item, param, now, is_item_specific, cst_time):
 
-        if len(param.shape) > 1:
+        if is_item_specific:
             tau, s, b, m, c, x = param[item]
 
         else:
@@ -35,8 +38,8 @@ class Walsh2018:
         relevant = self.hist == item
         rep = self.ts[relevant]
 
-        rep *= self.cst_time
-        now *= self.cst_time
+        rep *= cst_time
+        now *= cst_time
 
         n = len(rep)
         delta = now - rep
@@ -58,8 +61,8 @@ class Walsh2018:
                 d = b
 
             _m_ = n ** c * _t_ ** -d
-
-            v = (-tau + _m_) / s
+            with np.errstate(divide="ignore", invalid="ignore"):
+                v = (-tau + _m_) / s
             p = expit(v)
             return p
 
@@ -79,12 +82,7 @@ class Walsh2018:
     def p_seen_spec_hist(param, now, hist, ts, seen, is_item_specific, cst_time):
 
         if is_item_specific:
-            tau = param[seen, 0]
-            s = param[seen, 1]
-            b = param[seen, 2]
-            m = param[seen, 3]
-            c = param[seen, 4]
-            x = param[seen, 5]
+            tau, s, b, m, c, x = param[seen, :]
 
         else:
             tau, s, b, m, c, x = param
@@ -111,9 +109,9 @@ class Walsh2018:
             n_it = len(rep)
 
             delta = now - rep
-
-            w = delta ** -_x
-            w /= np.sum(w)
+            with np.errstate(divide="ignore", invalid="ignore"):
+                w = delta ** -_x
+                w /= np.sum(w)
 
             _t_it = np.sum(w * delta)
 
@@ -138,8 +136,7 @@ class Walsh2018:
         _m_ = np.zeros(n_seen)
         _m_[one_view] = _t_[one_view] ** -b_one_view
         _m_[more_than_one] = n[more_than_one] ** c * _t_[more_than_one] ** -(
-            b_more_than_one + m * mean_lag[more_than_one]
-        )
+            b_more_than_one + m * mean_lag[more_than_one])
 
         with np.errstate(divide="ignore", invalid="ignore"):
             v = (-tau + _m_) / s

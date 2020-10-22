@@ -9,6 +9,7 @@ from model.teacher.conservative import Conservative
 from model.teacher.leitner import Leitner
 from model.teacher.myopic import Myopic
 from model.teacher.robust import Robust
+from model.teacher.conservative_walsh import ConservativeWalsh
 from tqdm import tqdm
 
 
@@ -43,7 +44,7 @@ def run(config, with_tqdm=False):
     elif teacher_cls == Myopic:
         teacher = teacher_cls(n_item=n_item, learnt_threshold=learnt_threshold)
 
-    elif teacher_cls in (Conservative, Robust):
+    elif teacher_cls in (Conservative, ConservativeWalsh, Robust):
         teacher = teacher_cls(
             n_item=n_item,
             learnt_threshold=learnt_threshold,
@@ -134,9 +135,8 @@ def run(config, with_tqdm=False):
                     p_err_mean, p_err_std = np.mean(p_err), np.std(p_err)
 
                     p_err_raw = p_seen_inf - p_seen_real_before
-                    p_err_raw_mean, p_err_raw_std = np.mean(p_err_raw), np.std(
-                        p_err_raw
-                    )
+                    p_err_raw_mean, p_err_raw_std = \
+                        np.mean(p_err_raw), np.std(p_err_raw)
 
                 if is_leitner:
                     item = teacher.ask(

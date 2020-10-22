@@ -14,6 +14,7 @@ from model.psychologist.psychologist_grid import PsyGrid
 from model.teacher.leitner import Leitner
 from model.teacher.myopic import Myopic
 from model.teacher.conservative import Conservative
+from model.teacher.conservative_walsh import ConservativeWalsh
 from model.teacher.robust import Robust
 
 
@@ -28,11 +29,12 @@ def main():
     n_item = 500
     omni = False
 
-    teacher_md = Robust
+    teacher_md = Myopic
 
-    learner_md = Exponential
-    pr_val = [[2e-05, 0.5]
-              for _ in range(n_item)]
+    learner_md = Walsh2018
+    pr_val = [0.56, 0.077, 0.0, 0.17, 0.1, 0.6]
+        #[[2e-05, 0.5]
+        #      for _ in range(n_item)]
 
     is_item_specific = len(np.asarray(pr_val).shape) > 1
 
@@ -46,18 +48,33 @@ def main():
 
     leitner_cst = {"delay_factor": 2, "delay_min": 4}
 
-    pr_lab = ["alpha", "beta"],
-    bounds = [[2e-07, 0.025], [0.0001, 0.9999]]
+    pr_lab = ["tau", "s", "b", "m", "c", "x"]
+    bounds = [
+        [0.5, 1.5],
+        [0.00, 0.10],
+        [0.00, 0.20],
+        [0.00, 0.20],
+        [0.1, 0.1],
+        [0.6, 0.6],
+    ]
+    # bounds = [[0.5, 1.5], [0.00, 0.10]]
+    grid_methods = [
+        np.geomspace,
+        np.linspace,
+        np.linspace,
+        np.linspace,
+        np.linspace,
+        np.linspace,
+    ]
 
-    grid_methods = [PsyGrid.GEO, PsyGrid.LIN]
-    grid_size = 100
+    grid_size = 10
     cst_time = 1
 
-    assert learner_md == Exponential
+    assert learner_md == Walsh2018
 
     if teacher_md == Leitner:
         teacher_pr = leitner_cst
-    elif teacher_md in (Myopic, Conservative, Robust):
+    elif teacher_md in (Myopic, ConservativeWalsh):
         teacher_pr = {}
     else:
         raise ValueError
