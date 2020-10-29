@@ -18,14 +18,9 @@ class Walsh2018:
         self.n_seen = 0
         self.i = 0
 
-        self.tau = None
-        self.s = None
-        self.b = None
-        self.m = None
-        self.c = None
-        self.x = None
-
         self.cst_time = cst_time
+
+        self.n_item = n_item
 
     def p(self, item, param, now, is_item_specific, cst_time):
 
@@ -56,8 +51,7 @@ class Walsh2018:
             _t_ = np.sum(w * delta)
             if n > 1:
                 lag = rep[1:] - rep[:-1]
-                # d = b + m * np.mean(1 / np.log(lag + np.e))
-                d = b + m * np.sum(1 / np.log(lag + np.e))
+                d = b + m * np.mean(1 / np.log(lag + np.e))
             else:
                 d = b
 
@@ -77,13 +71,21 @@ class Walsh2018:
             seen=self.seen,
             is_item_specific=is_item_specific,
             cst_time=cst_time,
+            n_item=self.n_item
         )
 
     @staticmethod
-    def p_seen_spec_hist(param, now, hist, ts, seen, is_item_specific, cst_time):
+    def p_seen_spec_hist(param, now, hist, ts, seen,
+                         is_item_specific, cst_time, n_item):
 
         if is_item_specific:
-            tau, s, b, m, c, x = param[seen, :]
+
+            tau = param[:n_item][seen, 0]
+            s = param[:n_item][seen, 1]
+            b = param[:n_item][seen, 2]
+            m = param[:n_item][seen, 3]
+            c = param[:n_item][seen, 4]
+            x = param[:n_item][seen, 5]
 
         else:
             tau, s, b, m, c, x = param

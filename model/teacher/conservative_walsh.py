@@ -20,12 +20,13 @@ class ConservativeWalsh:
 
     @staticmethod
     def _p_seen(seen, hist, param, is_item_specific,
-                ts, review_ts, cst_time):
+                ts, review_ts, cst_time, n_item):
 
         p_seen, seen = Walsh2018.p_seen_spec_hist(
             param=param, now=ts, hist=hist,
             ts=review_ts, seen=seen, is_item_specific=is_item_specific,
-            cst_time=cst_time)
+            cst_time=cst_time,
+            n_item=n_item)
         return p_seen
 
     def _threshold_select(self, seen, param, hist, review_ts, n_item,
@@ -44,7 +45,7 @@ class ConservativeWalsh:
                 ts=ts,
                 cst_time=cst_time,
                 hist=hist,
-                review_ts=review_ts)
+                review_ts=review_ts, n_item=n_item)
 
             if n_seen == n_item or np.min(p_seen) <= self.thr:
                 item = np.flatnonzero(seen)[np.argmin(p_seen)]
@@ -53,7 +54,7 @@ class ConservativeWalsh:
 
         return item
 
-    def _select(self, future_ts, review_ts, hist, param, eval_ts,
+    def _select(self, future_ts, review_ts, now_idx, hist, param, eval_ts,
                 cst_time, is_item_specific):
 
         n_item = self.n_item
@@ -62,8 +63,6 @@ class ConservativeWalsh:
         future = future_ts[1:]
 
         hist_current = hist
-
-        now_idx = np.flatnonzero(review_ts == now)[0]
 
         seen_current = np.zeros(n_item, dtype=bool)
         seen_current[np.unique(hist[hist != Walsh2018.DUMMY_VALUE])] = 1
@@ -87,6 +86,9 @@ class ConservativeWalsh:
             hist = hist_current.copy()
             hist[now_idx] = first_item
 
+            seen = seen_current.copy()[:n_item]
+            seen[first_item] = True
+
             for i, ts in enumerate(future):
 
                 item = self._threshold_select(
@@ -99,7 +101,7 @@ class ConservativeWalsh:
                     review_ts=review_ts,
                     seen=seen)
 
-                seen[item] += 1
+                seen[item] = True
                 hist[now_idx + 1 + i] = item
 
             p_seen = self._p_seen(
@@ -109,7 +111,8 @@ class ConservativeWalsh:
                 ts=eval_ts,
                 cst_time=cst_time,
                 hist=hist,
-                review_ts=review_ts)
+                review_ts=review_ts,
+                n_item=n_item)
 
             n_learnt = np.sum(p_seen > self.thr)
             if n_learnt == n_item:
@@ -135,14 +138,16 @@ class ConservativeWalsh:
         no_dummy = hist != Walsh2018.DUMMY_VALUE
         current_step = np.sum(no_dummy)
         future_ts = self.review_ts[current_step:]
+        now_idx = np.flatnonzero(self.review_ts == future_ts[0])[0]
 
         item = self._select(
             is_item_specific=is_item_specific,
-            future_ts=future_ts,
             cst_time=cst_time,
             eval_ts=self.eval_ts,
             param=param,
             hist=hist,
+            now_idx=now_idx,
+            future_ts=future_ts,
             review_ts=self.review_ts)
 
         return item

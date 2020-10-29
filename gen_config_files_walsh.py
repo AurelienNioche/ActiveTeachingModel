@@ -11,10 +11,10 @@ from numpy.random import default_rng
 from tqdm import tqdm
 
 import settings.paths as paths
-from model.learner.exponential import Exponential
+# from model.learner.exponential import Exponential
 from model.learner.walsh2018 import Walsh2018
 from model.psychologist.psychologist_grid import PsyGrid
-from model.teacher.conservative import Conservative
+# from model.teacher.conservative import Conservative
 from model.teacher.conservative_walsh import ConservativeWalsh
 from model.teacher.leitner import Leitner
 from model.teacher.myopic import Myopic
@@ -144,7 +144,8 @@ def main() -> None:
     np.random.seed(seed)
 
     n_agent = 100
-    df = pd.read_csv("config/parameters/n_learnt_leitner_walsh_grid10.csv", index_col=0)
+    df = pd.read_csv("config/parameters/n_learnt_leitner_walsh_grid10.csv",
+                     index_col=0)
     n_learnt = df["n_learnt"].values
 
     tau = df["tau"].values
@@ -184,8 +185,8 @@ def main() -> None:
     pbar = tqdm()
     job_number = 0
 
-    for omni in (True, False):
-        for is_item_specific in (False, True):
+    for omni in (True, ):
+        for is_item_specific in (False, ):
 
             for agent in range(n_agent):
 

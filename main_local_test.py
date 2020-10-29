@@ -8,14 +8,14 @@ import numpy as np
 from settings.config_triton import Config
 from run.make_data_triton import run
 
-from model.learner.exponential import Exponential
+# from model.learner.exponential import Exponential
 from model.learner.walsh2018 import Walsh2018
 from model.psychologist.psychologist_grid import PsyGrid
 from model.teacher.leitner import Leitner
 from model.teacher.myopic import Myopic
-from model.teacher.conservative import Conservative
+# from model.teacher.conservative import Conservative
 from model.teacher.conservative_walsh import ConservativeWalsh
-from model.teacher.robust import Robust
+# from model.teacher.robust import Robust
 
 
 def dic_to_lab_val(dic):
@@ -59,12 +59,12 @@ def main():
     ]
     # bounds = [[0.5, 1.5], [0.00, 0.10]]
     grid_methods = [
-        np.geomspace,
-        np.linspace,
-        np.linspace,
-        np.linspace,
-        np.linspace,
-        np.linspace,
+        PsyGrid.GEO,
+        PsyGrid.LIN,
+        PsyGrid.LIN,
+        PsyGrid.LIN,
+        PsyGrid.LIN,
+        PsyGrid.LIN,
     ]
 
     grid_size = 10
