@@ -15,6 +15,7 @@ from model.learner.exponential import Exponential
 from model.learner.walsh2018 import Walsh2018
 from model.psychologist.psychologist_grid import PsyGrid
 from model.teacher.conservative import Conservative
+from model.teacher.conservative_walsh import ConservativeWalsh
 from model.teacher.leitner import Leitner
 from model.teacher.myopic import Myopic
 from settings.config_triton import LEARNER, PSYCHOLOGIST, TEACHER
@@ -101,7 +102,7 @@ def main() -> None:
     learner_md = Walsh2018
     psy_md = PsyGrid
 
-    teacher_models = (Leitner, Myopic, Conservative)
+    teacher_models = (Leitner, Myopic, ConservativeWalsh)
 
     ss_n_iter = 100
     time_between_ss = 24 * 60 ** 2
@@ -198,7 +199,7 @@ def main() -> None:
 
                     if teacher_md == Leitner:
                         teacher_pr = leitner_cst
-                    elif teacher_md in (Myopic, Conservative):
+                    elif teacher_md in (Myopic, ConservativeWalsh):
                         teacher_pr = {}
                     else:
                         raise ValueError
