@@ -1,3 +1,4 @@
+#%%
 """
 Run simulations and save results
 """
@@ -28,13 +29,18 @@ def main():
         if os.path.splitext(p.path)[1] == ".json"
     ]
     file_count = len(files)
+    print(file_count)
     assert file_count > 0
 
-    with Pool(processes=cpu_count()) as p:
-        max_ = file_count
-        with tqdm(total=max_) as pbar:
-            for i, _ in enumerate(p.imap_unordered(make_data, files)):
-                pbar.update()
+    for file in tqdm(files):
+        make_data(file)
+
+    # with Pool(processes=cpu_count()) as p:
+    # with Pool(processes=1) as p:
+    #     max_ = file_count
+    #     with tqdm(total=max_) as pbar:
+    #         for i, _ in enumerate(p.imap_unordered(make_data, files)):
+    #             pbar.update()
 
 
 if __name__ == "__main__":

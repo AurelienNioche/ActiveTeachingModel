@@ -1,4 +1,3 @@
-#%%
 import os
 from typing import Callable, Iterable
 
@@ -46,11 +45,6 @@ def cp_grid_param(
         grid[:, diff] = var
     if np.sum(not_diff):
         grid[:, not_diff] = bounds[not_diff, 0]
-
-    ####
-    # print(grid)
-    # return  # XXX
-    ####
 
     return grid
 

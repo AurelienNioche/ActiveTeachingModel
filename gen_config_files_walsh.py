@@ -1,3 +1,5 @@
+#%%
+
 #!/bin/python3
 import json
 import os
@@ -111,11 +113,28 @@ def main() -> None:
 
     leitner_cst = {"delay_factor": 2, "delay_min": time_per_iter}
 
-    pr_lab = ["alpha", "beta"]
+    pr_lab = ["tau", "s", "b", "m", "c", "x"]
 
-    bounds = [[2e-07, 0.025], [0.0001, 0.9999]]
+    eps = np.finfo(float).eps
 
-    grid_methods = [PsyGrid.GEO, PsyGrid.LIN]
+    bounds = [
+        [0.5, 1.5],
+        [eps, 0.10],
+        [0.00, 0.20],
+        [0.00, 0.20],
+        [0.1, 0.1],
+        [0.6, 0.6],
+    ]
+
+    grid_methods = [
+        PsyGrid.GEO,
+        PsyGrid.LIN,
+        PsyGrid.LIN,
+        PsyGrid.LIN,
+        PsyGrid.LIN,
+        PsyGrid.LIN,
+    ]
+
     grid_size = 100
 
     cst_time = 1
@@ -124,17 +143,32 @@ def main() -> None:
     np.random.seed(seed)
 
     n_agent = 100
-    df = pd.read_csv("config/parameters/n_learnt_leitner.csv", index_col=0)
+    df = pd.read_csv("config/parameters/n_learnt_leitner_walsh_grid10.csv", index_col=0)
     n_learnt = df["n_learnt"].values
-    alpha = df["alpha"].values
-    beta = df["beta"].values
+
+    tau = df["tau"].values
+    s = df["s"].values
+    b = df["b"].values
+    m = df["m"].values
+    c = df["c"].values
+    x = df["x"].values
+
     smart_enough = np.flatnonzero(n_learnt > 0)
     slc = np.random.choice(smart_enough, size=n_agent, replace=False)
-    grid = np.vstack((alpha[slc], beta[slc])).T
+    grid = np.vstack((tau[slc], s[slc], b[slc], m[slc], c[slc], x[slc])).T
 
     seed = 123
     np.random.seed(seed)
-    possibilities = np.vstack((alpha[smart_enough], beta[smart_enough])).T
+    possibilities = np.vstack(
+        (
+            tau[smart_enough],
+            s[smart_enough],
+            b[smart_enough],
+            m[smart_enough],
+            c[smart_enough],
+            x[smart_enough],
+        )
+    ).T
 
     grid_spec = np.zeros((n_agent, n_item, len(bounds)))
     for agent in range(n_agent):

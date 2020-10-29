@@ -56,7 +56,8 @@ class Walsh2018:
             _t_ = np.sum(w * delta)
             if n > 1:
                 lag = rep[1:] - rep[:-1]
-                d = b + m * np.mean(1 / np.log(lag + np.e))
+                # d = b + m * np.mean(1 / np.log(lag + np.e))
+                d = b + m * np.sum(1 / np.log(lag + np.e))
             else:
                 d = b
 
@@ -136,7 +137,8 @@ class Walsh2018:
         _m_ = np.zeros(n_seen)
         _m_[one_view] = _t_[one_view] ** -b_one_view
         _m_[more_than_one] = n[more_than_one] ** c * _t_[more_than_one] ** -(
-            b_more_than_one + m * mean_lag[more_than_one])
+            b_more_than_one + m * mean_lag[more_than_one]
+        )
 
         with np.errstate(divide="ignore", invalid="ignore"):
             v = (-tau + _m_) / s
