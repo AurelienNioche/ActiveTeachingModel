@@ -1,3 +1,0 @@
-#!/bin/sh
-# Ghostscript to merge PDF
-gs -dBATCH -dNOPAUSE -q -sDEVICE=pdfwrite -sOutputFile=figs_combined.pdf chocolate.pdf box.pdf combo.pdf eff_cost.pdf error.pdf
