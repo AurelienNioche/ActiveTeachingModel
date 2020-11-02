@@ -111,7 +111,7 @@ def main():
 
     np.random.seed(123)
 
-    for (thr, n_item) in zip((0.90, ), (2, )):
+    for (thr, n_item) in zip((0.90, ), (50, )):
         print("th", thr, "n_item", n_item)
         use_threshold(n_item=n_item, param=param, review_ts=review_ts,
                       eval_ts=eval_ts, thr=thr, eval_thr=eval_thr)

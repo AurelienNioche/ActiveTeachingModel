@@ -139,7 +139,7 @@ def main():
     param = np.asarray(param)
 
     ss_n_iter = 100
-    time_per_iter = 2
+    time_per_iter = 4
     n_sec_day = 24 * 60 ** 2
     n_ss = 6
     eval_ts = n_ss * n_sec_day

@@ -155,7 +155,7 @@ def use_conservative(n_item, param, review_ts, eval_ts, thr):
         * (eval_ts - last_pres[seen]))
 
     n_learnt = np.sum(p_seen > thr)
-    print("conservative n learnt", n_learnt)
+    print("conservative n learnt", n_learnt, "n seen", np.sum(seen))
     print()
 
 
@@ -167,7 +167,7 @@ def main():
     param = np.asarray(param)
 
     ss_n_iter = 100
-    time_per_iter = 2
+    time_per_iter = 4
     n_sec_day = 24 * 60 ** 2
     n_ss = 6
     eval_ts = n_ss * n_sec_day
