@@ -135,7 +135,7 @@ def main():
 
     n_item = 150
 
-    param = [[0.0006, 0.44] for _ in range(n_item)]
+    param = [0.0006, 0.44] # [[0.0006, 0.44] for _ in range(n_item)]
     param = np.asarray(param)
 
     ss_n_iter = 100
@@ -143,12 +143,10 @@ def main():
     n_sec_day = 24 * 60 ** 2
     n_ss = 6
     eval_ts = n_ss * n_sec_day
-    review_ts = np.hstack(
-        [
+    review_ts = np.hstack([
             np.arange(x, x + (ss_n_iter * time_per_iter), time_per_iter)
             for x in np.arange(0, n_sec_day * n_ss, n_sec_day)
-        ]
-    )
+        ])
 
     thr = 0.90
 
@@ -164,3 +162,7 @@ def main():
         rd=rd, param=param, thr=thr)
 
     print("[Time to execute ", datetime.datetime.now() - a, "]")
+
+
+if __name__ == "__main__":
+    main()
