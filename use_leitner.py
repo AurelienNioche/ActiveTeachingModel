@@ -1,7 +1,5 @@
 import datetime
-
 import numpy as np
-from tqdm import tqdm
 
 
 class Leitner:
@@ -67,7 +65,11 @@ class Leitner:
         return item_idx
 
 
-def use_leitner(n_item, review_ts, rd, param, eval_ts, thr):
+def use_leitner(n_item, review_ts, param, eval_ts, thr):
+
+    n_total_iter = len(review_ts)
+
+    rd = np.random.random(size=n_total_iter)
 
     is_item_specific = len(np.asarray(param).shape) > 1
 
@@ -133,6 +135,8 @@ def use_leitner(n_item, review_ts, rd, param, eval_ts, thr):
 
 def main():
 
+    np.random.seed(123)
+
     n_item = 150
 
     param = [0.0006, 0.44] # [[0.0006, 0.44] for _ in range(n_item)]
@@ -150,16 +154,11 @@ def main():
 
     thr = 0.90
 
-    n_total_iter = len(review_ts)
-
-    np.random.seed(123)
-    rd = np.random.random(size=n_total_iter)
-
     a = datetime.datetime.now()
 
     use_leitner(
         n_item=n_item, review_ts=review_ts, eval_ts=eval_ts,
-        rd=rd, param=param, thr=thr)
+        param=param, thr=thr)
 
     print("[Time to execute ", datetime.datetime.now() - a, "]")
 

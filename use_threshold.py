@@ -56,9 +56,11 @@ def use_threshold(n_item, param, review_ts, eval_ts, thr,
 
 def main():
 
+    np.random.seed(123)
+
     n_item = 50
 
-    param = [0.0006, 0.44]  # [[0.0006, 0.44] for _ in range(n_item)]
+    param = [[0.0006, 0.44] for _ in range(n_item)]
     param = np.asarray(param)
 
     ss_n_iter = 100
@@ -75,8 +77,6 @@ def main():
     print(eval_ts)
 
     thr = 0.90
-
-    np.random.seed(123)
 
     a = datetime.datetime.now()
 
