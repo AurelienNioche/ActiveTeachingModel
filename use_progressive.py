@@ -31,7 +31,8 @@ def run(n_item, sequence, review_ts, is_item_specific, param,
     return n_learnt
 
 
-def use_progressive(n_item, review_ts, param, eval_ts, thr):
+def use_progressive(n_item, review_ts, param, eval_ts, thr,
+                    n_sample=10**5):
 
     log_thr = np.log(thr)
     is_item_specific = len(np.asarray(param).shape) > 1
@@ -42,7 +43,6 @@ def use_progressive(n_item, review_ts, param, eval_ts, thr):
     while True:
         test_n_item += 1
 
-        n_sample = 5000
         success = False
         i = 0
 
@@ -102,13 +102,13 @@ def main():
 
     n_item = 50
 
-    param = [0.001, 0.44]   # [[0.001, 0.44] for _ in range(n_item)]
+    param = [0.006, 0.44]   # [[0.001, 0.44] for _ in range(n_item)]
     param = np.asarray(param)
 
     ss_n_iter = 100
     time_per_iter = 4
     n_sec_day = 24 * 60 ** 2
-    n_ss = 1
+    n_ss = 6
     eval_ts = n_ss * n_sec_day
     review_ts = np.hstack([
         np.arange(x, x + (ss_n_iter * time_per_iter), time_per_iter)

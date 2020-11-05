@@ -10,13 +10,13 @@ def main():
 
     n_item = 50
 
-    param = [0.001, 0.44]    # [[0.001, 0.44] for _ in range(n_item)]
+    param = [0.006, 0.44]    # [[0.001, 0.44] for _ in range(n_item)]
     param = np.asarray(param)
 
     ss_n_iter = 100
     time_per_iter = 4
     n_sec_day = 24 * 60 ** 2
-    n_ss = 1
+    n_ss = 6
     eval_ts = n_ss * n_sec_day
     review_ts = np.hstack([
         np.arange(x, x + (ss_n_iter * time_per_iter), time_per_iter)

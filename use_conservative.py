@@ -149,6 +149,7 @@ def use_conservative(n_item, param, review_ts, eval_ts, thr):
     else:
         init_forget, rep_effect = param
 
+    print(np.sum(n_pres))
     p_seen = np.exp(
         -init_forget
         * (1 - rep_effect) ** (n_pres[seen] - 1)
@@ -163,7 +164,7 @@ def main():
 
     n_item = 150
 
-    param = [0.0006, 0.44]  # [[0.0006, 0.44] for _ in range(n_item)]
+    param = [0.006, 0.44]  # [[0.0006, 0.44] for _ in range(n_item)]
     param = np.asarray(param)
 
     ss_n_iter = 100
