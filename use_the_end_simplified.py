@@ -15,7 +15,8 @@ def run(review_ts, param, thr, eval_ts):
     for ts in review_ts[::-1]:
 
         delta = eval_ts - ts
-        min_n = (math.log(-(np.log(thr))) - math.log(alpha*delta)) / math.log(1 - beta) + 1
+        min_n = math.log(-np.log(thr) / (alpha*delta)) \
+            * (1 / np.log(1 - beta)) + 1
         n_pres = math.ceil(min_n)
         n_review += n_pres
         if n_review > n_review_max:
@@ -23,36 +24,9 @@ def run(review_ts, param, thr, eval_ts):
 
         n_item += 1
 
-    # while True:
-    #     max_delay = - np.log(thr) / (alpha * (1 - beta) ** (n_pres - 1))
-    #     # print("n item", n_item)
-    #     # print("n pres", n_pres)
-    #     # print("max delay", max_delay)
-    #     min_ts = eval_ts - max_delay
-    #     # print("min ts", min_ts)
-    #     bool_possible = review_ts[empty] > min_ts
-    #     idx_possible = np.flatnonzero(bool_possible)
-    #     # print("idx possible", idx_possible)
-    #     is_place = len(idx_possible)
-    #     if is_place:
-    #         potential_idx = idx_possible[-1]
-    #         is_possible = n_review + n_pres <= n_review_max
-    #         # print("n review", n_review)
-    #         # print("is possible", is_possible)
-    #         if is_possible:
-    #             empty[potential_idx] = False
-    #             full = np.sum(empty) == 0
-    #             n_review += n_pres
-    #             n_item += 1
-    #             if full:
-    #                 break
-    #         else:
-    #             break
-    #     else:
-    #         n_pres += 1
-    #     # print()
-
     print("n learnt", n_item)
+
+    return n_item
 
 
 def main():
