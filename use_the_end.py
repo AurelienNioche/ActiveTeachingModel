@@ -32,6 +32,7 @@ def run(review_ts, param, thr, eval_ts):
             if is_possible:
                 empty[potential_idx] = False
                 full = np.sum(empty) == 0
+                print(n_pres)
                 n_review += n_pres
                 n_item += 1
                 if full:

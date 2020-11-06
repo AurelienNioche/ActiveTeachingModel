@@ -2,6 +2,7 @@ import numpy as np
 import datetime
 import itertools
 
+
 def run(n_item, sequence, review_ts, is_item_specific, param,
         eval_ts, log_thr):
 
