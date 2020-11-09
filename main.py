@@ -21,64 +21,21 @@ def main():
     design = np.linspace(0, 10, 100)
     n_design = len(design)
 
-    grid = np.array(list(itertools.product(np.linspace(0, 10, 100), repeat=2)))
-    n_trial = 100
+    grid = np.array(list(itertools.product(np.linspace(-10, 10, 100), repeat=2)))
+    n_trial = 1000
 
-    param = [2, 0.5]
+    param = [2.0, 0.5]
 
     n_param_set, n_param = grid.shape
 
-    engine = ('random', )
+    engine = ('random', 'ado')
     n_engine = len(engine)
 
     means = {e: np.zeros((n_param, n_trial)) for e in engine}
     stds = {e: np.zeros((n_param, n_trial)) for e in engine}
 
-    # lp = np.ones(n_param_set)
-    # lp -= logsumexp(lp)
-    #
-    # ep = np.dot(np.exp(lp), grid)
-    #
-    # delta = grid - ep
-    # post_cov = np.dot(delta.T, delta * np.exp(lp).reshape(-1, 1))
-    # sdp = np.sqrt(np.diag(post_cov))
-    # print(sdp)
-    #
-    # for t in range(n_trial):
-    #
-    #     d = np.random.choice(design)
-    #
-    #     p_r = calculate_prob(d, b0=param[0], b1=param[1])
-    #
-    #     resp = p_r > np.random.random()
-    #
-    #     p_one = calculate_prob(d, b0=grid[:, 0], b1=grid[:, 1])
-    #
-    #     lik = p_one if resp else 1 - p_one
-    #     log_lik = np.log(lik)
-    #
-    #     lp += log_lik
-    #     lp -= logsumexp(lp)
-    #
-    #     ep = np.dot(np.exp(lp), grid)
-    #
-    #     delta = grid - ep
-    #     post_cov = np.dot(delta.T, delta * np.exp(lp).reshape(-1, 1))
-    #     sdp = np.sqrt(np.diag(post_cov))
-    #
-    #     means['random'][:, t] = ep
-    #     stds['random'][:, t] = sdp
-
-
     lp = np.ones(n_param_set)
     lp -= logsumexp(lp)
-
-    ep = np.dot(np.exp(lp), grid)
-
-    delta = grid - ep
-    post_cov = np.dot(delta.T, delta * np.exp(lp).reshape(-1, 1))
-    sdp = np.sqrt(np.diag(post_cov))
-    print(sdp)
 
     p_one = np.array([calculate_prob(d, b0=grid[:, 0], b1=grid[:, 1])
                       for d in design])
@@ -86,35 +43,24 @@ def main():
     p = np.zeros((n_design, n_param_set, 2))
     p[:, :, 0] = p_zero
     p[:, :, 1] = p_one
+    log_lik = np.log(p + np.finfo(np.float).eps)
 
-    log_lik = np.log(p+ np.finfo(float).eps)
+    # ep = np.dot(np.exp(lp), grid)
+    #
+    # delta = grid - ep
+    # post_cov = np.dot(delta.T, delta * np.exp(lp).reshape(-1, 1))
+    # sdp = np.sqrt(np.diag(post_cov))
 
     for t in range(n_trial):
 
-        post = np.exp(lp)
+        d_idx = np.random.randint(n_design)
 
-        # Calculate the marginal log likelihood.
-        extended_lp = np.expand_dims(np.expand_dims(lp, 0), -1)
-        mll = logsumexp(log_lik + extended_lp, axis=1)
-        # marg_log_lik = mll  # shape (num_design, num_response)
-
-        # Calculate the marginal entropy and conditional entropy.
-        ent_obs = -np.multiply(np.exp(log_lik), log_lik).sum(-1)
-        ent_marg = -np.sum(np.exp(mll) * mll, -1)  # shape (num_designs,)
-        ent_cond = np.sum(post * ent_obs, axis=1)  # shape (num_designs,)
-
-        # Calculate the mutual information.
-        mutual_info = ent_marg - ent_cond  # shape (num_designs,)
-        d = np.argmax(mutual_info)
+        d = design[d_idx]
 
         p_r = calculate_prob(d, b0=param[0], b1=param[1])
-
         resp = p_r > np.random.random()
 
-        p_one = calculate_prob(d, b0=grid[:, 0], b1=grid[:, 1])
-
-        lik_r = p_one if resp else 1 - p_one
-        log_lik_r = np.log(lik_r)
+        log_lik_r = log_lik[d_idx, :, int(resp)].flatten()
 
         lp += log_lik_r
         lp -= logsumexp(lp)
@@ -127,6 +73,54 @@ def main():
 
         means['random'][:, t] = ep
         stds['random'][:, t] = sdp
+
+
+    lp = np.ones(n_param_set)
+    lp -= logsumexp(lp)
+
+    # ep = np.dot(np.exp(lp), grid)
+    #
+    # delta = grid - ep
+    # post_cov = np.dot(delta.T, delta * np.exp(lp).reshape(-1, 1))
+    # sdp = np.sqrt(np.diag(post_cov))
+    # print(sdp)
+
+    ent_obs = -np.multiply(np.exp(log_lik), log_lik).sum(-1)
+
+    for t in range(n_trial):
+
+        post = np.exp(lp)
+
+        # Calculate the marginal log likelihood.
+        extended_lp = np.expand_dims(np.expand_dims(lp, 0), -1)
+        mll = logsumexp(log_lik + extended_lp, axis=1) # shape (num_design, num_response)
+
+        # Calculate the marginal entropy and conditional entropy.
+        ent_marg = -np.sum(np.exp(mll) * mll, -1)  # shape (num_designs,)
+        ent_cond = np.sum(post * ent_obs, axis=1)  # shape (num_designs,)
+
+        # Calculate the mutual information.
+        mutual_info = ent_marg - ent_cond  # shape (num_designs,)
+        d_idx = np.argmax(mutual_info)
+
+        d = design[d_idx]
+
+        p_r = calculate_prob(d, b0=param[0], b1=param[1])
+        resp = p_r > np.random.random()
+
+        log_lik_r = log_lik[d_idx, :, int(resp)].flatten()
+
+        lp += log_lik_r
+        lp -= logsumexp(lp)
+
+        ep = np.dot(np.exp(lp), grid)
+
+        delta = grid - ep
+        post_cov = np.dot(delta.T, delta * np.exp(lp).reshape(-1, 1))
+        sdp = np.sqrt(np.diag(post_cov))
+
+        means['ado'][:, t] = ep
+        stds['ado'][:, t] = sdp
 
 
     fig, axes = plt.subplots(ncols=n_param, figsize=(12, 6))
@@ -156,7 +150,8 @@ def main():
 
     plt.legend()
     plt.tight_layout()
-    plt.show()
+    os.makedirs('fig', exist_ok=True)
+    plt.savefig(os.path.join("fig", "ado_vs_random.pdf"))
 
 
 if __name__ == "__main__":
