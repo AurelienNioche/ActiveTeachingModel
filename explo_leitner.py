@@ -6,12 +6,12 @@ import pandas as pd
 import seaborn as sns
 from tqdm import tqdm
 
-from model.learner.exponential_n_delta import ExponentialNDelta
+from model.learner.exponential import Exponential
 from model.teacher.leitner import Leitner
 
 from run.make_data_triton import run
 
-from settings.config_triton import LEARNER_INV, TEACHER_INV, Config
+from settings.config_triton import Config
 
 
 def dic_to_key_val_list(dic):
@@ -53,7 +53,7 @@ def produce_data(raw_data_folder, bounds, methods, grid_size):
     n_item = 150
     omni = True
 
-    learner_md = ExponentialNDelta
+    learner_md = Exponential
     teacher_md = Leitner
 
     is_item_specific = False
@@ -81,9 +81,9 @@ def produce_data(raw_data_folder, bounds, methods, grid_size):
             "seed": 0,
             "agent": i,
             "bounds": None,
-            "md_learner": LEARNER_INV[learner_md],
+            "md_learner": learner_md.__name__,
             "md_psy": None,
-            "md_teacher": TEACHER_INV[teacher_md],
+            "md_teacher": teacher_md.__name__,
             "omni": omni,
             "n_item": n_item,
             "is_item_specific": is_item_specific,
