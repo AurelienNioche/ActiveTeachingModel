@@ -112,7 +112,7 @@ def run(grid_design, grid_param, true_param, func, num_trial=100):
     plt.legend()
     plt.tight_layout()
 
-    FIG_FOLDER = os.path.join("fig", "adaptive")
+    FIG_FOLDER = os.path.join("fig", "get_started")
     os.makedirs(FIG_FOLDER, exist_ok=True)
     plt.savefig(os.path.join(FIG_FOLDER,
                              f"adaptive_example_{func.__name__}.pdf"))
