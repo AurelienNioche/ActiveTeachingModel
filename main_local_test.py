@@ -26,9 +26,9 @@ def dic_to_lab_val(dic):
 def main():
 
     n_item = 500
-    omni = False
+    omni = True
 
-    teacher_md = Robust
+    teacher_md = Myopic
 
     learner_md = Exponential
     pr_val = [[2e-05, 0.5]
