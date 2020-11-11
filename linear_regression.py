@@ -17,39 +17,38 @@ def main():
 
     np.random.seed(123)
 
-    design = np.linspace(0, 10, 100)
-    n_design = len(design)
+    n_design = 100
+    bounds_design = 0, 10
+    design = np.linspace(*bounds_design, n_design)
 
-    grid = np.array(list(itertools.product(np.linspace(-10, 10, 100), repeat=2)))
+    bounds_param = (-10, 10), (-10, 10)
+    grid = np.array(list(itertools.product(
+        *(np.linspace(*b, 100) for b in bounds_param))))
     n_trial = 1000
 
     param = [2.0, 0.5]
 
     n_param_set, n_param = grid.shape
 
+    # Results container
     engine = ('random', 'ado')
-    n_engine = len(engine)
-
     means = {e: np.zeros((n_param, n_trial)) for e in engine}
     stds = {e: np.zeros((n_param, n_trial)) for e in engine}
 
-    lp = np.ones(n_param_set)
-    lp -= logsumexp(lp)
-
+    # Log-lik
     p_one = np.array([calculate_prob(d, b0=grid[:, 0], b1=grid[:, 1])
                       for d in design])  # shape: (n design, n param set)
     p_zero = 1 - p_one
-    print(p_zero.shape)
+
     p = np.zeros((n_design, n_param_set, 2))
     p[:, :, 0] = p_zero
     p[:, :, 1] = p_one
     log_lik = np.log(p + np.finfo(np.float).eps)
 
-    # ep = np.dot(np.exp(lp), grid)
-    #
-    # delta = grid - ep
-    # post_cov = np.dot(delta.T, delta * np.exp(lp).reshape(-1, 1))
-    # sdp = np.sqrt(np.diag(post_cov))
+    # Random --------------------------------------------------------
+
+    lp = np.ones(n_param_set)
+    lp -= logsumexp(lp)
 
     for t in range(n_trial):
 
@@ -74,16 +73,10 @@ def main():
         means['random'][:, t] = ep
         stds['random'][:, t] = sdp
 
+    # Ado -----------------------------------------------
 
     lp = np.ones(n_param_set)
     lp -= logsumexp(lp)
-
-    # ep = np.dot(np.exp(lp), grid)
-    #
-    # delta = grid - ep
-    # post_cov = np.dot(delta.T, delta * np.exp(lp).reshape(-1, 1))
-    # sdp = np.sqrt(np.diag(post_cov))
-    # print(sdp)
 
     ent_obs = -np.multiply(np.exp(log_lik), log_lik).sum(-1)
 
@@ -122,10 +115,11 @@ def main():
         means['ado'][:, t] = ep
         stds['ado'][:, t] = sdp
 
+    # Figure -----------------------------------------------
 
     fig, axes = plt.subplots(ncols=n_param, figsize=(12, 6))
 
-    colors = [f'C{i}' for i in range(n_engine)]
+    colors = [f'C{i}' for i, e in enumerate(engine)]
 
     for i, ax in enumerate(axes):
 
