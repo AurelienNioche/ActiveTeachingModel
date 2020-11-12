@@ -13,38 +13,6 @@ def calculate_prob(alpha, beta, delta, n_pres):
     return p_obs
 
 
-def figure(param, engine, means, stds):
-
-    fig, axes = plt.subplots(ncols=len(param), figsize=(12, 6))
-
-    colors = [f'C{i}' for i,e in enumerate(engine)]
-
-    for i, ax in enumerate(axes):
-
-        for j, e in enumerate(engine):
-            _means = means[e][i, :]
-            _stds = stds[e][i, :]
-
-            true_p = param[i]
-            ax.axhline(true_p, linestyle='--', color='black',
-                       alpha=.2)
-
-            c = colors[j]
-
-            ax.plot(_means, color=c, label=e)
-            ax.fill_between(len(_means), _means - _stds,
-                            _means + _stds, alpha=.2, color=colors[j])
-
-            ax.set_title(f'b{i}')
-            ax.set_xlabel("trial")
-            ax.set_ylabel(f"value")
-
-    plt.legend()
-    plt.tight_layout()
-    os.makedirs('fig', exist_ok=True)
-    plt.savefig(os.path.join("fig", "ado_vs_random_exp_decay_with_rep.pdf"))
-
-
 def main():
 
     np.random.seed(123)
@@ -119,6 +87,8 @@ def main():
     lp = np.ones(n_param_set)
     lp -= logsumexp(lp)
 
+    utilities = np.zeros((n_trial-1, n_design))
+
     for t in tqdm(range(1, n_trial), file=sys.stdout):
 
         post = np.exp(lp)
@@ -150,6 +120,8 @@ def main():
         # Calculate the mutual information.
         mutual_info = ent_marg - ent_cond  # shape (num_designs,)
 
+        utilities[t-1] = mutual_info
+
         # Select design
         d_idx = np.argmax(mutual_info)
         d = design[d_idx]
@@ -179,7 +151,16 @@ def main():
         means['ado'][:, t] = ep
         stds['ado'][:, t] = sdp
 
-    figure(param, engine, means, stds)
+    # Figure ----------------------------------------------
+
+    fig, ax = plt.subplots(figsize=(12, 6))
+
+    for i in range(len(utilities)):
+        ax.plot(utilities[i], lw=0.1 + 0.001*i, color="C0", alpha=0.5)
+
+    plt.tight_layout()
+    os.makedirs('fig', exist_ok=True)
+    plt.savefig(os.path.join("fig", "utilities.pdf"))
 
 
 if __name__ == "__main__":
