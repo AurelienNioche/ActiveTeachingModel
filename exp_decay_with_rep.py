@@ -17,19 +17,20 @@ def main():
 
     np.random.seed(123)
 
-    bounds_design = 0, 100
-    n_design = 100
+    n_design = 1000
+    bounds_design = 1, n_design
     design = np.linspace(*bounds_design, n_design)
 
-    bounds = ((2e-07, 0.025), (0, 1))
+    bounds = ((2e-07, 0.025), (0.0001, 0.9999))
 
-    n_grid_param = 100
+    n_grid_param = 10
+    methods = np.geomspace, np.linspace
     grid = np.array(list(itertools.product(
-        *(np.linspace(*b, n_grid_param) for b in bounds))))
+        *(m(*b, n_grid_param) for m, b in zip(methods, bounds)))))
 
     n_trial = 100
 
-    param = [0.01, 0.2]
+    param = [0.01, 0.02]
 
     n_param_set, n_param = grid.shape
 
