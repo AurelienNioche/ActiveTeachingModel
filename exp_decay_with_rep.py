@@ -68,7 +68,6 @@ def main():
     n_param_set, n_param = grid.shape
 
     engine = ('random', 'ado')
-    n_engine = len(engine)
 
     means = {e: np.zeros((n_param, n_trial)) for e in engine}
     stds = {e: np.zeros((n_param, n_trial)) for e in engine}
