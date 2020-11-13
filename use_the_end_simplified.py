@@ -15,7 +15,8 @@ def run(review_ts, param, thr, eval_ts):
     for ts in review_ts[::-1]:
 
         delta = eval_ts - ts
-        min_n = (math.log(-(np.log(thr))) - math.log(alpha*delta)) / math.log(1 - beta) + 1
+        min_n = math.log(-np.log(thr) / (alpha*delta)) \
+            * (1 / np.log(1 - beta)) + 1
         n_pres = math.ceil(min_n)
         n_review += n_pres
         if n_review > n_review_max:
@@ -24,6 +25,8 @@ def run(review_ts, param, thr, eval_ts):
         n_item += 1
 
     print("n learnt", n_item)
+
+    return n_item
 
 
 def main():
