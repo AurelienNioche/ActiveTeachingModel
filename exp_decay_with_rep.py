@@ -31,8 +31,8 @@ def figure(param, engine, means, stds):
 
             c = colors[j]
 
-            ax.plot(_means, color=c, label=e)
-            ax.fill_between(len(_means), _means - _stds,
+            ax.plot(np.arange(len(_means)), _means, color=c, label=e)
+            ax.fill_between(np.arange(len(_means)), _means - _stds,
                             _means + _stds, alpha=.2, color=colors[j])
 
             ax.set_title(f'b{i}')
