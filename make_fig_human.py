@@ -160,7 +160,7 @@ def figure4():
     max_v = np.max((max_leitner, max_act))
 
     fig = plt.figure(figsize=(10, 6))
-    fig.suptitle("Human", fontsize=18, fontweight='bold',
+    fig.suptitle("Human (performance)", fontsize=18, fontweight='bold',
                  verticalalignment='top')
 
     # ...sorry about that
