@@ -102,7 +102,7 @@ def scatter_n_learnt_n_seen(data, active, ax, x_label, y_label):
 def boxplot(df, data_type, ylabel, axes, ylim):
 
     color_dic = {"leitner": "C0", "threshold": "C1", "forward": "C2"}
-    teacher_names = {"forward": "Conservative\nSampling",
+    teacher_names = {"forward": "Conservative\nsampling",
                      "leitner": "Leitner",
                      "threshold": "Myopic"}
 
@@ -178,31 +178,31 @@ def figure4():
 
     boxplot(df=df, axes=(axes[2], axes[3]),
             data_type="ratio",
-            ylabel="N learned / N seen",
+            ylabel="Learned / seen",
             ylim=(-0.01, 1.01))
 
     scatter_n_learnt(data=df,
                      active="threshold",
-                     x_label="N learned\nLeitner",
-                     y_label="N learned\nMyopic",
+                     x_label="Learned\nLeitner",
+                     y_label="Learned\nMyopic",
                      ax=axes[4])
 
     scatter_n_learnt(data=df,
                      active="forward",
-                     x_label="N learned\nLeitner",
-                     y_label="N learned\nCons. Sampling",
+                     x_label="Learned\nLeitner",
+                     y_label="Learned\nCons. sampling",
                      ax=axes[5])
 
     scatter_n_learnt_n_seen(data=df,
                             active="threshold",
-                            x_label="N learned / N seen\nLeitner",
-                            y_label="N learned / N seen\nMyopic",
+                            x_label="Learned / seen\nLeitner",
+                            y_label="Learned / seen\nMyopic",
                             ax=axes[6])
 
     scatter_n_learnt_n_seen(data=df,
                             active="forward",
-                            x_label="N learned / N seen\nLeitner",
-                            y_label="N learned / N seen\nCons. Sampling",
+                            x_label="Learned / seen\nLeitner",
+                            y_label="Learned / seen\nCons. sampling",
                             ax=axes[7])
 
     axes[0].text(-0.2, 1.05, ascii_uppercase[0],
@@ -216,11 +216,11 @@ def figure4():
 
     ax = fig.add_subplot(*(3, 4, (1, 6)))
     ax.set_axis_off()
-    ax.set_title("N learned\n", fontstyle='italic', fontsize=14)
+    ax.set_title("Learned\n", fontstyle='italic', fontsize=14)
 
     ax = fig.add_subplot(*(3, 4, (3, 8)))
     ax.set_axis_off()
-    ax.set_title("N learned / N seen\n", fontstyle='italic', fontsize=14)
+    ax.set_title("Learned / seen\n", fontstyle='italic', fontsize=14)
 
     # noinspection PyTypeChecker
     plt.tight_layout(rect=[0, 0, 1, 1.05])

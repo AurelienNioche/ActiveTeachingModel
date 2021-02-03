@@ -85,7 +85,7 @@ def rename_teachers(data):
 def boxplot_n_learnt(data, ax,
                      ylim,
                      x_label="Teacher",
-                     y_label="N learned", dot_size=3, dot_alpha=0.7):
+                     y_label="Learned", dot_size=3, dot_alpha=0.7):
 
     data = rename_teachers(data)
     data = data.rename(columns={
@@ -93,7 +93,7 @@ def boxplot_n_learnt(data, ax,
         "teacher": x_label
     })
 
-    order = ["Leitner", "Myopic", "Conservative\nSampling"]
+    order = ["Leitner", "Myopic", "Conservative\nsampling"]
     colors = ["C0", "C1", "C2"]
 
     sns.boxplot(x=x_label, y=y_label, data=data, ax=ax,
@@ -111,7 +111,7 @@ def boxplot_n_learnt(data, ax,
 
 def boxplot_n_learnt_n_seen(data, ax,
                             x_label="Teacher",
-                            y_label="N learned / N seen",
+                            y_label="Learned / seen",
                             dot_size=3, dot_alpha=0.7):
 
     data = rename_teachers(data)
@@ -120,7 +120,7 @@ def boxplot_n_learnt_n_seen(data, ax,
         "ratio_n_learnt_n_seen": y_label
     })
 
-    order = ["Leitner", "Myopic", "Conservative\nSampling"]
+    order = ["Leitner", "Myopic", "Conservative\nsampling"]
     colors = ["C0", "C1", "C2"]
 
     sns.boxplot(x="Teacher", y=y_label, data=data, ax=ax,
@@ -139,7 +139,7 @@ def boxplot_n_learnt_n_seen(data, ax,
 
 
 def prediction_error(data, ax, title, color,
-                     x_label="Time",
+                     x_label="Number of teaching interactions",
                      y_label="Prediction error\n"
                              "(probability of recall)"):
 
@@ -186,7 +186,7 @@ def figure2():
         teacher_name="forward")
 
     fig = plt.figure(figsize=(13, 8.5))
-    fig.suptitle("Artificial: Non item specific",
+    fig.suptitle("Artificial: Non-item-specific",
                  fontweight="bold",
                  fontsize=17)
 
@@ -200,7 +200,7 @@ def figure2():
                  transform=axes[0].transAxes, size=15, weight='bold')
 
     boxplot_n_learnt(data=df_omni, ax=axes[1], ylim=ylim)
-    axes[1].set_title("N learned\n", fontstyle='italic', fontsize=15)
+    axes[1].set_title("Learned\n", fontstyle='italic', fontsize=15)
     axes[1].text(-0.2, 1.05, ascii_uppercase[1],
                  transform=axes[1].transAxes, size=15, weight='bold')
 
@@ -210,7 +210,7 @@ def figure2():
                  transform=axes[1].transAxes, size=15, weight='bold', rotation=90, style="italic")
 
     boxplot_n_learnt_n_seen(data=df_omni, ax=axes[2])
-    axes[2].set_title("N learned / N seen\n", fontstyle='italic', fontsize=15)
+    axes[2].set_title("Learned / seen\n", fontstyle='italic', fontsize=15)
     axes[2].text(-0.2, 1.05, ascii_uppercase[2],
                  transform=axes[2].transAxes, size=15, weight='bold')
 
@@ -222,14 +222,14 @@ def figure2():
 
     ax = fig.add_subplot(2, 3, 4)
     ax.set_axis_off()
-    ax.text(-0.35, 0.5, "Non omniscient",
+    ax.text(-0.35, 0.5, "Non-omniscient",
             horizontalalignment='left',
             verticalalignment='center',
             transform=ax.transAxes, size=15, weight='bold',
             rotation=90, style="italic")
 
     prediction_error(data=err_forward, ax=axes[4],
-                     title="Conservative Sampling",
+                     title="Conservative sampling",
                      color="C2")
 
     boxplot_n_learnt(data=df_not_omni, ax=axes[5], ylim=ylim)
@@ -302,7 +302,7 @@ def figure3():
                  rotation=90, style="italic")
 
     boxplot_n_learnt_n_seen(data=df_omni, ax=axes[1])
-    axes[1].set_title("N learned / N seen\n", fontstyle='italic', fontsize=15)
+    axes[1].set_title("Learned / seen\n", fontstyle='italic', fontsize=15)
     axes[1].text(-0.2, 1.05, ascii_uppercase[1],
                  transform=axes[1].transAxes, size=15, weight='bold')
 
@@ -314,14 +314,14 @@ def figure3():
 
     ax = fig.add_subplot(2, 3, 4)
     ax.set_axis_off()
-    ax.text(-0.35, 0.5, "Non omniscient",
+    ax.text(-0.35, 0.5, "Non-omniscient",
             horizontalalignment='left',
             verticalalignment='center',
             transform=ax.transAxes, size=15, weight='bold',
             rotation=90, style="italic")
 
     prediction_error(data=err_forward, ax=axes[3],
-                     title="Conservative Sampling",
+                     title="Conservative sampling",
                      color="C2")
 
     boxplot_n_learnt(data=df_not_omni, ax=axes[4], ylim=ylim)
