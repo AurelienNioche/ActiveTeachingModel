@@ -73,7 +73,7 @@ def heatmap(data, ax):
 def rename_teachers(data):
     dic = {
         "leitner": "Leitner",
-        "forward": "Conservative\nSampling",
+        "forward": "Conservative\nsampling",
         "threshold": "Myopic",
     }
 
