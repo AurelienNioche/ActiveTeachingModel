@@ -1,8 +1,19 @@
 # ActiveTeachingModel
 
+This repo is link to [Nioche et al. (2021)](https://dl.acm.org/doi/10.1145/3397481.3450696).
+
+## Data 
+
+A clean release of the dataset is accessible on [Zenodo](https://zenodo.org/record/5536917). 
+It contains not only the data but also demographic information 
+of the participants (age, gender, native language, other spoken languages), 
+and the stimuli used (character and meaning).
+
+## Code 
+
 Note: All commands are given based on the assumption of using the Homebrew's package manager (MacOs).
 
-## Dependencies
+### Dependencies
 
 #### Python 3
 
@@ -20,7 +31,7 @@ Note: All commands are given based on the assumption of using the Homebrew's pac
     source venv/bin/activate
     pip install -r requirements.txt
     
-## Local
+### Local
 Create the config files:
 
     gen_config_files.py
@@ -37,7 +48,7 @@ For exploratory simulations (n learnt leitner):
 
 Data will be save under `data/explo_leitner/<param used>`.
 
- ## Triton (Aalto University Cluster)
+ ### Triton (Aalto University Cluster)
 
 Create the config files & run job
 
@@ -76,9 +87,9 @@ check the resources used by the job
     
    
    
-## Reproduce figures
+### Reproduce figures
 
-Unpack data
+Unpack artificial data
     
     cd data/triton
     unzstd n_learnt_leitner.tar.zst

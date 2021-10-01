@@ -130,6 +130,7 @@ dmypy.json
 /data/*
 !/data/triton/n_learnt_leitner.tar.zst
 !/data/human/data_summary.csv
+!/data/human/data_psy_estimates.csv
 
 # Config
 config/triton/
